@@ -2,28 +2,28 @@
 <metadata modelVersion="1.1.0">
   <groupId>com.teenthofabud.core.common</groupId>
   <artifactId>toab-chassis-sdk</artifactId>
-  <version>1.5.8-SNAPSHOT</version>
+  <version>1.6.0-SNAPSHOT</version>
   <versioning>
     <snapshot>
       <localCopy>true</localCopy>
     </snapshot>
-    <lastUpdated>20211107135922</lastUpdated>
+    <lastUpdated>20211107191635</lastUpdated>
     <snapshotVersions>
       <snapshotVersion>
         <classifier>sources</classifier>
         <extension>jar</extension>
-        <value>1.5.8-SNAPSHOT</value>
-        <updated>20211107135922</updated>
+        <value>1.6.0-SNAPSHOT</value>
+        <updated>20211107191635</updated>
       </snapshotVersion>
       <snapshotVersion>
         <extension>jar</extension>
-        <value>1.5.8-SNAPSHOT</value>
-        <updated>20211107135922</updated>
+        <value>1.6.0-SNAPSHOT</value>
+        <updated>20211107191635</updated>
       </snapshotVersion>
       <snapshotVersion>
         <extension>pom</extension>
-        <value>1.5.8-SNAPSHOT</value>
-        <updated>20211107135922</updated>
+        <value>1.6.0-SNAPSHOT</value>
+        <updated>20211107191635</updated>
       </snapshotVersion>
     </snapshotVersions>
   </versioning>
