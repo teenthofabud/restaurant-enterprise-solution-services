@@ -11,12 +11,13 @@
 
     <groupId>com.teenthofabud.restaurant.solution</groupId>
     <artifactId>restaurant-enterprise-solution-services</artifactId>
-    <version>2021.1</version>
+    <version>2021.1-SNAPSHOT</version>
     <name>restaurant-enterprise-solution-services</name>
     <packaging>pom</packaging>
 
     <modules>
         <module>establishment-area-service</module>
+        <module>customer-service</module>
     </modules>
 
     <properties>
@@ -26,7 +27,7 @@
         <sonar.organization>teenthofabud</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
-        <toab-chassis-sdk.version>1.6.0-SNAPSHOT</toab-chassis-sdk.version>
+        <toab-chassis-sdk.version>1.6.2-SNAPSHOT</toab-chassis-sdk.version>
         <json-patch.version>1.13</json-patch.version>
         <jackson-datatype-jdk8.version>2.12.3</jackson-datatype-jdk8.version>
         <javax.json-api.version>1.1.4</javax.json-api.version>
@@ -42,6 +43,7 @@
         <docker.registry>docker.io</docker.registry>
         <docker.username>teenthofabud</docker.username>
         <docker.password>Razor1911.</docker.password>
+        <resilience4j.version>1.7.0</resilience4j.version>
     </properties>
 
     <dependencies>

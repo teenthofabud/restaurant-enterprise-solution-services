@@ -11,16 +11,16 @@
     </parent>
 
     <properties>
-        <start-class>com.teenthofabud.restaurant.solution.establishmentarea.EstablishmentAreaServiceApplication</start-class>
+        <start-class>com.teenthofabud.restaurant.solution.customer.CustomerServiceApplication</start-class>
         <service.prefix>establishment-area</service.prefix>
     </properties>
 
     <groupId>com.teenthofabud.restaurant.solution</groupId>
-    <artifactId>restaurant-solution-establishment-area-service</artifactId>
+    <artifactId>restaurant-solution-customer-service</artifactId>
     <version>2021.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>${service.prefix}-service</name>
-    <description>manage entity definition attributes for establishment area service</description>
+    <description>manage entity definition for customer service</description>
 
     <build>
         <finalName>${service.prefix}-app</finalName>
@@ -118,10 +118,34 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
-
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-spring-boot2</artifactId>
+            <version>${resilience4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-feign</artifactId>
+            <version>${resilience4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.specto</groupId>
+            <artifactId>hoverfly-java</artifactId>
+            <version>${hoverfly.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
