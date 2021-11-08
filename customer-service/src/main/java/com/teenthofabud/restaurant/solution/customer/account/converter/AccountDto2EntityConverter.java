@@ -44,8 +44,7 @@ public class AccountDto2EntityConverter implements ComparativePatchConverter<Acc
         int i = 0;
         Optional<String> optGenderId = dto.getGenderId();
         if(!fieldsToEscape.contains("genderId") && optGenderId.isPresent()) {
-            Long genderId = Long.parseLong(optGenderId.get());
-            actualEntity.setGenderId(genderId);
+            actualEntity.setGenderId(optGenderId.get());
             changeSW[i++] = true;
             log.debug("AccountDto.genderId is valid");
         }

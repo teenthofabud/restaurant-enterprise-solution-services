@@ -55,7 +55,7 @@ public class AccountEntity2VoConverter extends TOABBaseEntity2VoConverter<Accoun
         TOABCascadeLevel cascadeLevel = TOABRequestContextHolder.getCascadeLevelContext();
         switch(cascadeLevel) {
             case TWO:
-                GenderVo genderVo = genderServiceClient.getGenderDetailsById(entity.getGenderId().toString());
+                GenderVo genderVo = genderServiceClient.getGenderDetailsById(entity.getGenderId());
                 vo.setGender(genderVo);
                 log.debug("Retrieved {} for genderId: {}", vo, entity.getGenderId());
                 break;

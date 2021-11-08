@@ -2,7 +2,7 @@ create table if not exists customer_account (
     id identity not null,
     first_name varchar2(50) not null,
     last_name varchar2(50) not null,
-    gender_id int,
+    gender_id varchar2(100),
     date_of_birth date,
     created_on datetime default current_timestamp,
     created_by int default -1,

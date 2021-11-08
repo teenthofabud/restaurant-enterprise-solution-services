@@ -39,7 +39,7 @@ public class AccountForm2EntityConverter implements Converter<AccountForm, Accou
             entity.setDateOfBirth(dateOfBirth);
         }
         if(!fieldsToEscape.contains("genderId")) {
-            entity.setGenderId(Long.parseLong(form.getGenderId()));
+            entity.setGenderId(form.getGenderId());
         }
         entity.setActive(Boolean.TRUE);
         log.debug("Converting {} to {}", form, entity);
