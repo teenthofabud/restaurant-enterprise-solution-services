@@ -115,7 +115,6 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         accountEntity1 = accountRepository.save(accountEntity1);
 
         accountVo1 = new AccountVo();
-        accountVo1.setActive(Boolean.TRUE);
         accountVo1.setId(accountEntity1.getId().toString());
         accountVo1.setFirstName(accountEntity1.getFirstName());
         accountVo1.setLastName(accountEntity1.getLastName());
@@ -123,7 +122,6 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         accountEntity2 = accountRepository.save(accountEntity2);
 
         accountVo2 = new AccountVo();
-        accountVo2.setActive(Boolean.TRUE);
         accountVo2.setId(accountEntity2.getId().toString());
         accountVo2.setFirstName(accountEntity2.getFirstName());
         accountVo2.setLastName(accountEntity2.getLastName());
@@ -131,7 +129,6 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         accountEntity3 = accountRepository.save(accountEntity3);
 
         accountVo3 = new AccountVo();
-        accountVo3.setActive(Boolean.TRUE);
         accountVo3.setId(accountEntity3.getId().toString());
         accountVo3.setFirstName(accountEntity3.getFirstName());
         accountVo3.setLastName(accountEntity3.getLastName());
@@ -139,7 +136,6 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         accountEntity4 = accountRepository.save(accountEntity4);
 
         accountVo4 = new AccountVo();
-        accountVo4.setActive(Boolean.FALSE);
         accountVo4.setId(accountEntity4.getId().toString());
         accountVo4.setFirstName(accountEntity4.getFirstName());
         accountVo4.setLastName(accountEntity4.getLastName());
