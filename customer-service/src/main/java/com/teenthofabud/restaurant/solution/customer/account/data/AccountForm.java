@@ -1,5 +1,6 @@
 package com.teenthofabud.restaurant.solution.customer.account.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,8 +21,10 @@ public class AccountForm {
     private String firstName;
     @ToString.Include
     private String lastName;
+    @JsonIgnore
     @ToString.Include
     private String genderId;
+    @JsonIgnore
     @ToString.Include
     private String dateOfBirth;
 

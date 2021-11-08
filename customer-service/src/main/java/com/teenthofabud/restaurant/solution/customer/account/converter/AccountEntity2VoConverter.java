@@ -46,7 +46,6 @@ public class AccountEntity2VoConverter extends TOABBaseEntity2VoConverter<Accoun
         }
         super.expandAuditFields(entity, vo);
         vo.setId(entity.getId().toString());
-        vo.setActive(entity.getActive());
         log.debug("Converted {} to {} ", entity, vo);
         return vo;
     }

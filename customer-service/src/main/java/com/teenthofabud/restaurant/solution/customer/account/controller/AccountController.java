@@ -177,7 +177,7 @@ public class AccountController {
         return naturallyOrderedAccounts;
     }
 
-    @Operation(summary = "Get all Account details by gender id")
+    @Operation(summary = "Get all Account details by gender id", hidden = true)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Retrieve all available Accounts and their details that match the given gender id",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = AccountVo.class))) }),
