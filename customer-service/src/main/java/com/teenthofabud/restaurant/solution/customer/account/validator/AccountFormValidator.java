@@ -59,6 +59,21 @@ public class AccountFormValidator implements Validator {
             errors.rejectValue("lastName", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
             return;
         }
+        if(!fieldsToEscape.contains("countryCode") && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getCountryCode()))) {
+            log.debug("AccountForm.countryCode is empty");
+            errors.rejectValue("countryCode", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
+            return;
+        }
+        if(!fieldsToEscape.contains("phoneNumber") && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getPhoneNumber()))) {
+            log.debug("AccountForm.phoneNumber is empty");
+            errors.rejectValue("phoneNumber", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
+            return;
+        }
+        if(!fieldsToEscape.contains("emailId") && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getEmailId()))) {
+            log.debug("AccountForm.emailId is empty");
+            errors.rejectValue("emailId", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
+            return;
+        }
         if(!fieldsToEscape.contains("dateOfBirth") && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getDateOfBirth()))) {
             errors.rejectValue("dateOfBirth", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
             log.debug("AccountForm.dateOfBirth is invalid");

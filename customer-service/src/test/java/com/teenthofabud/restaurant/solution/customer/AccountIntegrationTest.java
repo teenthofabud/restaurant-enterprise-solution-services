@@ -87,29 +87,40 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         accountForm = new AccountForm();
         accountForm.setFirstName("New First Name");
         accountForm.setLastName("New Last Name");
+        accountForm.setCountryCode("91");
+        accountForm.setPhoneNumber("1234567890");
 
         patches = Arrays.asList(
                 new PatchOperationForm("replace", "/firstName", "patched first name"),
-                new PatchOperationForm("replace", "/lastName", "patched last name"));
+                new PatchOperationForm("replace", "/lastName", "patched last name"),
+                new PatchOperationForm("replace", "/phoneNumber", "6666666666"));
 
         accountEntity1 = new AccountEntity();
         accountEntity1.setFirstName("Account 1 First Name");
         accountEntity1.setLastName("Account 1 Last Name");
+        accountEntity1.setCountryCode("91");
+        accountEntity1.setPhoneNumber("1122334455");
         accountEntity1.setActive(Boolean.TRUE);
 
         accountEntity2 = new AccountEntity();
         accountEntity2.setFirstName("Account 2 First Name");
         accountEntity2.setLastName("Account 2 Last Name");
+        accountEntity2.setCountryCode("91");
+        accountEntity2.setPhoneNumber("0987654321");
         accountEntity2.setActive(Boolean.TRUE);
 
         accountEntity3 = new AccountEntity();
         accountEntity3.setFirstName("Account 3 First Name");
         accountEntity3.setLastName("Account 3 Last Name");
+        accountEntity3.setCountryCode("91");
+        accountEntity3.setPhoneNumber("3487561290");
         accountEntity3.setActive(Boolean.TRUE);
 
         accountEntity4 = new AccountEntity();
         accountEntity4.setFirstName("Account 4 First Name");
         accountEntity4.setLastName("Account 4 Last Name");
+        accountEntity4.setCountryCode("91");
+        accountEntity4.setPhoneNumber("3907451274");
         accountEntity4.setActive(Boolean.FALSE);
 
         accountEntity1 = accountRepository.save(accountEntity1);
@@ -118,6 +129,8 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         accountVo1.setId(accountEntity1.getId().toString());
         accountVo1.setFirstName(accountEntity1.getFirstName());
         accountVo1.setLastName(accountEntity1.getLastName());
+        accountVo1.setCountryCode(accountEntity1.getCountryCode());
+        accountVo1.setPhoneNumber(accountEntity1.getPhoneNumber());
 
         accountEntity2 = accountRepository.save(accountEntity2);
 
@@ -125,6 +138,8 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         accountVo2.setId(accountEntity2.getId().toString());
         accountVo2.setFirstName(accountEntity2.getFirstName());
         accountVo2.setLastName(accountEntity2.getLastName());
+        accountVo2.setCountryCode(accountEntity2.getCountryCode());
+        accountVo2.setPhoneNumber(accountEntity2.getPhoneNumber());
 
         accountEntity3 = accountRepository.save(accountEntity3);
 
@@ -132,6 +147,8 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         accountVo3.setId(accountEntity3.getId().toString());
         accountVo3.setFirstName(accountEntity3.getFirstName());
         accountVo3.setLastName(accountEntity3.getLastName());
+        accountVo3.setCountryCode(accountEntity3.getCountryCode());
+        accountVo3.setPhoneNumber(accountEntity3.getPhoneNumber());
 
         accountEntity4 = accountRepository.save(accountEntity4);
 
@@ -139,6 +156,8 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         accountVo4.setId(accountEntity4.getId().toString());
         accountVo4.setFirstName(accountEntity4.getFirstName());
         accountVo4.setLastName(accountEntity4.getLastName());
+        accountVo4.setCountryCode(accountEntity4.getCountryCode());
+        accountVo4.setPhoneNumber(accountEntity4.getPhoneNumber());
 
     }
 
@@ -205,16 +224,53 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
 
     }
 
+    @Test
+    public void test_Account_Post_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_WithEmptyCountryCode() throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "countryCode";
+        accountForm.setCountryCode("");
 
-    /**
-     * TODO: implement when customer contact service is ready
-     */
-    /*@Test
+        mvcResult = mockMvc.perform(post(ACCOUNT_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(accountForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+
+    }
+
+    @Test
+    public void test_Account_Post_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_WithEmptyPhoneNumber() throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "phoneNumber";
+        accountForm.setPhoneNumber("");
+
+        mvcResult = mockMvc.perform(post(ACCOUNT_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(accountForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+
+    }
+
+
+    @Test
     public void test_Account_Post_ShouldReturn_409Response_And_ErrorCode_PHARM_LEARN_CUST_004_WhenRequested_WithDuplicateAccount() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_EXISTS.getErrorCode();
-        String field1Name = "name";
-        accountForm.setName("Account 1");
+        String field1Name = "phoneNumber";
+        accountForm.setPhoneNumber(accountEntity1.getPhoneNumber());
 
         mvcResult = mockMvc.perform(post(ACCOUNT_URI)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -226,7 +282,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertEquals(HttpStatus.CONFLICT.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field1Name));
-    }*/
+    }
 
     @Test
     public void test_Account_Post_ShouldReturn_422Response_And_ErrorCode_PHARM_LEARN_CUST_003_WhenPosted_WithNoAccountForm() throws Exception {
@@ -348,6 +404,23 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = { "", " " })
+    public void test_Account_Get_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequestedBy_EmptyPhoneNumberOnly(String phoneNumber) throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "filters";
+
+        mvcResult = this.mockMvc.perform(get(ACCOUNT_URI_FILTER).queryParam("phoneNumber", phoneNumber))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+    }
+
     @Test
     public void test_Account_Get_ShouldReturn_200Response_And_EmptyAccountList_WhenRequestedBy_AbsentFirstName() throws Exception {
         MvcResult mvcResult = null;
@@ -375,6 +448,50 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
+    public void test_Account_Get_ShouldReturn_200Response_And_EmptyAccountList_WhenRequestedBy_AbsentPhoneNumber() throws Exception {
+        MvcResult mvcResult = null;
+
+        mvcResult = this.mockMvc.perform(get(ACCOUNT_URI_FILTER).queryParam("phoneNumber", "Hey"))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(0, om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo[].class).length);
+    }
+
+
+    @Test
+    public void test_Account_Get_ShouldReturn_200Response_And_AccountListNaturallyOrdered_WhenRequested_ForAccounts_WithFirstName() throws Exception {
+        MvcResult mvcResult = null;
+        List<AccountVo> accountList = new ArrayList<>(Arrays.asList(accountVo1, accountVo2, accountVo3, accountVo4));
+
+        mvcResult = this.mockMvc.perform(get(ACCOUNT_URI_FILTER)
+                        .queryParam("firstName", "Account"))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(accountList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo[].class).length);
+    }
+
+    @Test
+    public void test_Account_Get_ShouldReturn_200Response_And_AccountListNaturallyOrdered_WhenRequested_ForAccounts_WithLastName() throws Exception {
+        MvcResult mvcResult = null;
+        List<AccountVo> accountList = new ArrayList<>(Arrays.asList(accountVo2));
+
+        mvcResult = this.mockMvc.perform(get(ACCOUNT_URI_FILTER)
+                        .queryParam("lastName", "Account 2"))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(accountList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo[].class).length);
+    }
+
+    @Test
     public void test_Account_Get_ShouldReturn_200Response_And_AccountListNaturallyOrdered_WhenRequested_ForAccounts_WithFirstNameAndLastName() throws Exception {
         MvcResult mvcResult = null;
         Set<AccountVo> accountList = new TreeSet<>(Arrays.asList(accountVo1));
@@ -391,6 +508,38 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
+    public void test_Account_Get_ShouldReturn_200Response_And_AccountListNaturallyOrdered_WhenRequested_ForAccounts_WithPhoneNumber() throws Exception {
+        MvcResult mvcResult = null;
+        Set<AccountVo> accountList = new TreeSet<>(Arrays.asList(accountVo1));
+
+        mvcResult = this.mockMvc.perform(get(ACCOUNT_URI_FILTER)
+                        .queryParam("phoneNumber", "1122334455"))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(accountList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo[].class).length);
+    }
+
+    @Test
+    public void test_Account_Get_ShouldReturn_200Response_And_AccountListNaturallyOrdered_WhenRequested_ForAccounts_WithFirstNameAndLastNameAndPhoneNumber() throws Exception {
+        MvcResult mvcResult = null;
+        Set<AccountVo> accountList = new TreeSet<>(Arrays.asList(accountVo1));
+
+        mvcResult = this.mockMvc.perform(get(ACCOUNT_URI_FILTER)
+                        .queryParam("firstName", "Account 1")
+                        .queryParam("lastName", "Account 1")
+                        .queryParam("phoneNumber", "1122334455"))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(accountList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo[].class).length);
+    }
+
+    @Test
     public void test_Account_Get_ShouldReturn_200Response_And_EmptyAccountList_WhenRequested_ForAccounts_WithAbsent_WithFirstNameAndLastName() throws Exception {
         MvcResult mvcResult = null;
         Set<AccountVo> accountList = new TreeSet<>();
@@ -398,6 +547,23 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         mvcResult = this.mockMvc.perform(get(ACCOUNT_URI_FILTER)
                         .queryParam("firstName", "Account 1")
                         .queryParam("lastName", UUID.randomUUID().toString()))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(accountList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo[].class).length);
+    }
+
+    @Test
+    public void test_Account_Get_ShouldReturn_200Response_And_EmptyAccountList_WhenRequested_ForAccounts_WithAbsent_WithFirstNameAndLastNameAndPhoneNumber() throws Exception {
+        MvcResult mvcResult = null;
+        Set<AccountVo> accountList = new TreeSet<>();
+
+        mvcResult = this.mockMvc.perform(get(ACCOUNT_URI_FILTER)
+                        .queryParam("firstName", "Account 1")
+                        .queryParam("lastName", UUID.randomUUID().toString())
+                        .queryParam("phoneNumber", "1122334455"))
                 .andDo(print())
                 .andReturn();
 
@@ -711,16 +877,13 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
     }
 
-    /**
-     * TODO: implement when customer contact service is ready
-     */
-    /*@Test
+    @Test
     public void test_Account_Put_ShouldReturn_409Response_And_ErrorCode_PHARM_LEARN_CUST_004_WhenUpdated_ById_AndDuplicateAccountDetails() throws Exception {
         String id = accountEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_EXISTS.getErrorCode();
-        String field1Name = "name";
-        accountForm.setName(accountEntity2.getName());
+        String field1Name = "phoneNumber";
+        accountForm.setPhoneNumber(accountEntity2.getPhoneNumber());
 
         mvcResult = mockMvc.perform(put(ACCOUNT_URI_BY_ID, id)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -732,7 +895,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertEquals(HttpStatus.CONFLICT.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field1Name));
-    }*/
+    }
 
     @Test
     public void test_Account_Patch_ShouldReturn_204Response_And_NoResponseBody_WhenUpdated_ById_AndAccountDetails() throws Exception {
@@ -808,18 +971,15 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(id.toString()));
     }
 
-    /**
-     * TODO: implement when customer contact service is ready
-     */
-    /*@Test
+    @Test
     public void test_Account_Patch_ShouldReturn_409Response_And_ErrorCode_PHARM_LEARN_CUST_002_WhenUpdated_ById_AndDuplicateAccountDetails() throws Exception {
         String id = accountEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_EXISTS.getErrorCode();
-        String fieldName = "name";
-        String fieldValue = "Account 3";
+        String fieldName = "phoneNumber";
+        String fieldValue = accountEntity3.getPhoneNumber();
         patches = Arrays.asList(
-                new PatchOperationForm("replace", "/name", fieldValue));
+                new PatchOperationForm("replace", "/phoneNumber", fieldValue));
 
 
         mvcResult = this.mockMvc.perform(patch(ACCOUNT_URI_BY_ID, id)
@@ -833,7 +993,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldValue));
-    }*/
+    }
 
     @Test
     public void test_Account_Patch_ShouldReturn_422Response_And_ErrorCode_PHARM_LEARN_CUST_003_WhenUpdated_ById_AndNoAccountDetails() throws Exception {

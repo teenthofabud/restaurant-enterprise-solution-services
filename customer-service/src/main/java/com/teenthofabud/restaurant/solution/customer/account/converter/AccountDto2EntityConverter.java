@@ -21,7 +21,7 @@ import java.util.Optional;
 @Slf4j
 public class AccountDto2EntityConverter implements ComparativePatchConverter<AccountDto, AccountEntity> {
 
-    private static final Integer NO_OF_COMPARABLE_AND_MAPPABLE_FIELDS = 5;
+    private static final Integer NO_OF_COMPARABLE_AND_MAPPABLE_FIELDS = 8;
 
     private List<String> fieldsToEscape;
 
@@ -59,6 +59,24 @@ public class AccountDto2EntityConverter implements ComparativePatchConverter<Acc
             actualEntity.setLastName(optLastName.get());
             changeSW[i++] = true;
             log.debug("AccountDto.lastName is valid");
+        }
+        Optional<String> optEmailId = dto.getEmailId();
+        if(!fieldsToEscape.contains("emailId") && optEmailId.isPresent()) {
+            actualEntity.setEmailId(optEmailId.get());
+            changeSW[i++] = true;
+            log.debug("AccountDto.emailId is valid");
+        }
+        Optional<String> optCountryCode = dto.getCountryCode();
+        if(!fieldsToEscape.contains("countryCode") && optCountryCode.isPresent()) {
+            actualEntity.setCountryCode(optCountryCode.get());
+            changeSW[i++] = true;
+            log.debug("AccountDto.countryCode is valid");
+        }
+        Optional<String> optPhoneNumber = dto.getPhoneNumber();
+        if(!fieldsToEscape.contains("phoneNumber") && optPhoneNumber.isPresent()) {
+            actualEntity.setPhoneNumber(optPhoneNumber.get());
+            changeSW[i++] = true;
+            log.debug("AccountDto.phoneNumber is valid");
         }
         Optional<String> optDateOfBirth = dto.getDateOfBirth();
         if(!fieldsToEscape.contains("dateOfBirth") && optDateOfBirth.isPresent()) {

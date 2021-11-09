@@ -16,4 +16,10 @@ public interface AccountRepository extends TOABSimpleEntityBaseRepository<Accoun
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     public AccountEntity save(AccountEntity entity);
+
+    @Lock(LockModeType.PESSIMISTIC_READ)
+    List<AccountEntity> findByPhoneNumberContaining(String phoneNumber);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Boolean existsByPhoneNumber(String phoneNumber);
 }

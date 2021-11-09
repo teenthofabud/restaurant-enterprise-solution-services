@@ -4,23 +4,8 @@ create table if not exists customer_account (
     last_name varchar2(50) not null,
     gender_id varchar2(100),
     date_of_birth date,
-    created_on datetime default current_timestamp,
-    created_by int default -1,
-    modified_on datetime default current_timestamp,
-    modified_by int,
-    active_sw boolean default true,
-    version int default 0,
-    constraint pk_customer_account primary key (id)
-);
-create index if not exists idx_customer_account_name on customer_account(first_name, last_name);
-create index if not exists idx_customer_gender_id on customer_account(gender_id);
-
-create table if not exists customer_contact (
-    id identity not null,
-    name varchar2(50) default 'default',
-    customer_account_id int not null,
-    phone_number varchar2(50) not null,
     country_code varchar2(10) not null,
+    phone_number varchar2(50) not null,
     email_id varchar2(150),
     created_on datetime default current_timestamp,
     created_by int default -1,
@@ -28,13 +13,14 @@ create table if not exists customer_contact (
     modified_by int,
     active_sw boolean default true,
     version int default 0,
-    constraint pk_customer_contact primary key (id),
-    constraint fk_customer_contact_customer_account_id foreign key (customer_account_id) references customer_account(id),
-    constraint uq_customer_contact_phone_number unique (phone_number)
+    constraint pk_customer_account primary key (id),
+    constraint uq_customer_account_phone_number unique (phone_number)
 );
-create index if not exists idx_customer_contact_phone_number on customer_contact(phone_number);
-create index if not exists idx_customer_contact_country_code on customer_contact(country_code);
-create index if not exists idx_customer_contact_email_id on customer_contact(email_id);
+create index if not exists idx_customer_account_name on customer_account(first_name, last_name);
+create index if not exists idx_customer_account_gender_id on customer_account(gender_id);
+create index if not exists idx_customer_account_phone_number on customer_account(phone_number);
+create index if not exists idx_customer_account_country_code on customer_account(country_code);
+create index if not exists idx_customer_account_email_id on customer_account(email_id);
 
 create table if not exists customer_address (
     id identity not null,

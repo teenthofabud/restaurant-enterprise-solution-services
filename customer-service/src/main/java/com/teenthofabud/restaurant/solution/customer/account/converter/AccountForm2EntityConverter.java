@@ -33,6 +33,8 @@ public class AccountForm2EntityConverter implements Converter<AccountForm, Accou
         AccountEntity entity = new AccountEntity();
         entity.setFirstName(form.getFirstName());
         entity.setLastName(form.getLastName());
+        entity.setCountryCode(form.getCountryCode());
+        entity.setPhoneNumber(form.getPhoneNumber());
         if(!fieldsToEscape.contains("dateOfBirth")) {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dobFormat);
             LocalDate dateOfBirth = LocalDate.parse(form.getDateOfBirth(), dtf);
@@ -40,6 +42,9 @@ public class AccountForm2EntityConverter implements Converter<AccountForm, Accou
         }
         if(!fieldsToEscape.contains("genderId")) {
             entity.setGenderId(form.getGenderId());
+        }
+        if(!fieldsToEscape.contains("emailId")) {
+            entity.setEmailId(form.getEmailId());
         }
         entity.setActive(Boolean.TRUE);
         log.debug("Converting {} to {}", form, entity);

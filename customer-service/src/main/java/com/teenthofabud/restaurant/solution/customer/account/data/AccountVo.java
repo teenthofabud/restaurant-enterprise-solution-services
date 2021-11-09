@@ -1,6 +1,7 @@
 package com.teenthofabud.restaurant.solution.customer.account.data;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
@@ -30,10 +31,18 @@ public class AccountVo extends TOABBaseVo implements Comparable<AccountVo> {
     private String lastName;
     @ToString.Include
     private GenderVo gender;
+    @ToString.Include
+    private String genderId;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy") // date pattern referenced from res.customer.dob.format
     @ToString.Include
     private LocalDate dateOfBirth;
+    @ToString.Include
+    private String phoneNumber;
+    @ToString.Include
+    private String countryCode;
+    @ToString.Include
+    private String emailId;
 
     @Override
     public int compareTo(AccountVo o) {

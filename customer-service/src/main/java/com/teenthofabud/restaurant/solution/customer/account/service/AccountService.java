@@ -23,10 +23,17 @@ public interface AccountService {
 
     public List<AccountVo> retrieveAllMatchingDetailsByGenderId(String genderId) throws AccountException;
 
-
+    @Deprecated
     public List<AccountVo> retrieveAllMatchingDetailsByFirstNameLastNameDateOfBirth(Optional<String> optionalFirstName,
                                                                                       Optional<String> optionalLastName,
                                                                            Optional<String> optionalDateOfBirth) throws AccountException;
+
+
+    public List<AccountVo> retrieveAllMatchingDetailsByFirstNameLastNamePhoneNumberEmailIdDateOfBirth(Optional<String> optionalFirstName,
+                                                                                    Optional<String> optionalLastName,
+                                                                                    Optional<String> optionalPhoneNumber,
+                                                                                    Optional<String> optionalEmailId,
+                                                                                    Optional<String> optionalDateOfBirth) throws AccountException;
 
     public String createAccount(AccountForm form) throws AccountException;
 

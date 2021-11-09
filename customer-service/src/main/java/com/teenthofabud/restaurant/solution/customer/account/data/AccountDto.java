@@ -23,6 +23,13 @@ public class AccountDto {
     private Optional<String> dateOfBirth;
     @ToString.Include
     private Optional<String> active;
+    @ToString.Include
+    private Optional<String> phoneNumber;
+    @ToString.Include
+    private Optional<String> countryCode;
+    @ToString.Include
+    private Optional<String> emailId;
+
 
     public AccountDto() {
         this.firstName = Optional.ofNullable(null);
@@ -30,6 +37,9 @@ public class AccountDto {
         this.genderId = Optional.ofNullable(null);
         this.dateOfBirth = Optional.ofNullable(null);
         this.active = Optional.ofNullable(null);
+        this.phoneNumber = Optional.ofNullable(null);
+        this.countryCode = Optional.ofNullable(null);
+        this.emailId = Optional.ofNullable(null);
     }
 
 }

@@ -38,14 +38,19 @@ public class AccountEntity2VoConverter extends TOABBaseEntity2VoConverter<Accoun
         AccountVo vo = new AccountVo();
         vo.setFirstName(entity.getFirstName());
         vo.setLastName(entity.getLastName());
+        vo.setId(entity.getId().toString());
+        vo.setCountryCode(entity.getCountryCode());
+        vo.setPhoneNumber(entity.getPhoneNumber().toString());
         if(!fieldsToEscape.contains("dateOfBirth")) {
             vo.setDateOfBirth(entity.getDateOfBirth());
         }
         if(!fieldsToEscape.contains("genderId")) {
             this.expandSecondLevelFields(entity, vo);
         }
+        if(!fieldsToEscape.contains("emailId")) {
+            vo.setEmailId(entity.getEmailId());
+        }
         super.expandAuditFields(entity, vo);
-        vo.setId(entity.getId().toString());
         log.debug("Converted {} to {} ", entity, vo);
         return vo;
     }
@@ -59,7 +64,8 @@ public class AccountEntity2VoConverter extends TOABBaseEntity2VoConverter<Accoun
                 log.debug("Retrieved {} for genderId: {}", vo, entity.getGenderId());
                 break;
             default:
-                log.debug("only second level cascading is allowed in target type");
+                vo.setGenderId(entity.getGenderId());
+                log.debug("only first level cascaded for genderId");
                 break;
         }
     }

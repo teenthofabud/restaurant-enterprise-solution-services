@@ -32,6 +32,12 @@ public class AccountEntity extends TOABBaseEntity implements Comparable<AccountE
     private String genderId;
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
+    @Column(name = "phone_number")
+    private String phoneNumber;
+    @Column(name = "country_code")
+    private String countryCode;
+    @Column(name = "email_id")
+    private String emailId;
 
 
     @Override

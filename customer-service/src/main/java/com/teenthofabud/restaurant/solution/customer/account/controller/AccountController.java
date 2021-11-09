@@ -199,9 +199,9 @@ public class AccountController {
         throw new AccountException(CustomerErrorCode.CUST_ATTRIBUTE_INVALID, new Object[] { "genderId", genderId });
     }
 
-    @Operation(summary = "Get all Account details by first name, last name, date of birth")
+    @Operation(summary = "Get all Account details by first name, last name, phone number, email id, date of birth")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Retrieve all available Accounts and their details that match the provided first name, last name, date of birth",
+            @ApiResponse(responseCode = "200", description = "Retrieve all available Accounts and their details that match the provided first name, last name, phone number, email id, date of birth",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = AccountVo.class))) }),
             @ApiResponse(responseCode = "400", description = "Account search filters are invalid",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) }),
@@ -211,17 +211,22 @@ public class AccountController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("filter")
     public List<AccountVo> getAllAccountsByFilters(@RequestParam(required = false) String firstName, @RequestParam(required = false) String lastName,
-                                                 @RequestParam(required = false) String dateOfBirth) throws AccountException {
+                                                 @RequestParam(required = false) String dateOfBirth, @RequestParam(required = false) String phoneNumber,
+                                                 @RequestParam(required = false) String emailId) throws AccountException {
         log.debug("Requesting all available accounts with given filters");
         boolean emptyFirstName = !StringUtils.hasText(StringUtils.trimWhitespace(firstName));
         boolean emptyLastName = !StringUtils.hasText(StringUtils.trimWhitespace(lastName));
         boolean emptyDateOfBirth = !StringUtils.hasText(StringUtils.trimWhitespace(dateOfBirth));
-        if(!emptyFirstName || !emptyLastName || !emptyDateOfBirth) {
+        boolean emptyPhoneNumber = !StringUtils.hasText(StringUtils.trimWhitespace(phoneNumber));
+        boolean emptyEmailId = !StringUtils.hasText(StringUtils.trimWhitespace(emailId));
+        if(!emptyFirstName || !emptyLastName || !emptyDateOfBirth || !emptyPhoneNumber || !emptyEmailId) {
             Optional<String> optAccountName = emptyFirstName ? Optional.empty() : Optional.of(firstName);
             Optional<String> optLastName = emptyLastName ? Optional.empty() : Optional.of(lastName);
             Optional<String> optDateOfBirth = emptyDateOfBirth ? Optional.empty() : Optional.of(dateOfBirth);
-            List<AccountVo> matchedByFilter = service.retrieveAllMatchingDetailsByFirstNameLastNameDateOfBirth(
-                    optAccountName, optLastName, optDateOfBirth);
+            Optional<String> optPhoneNumber = emptyPhoneNumber ? Optional.empty() : Optional.of(phoneNumber);
+            Optional<String> optEmailId = emptyEmailId ? Optional.empty() : Optional.of(emailId);
+            List<AccountVo> matchedByFilter = service.retrieveAllMatchingDetailsByFirstNameLastNamePhoneNumberEmailIdDateOfBirth(
+                    optAccountName, optLastName, optPhoneNumber, optEmailId, optDateOfBirth);
             log.debug("Responding with all available accounts with given filters");
             return matchedByFilter;
         }

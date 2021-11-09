@@ -62,6 +62,24 @@ public class AccountDtoValidator implements Validator {
             log.debug("AccountDto.lastName is invalid");
             return;
         }
+        Optional<String> optCountryCode = dto.getCountryCode();
+        if(!fieldsToEscape.contains("countryCode") && optCountryCode.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optCountryCode.get()))) {
+            errors.rejectValue("countryCode", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
+            log.debug("AccountDto.countryCode is invalid");
+            return;
+        }
+        Optional<String> optPhoneNumber = dto.getPhoneNumber();
+        if(!fieldsToEscape.contains("phoneNumber") && optPhoneNumber.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optPhoneNumber.get()))) {
+            errors.rejectValue("phoneNumber", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
+            log.debug("AccountDto.phoneNumber is invalid");
+            return;
+        }
+        Optional<String> optEmailId = dto.getEmailId();
+        if(!fieldsToEscape.contains("emailId") && optEmailId.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optEmailId.get()))) {
+            errors.rejectValue("emailId", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
+            log.debug("AccountDto.emailId is invalid");
+            return;
+        }
         Optional<String> optDateOfBirth = dto.getDateOfBirth();
         if(!fieldsToEscape.contains("dateOfBirth") && optDateOfBirth.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optDateOfBirth.get()))) {
             try {

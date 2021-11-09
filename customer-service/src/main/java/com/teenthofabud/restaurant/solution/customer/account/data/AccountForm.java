@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import javax.persistence.Column;
+
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -27,5 +29,12 @@ public class AccountForm {
     @JsonIgnore
     @ToString.Include
     private String dateOfBirth;
+    @ToString.Include
+    private String phoneNumber;
+    @ToString.Include
+    private String countryCode;
+    @JsonIgnore
+    @ToString.Include
+    private String emailId;
 
 }

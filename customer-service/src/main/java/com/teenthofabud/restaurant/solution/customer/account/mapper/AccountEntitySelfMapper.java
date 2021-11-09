@@ -40,6 +40,21 @@ public class AccountEntitySelfMapper implements SingleChannelMapper<AccountEntit
             changeSW = true;
             log.debug("Source AccountEntity.lastName is valid");
         }
+        if(source.getCountryCode() != null && StringUtils.hasText(StringUtils.trimWhitespace(source.getCountryCode())) && source.getCountryCode().compareTo(target.getCountryCode()) != 0) {
+            target.setCountryCode(source.getCountryCode());
+            changeSW = true;
+            log.debug("Source AccountEntity.countryCode is valid");
+        }
+        if(source.getPhoneNumber() != null && StringUtils.hasText(StringUtils.trimWhitespace(source.getPhoneNumber())) && source.getPhoneNumber().compareTo(target.getPhoneNumber()) != 0) {
+            target.setPhoneNumber(source.getPhoneNumber());
+            changeSW = true;
+            log.debug("Source AccountEntity.phoneNumber is valid");
+        }
+        if(source.getEmailId() != null && StringUtils.hasText(StringUtils.trimWhitespace(source.getEmailId())) && source.getEmailId().compareTo(target.getEmailId()) != 0) {
+            target.setEmailId(source.getEmailId());
+            changeSW = true;
+            log.debug("Source AccountEntity.emailId is valid");
+        }
         if(changeSW) {
             log.debug("All provided AccountEntity attributes are valid");
             return Optional.of(target);

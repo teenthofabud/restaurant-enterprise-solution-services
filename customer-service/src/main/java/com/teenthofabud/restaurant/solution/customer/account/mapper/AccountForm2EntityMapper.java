@@ -61,6 +61,33 @@ public class AccountForm2EntityMapper implements DualChannelMapper<AccountEntity
             expectedEntity.setLastName(actualEntity.getLastName());
             log.debug("AccountForm.lastName: is unchanged");
         }
+        if(!fieldsToEscape.contains("countryCode") && StringUtils.hasText(StringUtils.trimWhitespace(form.getCountryCode()))
+                && form.getCountryCode().compareTo(actualEntity.getCountryCode()) != 0) {
+            expectedEntity.setCountryCode(form.getCountryCode());
+            changeSW = true;
+            log.debug("AccountForm.countryCode: {} is different as AccountEntity.countryCode: {}", form.getCountryCode(), actualEntity.getCountryCode());
+        } else {
+            expectedEntity.setCountryCode(actualEntity.getCountryCode());
+            log.debug("AccountForm.countryCode: is unchanged");
+        }
+        if(!fieldsToEscape.contains("phoneNumber") && StringUtils.hasText(StringUtils.trimWhitespace(form.getPhoneNumber()))
+                && form.getPhoneNumber().compareTo(actualEntity.getPhoneNumber()) != 0) {
+            expectedEntity.setPhoneNumber(form.getPhoneNumber());
+            changeSW = true;
+            log.debug("AccountForm.phoneNumber: {} is different as AccountEntity.phoneNumber: {}", form.getPhoneNumber(), actualEntity.getPhoneNumber());
+        } else {
+            expectedEntity.setPhoneNumber(actualEntity.getPhoneNumber());
+            log.debug("AccountForm.phoneNumber: is unchanged");
+        }
+        if(!fieldsToEscape.contains("emailId") && StringUtils.hasText(StringUtils.trimWhitespace(form.getEmailId()))
+                && form.getEmailId().compareTo(actualEntity.getEmailId()) != 0) {
+            expectedEntity.setEmailId(form.getEmailId());
+            changeSW = true;
+            log.debug("AccountForm.emailId: {} is different as AccountEntity.emailId: {}", form.getEmailId(), actualEntity.getEmailId());
+        } else {
+            expectedEntity.setEmailId(actualEntity.getEmailId());
+            log.debug("AccountForm.emailId: is unchanged");
+        }
         if(!fieldsToEscape.contains("genderId") && StringUtils.hasText(StringUtils.trimWhitespace(form.getGenderId()))
                 && form.getGenderId().compareTo(actualEntity.getGenderId().toString()) != 0) {
             expectedEntity.setGenderId(form.getGenderId());

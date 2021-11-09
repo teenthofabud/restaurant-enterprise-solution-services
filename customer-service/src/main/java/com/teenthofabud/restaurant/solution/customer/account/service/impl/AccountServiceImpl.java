@@ -61,7 +61,7 @@ import java.util.TreeSet;
 @Slf4j
 public class AccountServiceImpl implements AccountService {
 
-    private static final Comparator<AccountVo> CMP_BY_NAME = (s1, s2) -> {
+    private static final Comparator<AccountVo> CMP_BY_PHONE_NUMBER = (s1, s2) -> {
         return Integer.compare(s1.getFirstName().compareTo(s2.getFirstName()), s1.getLastName().compareTo(s2.getLastName()));
     };
 
@@ -181,7 +181,7 @@ public class AccountServiceImpl implements AccountService {
     public Set<AccountVo> retrieveAllByNaturalOrdering() {
         log.info("Requesting all AccountEntity by their natural ordering");
         List<AccountEntity> accountEntityList = repository.findAll();
-        Set<AccountVo> naturallyOrderedSet = new TreeSet<AccountVo>(CMP_BY_NAME);
+        Set<AccountVo> naturallyOrderedSet = new TreeSet<AccountVo>(CMP_BY_PHONE_NUMBER);
         for(AccountEntity entity : accountEntityList) {
             AccountVo dto = entity2VoConverter.convert(entity);
             log.debug("Converting {} to {}", entity, dto);
@@ -308,6 +308,81 @@ public class AccountServiceImpl implements AccountService {
         return matchedAccountList;
     }
 
+    @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+    @Override
+    public List<AccountVo> retrieveAllMatchingDetailsByFirstNameLastNamePhoneNumberEmailIdDateOfBirth(
+            Optional<String> optionalFirstName, Optional<String> optionalLastName, Optional<String> optionalPhoneNumber,
+            Optional<String> optionalEmailId, Optional<String> optionalDateOfBirth) throws AccountException {
+        if(optionalFirstName.isEmpty() && optionalLastName.isEmpty() && optionalPhoneNumber.isEmpty() && optionalEmailId.isEmpty() && optionalDateOfBirth.isEmpty()) {
+            log.debug("No search parameters provided");
+        }
+        String firstName = optionalFirstName.isPresent() ? optionalFirstName.get() : "";
+        String lastName = optionalLastName.isPresent() ? optionalLastName.get() : "";
+        String phoneNumber = optionalPhoneNumber.isPresent() ? optionalPhoneNumber.get() : "";
+        String emailId = optionalEmailId.isPresent() ? optionalEmailId.get() : "";
+        String dateOfBirth = optionalDateOfBirth.isPresent() ? optionalDateOfBirth.get() : "";
+        if(StringUtils.isEmpty(StringUtils.trimWhitespace(firstName)) && StringUtils.isEmpty(StringUtils.trimWhitespace(lastName))
+                && StringUtils.isEmpty(StringUtils.trimWhitespace(phoneNumber)) && StringUtils.isEmpty(StringUtils.trimWhitespace(emailId))
+                && StringUtils.isEmpty(StringUtils.trimWhitespace(dateOfBirth))) {
+            log.debug("All search parameters are empty");
+        }
+        List<AccountVo> matchedAccountList = new LinkedList<>();
+        Map<String, String> providedFilters = new LinkedHashMap<>();
+        AccountEntity entity = new AccountEntity();
+        ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll();
+        if(StringUtils.hasText(StringUtils.trimWhitespace(firstName))) {
+            log.debug("firstName {} is valid", firstName);
+            providedFilters.put("firstName", firstName);
+            entity.setFirstName(firstName);
+            matcherCriteria = matcherCriteria.withMatcher("firstName", match -> match.contains());
+        }
+        if(StringUtils.hasText(StringUtils.trimWhitespace(lastName))) {
+            log.debug("lastName {} is valid", lastName);
+            providedFilters.put("lastName", lastName);
+            entity.setLastName(lastName);
+            matcherCriteria = matcherCriteria.withMatcher("lastName", match -> match.contains());
+        }
+        if(StringUtils.hasText(StringUtils.trimWhitespace(dateOfBirth))) {
+            try {
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dobFormat);
+                LocalDate dob = LocalDate.parse(dateOfBirth, dtf);
+                log.debug("dateOfBirth {} is valid", dateOfBirth);
+                providedFilters.put("dateOfBirth", dateOfBirth);
+                entity.setDateOfBirth(dob);
+                matcherCriteria = matcherCriteria.withMatcher("dateOfBirth", match -> match.exact());
+            } catch (DateTimeParseException e) {
+                log.error("Unable to parse dateOfBirth", e);
+                log.debug(AccountMessageTemplate.MSG_TEMPLATE_ACCOUNT_DOB_INVALID.getValue(), dateOfBirth);
+                throw new AccountException(CustomerErrorCode.CUST_ATTRIBUTE_INVALID, new Object[] { "dateOfBirth", dateOfBirth });
+            }
+        }
+        if(StringUtils.hasText(StringUtils.trimWhitespace(phoneNumber))) {
+            log.debug("phoneNumber {} is valid", phoneNumber);
+            providedFilters.put("phoneNumber", phoneNumber);
+            entity.setPhoneNumber(phoneNumber);
+            matcherCriteria = matcherCriteria.withMatcher("phoneNumber", match -> match.contains());
+        }
+        if(StringUtils.hasText(StringUtils.trimWhitespace(emailId))) {
+            log.debug("emailId {} is valid", emailId);
+            providedFilters.put("emailId", emailId);
+            entity.setEmailId(emailId);
+            matcherCriteria = matcherCriteria.withMatcher("emailId", match -> match.contains());
+        }
+        if(providedFilters.isEmpty()) {
+            log.debug("search parameters are not valid");
+        } else {
+            log.debug("search parameters {} are valid", providedFilters);
+        }
+        Example<AccountEntity> accountEntityExample = Example.of(entity, matcherCriteria);
+        List<AccountEntity> accountEntityList = repository.findAll(accountEntityExample);
+        if(accountEntityList != null && !accountEntityList.isEmpty()) {
+            matchedAccountList = entity2DetailedVoList(accountEntityList);
+            log.info("Found {} AccountVo matching with provided parameters : {}", matchedAccountList.size(), providedFilters);
+        }
+        log.info("No AccountVo available matching with provided parameters : {}", matchedAccountList.size(), providedFilters);
+        return matchedAccountList;
+    }
+
     @Transactional
     @Override
     public String createAccount(AccountForm form) throws AccountException {
@@ -333,13 +408,13 @@ public class AccountServiceImpl implements AccountService {
 
         AccountEntity expectedEntity = form2EntityConverter.convert(form);
 
-        /*log.debug(AccountMessageTemplate.MSG_TEMPLATE_ACCOUNT_EXISTENCE_BY_NAME.getValue(), form.getName());
-        if(repository.existsByName(expectedEntity.getName())) {
-            log.debug(AccountMessageTemplate.MSG_TEMPLATE_ACCOUNT_EXISTS_BY_NAME.getValue(), expectedEntity.getName());
+        log.debug(AccountMessageTemplate.MSG_TEMPLATE_ACCOUNT_EXISTENCE_BY_PHONE_NUMBER.getValue(), form.getPhoneNumber());
+        if(repository.existsByPhoneNumber(expectedEntity.getPhoneNumber())) {
+            log.debug(AccountMessageTemplate.MSG_TEMPLATE_ACCOUNT_EXISTS_BY_PHONE_NUMBER.getValue(), expectedEntity.getPhoneNumber());
             throw new AccountException(CustomerErrorCode.CUST_EXISTS,
-                    new Object[]{ "name", form.getName() });
+                    new Object[]{ "phoneNumber", form.getPhoneNumber() });
         }
-        log.debug(AccountMessageTemplate.MSG_TEMPLATE_ACCOUNT_NON_EXISTENCE_BY_NAME.getValue(), expectedEntity.getName());*/
+        log.debug(AccountMessageTemplate.MSG_TEMPLATE_ACCOUNT_NON_EXISTENCE_BY_PHONE_NUMBER.getValue(), expectedEntity.getPhoneNumber());
 
         log.debug("Saving {}", expectedEntity);
         AccountEntity actualEntity = repository.save(expectedEntity);
@@ -404,13 +479,14 @@ public class AccountServiceImpl implements AccountService {
 
         AccountEntity expectedEntity = optExpectedEntity.get();
 
-        /*log.debug(AccountMessageTemplate.MSG_TEMPLATE_ACCOUNT_EXISTENCE_BY_NAME.getValue(), form.getName());
-        if(actualEntity.getName().compareTo(expectedEntity.getName()) == 0 || repository.existsByName(expectedEntity.getName())) {
-            log.debug(AccountMessageTemplate.MSG_TEMPLATE_ACCOUNT_EXISTS_BY_NAME.getValue(), expectedEntity.getName());
+        log.debug(AccountMessageTemplate.MSG_TEMPLATE_ACCOUNT_EXISTENCE_BY_PHONE_NUMBER.getValue(), form.getPhoneNumber());
+        if(actualEntity.getPhoneNumber().compareTo(expectedEntity.getPhoneNumber()) == 0
+                || repository.existsByPhoneNumber(expectedEntity.getPhoneNumber())) {
+            log.debug(AccountMessageTemplate.MSG_TEMPLATE_ACCOUNT_EXISTS_BY_PHONE_NUMBER.getValue(), expectedEntity.getPhoneNumber());
             throw new AccountException(CustomerErrorCode.CUST_EXISTS,
-                    new Object[]{ "name", actualEntity.getName() });
+                    new Object[]{ "phoneNumber", actualEntity.getPhoneNumber() });
         }
-        log.debug(AccountMessageTemplate.MSG_TEMPLATE_ACCOUNT_NON_EXISTENCE_BY_NAME.getValue(), expectedEntity.getName());*/
+        log.debug(AccountMessageTemplate.MSG_TEMPLATE_ACCOUNT_NON_EXISTENCE_BY_PHONE_NUMBER.getValue(), expectedEntity.getPhoneNumber());
 
         entitySelfMapper.compareAndMap(expectedEntity, actualEntity);
         log.debug("Compared and copied attributes from AccountEntity to AccountForm");
@@ -534,13 +610,14 @@ public class AccountServiceImpl implements AccountService {
         }
         log.debug("All attributes of patched AccountDto are valid");
 
-        /*log.debug(AccountMessageTemplate.MSG_TEMPLATE_ACCOUNT_EXISTENCE_BY_NAME.getValue(), patchedAccountForm.getName().get());
-        if(actualEntity.getName().compareTo(patchedAccountForm.getName().get()) == 0 || repository.existsByName(patchedAccountForm.getName().get())) {
-            log.debug(AccountMessageTemplate.MSG_TEMPLATE_ACCOUNT_EXISTS_BY_NAME.getValue(), patchedAccountForm.getName().get());
+        log.debug(AccountMessageTemplate.MSG_TEMPLATE_ACCOUNT_EXISTENCE_BY_PHONE_NUMBER.getValue(), patchedAccountForm.getPhoneNumber().get());
+        if(actualEntity.getPhoneNumber().compareTo(patchedAccountForm.getPhoneNumber().get()) == 0
+                || repository.existsByPhoneNumber(patchedAccountForm.getPhoneNumber().get())) {
+            log.debug(AccountMessageTemplate.MSG_TEMPLATE_ACCOUNT_EXISTS_BY_PHONE_NUMBER.getValue(), patchedAccountForm.getPhoneNumber().get());
             throw new AccountException(CustomerErrorCode.CUST_EXISTS,
-                    new Object[]{ "name", patchedAccountForm.getName().get() });
+                    new Object[]{ "phoneNumber", patchedAccountForm.getPhoneNumber().get() });
         }
-        log.debug(AccountMessageTemplate.MSG_TEMPLATE_ACCOUNT_NON_EXISTENCE_BY_NAME.getValue(), patchedAccountForm.getName().get());*/
+        log.debug(AccountMessageTemplate.MSG_TEMPLATE_ACCOUNT_NON_EXISTENCE_BY_PHONE_NUMBER.getValue(), patchedAccountForm.getPhoneNumber().get());
 
 
         log.debug("Comparatively copying patched attributes from AccountDto to AccountEntity");
