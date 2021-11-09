@@ -18,7 +18,7 @@ public class AccountForm2EntityConverter implements Converter<AccountForm, Accou
     private String dobFormat;
     private List<String> fieldsToEscape;
 
-    @Value("#{'${res.customer.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.customer.account.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }
