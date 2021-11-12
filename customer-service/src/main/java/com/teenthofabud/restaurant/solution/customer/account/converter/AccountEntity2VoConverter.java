@@ -36,11 +36,21 @@ public class AccountEntity2VoConverter extends TOABBaseEntity2VoConverter<Accoun
     @Override
     public AccountVo convert(AccountEntity entity) {
         AccountVo vo = new AccountVo();
-        vo.setFirstName(entity.getFirstName());
-        vo.setLastName(entity.getLastName());
-        vo.setId(entity.getId().toString());
-        vo.setCountryCode(entity.getCountryCode());
-        vo.setPhoneNumber(entity.getPhoneNumber().toString());
+        if(!fieldsToEscape.contains("id")) {
+            vo.setId(entity.getId().toString());
+        }
+        if(!fieldsToEscape.contains("firstName")) {
+            vo.setFirstName(entity.getFirstName());
+        }
+        if(!fieldsToEscape.contains("lastName")) {
+            vo.setLastName(entity.getLastName());
+        }
+        if(!fieldsToEscape.contains("countryCode")) {
+            vo.setCountryCode(entity.getCountryCode());
+        }
+        if(!fieldsToEscape.contains("phoneNumber")) {
+            vo.setPhoneNumber(entity.getPhoneNumber());
+        }
         if(!fieldsToEscape.contains("dateOfBirth")) {
             vo.setDateOfBirth(entity.getDateOfBirth());
         }

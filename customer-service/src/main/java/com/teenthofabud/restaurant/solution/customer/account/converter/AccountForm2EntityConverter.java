@@ -31,10 +31,18 @@ public class AccountForm2EntityConverter implements Converter<AccountForm, Accou
     @Override
     public AccountEntity convert(AccountForm form) {
         AccountEntity entity = new AccountEntity();
-        entity.setFirstName(form.getFirstName());
-        entity.setLastName(form.getLastName());
-        entity.setCountryCode(form.getCountryCode());
-        entity.setPhoneNumber(form.getPhoneNumber());
+        if(!fieldsToEscape.contains("firstName")) {
+            entity.setFirstName(form.getFirstName());
+        }
+        if(!fieldsToEscape.contains("lastName")) {
+            entity.setLastName(form.getLastName());
+        }
+        if(!fieldsToEscape.contains("countryCode")) {
+            entity.setCountryCode(form.getCountryCode());
+        }
+        if(!fieldsToEscape.contains("phoneNumber")) {
+            entity.setPhoneNumber(form.getPhoneNumber());
+        }
         if(!fieldsToEscape.contains("dateOfBirth")) {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dobFormat);
             LocalDate dateOfBirth = LocalDate.parse(form.getDateOfBirth(), dtf);

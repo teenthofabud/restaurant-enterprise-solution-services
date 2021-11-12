@@ -1,6 +1,7 @@
 package com.teenthofabud.restaurant.solution.customer.account.data;
 
 import com.teenthofabud.core.common.data.entity.TOABBaseEntity;
+import com.teenthofabud.restaurant.solution.customer.address.data.AddressEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -38,7 +40,8 @@ public class AccountEntity extends TOABBaseEntity implements Comparable<AccountE
     private String countryCode;
     @Column(name = "email_id")
     private String emailId;
-
+    @OneToMany(mappedBy = "account", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<AddressEntity> addresses;
 
     @Override
     public int compareTo(AccountEntity o) {

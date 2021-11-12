@@ -61,7 +61,7 @@ import java.util.TreeSet;
 @Slf4j
 public class AccountServiceImpl implements AccountService {
 
-    private static final Comparator<AccountVo> CMP_BY_PHONE_NUMBER = (s1, s2) -> {
+    private static final Comparator<AccountVo> CMP_BY_FIRST_NAME_AND_LAST_NAME = (s1, s2) -> {
         return Integer.compare(s1.getFirstName().compareTo(s2.getFirstName()), s1.getLastName().compareTo(s2.getLastName()));
     };
 
@@ -181,7 +181,7 @@ public class AccountServiceImpl implements AccountService {
     public Set<AccountVo> retrieveAllByNaturalOrdering() {
         log.info("Requesting all AccountEntity by their natural ordering");
         List<AccountEntity> accountEntityList = repository.findAll();
-        Set<AccountVo> naturallyOrderedSet = new TreeSet<AccountVo>(CMP_BY_PHONE_NUMBER);
+        Set<AccountVo> naturallyOrderedSet = new TreeSet<AccountVo>(CMP_BY_FIRST_NAME_AND_LAST_NAME);
         for(AccountEntity entity : accountEntityList) {
             AccountVo dto = entity2VoConverter.convert(entity);
             log.debug("Converting {} to {}", entity, dto);
@@ -224,7 +224,6 @@ public class AccountServiceImpl implements AccountService {
         AccountVo vo = entity2VoConverter.convert(entity);
         log.debug("AccountVo populated with fields cascaded to level: {}", cascadeLevel);
         TOABRequestContextHolder.clearCascadeLevelContext();
-
         return vo;
     }
 

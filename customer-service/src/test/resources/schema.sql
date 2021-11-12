@@ -28,8 +28,8 @@ create table if not exists customer_address (
     customer_account_id int not null,
     address_line_1 varchar2(100) not null,
     address_line_2 varchar2(100),
-    city varchar2(50) not null,
-    state varchar2(50) not null,
+    city_id int not null,
+    state_id int not null,
     pincode varchar2(50) not null,
     country_id int not null,
     created_on datetime default current_timestamp,
@@ -39,8 +39,10 @@ create table if not exists customer_address (
     active_sw boolean default true,
     version int default 0,
     constraint pk_customer_address primary key (id),
-    constraint fk_customer_address_customer_account_id foreign key (customer_account_id) references customer_account(id)
+    constraint fk_customer_address_customer_account_id foreign key (customer_account_id) references customer_account(id),
+    constraint uq_customer_address_name_customer_account_id unique (name, customer_account_id)
 );
 create index if not exists idx_customer_address_pincode on customer_address(pincode);
-create index if not exists idx_customer_address_city on customer_address(city);
+create index if not exists idx_customer_address_city_id on customer_address(city_id);
+create index if not exists idx_customer_address_state_id on customer_address(state_id);
 create index if not exists idx_customer_address_country_id on customer_address(country_id);

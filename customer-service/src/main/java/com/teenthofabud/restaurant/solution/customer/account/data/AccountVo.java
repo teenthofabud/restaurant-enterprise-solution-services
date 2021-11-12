@@ -24,8 +24,6 @@ public class AccountVo extends TOABBaseVo implements Comparable<AccountVo> {
     @ToString.Include
     private String id;
     @ToString.Include
-    private Boolean active;
-    @ToString.Include
     private String firstName;
     @ToString.Include
     private String lastName;
