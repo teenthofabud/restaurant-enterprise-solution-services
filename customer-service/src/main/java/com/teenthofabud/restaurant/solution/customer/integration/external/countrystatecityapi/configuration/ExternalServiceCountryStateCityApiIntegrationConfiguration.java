@@ -1,7 +1,7 @@
-package com.teenthofabud.restaurant.solution.customer.integration.metadata.gender.configuration;
+package com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.configuration;
 
-import com.teenthofabud.restaurant.solution.customer.integration.metadata.gender.proxy.GenderServiceClient;
-import com.teenthofabud.restaurant.solution.customer.integration.metadata.gender.proxy.impl.GenderServiceClientFallbackImpl;
+import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.proxy.CountryStateCityApiClient;
+import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.proxy.impl.CountryStateCityApiClientFallbackImpl;
 import feign.Feign;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
@@ -16,15 +16,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
 @Configuration
-public class MetadataServiceGenderIntegrationConfiguration {
+public class ExternalServiceCountryStateCityApiIntegrationConfiguration {
 
     private CircuitBreakerRegistry circuitBreakerRegistry;
-    private GenderServiceClientFallbackImpl genderServiceClientFallback;
+    private CountryStateCityApiClientFallbackImpl countryStateCityApiClientFallback;
 
     @Autowired
-    @Qualifier("genderServiceClientFallback")
-    public void setGenderServiceClientFallback(GenderServiceClientFallbackImpl genderServiceClientFallback) {
-        this.genderServiceClientFallback = genderServiceClientFallback;
+    @Qualifier("countryStateCityApiClientFallback")
+    public void setCountryStateCityApiClientFallback(CountryStateCityApiClientFallbackImpl countryStateCityApiClientFallback) {
+        this.countryStateCityApiClientFallback = countryStateCityApiClientFallback;
     }
 
     @Autowired
@@ -34,11 +34,11 @@ public class MetadataServiceGenderIntegrationConfiguration {
 
     @Bean
     @Scope(scopeName = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public Feign.Builder genderServiceClientFeignBuilder() {
-        CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker(GenderServiceClient.SERVICE_CLIENT_NAME);
+    public Feign.Builder countryStateCityApiClientFeignBuilder() {
+        CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker(CountryStateCityApiClient.SERVICE_CLIENT_NAME);
         FeignDecorators decorators = FeignDecorators.builder()
                 .withCircuitBreaker(circuitBreaker)
-                .withFallback(genderServiceClientFallback, CallNotPermittedException.class)
+                .withFallback(countryStateCityApiClientFallback, CallNotPermittedException.class)
                 .build();
         return Resilience4jFeign.builder(decorators);
     }

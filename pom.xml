@@ -27,7 +27,7 @@
         <sonar.organization>teenthofabud</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
-        <toab-chassis-sdk.version>1.6.2-SNAPSHOT</toab-chassis-sdk.version>
+        <toab-chassis-sdk.version>1.6.4-SNAPSHOT</toab-chassis-sdk.version>
         <json-patch.version>1.13</json-patch.version>
         <jackson-datatype-jdk8.version>2.12.3</jackson-datatype-jdk8.version>
         <javax.json-api.version>1.1.4</javax.json-api.version>

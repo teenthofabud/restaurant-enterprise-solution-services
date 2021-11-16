@@ -1,9 +1,11 @@
 package com.teenthofabud.restaurant.solution.customer.address.validator;
 
 import com.teenthofabud.core.common.constant.TOABCascadeLevel;
+import com.teenthofabud.core.common.data.dto.TOABValidationContextHolder;
 import com.teenthofabud.restaurant.solution.customer.account.data.AccountException;
 import com.teenthofabud.restaurant.solution.customer.account.data.AccountVo;
 import com.teenthofabud.restaurant.solution.customer.account.service.AccountService;
+import com.teenthofabud.restaurant.solution.customer.address.data.AddressConstant;
 import com.teenthofabud.restaurant.solution.customer.address.data.AddressDto;
 import com.teenthofabud.restaurant.solution.customer.error.CustomerErrorCode;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
@@ -22,6 +25,9 @@ import java.util.Optional;
 public class AddressDtoValidator implements Validator {
 
     private List<String> fieldsToEscape;
+    private Validator countryIdValidator;
+    private Validator stateIdValidator;
+    private Validator cityIdValidator;
 
     @Value("#{'${res.customer.address.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
@@ -35,10 +41,29 @@ public class AddressDtoValidator implements Validator {
         this.accountService = accountService;
     }
 
+    @Autowired
+    public void setCountryIdValidator(Validator countryIdValidator) {
+        this.countryIdValidator = countryIdValidator;
+    }
+
+    @Autowired
+    public void setStateIdValidator(Validator stateIdValidator) {
+        this.stateIdValidator = stateIdValidator;
+    }
+
+    @Autowired
+    public void setCityIdValidator(Validator cityIdValidator) {
+        this.cityIdValidator = cityIdValidator;
+    }
+
     @Override
     public boolean supports(Class<?> clazz) {
         return clazz.isAssignableFrom(AddressDto.class);
     }
+
+    /**
+     * Order in which the fields are being validated are important
+     */
 
     @Override
     public void validate(Object target, Errors errors) {
@@ -55,35 +80,57 @@ public class AddressDtoValidator implements Validator {
             log.debug("AccountDto.addressLine1 is invalid");
             return;
         }
-        Optional<String> optAddressLine2 = dto.getAddressLine2();
+        /*Optional<String> optAddressLine2 = dto.getAddressLine2();
         if(!fieldsToEscape.contains("addressLine2") && optAddressLine2.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optAddressLine2.get()))) {
             errors.rejectValue("addressLine2", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
             log.debug("AccountDto.addressLine2 is invalid");
             return;
-        }
-        Optional<String> optStateId = dto.getStateId();
-        if(!fieldsToEscape.contains("stateId") && optStateId.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optStateId.get()))) {
-            errors.rejectValue("stateId", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
-            log.debug("AccountDto.stateId is invalid");
-            return;
-        }
+        }*/
         Optional<String> optPincode = dto.getPincode();
         if(!fieldsToEscape.contains("pincode") && optPincode.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optPincode.get()))) {
             errors.rejectValue("pincode", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
             log.debug("AccountDto.pincode is invalid");
             return;
         }
+        Optional<String> optCountryId = dto.getCountryId();
+        if(!fieldsToEscape.contains("countryId") && optCountryId.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optCountryId.get()))) {
+            String countryId = optCountryId.get();
+            Errors err = new DirectFieldBindingResult(countryId, "AddressDto");
+            countryIdValidator.validate(countryId, err);
+            if(err.hasErrors()) {
+                log.debug("AddressDto.countryId is invalid");
+                CustomerErrorCode ec = CustomerErrorCode.valueOf(err.getGlobalError().getCode());
+                log.debug("AddressDto error detail: {}", ec);
+                errors.rejectValue("countryId", ec.name());
+                return;
+            }
+            TOABValidationContextHolder.setSupportingValidationParameterContext(AddressConstant.COUNTRY_ISO.getName(), countryId);
+        }
         Optional<String> optCityId = dto.getCityId();
         if(!fieldsToEscape.contains("cityId") && optCityId.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optCityId.get()))) {
-            errors.rejectValue("cityId", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
-            log.debug("AccountDto.cityId is invalid");
-            return;
+            String cityId = optCityId.get();
+            Errors err = new DirectFieldBindingResult(cityId, "AddressDto");
+            cityIdValidator.validate(cityId, err);
+            if(err.hasErrors()) {
+                log.debug("AddressDto.cityId is invalid");
+                CustomerErrorCode ec = CustomerErrorCode.valueOf(err.getGlobalError().getCode());
+                log.debug("AddressDto error detail: {}", ec);
+                errors.rejectValue("cityId", ec.name());
+                return;
+            }
         }
-        Optional<String> optCountryId = dto.getCountryId();
-        if(!fieldsToEscape.contains("countryId") && optCountryId.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optCountryId.get()))) {
-            errors.rejectValue("countryId", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
-            log.debug("AccountDto.countryId is invalid");
-            return;
+        Optional<String> optStateId = dto.getStateId();
+        if(!fieldsToEscape.contains("stateId") && optStateId.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optStateId.get()))) {
+            String stateId = optStateId.get();
+            Errors err = new DirectFieldBindingResult(stateId, "AddressDto");
+            stateIdValidator.validate(stateId, err);
+            if(err.hasErrors()) {
+                log.debug("AddressDto.stateId is invalid");
+                CustomerErrorCode ec = CustomerErrorCode.valueOf(err.getGlobalError().getCode());
+                log.debug("AddressDto error detail: {}", ec);
+                errors.rejectValue("stateId", ec.name());
+                return;
+            }
         }
         Optional<String> optActive = dto.getActive();
         if(!fieldsToEscape.contains("active") && optActive.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optActive.get()))) {
@@ -111,6 +158,7 @@ public class AddressDtoValidator implements Validator {
                 return;
             }
         }
+        TOABValidationContextHolder.clearSupportingValidationParameterContext(AddressConstant.COUNTRY_ISO.getName());
     }
 
 }

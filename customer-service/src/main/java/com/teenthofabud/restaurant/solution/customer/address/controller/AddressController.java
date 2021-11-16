@@ -225,7 +225,7 @@ public class AddressController {
             Optional<String> optCountryId = emptyCountryId ? Optional.empty() : Optional.of(countryId);
             Optional<String> optCityId = emptyCityId ? Optional.empty() : Optional.of(cityId);
             Optional<String> optStateId = emptyStateId ? Optional.empty() : Optional.of(stateId);
-            List<AddressVo> matchedByFilter = service.retrieveAllMatchingDetailsByNamePincodeCityStateCountry(
+            List<AddressVo> matchedByFilter = service.retrieveAllMatchingDetailsByCriteria(
                     optAddressName, optPincode, optCityId, optStateId, optCountryId);
             log.debug("Responding with all available addresses with given filters");
             return matchedByFilter;

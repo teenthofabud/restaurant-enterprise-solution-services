@@ -7,6 +7,10 @@ import com.teenthofabud.restaurant.solution.customer.account.converter.AccountEn
 import com.teenthofabud.restaurant.solution.customer.account.data.AccountVo;
 import com.teenthofabud.restaurant.solution.customer.address.data.AddressEntity;
 import com.teenthofabud.restaurant.solution.customer.address.data.AddressVo;
+import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.data.CityVo;
+import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.data.CountryVo;
+import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.data.StateVo;
+import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.proxy.CountryStateCityApiClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +18,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @Slf4j
@@ -27,10 +32,16 @@ public class AddressEntity2VoConverter extends TOABBaseEntity2VoConverter<Addres
     }
 
     private AccountEntity2VoConverter accountEntity2VoConverter;
+    private CountryStateCityApiClient countryStateCityApiClient;
 
     @Autowired
     public void setAccountEntity2VoConverter(AccountEntity2VoConverter accountEntity2VoConverter) {
         this.accountEntity2VoConverter = accountEntity2VoConverter;
+    }
+
+    @Autowired
+    public void setCountryStateCityApiClient(CountryStateCityApiClient countryStateCityApiClient) {
+        this.countryStateCityApiClient = countryStateCityApiClient;
     }
 
     @Override
@@ -66,6 +77,16 @@ public class AddressEntity2VoConverter extends TOABBaseEntity2VoConverter<Addres
                 AccountVo accountVo = accountEntity2VoConverter.convert(entity.getAccount());
                 vo.setAccount(accountVo);
                 log.debug("Retrieved {} for accountId: {}", accountVo, entity.getAccount().getId());
+                CountryVo country = countryStateCityApiClient.getCountryDetailsFromISO2Code(entity.getCountryId());
+                log.debug("Retrieved {} for country is: {}", country, entity.getCountryId());
+                vo.setCountry(country);
+                StateVo state = countryStateCityApiClient.getTheStateDetailsFromISO2Code(entity.getCountryId(), entity.getStateId());
+                log.debug("Retrieved {} for state id: {}", state, entity.getStateId());
+                vo.setState(state);
+                List<CityVo> cities = countryStateCityApiClient.getTheListOfCitiesInACountry(entity.getCountryId());
+                Optional<CityVo> optionalCity = cities.stream().filter(c -> c.getId().toString().compareTo(entity.getCityId()) == 0).findFirst();
+                log.debug("Retrieved {} for city id: {}", optionalCity.get(), entity.getCityId());
+                vo.setCity(optionalCity.get());
                 break;
             default:
                 vo.setAccountId(entity.getAccount().getId().toString());

@@ -6,7 +6,6 @@ import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -21,6 +20,7 @@ public class AddressEntity extends TOABBaseEntity implements Comparable<AddressE
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(columnDefinition = "varchar(50) default 'default'")
     private String name;
     @Column(name = "address_line_1")
     private String addressLine1;

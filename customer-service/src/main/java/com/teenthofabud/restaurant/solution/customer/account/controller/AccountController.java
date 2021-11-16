@@ -225,7 +225,7 @@ public class AccountController {
             Optional<String> optDateOfBirth = emptyDateOfBirth ? Optional.empty() : Optional.of(dateOfBirth);
             Optional<String> optPhoneNumber = emptyPhoneNumber ? Optional.empty() : Optional.of(phoneNumber);
             Optional<String> optEmailId = emptyEmailId ? Optional.empty() : Optional.of(emailId);
-            List<AccountVo> matchedByFilter = service.retrieveAllMatchingDetailsByFirstNameLastNamePhoneNumberEmailIdDateOfBirth(
+            List<AccountVo> matchedByFilter = service.retrieveAllMatchingDetailsByCriteria(
                     optAccountName, optLastName, optPhoneNumber, optEmailId, optDateOfBirth);
             log.debug("Responding with all available accounts with given filters");
             return matchedByFilter;

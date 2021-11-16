@@ -29,7 +29,7 @@ public interface AccountService {
                                                                            Optional<String> optionalDateOfBirth) throws AccountException;
 
 
-    public List<AccountVo> retrieveAllMatchingDetailsByFirstNameLastNamePhoneNumberEmailIdDateOfBirth(Optional<String> optionalFirstName,
+    public List<AccountVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalFirstName,
                                                                                     Optional<String> optionalLastName,
                                                                                     Optional<String> optionalPhoneNumber,
                                                                                     Optional<String> optionalEmailId,

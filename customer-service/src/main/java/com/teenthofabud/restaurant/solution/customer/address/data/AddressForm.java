@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
-@NoArgsConstructor
 @AllArgsConstructor
 @ToString
 @Getter
@@ -20,6 +19,7 @@ public class AddressForm {
     @ToString.Include
     private String addressLine2;
     @ToString.Include
+    @JsonIgnore
     private String cityId;
     @ToString.Include
     private String stateId;
@@ -29,5 +29,9 @@ public class AddressForm {
     private String countryId;
     @ToString.Include
     private String accountId;
+
+    public AddressForm() {
+        this.name = "default";
+    }
 
 }

@@ -309,7 +309,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
-    public List<AccountVo> retrieveAllMatchingDetailsByFirstNameLastNamePhoneNumberEmailIdDateOfBirth(
+    public List<AccountVo> retrieveAllMatchingDetailsByCriteria(
             Optional<String> optionalFirstName, Optional<String> optionalLastName, Optional<String> optionalPhoneNumber,
             Optional<String> optionalEmailId, Optional<String> optionalDateOfBirth) throws AccountException {
         if(optionalFirstName.isEmpty() && optionalLastName.isEmpty() && optionalPhoneNumber.isEmpty() && optionalEmailId.isEmpty() && optionalDateOfBirth.isEmpty()) {

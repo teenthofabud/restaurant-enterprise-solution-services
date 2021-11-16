@@ -237,7 +237,7 @@ public class AddressServiceImpl implements AddressService {
 
     @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
-    public List<AddressVo> retrieveAllMatchingDetailsByNamePincodeCityStateCountry(Optional<String> optionalName, Optional<String> optionalPincode, Optional<String> optionalCityId, Optional<String> optionalStateId, Optional<String> optionalCountryId) throws AddressException {
+    public List<AddressVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalName, Optional<String> optionalPincode, Optional<String> optionalCityId, Optional<String> optionalStateId, Optional<String> optionalCountryId) throws AddressException {
         if(optionalName.isEmpty() && optionalPincode.isEmpty() && optionalCityId.isEmpty() && optionalStateId.isEmpty() && optionalCountryId.isEmpty()) {
             log.debug("No search parameters provided");
         }

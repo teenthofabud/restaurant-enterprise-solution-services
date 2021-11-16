@@ -26,52 +26,52 @@ public class AddressFormRelaxedValidator implements RelaxedValidator<AddressForm
     public Boolean validateLoosely(AddressForm form, Errors errors) {
         if(!fieldsToEscape.contains("name") && form.getName() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getName()))) {
             errors.rejectValue("name", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
-            log.debug("AccountForm.name is empty");
+            log.debug("AddressForm.name is empty");
             return false;
         }
-        log.debug("AccountForm.name is valid");
+        log.debug("AddressForm.name is valid");
         if(!fieldsToEscape.contains("addressLine1") && form.getAddressLine1() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getAddressLine1()))) {
             errors.rejectValue("addressLine1", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
-            log.debug("AccountForm.addressLine1 is empty");
+            log.debug("AddressForm.addressLine1 is empty");
             return false;
         }
-        log.debug("AccountForm.addressLine1 is valid");
+        log.debug("AddressForm.addressLine1 is valid");
         if(!fieldsToEscape.contains("countryId") && form.getCountryId() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getCountryId()))) {
             errors.rejectValue("countryId", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
-            log.debug("AccountForm.countryId is empty");
+            log.debug("AddressForm.countryId is empty");
             return false;
         }
-        log.debug("AccountForm.countryId is valid");
+        log.debug("AddressForm.countryId is valid");
         if(!fieldsToEscape.contains("addressLine2") && form.getAddressLine2() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getAddressLine2()))) {
             errors.rejectValue("addressLine2", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
-            log.debug("AccountForm.addressLine2 is empty");
+            log.debug("AddressForm.addressLine2 is empty");
             return false;
         }
-        log.debug("AccountForm.addressLine2 is valid");
+        log.debug("AddressForm.addressLine2 is valid");
         if(!fieldsToEscape.contains("stateId") && form.getStateId() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getStateId()))) {
             errors.rejectValue("stateId", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
-            log.debug("AccountForm.stateId is empty");
+            log.debug("AddressForm.stateId is empty");
             return false;
         }
-        log.debug("AccountForm.stateId is valid");
+        log.debug("AddressForm.stateId is valid");
         if(!fieldsToEscape.contains("cityId") && form.getCityId() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getCityId()))) {
             errors.rejectValue("cityId", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
-            log.debug("AccountForm.cityId is empty");
+            log.debug("AddressForm.cityId is empty");
             return false;
         }
-        log.debug("AccountForm.stateId is valid");
+        log.debug("AddressForm.stateId is valid");
         if(!fieldsToEscape.contains("accountId") && form.getAccountId() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getAccountId()))) {
             errors.rejectValue("accountId", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
-            log.debug("AccountForm.accountId is empty");
+            log.debug("AddressForm.accountId is empty");
             return false;
         }
-        log.debug("AccountForm.accountId is valid");
+        log.debug("AddressForm.accountId is valid");
         if(!fieldsToEscape.contains("pincode") && form.getPincode() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getAccountId()))) {
             errors.rejectValue("pincode", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
-            log.debug("AccountForm.pincode is empty");
+            log.debug("AddressForm.pincode is empty");
             return false;
         }
-        log.debug("AccountForm.pincode is valid");
+        log.debug("AddressForm.pincode is valid");
         return true;
     }
 }
