@@ -25,12 +25,12 @@ public class AddressEntitySelfMapper implements SingleChannelMapper<AddressEntit
             changeSW = true;
             log.debug("Source AccountEntity.name is valid");
         }
-        if(source.getAddressLine1() != null && source.getAddressLine1().compareTo(target.getAddressLine1()) != 0) {
+        if(source.getAddressLine1() != null && StringUtils.hasText(StringUtils.trimWhitespace(source.getAddressLine1())) && source.getAddressLine1().compareTo(target.getAddressLine1()) != 0) {
             target.setAddressLine1(source.getAddressLine1());
             changeSW = true;
             log.debug("Source AccountEntity.addressLine1 is valid");
         }
-        if(source.getAddressLine2() != null && source.getAddressLine2().compareTo(target.getAddressLine2()) != 0) {
+        if(source.getAddressLine2() != null && StringUtils.hasText(StringUtils.trimWhitespace(source.getAddressLine2())) && source.getAddressLine2().compareTo(target.getAddressLine2()) != 0) {
             target.setAddressLine2(source.getAddressLine2());
             changeSW = true;
             log.debug("Source AccountEntity.addressLine2 is valid");

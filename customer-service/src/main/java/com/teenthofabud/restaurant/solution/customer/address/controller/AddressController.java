@@ -5,6 +5,7 @@ import com.teenthofabud.core.common.constant.TOABCascadeLevel;
 import com.teenthofabud.core.common.data.form.PatchOperationForm;
 import com.teenthofabud.core.common.data.vo.CreatedVo;
 import com.teenthofabud.core.common.data.vo.ErrorVo;
+import com.teenthofabud.restaurant.solution.customer.address.converter.AddressEntity2VoConverter;
 import com.teenthofabud.restaurant.solution.customer.address.data.AddressException;
 import com.teenthofabud.restaurant.solution.customer.address.data.AddressForm;
 import com.teenthofabud.restaurant.solution.customer.address.data.AddressMessageTemplate;
@@ -179,11 +180,11 @@ public class AddressController {
 
     @Operation(summary = "Get all Address details by account id", hidden = true)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Retrieve all available Addresss and their details that match the given account id",
+            @ApiResponse(responseCode = "200", description = "Retrieve all available Addresses and their details that match the given account id",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = AddressVo.class))) }),
-            @ApiResponse(responseCode = "400", description = "Gender id is invalid",
+            @ApiResponse(responseCode = "400", description = "Address id is invalid",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) }),
-            @ApiResponse(responseCode = "404", description = "No Addresss available with the given account id",
+            @ApiResponse(responseCode = "404", description = "No Addresses available with the given account id",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
     @ResponseStatus(HttpStatus.OK)
@@ -191,42 +192,54 @@ public class AddressController {
     public List<AddressVo> getAllAddresssByAlbumId(@PathVariable String accountId) throws AddressException {
         log.debug("Requesting all available addresses with given accountId");
         if(StringUtils.hasText(StringUtils.trimWhitespace(accountId))) {
-            List<AddressVo> matchedByGenderIds = service.retrieveAllMatchingDetailsByAccountId(accountId);
+            List<AddressVo> matchedByAccountIds = service.retrieveAllMatchingDetailsByAccountId(accountId);
             log.debug("Responding with all available addresses with given accountId");
-            return matchedByGenderIds;
+            return matchedByAccountIds;
         }
         log.debug("address accountId is empty");
         throw new AddressException(CustomerErrorCode.CUST_ATTRIBUTE_INVALID, new Object[] { "accountId", accountId });
     }
 
-    @Operation(summary = "Get all Address details by name, pincode, country id, city id, state id")
+    @Operation(summary = "Get all Address details by name, address line 1, address line 2, pincode, country id, city id, state id")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Retrieve all available Addresss and their details that match the provided name, pincode, country id, city id, state id",
+            @ApiResponse(responseCode = "200", description = "Retrieve all available Addresses and their details that match the provided name, address line 1, address line 2, pincode, country id, city id, state id",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = AddressVo.class))) }),
             @ApiResponse(responseCode = "400", description = "Address search filters are invalid",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) }),
-            @ApiResponse(responseCode = "404", description = "No Addresss available by the given filters",
+            @ApiResponse(responseCode = "404", description = "No Addresses available by the given filters",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("filter")
-    public List<AddressVo> getAllAddresssByFilters(@RequestParam(required = false) String name, @RequestParam(required = false) String pincode,
+    public List<AddressVo> getAllAddressesByFilters(@RequestParam(required = false) String name, @RequestParam(required = false) String pincode,
                                                    @RequestParam(required = false) String countryId, @RequestParam(required = false) String cityId,
-                                                   @RequestParam(required = false) String stateId) throws AddressException {
+                                                   @RequestParam(required = false) String stateId, @RequestParam(required = false) String addressLine1,
+                                                   @RequestParam(required = false) String addressLine2) throws AddressException {
         log.debug("Requesting all available addresses with given filters");
-        boolean emptyName = !StringUtils.hasText(StringUtils.trimWhitespace(name));
-        boolean emptyPincode = !StringUtils.hasText(StringUtils.trimWhitespace(pincode));
-        boolean emptyCountryId = !StringUtils.hasText(StringUtils.trimWhitespace(countryId));
-        boolean emptyCityId = !StringUtils.hasText(StringUtils.trimWhitespace(cityId));
-        boolean emptyStateId = !StringUtils.hasText(StringUtils.trimWhitespace(stateId));
-        if(!emptyName || !emptyPincode || !emptyCountryId || !emptyCityId || !emptyStateId) {
-            Optional<String> optAddressName = emptyName ? Optional.empty() : Optional.of(name);
+        boolean emptyName = StringUtils.isEmpty(StringUtils.trimWhitespace(name));
+        log.debug("filter name is provided: {} as ", emptyName, name);
+        boolean emptyAddressLine1 = StringUtils.isEmpty(StringUtils.trimWhitespace(addressLine1));
+        log.debug("filter addressLine1 name is provided: {} as ", emptyAddressLine1, addressLine1);
+        boolean emptyAddressLine2 = StringUtils.isEmpty(StringUtils.trimWhitespace(addressLine2));
+        log.debug("filter addressLine2 is provided: {} as ", emptyAddressLine2, addressLine2);
+        boolean emptyPincode = StringUtils.isEmpty(StringUtils.trimWhitespace(pincode));
+        log.debug("filter pincode is provided: {} as ", emptyPincode, pincode);
+        boolean emptyCountryId = StringUtils.isEmpty(StringUtils.trimWhitespace(countryId));
+        log.debug("filter countryId is provided: {} as ", emptyCountryId, countryId);
+        boolean emptyCityId = StringUtils.isEmpty(StringUtils.trimWhitespace(cityId));
+        log.debug("filter cityId is provided: {} as ", emptyCityId, cityId);
+        boolean emptyStateId =  StringUtils.isEmpty(StringUtils.trimWhitespace(stateId));
+        log.debug("filter stateId is provided: {} as ", emptyStateId, stateId);
+        if(!emptyName || !emptyAddressLine1 || !emptyAddressLine2 || !emptyPincode || !emptyCountryId || !emptyCityId || !emptyStateId) {
+            Optional<String> optName = emptyName ? Optional.empty() : Optional.of(name);
+            Optional<String> optAddressLine1 = emptyAddressLine1 ? Optional.empty() : Optional.of(addressLine1);
+            Optional<String> optAddressLine2 = emptyAddressLine2 ? Optional.empty() : Optional.of(addressLine2);
             Optional<String> optPincode = emptyPincode ? Optional.empty() : Optional.of(pincode);
             Optional<String> optCountryId = emptyCountryId ? Optional.empty() : Optional.of(countryId);
             Optional<String> optCityId = emptyCityId ? Optional.empty() : Optional.of(cityId);
             Optional<String> optStateId = emptyStateId ? Optional.empty() : Optional.of(stateId);
             List<AddressVo> matchedByFilter = service.retrieveAllMatchingDetailsByCriteria(
-                    optAddressName, optPincode, optCityId, optStateId, optCountryId);
+                    optName, optAddressLine1, optAddressLine2, optPincode, optCityId, optStateId, optCountryId);
             log.debug("Responding with all available addresses with given filters");
             return matchedByFilter;
         }
@@ -236,11 +249,11 @@ public class AddressController {
 
     @Operation(summary = "Get Address details by id")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Retrieve the details of Gender that matches the given id",
+            @ApiResponse(responseCode = "200", description = "Retrieve the details of Address that matches the given id",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = AddressVo.class)) }),
-            @ApiResponse(responseCode = "400", description = "Gender id is invalid",
+            @ApiResponse(responseCode = "400", description = "Address id is invalid",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) }),
-            @ApiResponse(responseCode = "404", description = "No Gender found with the given id",
+            @ApiResponse(responseCode = "404", description = "No Address found with the given id",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
     @ResponseStatus(HttpStatus.OK)
@@ -248,12 +261,12 @@ public class AddressController {
     public AddressVo getAddressDetailsById(@PathVariable String id, @RequestParam(required = false)
     @io.swagger.v3.oas.annotations.Parameter(in = ParameterIn.QUERY, description = "levels of nested fields to be unfolded within the response body")
             String cascadeUntilLevel) throws AddressException {
-        AddressVo accountDetails = null;
+        AddressVo addressDetails = null;
         log.debug("Requesting all details of address by its id");
         if(StringUtils.hasText(StringUtils.trimWhitespace(id)) && StringUtils.isEmpty(StringUtils.trimWhitespace(cascadeUntilLevel))) {
-            accountDetails = service.retrieveDetailsById(id, Optional.empty());
+            addressDetails = service.retrieveDetailsById(id, Optional.empty());
             log.debug("Responding with successful retrieval of existing address details by id");
-            return accountDetails;
+            return addressDetails;
         } else if(StringUtils.hasText(StringUtils.trimWhitespace(id)) && StringUtils.hasText(StringUtils.trimWhitespace(cascadeUntilLevel))) {
             try {
                 Integer cascadeLevelCode = Integer.parseInt(cascadeUntilLevel);
@@ -262,9 +275,9 @@ public class AddressController {
                 }
                 log.debug("Requested with cascade level code: {}", cascadeLevelCode);
                 Optional<TOABCascadeLevel> optCascadeLevel = TOABCascadeLevel.findByLevelCode(cascadeUntilLevel);
-                accountDetails = service.retrieveDetailsById(id, optCascadeLevel);
+                addressDetails = service.retrieveDetailsById(id, optCascadeLevel);
                 log.debug("Responding with successful retrieval of existing address details by id wth fields cascaded to given level");
-                return accountDetails;
+                return addressDetails;
             } catch (NumberFormatException e) {
                 log.debug(AddressMessageTemplate.MSG_TEMPLATE_ADDRESS_CASCADE_LEVEL_EMPTY.getValue());
                 throw new AddressException(CustomerErrorCode.CUST_ATTRIBUTE_INVALID, new Object[] { "cascadeUntilLevel", cascadeUntilLevel });

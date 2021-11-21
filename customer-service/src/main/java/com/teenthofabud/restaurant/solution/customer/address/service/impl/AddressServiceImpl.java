@@ -42,7 +42,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
 
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -76,12 +79,37 @@ public class AddressServiceImpl implements AddressService {
     private TOABBaseService toabBaseService;
     private ObjectMapper om;
     private AccountService accountService;
+    private Validator countryIdValidator;
+    private Validator stateIdValidator;
+    private Validator cityIdValidator;
+
+    private EntityManager em;
+
+    @Autowired
+    public void setEm(EntityManager em) {
+        this.em = em;
+    }
 
     private String dobFormat;
 
     @Value("${res.customer.dob.format}")
     public void setDobFormat(String dobFormat) {
         this.dobFormat = dobFormat;
+    }
+
+    @Autowired
+    public void setCountryIdValidator(Validator countryIdValidator) {
+        this.countryIdValidator = countryIdValidator;
+    }
+
+    @Autowired
+    public void setStateIdValidator(Validator stateIdValidator) {
+        this.stateIdValidator = stateIdValidator;
+    }
+
+    @Autowired
+    public void setCityIdValidator(Validator cityIdValidator) {
+        this.cityIdValidator = cityIdValidator;
     }
 
     @Autowired
@@ -237,8 +265,10 @@ public class AddressServiceImpl implements AddressService {
 
     @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
-    public List<AddressVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalName, Optional<String> optionalPincode, Optional<String> optionalCityId, Optional<String> optionalStateId, Optional<String> optionalCountryId) throws AddressException {
-        if(optionalName.isEmpty() && optionalPincode.isEmpty() && optionalCityId.isEmpty() && optionalStateId.isEmpty() && optionalCountryId.isEmpty()) {
+    public List<AddressVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalName, Optional<String> optionalPincode,
+                                                                Optional<String> optionalCityId, Optional<String> optionalStateId, Optional<String> optionalCountryId) throws AddressException {
+        if(optionalName.isEmpty() && optionalPincode.isEmpty() && optionalCityId.isEmpty() && optionalStateId.isEmpty()
+                && optionalCountryId.isEmpty()) {
             log.debug("No search parameters provided");
         }
         String name = optionalName.isPresent() ? optionalName.get() : "";
@@ -268,38 +298,39 @@ public class AddressServiceImpl implements AddressService {
             matcherCriteria = matcherCriteria.withMatcher("pincode", match -> match.contains());
         }
         if(StringUtils.hasText(StringUtils.trimWhitespace(cityId))) {
-            /**
-             * TODO Logic to validate city Id
-             */
-            /*try {
-                DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dobFormat);
-                LocalDate dob = LocalDate.parse(dateOfBirth, dtf);
-                log.debug("dateOfBirth {} is valid", dateOfBirth);
-                providedFilters.put("dateOfBirth", dateOfBirth);
-                entity.setDateOfBirth(dob);
-                matcherCriteria = matcherCriteria.withMatcher("dateOfBirth", match -> match.exact());
-            } catch (DateTimeParseException e) {
-                log.error("Unable to parse dateOfBirth", e);
-                log.debug(AddressMessageTemplate.MSG_TEMPLATE_ADDRESS_DOB_INVALID.getValue(), dateOfBirth);
-                throw new AddressException(CustomerErrorCode.CUST_ATTRIBUTE_INVALID, new Object[] { "dateOfBirth", dateOfBirth });
-            }*/
+            Errors err = new DirectFieldBindingResult(cityId, "filters");
+            cityIdValidator.validate(cityId, err);
+            if(err.hasErrors()) {
+                log.error("cityId is invalid: {}", err);
+                log.debug(AddressMessageTemplate.MSG_TEMPLATE_ADDRESS_CITY_ID_INVALID.getValue(), cityId);
+                throw new AddressException(CustomerErrorCode.CUST_ATTRIBUTE_INVALID, new Object[] { "cityId", cityId });
+            }
+            log.debug("cityId {} is valid", cityId);
             providedFilters.put("cityId", cityId);
             entity.setCityId(cityId);
             matcherCriteria = matcherCriteria.withMatcher("cityId", match -> match.exact());
         }
         if(StringUtils.hasText(StringUtils.trimWhitespace(stateId))) {
-            /**
-             * TODO Logic to validate city Id
-             */
+            Errors err = new DirectFieldBindingResult(stateId, "filters");
+            stateIdValidator.validate(stateId, err);
+            if(err.hasErrors()) {
+                log.error("stateId is invalid: {}", err);
+                log.debug(AddressMessageTemplate.MSG_TEMPLATE_ADDRESS_STATE_ID_INVALID.getValue(), stateId);
+                throw new AddressException(CustomerErrorCode.CUST_ATTRIBUTE_INVALID, new Object[] { "stateId", stateId });
+            }
             log.debug("stateId {} is valid", stateId);
             providedFilters.put("stateId", stateId);
             entity.setStateId(stateId);
             matcherCriteria = matcherCriteria.withMatcher("stateId", match -> match.exact());
         }
         if(StringUtils.hasText(StringUtils.trimWhitespace(countryId))) {
-            /**
-             * TODO Logic to validate city Id
-             */
+            Errors err = new DirectFieldBindingResult(countryId, "filters");
+            countryIdValidator.validate(countryId, err);
+            if(err.hasErrors()) {
+                log.error("countryId is invalid: {}", err);
+                log.debug(AddressMessageTemplate.MSG_TEMPLATE_ADDRESS_COUNTRY_ID_INVALID.getValue(), countryId);
+                throw new AddressException(CustomerErrorCode.CUST_ATTRIBUTE_INVALID, new Object[] { "countryId", countryId });
+            }
             log.debug("countryId {} is valid", countryId);
             providedFilters.put("countryId", countryId);
             entity.setCountryId(countryId);
@@ -319,7 +350,112 @@ public class AddressServiceImpl implements AddressService {
         log.info("No AddressVo available matching with provided parameters : {}", matchedAddressList.size(), providedFilters);
         return matchedAddressList;
     }
-    
+
+    @Override
+    public List<AddressVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalName, Optional<String> optionalAddressLine1,
+                                                                Optional<String> optionalAddressLine2, Optional<String> optionalPincode,
+                                                                Optional<String> optionalCityId, Optional<String> optionalStateId,
+                                                                Optional<String> optionalCountryId) throws AddressException {
+        if(optionalName.isEmpty() && optionalAddressLine1.isEmpty() && optionalAddressLine2.isEmpty()
+                && optionalPincode.isEmpty() && optionalCityId.isEmpty()
+                && optionalStateId.isEmpty() && optionalCountryId.isEmpty()) {
+            log.debug("No search parameters provided");
+        }
+        String name = optionalName.isPresent() ? optionalName.get() : "";
+        String addressLine1 = optionalAddressLine1.isPresent() ? optionalAddressLine1.get() : "";
+        String addressLine2 = optionalAddressLine2.isPresent() ? optionalAddressLine2.get() : "";
+        String pincode = optionalPincode.isPresent() ? optionalPincode.get() : "";
+        String cityId = optionalCityId.isPresent() ? optionalCityId.get() : "";
+        String stateId = optionalStateId.isPresent() ? optionalStateId.get() : "";
+        String countryId = optionalCountryId.isPresent() ? optionalCountryId.get() : "";
+        if(StringUtils.isEmpty(StringUtils.trimWhitespace(name)) && StringUtils.isEmpty(StringUtils.trimWhitespace(addressLine1))
+                && StringUtils.isEmpty(StringUtils.trimWhitespace(addressLine2)) && StringUtils.isEmpty(StringUtils.trimWhitespace(pincode))
+                && StringUtils.isEmpty(StringUtils.trimWhitespace(cityId)) && StringUtils.isEmpty(StringUtils.trimWhitespace(stateId))
+                && StringUtils.isEmpty(StringUtils.trimWhitespace(countryId))) {
+            log.debug("All search parameters are empty");
+        }
+        List<AddressVo> matchedAddressList = new LinkedList<>();
+        Map<String, String> providedFilters = new LinkedHashMap<>();
+        AddressEntity entity = new AddressEntity();
+        ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll();
+        if(StringUtils.hasText(StringUtils.trimWhitespace(name))) {
+            log.debug("name {} is valid", name);
+            providedFilters.put("name", name);
+            entity.setName(name);
+            matcherCriteria = matcherCriteria.withMatcher("name", match -> match.contains());
+        }
+        if(StringUtils.hasText(StringUtils.trimWhitespace(addressLine1))) {
+            log.debug("addressLine1 {} is valid", addressLine1);
+            providedFilters.put("addressLine1", addressLine1);
+            entity.setAddressLine1(addressLine1);
+            matcherCriteria = matcherCriteria.withMatcher("addressLine1", match -> match.contains());
+        }
+        if(StringUtils.hasText(StringUtils.trimWhitespace(addressLine2))) {
+            log.debug("addressLine2 {} is valid", addressLine2);
+            providedFilters.put("addressLine2", addressLine2);
+            entity.setAddressLine2(addressLine2);
+            matcherCriteria = matcherCriteria.withMatcher("addressLine2", match -> match.contains());
+        }
+        if(StringUtils.hasText(StringUtils.trimWhitespace(pincode))) {
+            log.debug("pincode {} is valid", pincode);
+            providedFilters.put("pincode", pincode);
+            entity.setPincode(pincode);
+            matcherCriteria = matcherCriteria.withMatcher("pincode", match -> match.contains());
+        }
+        if(StringUtils.hasText(StringUtils.trimWhitespace(cityId))) {
+            Errors err = new DirectFieldBindingResult(cityId, "filters");
+            cityIdValidator.validate(cityId, err);
+            if(err.hasErrors()) {
+                log.error("cityId is invalid: {}", err);
+                log.debug(AddressMessageTemplate.MSG_TEMPLATE_ADDRESS_CITY_ID_INVALID.getValue(), cityId);
+                throw new AddressException(CustomerErrorCode.CUST_ATTRIBUTE_INVALID, new Object[] { "cityId", cityId });
+            }
+            log.debug("cityId {} is valid", cityId);
+            providedFilters.put("cityId", cityId);
+            entity.setCityId(cityId);
+            matcherCriteria = matcherCriteria.withMatcher("cityId", match -> match.exact());
+        }
+        if(StringUtils.hasText(StringUtils.trimWhitespace(stateId))) {
+            Errors err = new DirectFieldBindingResult(stateId, "filters");
+            stateIdValidator.validate(stateId, err);
+            if(err.hasErrors()) {
+                log.error("stateId is invalid: {}", err);
+                log.debug(AddressMessageTemplate.MSG_TEMPLATE_ADDRESS_STATE_ID_INVALID.getValue(), stateId);
+                throw new AddressException(CustomerErrorCode.CUST_ATTRIBUTE_INVALID, new Object[] { "stateId", stateId });
+            }
+            log.debug("stateId {} is valid", stateId);
+            providedFilters.put("stateId", stateId);
+            entity.setStateId(stateId);
+            matcherCriteria = matcherCriteria.withMatcher("stateId", match -> match.exact());
+        }
+        if(StringUtils.hasText(StringUtils.trimWhitespace(countryId))) {
+            Errors err = new DirectFieldBindingResult(countryId, "filters");
+            countryIdValidator.validate(countryId, err);
+            if(err.hasErrors()) {
+                log.error("countryId is invalid: {}", err);
+                log.debug(AddressMessageTemplate.MSG_TEMPLATE_ADDRESS_COUNTRY_ID_INVALID.getValue(), countryId);
+                throw new AddressException(CustomerErrorCode.CUST_ATTRIBUTE_INVALID, new Object[] { "countryId", countryId });
+            }
+            log.debug("countryId {} is valid", countryId);
+            providedFilters.put("countryId", countryId);
+            entity.setCountryId(countryId);
+            matcherCriteria = matcherCriteria.withMatcher("countryId", match -> match.exact());
+        }
+        if(providedFilters.isEmpty()) {
+            log.debug("search parameters are not valid");
+        } else {
+            log.debug("search parameters {} are valid", providedFilters);
+        }
+        Example<AddressEntity> addressEntityExample = Example.of(entity, matcherCriteria);
+        List<AddressEntity> addressEntityList = repository.findAll(addressEntityExample);
+        if(addressEntityList != null && !addressEntityList.isEmpty()) {
+            matchedAddressList = entity2DetailedVoList(addressEntityList);
+            log.info("Found {} AddressVo matching with provided parameters : {}", matchedAddressList.size(), providedFilters);
+        }
+        log.info("No AddressVo available matching with provided parameters : {}", matchedAddressList.size(), providedFilters);
+        return matchedAddressList;
+    }
+
     @Transactional
     @Override
     public String createAddress(AddressForm form) throws AddressException {
@@ -387,6 +523,20 @@ public class AddressServiceImpl implements AddressService {
             throw new AddressException(CustomerErrorCode.CUST_INACTIVE, new Object[] { String.valueOf(id) });
         }
         log.debug("AddressEntity is active with id: {}", id);
+
+        Query q = em.createNativeQuery("select * from customer_address");
+        List<Object[]> r = q.getResultList();
+        log.info(q.getHints().toString());
+        log.info("result set size " + r.size());
+        for(int i = 0 ; i < r.size() ; i++) {
+            Object[] o = r.get(i);
+            log.info(" index " + i + " has " + o.length + " columns");
+            List<String> f = new ArrayList<>(o.length);
+            for(Object j : o) {
+                f.add(j != null ? j.toString() : "");
+            }
+            log.info(String.join(",", f));
+        }
 
         if(form == null) {
             log.debug("AddressForm is null");

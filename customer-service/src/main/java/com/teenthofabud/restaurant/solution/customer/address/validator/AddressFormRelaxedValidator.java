@@ -59,7 +59,7 @@ public class AddressFormRelaxedValidator implements RelaxedValidator<AddressForm
             log.debug("AddressForm.cityId is empty");
             return false;
         }
-        log.debug("AddressForm.stateId is valid");
+        log.debug("AddressForm.cityId is valid");
         if(!fieldsToEscape.contains("accountId") && form.getAccountId() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getAccountId()))) {
             errors.rejectValue("accountId", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
             log.debug("AddressForm.accountId is empty");

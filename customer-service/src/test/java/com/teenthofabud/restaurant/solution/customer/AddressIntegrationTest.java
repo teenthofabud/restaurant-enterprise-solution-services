@@ -12,6 +12,7 @@ import com.teenthofabud.restaurant.solution.customer.address.data.AddressVo;
 import com.teenthofabud.restaurant.solution.customer.address.repository.AddressRepository;
 import com.teenthofabud.restaurant.solution.customer.error.CustomerErrorCode;
 import com.teenthofabud.restaurant.solution.customer.account.data.AccountVo;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -29,11 +30,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import javax.persistence.EntityManager;
 import java.util.*;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
+@Slf4j
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
@@ -52,6 +55,13 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
 
     private AddressRepository addressRepository;
     private AccountRepository accountRepository;
+
+    private EntityManager em;
+
+    @Autowired
+    public void setEm(EntityManager em) {
+        this.em = em;
+    }
 
     private int metadataServicePort;
 
@@ -146,7 +156,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         accountEntity4.setLastName("Account 4 Last Name");
         accountEntity4.setCountryCode("91");
         accountEntity4.setPhoneNumber("6299711209");
-        accountEntity4.setActive(Boolean.FALSE);
+        accountEntity4.setActive(Boolean.TRUE);//here
 
         accountEntity4 = accountRepository.save(accountEntity4);
 
@@ -167,9 +177,9 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         addressForm.setCountryId("IN");
 
         patches = Arrays.asList(
-                new PatchOperationForm("replace", "/firstName", "patched first name"),
-                new PatchOperationForm("replace", "/lastName", "patched last name"),
-                new PatchOperationForm("replace", "/phoneNumber", "6666666666"));
+                new PatchOperationForm("replace", "/addressLine1", "patched first name"),
+                new PatchOperationForm("replace", "/addressLine2", "patched last name"),
+                new PatchOperationForm("replace", "/name", "patched name"));
 
         addressEntity1 = new AddressEntity();
         addressEntity1.setAddressLine1("Address 1 First Name");
@@ -250,6 +260,34 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         addressVo4.setPincode(addressForm.getPincode());
         addressVo4.setAccountId(addressForm.getAccountId());
 
+        /*Optional<AddressEntity> optAE1 = addressRepository.findById(addressEntity1.getId());
+        Optional<AddressEntity> optAE2 = addressRepository.findById(addressEntity2.getId());
+        Optional<AddressEntity> optAE3 = addressRepository.findById(addressEntity3.getId());
+
+        log.info(optAE1.get().toString());
+        log.info(optAE2.get().toString());
+        log.info(optAE3.get().toString());
+
+        Query q = em.createNativeQuery("select * from customer_address");
+        List<Object[]> r = q.getResultList();
+        log.info("result set size " + r.size());
+        for(int i = 0 ; i < r.size() ; i++) {
+            Object[] o = r.get(i);
+            log.info(" index " + i + " has " + o.length + " columns");
+            List<String> f = new ArrayList<>(o.length);
+            for(Object j : o) {
+                f.add(j != null ? j.toString() : "");
+            }
+            log.info(String.join(",", f));
+        }
+
+        AddressEntity ae1 = em.find(AddressEntity.class, accountEntity1.getId());
+        AddressEntity ae2 = em.find(AddressEntity.class, accountEntity2.getId());
+        AddressEntity ae3 = em.find(AddressEntity.class, accountEntity3.getId());
+
+        log.info(ae1.toString());
+        log.info(ae2.toString());
+        log.info(ae3.toString());*/
     }
 
     @AfterEach
@@ -654,12 +692,13 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Get_ShouldReturn_200Response_And_AddressListNaturallyOrdered_WhenRequested_ForAddresses_WithPincode() throws Exception {
+    public void test_Address_Get_ShouldReturn_200Response_And_AddressListNaturallyOrdered_WhenRequested_ForAddresses_WithAddressLine2() throws Exception {
         MvcResult mvcResult = null;
-        List<AddressVo> addressList = new ArrayList<>(Arrays.asList(addressVo2));
+        List<AddressVo> addressList = new ArrayList<>(Arrays.asList(addressVo1));
+        //List<AddressVo> addressList = new ArrayList<>(Arrays.asList(addressVo1, addressVo2, addressVo3));
 
         mvcResult = this.mockMvc.perform(get(ADDRESS_URI_FILTER)
-                        .queryParam("pincode", "200111"))
+                        .queryParam("addressLine2", "Address 1"))
                 .andDo(print())
                 .andReturn();
 
@@ -670,9 +709,27 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
+    public void test_Address_Get_ShouldReturn_200Response_And_AddressListNaturallyOrdered_WhenRequested_ForAddresses_WithPincode() throws Exception {
+        MvcResult mvcResult = null;
+        //List<AddressVo> addressList = new ArrayList<>(Arrays.asList(addressVo1, addressVo2, addressVo3));
+        List<AddressVo> addressList = new ArrayList<>(Arrays.asList(addressVo2));
+
+        mvcResult = this.mockMvc.perform(get(ADDRESS_URI_FILTER)
+                        .queryParam("pincode", "200111"))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(addressList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo[].class).length);
+        //Assertions.assertEquals(om.readValue(addressList.toString(), AddressVo[].class), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo[].class));
+    }
+
+    @Test
     public void test_Address_Get_ShouldReturn_200Response_And_AddressListNaturallyOrdered_WhenRequested_ForAddresses_WithCityId() throws Exception {
         MvcResult mvcResult = null;
-        List<AddressVo> addressList = new ArrayList<>(Arrays.asList(addressVo2));
+        //List<AddressVo> addressList = new ArrayList<>(Arrays.asList(addressVo2));
+        List<AddressVo> addressList = new ArrayList<>(Arrays.asList(addressVo1, addressVo2, addressVo3));
 
         mvcResult = this.mockMvc.perform(get(ADDRESS_URI_FILTER)
                         .queryParam("cityId", "133024"))
@@ -688,7 +745,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     @Test
     public void test_Address_Get_ShouldReturn_200Response_And_AddressListNaturallyOrdered_WhenRequested_ForAddresses_WithStateId() throws Exception {
         MvcResult mvcResult = null;
-        List<AddressVo> addressList = new ArrayList<>(Arrays.asList(addressVo1, addressVo2, addressVo3, addressVo4));
+        List<AddressVo> addressList = new ArrayList<>(Arrays.asList(addressVo1, addressVo2, addressVo3));
 
         mvcResult = this.mockMvc.perform(get(ADDRESS_URI_FILTER)
                         .queryParam("stateId", "MH"))
@@ -704,7 +761,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     @Test
     public void test_Address_Get_ShouldReturn_200Response_And_AddressListNaturallyOrdered_WhenRequested_ForAddresses_WithCountryId() throws Exception {
         MvcResult mvcResult = null;
-        List<AddressVo> addressList = new ArrayList<>(Arrays.asList(addressVo1, addressVo2, addressVo3, addressVo4));
+        List<AddressVo> addressList = new ArrayList<>(Arrays.asList(addressVo1, addressVo2, addressVo3));
 
         mvcResult = this.mockMvc.perform(get(ADDRESS_URI_FILTER)
                         .queryParam("countryId", "IN"))
@@ -720,7 +777,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     @Test
     public void test_Address_Get_ShouldReturn_200Response_And_AddressListNaturallyOrdered_WhenRequested_ForAddresses_WithStateIdAndCityId() throws Exception {
         MvcResult mvcResult = null;
-        Set<AddressVo> addressList = new TreeSet<>(Arrays.asList(addressVo1, addressVo2, addressVo3, addressVo4));
+        Set<AddressVo> addressList = new TreeSet<>(Arrays.asList(addressVo1, addressVo2, addressVo3));
 
         mvcResult = this.mockMvc.perform(get(ADDRESS_URI_FILTER)
                         .queryParam("cityId", "133024")
@@ -737,7 +794,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     @Test
     public void test_Address_Get_ShouldReturn_200Response_And_AddressListNaturallyOrdered_WhenRequested_ForAddresses_WithCountryIdAndStateId() throws Exception {
         MvcResult mvcResult = null;
-        Set<AddressVo> addressList = new TreeSet<>(Arrays.asList(addressVo1, addressVo2, addressVo3, addressVo4));
+        Set<AddressVo> addressList = new TreeSet<>(Arrays.asList(addressVo1, addressVo2, addressVo3));
 
         mvcResult = this.mockMvc.perform(get(ADDRESS_URI_FILTER)
                         .queryParam("countryId", "IN")
@@ -754,7 +811,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     @Test
     public void test_Address_Get_ShouldReturn_200Response_And_AddressListNaturallyOrdered_WhenRequested_ForAddresses_WithCountryIdAndCityId() throws Exception {
         MvcResult mvcResult = null;
-        Set<AddressVo> addressList = new TreeSet<>(Arrays.asList(addressVo1, addressVo2, addressVo3, addressVo4));
+        Set<AddressVo> addressList = new TreeSet<>(Arrays.asList(addressVo1, addressVo2, addressVo3));
 
         mvcResult = this.mockMvc.perform(get(ADDRESS_URI_FILTER)
                         .queryParam("countryId", "IN")
@@ -841,6 +898,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     public void test_Address_Get_ShouldReturn_200Response_And_AddressDetails_WhenRequested_ById() throws Exception {
         String id = addressEntity1.getId().toString();
         MvcResult mvcResult = null;
+        addressVo1.setAccount(null);
 
         mvcResult = this.mockMvc.perform(get(ADDRESS_URI_BY_ID, id))
                 .andDo(print())
@@ -888,7 +946,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
 
     @Test
     public void test_Address_Delete_ShouldReturn_204Response_And_NoResponseBody_WhenDeleted_ById() throws Exception {
-        String id = addressEntity3.getId().toString();
+        String id = addressEntity2.getId().toString();
         MvcResult mvcResult = null;
 
         mvcResult = this.mockMvc.perform(delete(ADDRESS_URI_BY_ID, id))
@@ -1322,8 +1380,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
                 .andDo(print())
                 .andReturn();
 
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.CONFLICT.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertNotNull(mvcResult);Assertions.assertEquals(HttpStatus.CONFLICT.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldValue));

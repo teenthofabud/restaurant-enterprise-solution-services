@@ -19,7 +19,6 @@ public class AddressForm {
     @ToString.Include
     private String addressLine2;
     @ToString.Include
-    @JsonIgnore
     private String cityId;
     @ToString.Include
     private String stateId;

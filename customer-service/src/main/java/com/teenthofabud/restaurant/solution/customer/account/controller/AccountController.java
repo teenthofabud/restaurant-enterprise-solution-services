@@ -236,11 +236,11 @@ public class AccountController {
 
     @Operation(summary = "Get Account details by id")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Retrieve the details of Gender that matches the given id",
+            @ApiResponse(responseCode = "200", description = "Retrieve the details of Account that matches the given id",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = AccountVo.class)) }),
-            @ApiResponse(responseCode = "400", description = "Gender id is invalid",
+            @ApiResponse(responseCode = "400", description = "Account id is invalid",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) }),
-            @ApiResponse(responseCode = "404", description = "No Gender found with the given id",
+            @ApiResponse(responseCode = "404", description = "No Account found with the given id",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
     @ResponseStatus(HttpStatus.OK)
@@ -248,12 +248,12 @@ public class AccountController {
     public AccountVo getAccountDetailsById(@PathVariable String id, @RequestParam(required = false)
     @io.swagger.v3.oas.annotations.Parameter(in = ParameterIn.QUERY, description = "levels of nested fields to be unfolded within the response body")
             String cascadeUntilLevel) throws AccountException {
-        AccountVo genderDetails = null;
+        AccountVo accountDetails = null;
         log.debug("Requesting all details of account by its id");
         if(StringUtils.hasText(StringUtils.trimWhitespace(id)) && StringUtils.isEmpty(StringUtils.trimWhitespace(cascadeUntilLevel))) {
-            genderDetails = service.retrieveDetailsById(id, Optional.empty());
+            accountDetails = service.retrieveDetailsById(id, Optional.empty());
             log.debug("Responding with successful retrieval of existing account details by id");
-            return genderDetails;
+            return accountDetails;
         } else if(StringUtils.hasText(StringUtils.trimWhitespace(id)) && StringUtils.hasText(StringUtils.trimWhitespace(cascadeUntilLevel))) {
             try {
                 Integer cascadeLevelCode = Integer.parseInt(cascadeUntilLevel);
@@ -262,9 +262,9 @@ public class AccountController {
                 }
                 log.debug("Requested with cascade level code: {}", cascadeLevelCode);
                 Optional<TOABCascadeLevel> optCascadeLevel = TOABCascadeLevel.findByLevelCode(cascadeUntilLevel);
-                genderDetails = service.retrieveDetailsById(id, optCascadeLevel);
+                accountDetails = service.retrieveDetailsById(id, optCascadeLevel);
                 log.debug("Responding with successful retrieval of existing account details by id wth fields cascaded to given level");
-                return genderDetails;
+                return accountDetails;
             } catch (NumberFormatException e) {
                 log.debug(AccountMessageTemplate.MSG_TEMPLATE_ACCOUNT_CASCADE_LEVEL_EMPTY.getValue());
                 throw new AccountException(CustomerErrorCode.CUST_ATTRIBUTE_INVALID, new Object[] { "cascadeUntilLevel", cascadeUntilLevel });

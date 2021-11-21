@@ -26,6 +26,14 @@ public interface AddressService {
                                                                                                       Optional<String> optionalStateId,
                                                                                                       Optional<String> optionalCountryId) throws AddressException;
 
+    public List<AddressVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalName,
+                                                                Optional<String> optionalAddressLine1,
+                                                                Optional<String> optionalAddressLine2,
+                                                                Optional<String> optionalPincode,
+                                                                Optional<String> optionalCityId,
+                                                                Optional<String> optionalStateId,
+                                                                Optional<String> optionalCountryId) throws AddressException;
+
     public String createAddress(AddressForm form) throws AddressException;
 
     public void updateAddress(String id, AddressForm form) throws AddressException;

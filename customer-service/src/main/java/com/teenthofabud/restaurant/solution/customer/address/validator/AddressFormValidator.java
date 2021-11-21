@@ -73,11 +73,13 @@ public class AddressFormValidator implements Validator {
             errors.rejectValue("name", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
             return;
         }
+        log.debug("AddressForm.name is valid");
         if(!fieldsToEscape.contains("addressLine1") && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getAddressLine1()))) {
             log.debug("AddressForm.addressLine1 is empty");
             errors.rejectValue("addressLine1", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
             return;
         }
+        log.debug("AddressForm.addressLine1 is valid");
         /*if(!fieldsToEscape.contains("addressLine2") && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getAddressLine2()))) {
             log.debug("AddressForm.addressLine2 is empty");
             errors.rejectValue("addressLine2", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
@@ -99,6 +101,7 @@ public class AddressFormValidator implements Validator {
             }
             TOABValidationContextHolder.setSupportingValidationParameterContext(AddressConstant.COUNTRY_ISO.getName(), form.getCountryId());
         }
+        log.debug("AddressForm.countryId is valid");
         if(!fieldsToEscape.contains("cityId") && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getCityId()))) {
             log.debug("AddressForm.cityId is empty");
             errors.rejectValue("cityId", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
@@ -114,6 +117,7 @@ public class AddressFormValidator implements Validator {
                 return;
             }
         }
+        log.debug("AddressForm.cityId is valid");
         if(!fieldsToEscape.contains("stateId") && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getStateId()))) {
             log.debug("AddressForm.stateId is empty");
             errors.rejectValue("stateId", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
@@ -129,11 +133,13 @@ public class AddressFormValidator implements Validator {
                 return;
             }
         }
-        if(!fieldsToEscape.contains("pincode") && StringUtils.hasText(StringUtils.trimWhitespace(form.getPincode()))) {
+        log.debug("AddressForm.stateId is valid");
+        if(!fieldsToEscape.contains("pincode") && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getPincode()))) {
             errors.rejectValue("pincode", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
             log.debug("AddressForm.pincode is invalid");
             return;
         }
+        log.debug("AddressForm.pincode is valid");
         if(!fieldsToEscape.contains("accountId") && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getAccountId()))) {
             log.debug("AddressForm.accountId is empty");
             errors.rejectValue("accountId", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
@@ -153,6 +159,7 @@ public class AddressFormValidator implements Validator {
                 return;
             }
         }
+        log.debug("AddressForm.accountId is valid");
         TOABValidationContextHolder.clearSupportingValidationParameterContext(AddressConstant.COUNTRY_ISO.getName());
     }
 

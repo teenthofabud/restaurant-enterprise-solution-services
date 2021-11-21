@@ -35,13 +35,13 @@ public class AddressForm2EntityConverter implements Converter<AddressForm, Addre
     public AddressEntity convert(AddressForm form) {
         AddressEntity entity = new AddressEntity();
         if(!fieldsToEscape.contains("name")) {
-            entity.setName(entity.getName());
+            entity.setName(form.getName());
         }
         if(!fieldsToEscape.contains("addressLine1")) {
-            entity.setAddressLine1(entity.getAddressLine1());
+            entity.setAddressLine1(form.getAddressLine1());
         }
         if(!fieldsToEscape.contains("addressLine2")) {
-            entity.setAddressLine2(entity.getAddressLine2());
+            entity.setAddressLine2(form.getAddressLine2());
         }
         if(!fieldsToEscape.contains("accountId")) {
             Long accountId = Long.parseLong(form.getAccountId());
