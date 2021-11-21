@@ -12,7 +12,6 @@ import com.teenthofabud.restaurant.solution.customer.address.data.AddressVo;
 import com.teenthofabud.restaurant.solution.customer.address.repository.AddressRepository;
 import com.teenthofabud.restaurant.solution.customer.error.CustomerErrorCode;
 import com.teenthofabud.restaurant.solution.customer.account.data.AccountVo;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -36,7 +35,6 @@ import java.util.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
-@Slf4j
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
@@ -479,6 +477,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         MvcResult mvcResult = null;
 
         List<AddressVo> addressList = Arrays.asList(addressVo1);
+        addressVo1.setAccount(null);
 
         mvcResult = this.mockMvc.perform(get(ADDRESS_URI_BY_ACCOUNT_ID, accountEntity1.getId()))
                 .andDo(print())
@@ -487,7 +486,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(addressList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo[].class).length);
-        Assertions.assertEquals(om.readValue(addressList.toString(), AddressVo[].class), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo[].class));
+        Assertions.assertEquals(om.writeValueAsString(addressList), mvcResult.getResponse().getContentAsString());
     }
 
     @Test
@@ -679,6 +678,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     public void test_Address_Get_ShouldReturn_200Response_And_AddressListNaturallyOrdered_WhenRequested_ForAddresses_WithAddressLine1() throws Exception {
         MvcResult mvcResult = null;
         List<AddressVo> addressList = new ArrayList<>(Arrays.asList(addressVo1));
+        addressVo1.setAccount(null);
 
         mvcResult = this.mockMvc.perform(get(ADDRESS_URI_FILTER)
                         .queryParam("addressLine1", "Address 1"))
@@ -688,15 +688,14 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(addressList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo[].class).length);
-        Assertions.assertEquals(om.readValue(addressList.toString(), AddressVo[].class), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo[].class));
+        Assertions.assertEquals(om.writeValueAsString(addressList), mvcResult.getResponse().getContentAsString());
     }
 
     @Test
     public void test_Address_Get_ShouldReturn_200Response_And_AddressListNaturallyOrdered_WhenRequested_ForAddresses_WithAddressLine2() throws Exception {
         MvcResult mvcResult = null;
         List<AddressVo> addressList = new ArrayList<>(Arrays.asList(addressVo1));
-        //List<AddressVo> addressList = new ArrayList<>(Arrays.asList(addressVo1, addressVo2, addressVo3));
-
+        addressVo1.setAccount(null);
         mvcResult = this.mockMvc.perform(get(ADDRESS_URI_FILTER)
                         .queryParam("addressLine2", "Address 1"))
                 .andDo(print())
@@ -705,13 +704,13 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(addressList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo[].class).length);
-        Assertions.assertEquals(om.readValue(addressList.toString(), AddressVo[].class), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo[].class));
+        Assertions.assertEquals(om.writeValueAsString(addressList), mvcResult.getResponse().getContentAsString());
     }
 
     @Test
     public void test_Address_Get_ShouldReturn_200Response_And_AddressListNaturallyOrdered_WhenRequested_ForAddresses_WithPincode() throws Exception {
         MvcResult mvcResult = null;
-        //List<AddressVo> addressList = new ArrayList<>(Arrays.asList(addressVo1, addressVo2, addressVo3));
+        addressVo2.setAccount(null);
         List<AddressVo> addressList = new ArrayList<>(Arrays.asList(addressVo2));
 
         mvcResult = this.mockMvc.perform(get(ADDRESS_URI_FILTER)
@@ -722,15 +721,16 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(addressList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo[].class).length);
-        //Assertions.assertEquals(om.readValue(addressList.toString(), AddressVo[].class), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo[].class));
+        Assertions.assertEquals(om.writeValueAsString(addressList), mvcResult.getResponse().getContentAsString());
     }
 
     @Test
     public void test_Address_Get_ShouldReturn_200Response_And_AddressListNaturallyOrdered_WhenRequested_ForAddresses_WithCityId() throws Exception {
         MvcResult mvcResult = null;
-        //List<AddressVo> addressList = new ArrayList<>(Arrays.asList(addressVo2));
+        addressVo1.setAccount(null);
+        addressVo2.setAccount(null);
+        addressVo3.setAccount(null);
         List<AddressVo> addressList = new ArrayList<>(Arrays.asList(addressVo1, addressVo2, addressVo3));
-
         mvcResult = this.mockMvc.perform(get(ADDRESS_URI_FILTER)
                         .queryParam("cityId", "133024"))
                 .andDo(print())
@@ -739,13 +739,17 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(addressList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo[].class).length);
-        Assertions.assertEquals(om.readValue(addressList.toString(), AddressVo[].class), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo[].class));
+        Assertions.assertEquals(om.writeValueAsString(addressList), mvcResult.getResponse().getContentAsString());
     }
 
     @Test
     public void test_Address_Get_ShouldReturn_200Response_And_AddressListNaturallyOrdered_WhenRequested_ForAddresses_WithStateId() throws Exception {
         MvcResult mvcResult = null;
         List<AddressVo> addressList = new ArrayList<>(Arrays.asList(addressVo1, addressVo2, addressVo3));
+        addressVo1.setAccount(null);
+        addressVo2.setAccount(null);
+        addressVo3.setAccount(null);
+
 
         mvcResult = this.mockMvc.perform(get(ADDRESS_URI_FILTER)
                         .queryParam("stateId", "MH"))
@@ -755,13 +759,16 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(addressList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo[].class).length);
-        Assertions.assertEquals(om.readValue(addressList.toString(), AddressVo[].class), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo[].class));
+        Assertions.assertEquals(om.writeValueAsString(addressList), mvcResult.getResponse().getContentAsString());
     }
 
     @Test
     public void test_Address_Get_ShouldReturn_200Response_And_AddressListNaturallyOrdered_WhenRequested_ForAddresses_WithCountryId() throws Exception {
         MvcResult mvcResult = null;
         List<AddressVo> addressList = new ArrayList<>(Arrays.asList(addressVo1, addressVo2, addressVo3));
+        addressVo1.setAccount(null);
+        addressVo2.setAccount(null);
+        addressVo3.setAccount(null);
 
         mvcResult = this.mockMvc.perform(get(ADDRESS_URI_FILTER)
                         .queryParam("countryId", "IN"))
@@ -771,13 +778,16 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(addressList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo[].class).length);
-        Assertions.assertEquals(om.readValue(addressList.toString(), AddressVo[].class), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo[].class));
+        Assertions.assertEquals(om.writeValueAsString(addressList), mvcResult.getResponse().getContentAsString());
     }
 
     @Test
     public void test_Address_Get_ShouldReturn_200Response_And_AddressListNaturallyOrdered_WhenRequested_ForAddresses_WithStateIdAndCityId() throws Exception {
         MvcResult mvcResult = null;
-        Set<AddressVo> addressList = new TreeSet<>(Arrays.asList(addressVo1, addressVo2, addressVo3));
+        List<AddressVo> addressList = Arrays.asList(addressVo1, addressVo2, addressVo3);
+        addressVo1.setAccount(null);
+        addressVo2.setAccount(null);
+        addressVo3.setAccount(null);
 
         mvcResult = this.mockMvc.perform(get(ADDRESS_URI_FILTER)
                         .queryParam("cityId", "133024")
@@ -788,13 +798,16 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(addressList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo[].class).length);
-        Assertions.assertEquals(om.readValue(addressList.toString(), AddressVo[].class), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo[].class));
+        Assertions.assertEquals(om.writeValueAsString(addressList), mvcResult.getResponse().getContentAsString());
     }
 
     @Test
     public void test_Address_Get_ShouldReturn_200Response_And_AddressListNaturallyOrdered_WhenRequested_ForAddresses_WithCountryIdAndStateId() throws Exception {
         MvcResult mvcResult = null;
-        Set<AddressVo> addressList = new TreeSet<>(Arrays.asList(addressVo1, addressVo2, addressVo3));
+        List<AddressVo> addressList = Arrays.asList(addressVo1, addressVo2, addressVo3);
+        addressVo1.setAccount(null);
+        addressVo2.setAccount(null);
+        addressVo3.setAccount(null);
 
         mvcResult = this.mockMvc.perform(get(ADDRESS_URI_FILTER)
                         .queryParam("countryId", "IN")
@@ -805,13 +818,16 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(addressList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo[].class).length);
-        Assertions.assertEquals(om.readValue(addressList.toString(), AddressVo[].class), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo[].class));
+        Assertions.assertEquals(om.writeValueAsString(addressList), mvcResult.getResponse().getContentAsString());
     }
 
     @Test
     public void test_Address_Get_ShouldReturn_200Response_And_AddressListNaturallyOrdered_WhenRequested_ForAddresses_WithCountryIdAndCityId() throws Exception {
         MvcResult mvcResult = null;
-        Set<AddressVo> addressList = new TreeSet<>(Arrays.asList(addressVo1, addressVo2, addressVo3));
+        List<AddressVo> addressList = Arrays.asList(addressVo1, addressVo2, addressVo3);
+        addressVo1.setAccount(null);
+        addressVo2.setAccount(null);
+        addressVo3.setAccount(null);
 
         mvcResult = this.mockMvc.perform(get(ADDRESS_URI_FILTER)
                         .queryParam("countryId", "IN")
@@ -822,13 +838,14 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(addressList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo[].class).length);
-        Assertions.assertEquals(om.readValue(addressList.toString(), AddressVo[].class), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo[].class));
+        Assertions.assertEquals(om.writeValueAsString(addressList), mvcResult.getResponse().getContentAsString());
     }
 
     @Test
     public void test_Address_Get_ShouldReturn_200Response_And_AddressListNaturallyOrdered_WhenRequested_ForAddresses_WithCityIdAndPincode() throws Exception {
         MvcResult mvcResult = null;
-        Set<AddressVo> addressList = new TreeSet<>(Arrays.asList(addressVo2));
+        List<AddressVo> addressList = Arrays.asList(addressVo2);
+        addressVo2.setAccount(null);
 
         mvcResult = this.mockMvc.perform(get(ADDRESS_URI_FILTER)
                         .queryParam("cityId", "133024")
@@ -839,13 +856,14 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(addressList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo[].class).length);
-        Assertions.assertEquals(om.readValue(addressList.toString(), AddressVo[].class), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo[].class));
+        Assertions.assertEquals(om.writeValueAsString(addressList), mvcResult.getResponse().getContentAsString());
     }
 
     @Test
     public void test_Address_Get_ShouldReturn_200Response_And_AddressListNaturallyOrdered_WhenRequested_ForAddresses_WithAddressLine1AndPincodeAndCountryId() throws Exception {
         MvcResult mvcResult = null;
-        Set<AddressVo> addressList = new TreeSet<>(Arrays.asList(addressVo2));
+        List<AddressVo> addressList = Arrays.asList(addressVo2);
+        addressVo2.setAccount(null);
 
         mvcResult = this.mockMvc.perform(get(ADDRESS_URI_FILTER)
                         .queryParam("addressLine1", "Address 2")
@@ -857,13 +875,13 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(addressList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo[].class).length);
-        Assertions.assertEquals(om.readValue(addressList.toString(), AddressVo[].class), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo[].class));
+        Assertions.assertEquals(om.writeValueAsString(addressList), mvcResult.getResponse().getContentAsString());
     }
 
     @Test
     public void test_Address_Get_ShouldReturn_200Response_And_EmptyAddressList_WhenRequested_ForAddresses_WithAbsent_AddressLine1AndCityIdAndCountryId() throws Exception {
         MvcResult mvcResult = null;
-        Set<AddressVo> addressList = new TreeSet<>();
+        List<AddressVo> addressList = new ArrayList<>();
 
         mvcResult = this.mockMvc.perform(get(ADDRESS_URI_FILTER)
                         .queryParam("addressLine1", "Address 1")
@@ -880,7 +898,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     @Test
     public void test_Address_Get_ShouldReturn_200Response_And_EmptyAddressList_WhenRequested_ForAddresses_WithAbsent_CityIdAndStateIdAndCountryId() throws Exception {
         MvcResult mvcResult = null;
-        Set<AddressVo> addressList = new TreeSet<>();
+        List<AddressVo> addressList = new ArrayList<>();
 
         mvcResult = this.mockMvc.perform(get(ADDRESS_URI_FILTER)
                         .queryParam("cityId", UUID.randomUUID().toString())

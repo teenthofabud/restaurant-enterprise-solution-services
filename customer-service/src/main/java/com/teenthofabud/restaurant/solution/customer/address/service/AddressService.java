@@ -20,6 +20,7 @@ public interface AddressService {
 
     public List<AddressVo> retrieveAllMatchingDetailsByAccountId(String accountId) throws AddressException;
 
+    @Deprecated
     public List<AddressVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalName,
                                                                                                       Optional<String> optionalPincode,
                                                                                                       Optional<String> optionalCityId,

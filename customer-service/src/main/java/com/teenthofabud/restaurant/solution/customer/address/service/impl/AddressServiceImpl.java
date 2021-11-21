@@ -253,7 +253,7 @@ public class AddressServiceImpl implements AddressService {
             log.error("accountId is invalid", e);
             throw new AddressException(CustomerErrorCode.CUST_ATTRIBUTE_INVALID, new Object [] { "accountId: " + accountId });
         }
-        List<AddressEntity> addressEntityList = repository.findByAccountId(accountId);
+        List<AddressEntity> addressEntityList = repository.findByAccountId(Long.parseLong(accountId));
         if(addressEntityList != null && !addressEntityList.isEmpty()) {
             List<AddressVo> matchedAddressList = entity2DetailedVoList(addressEntityList);
             log.info("Found {} AddressVo matching with accountId: {}", matchedAddressList.size(),accountId);
