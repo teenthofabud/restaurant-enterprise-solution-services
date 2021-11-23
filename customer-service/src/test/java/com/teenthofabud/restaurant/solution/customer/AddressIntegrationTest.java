@@ -54,13 +54,6 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     private AddressRepository addressRepository;
     private AccountRepository accountRepository;
 
-    private EntityManager em;
-
-    @Autowired
-    public void setEm(EntityManager em) {
-        this.em = em;
-    }
-
     private int metadataServicePort;
 
     @Value("${customer.metadata.service.port}")
@@ -180,6 +173,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
                 new PatchOperationForm("replace", "/name", "patched name"));
 
         addressEntity1 = new AddressEntity();
+        addressEntity1.setName("default");
         addressEntity1.setAddressLine1("Address 1 First Name");
         addressEntity1.setAddressLine2("Address 1 Last Name");
         addressEntity1.setCountryId("IN");
@@ -193,6 +187,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
 
         addressVo1 = new AddressVo();
         addressVo1.setId(addressEntity1.getId().toString());
+        addressVo1.setName(addressEntity1.getName());
         addressVo1.setAddressLine1(addressEntity1.getAddressLine1());
         addressVo1.setAddressLine2(addressEntity1.getAddressLine2());
         addressVo1.setCountryId(addressEntity1.getCountryId());
@@ -203,6 +198,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         addressVo1.setAccount(accountVo1);
 
         addressEntity2 = new AddressEntity();
+        addressEntity2.setName("default");
         addressEntity2.setAddressLine1("Address 2 First Name");
         addressEntity2.setAddressLine2("Address 2 Last Name");
         addressEntity2.setCountryId("IN");
@@ -216,6 +212,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
 
         addressVo2 = new AddressVo();
         addressVo2.setId(addressEntity2.getId().toString());
+        addressVo2.setName(addressEntity2.getName());
         addressVo2.setAddressLine1(addressEntity2.getAddressLine1());
         addressVo2.setAddressLine2(addressEntity2.getAddressLine2());
         addressVo2.setCountryId(addressEntity2.getCountryId());
@@ -226,6 +223,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         addressVo2.setAccount(accountVo2);
 
         addressEntity3 = new AddressEntity();
+        addressEntity3.setName("default");
         addressEntity3.setAddressLine1("Address 3 First Name");
         addressEntity3.setAddressLine2("Address 3 Last Name");
         addressEntity3.setCountryId("IN");
@@ -239,6 +237,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
 
         addressVo3 = new AddressVo();
         addressVo3.setId(addressEntity3.getId().toString());
+        addressVo3.setName(addressEntity3.getName());
         addressVo3.setAddressLine1(addressEntity3.getAddressLine1());
         addressVo3.setAddressLine2(addressEntity3.getAddressLine2());
         addressVo3.setCountryId(addressEntity3.getCountryId());
@@ -250,6 +249,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
 
         addressVo4 = new AddressVo();
         addressVo4.setId(UUID.randomUUID().toString());
+        addressVo4.setName(addressForm.getName());
         addressVo4.setAddressLine1(addressForm.getAddressLine1());
         addressVo4.setAddressLine2(addressForm.getAddressLine2());
         addressVo4.setCountryId(addressForm.getCountryId());
@@ -257,35 +257,6 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         addressVo4.setCityId(addressForm.getCityId());
         addressVo4.setPincode(addressForm.getPincode());
         addressVo4.setAccountId(addressForm.getAccountId());
-
-        /*Optional<AddressEntity> optAE1 = addressRepository.findById(addressEntity1.getId());
-        Optional<AddressEntity> optAE2 = addressRepository.findById(addressEntity2.getId());
-        Optional<AddressEntity> optAE3 = addressRepository.findById(addressEntity3.getId());
-
-        log.info(optAE1.get().toString());
-        log.info(optAE2.get().toString());
-        log.info(optAE3.get().toString());
-
-        Query q = em.createNativeQuery("select * from customer_address");
-        List<Object[]> r = q.getResultList();
-        log.info("result set size " + r.size());
-        for(int i = 0 ; i < r.size() ; i++) {
-            Object[] o = r.get(i);
-            log.info(" index " + i + " has " + o.length + " columns");
-            List<String> f = new ArrayList<>(o.length);
-            for(Object j : o) {
-                f.add(j != null ? j.toString() : "");
-            }
-            log.info(String.join(",", f));
-        }
-
-        AddressEntity ae1 = em.find(AddressEntity.class, accountEntity1.getId());
-        AddressEntity ae2 = em.find(AddressEntity.class, accountEntity2.getId());
-        AddressEntity ae3 = em.find(AddressEntity.class, accountEntity3.getId());
-
-        log.info(ae1.toString());
-        log.info(ae2.toString());
-        log.info(ae3.toString());*/
     }
 
     @AfterEach
@@ -423,6 +394,8 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         String errorCode = CustomerErrorCode.CUST_EXISTS.getErrorCode();
         String field1Name = "name";
         String field2Name = "accountId";
+        String field1Value = addressForm.getName();
+        String field2Value = addressEntity2.getAccount().getId().toString();
         addressForm.setAccountId(addressEntity2.getAccount().getId().toString());
 
         mvcResult = mockMvc.perform(post(ADDRESS_URI)
@@ -435,7 +408,9 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertEquals(HttpStatus.CONFLICT.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field1Name));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field1Value));
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field2Name));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field2Value));
     }
 
     @Test
@@ -461,7 +436,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     @Test
     public void test_Address_Get_ShouldReturn_200Response_And_AddressListNaturallyOrdered_WhenRequested_ForAllAddresses() throws Exception {
         MvcResult mvcResult = null;
-        List<AddressVo> addressList = new ArrayList<>(Arrays.asList(addressVo1, addressVo2, addressVo3, addressVo4));
+        List<AddressVo> addressList = new ArrayList<>(Arrays.asList(addressVo1, addressVo2, addressVo3));
 
         mvcResult = this.mockMvc.perform(get(ADDRESS_URI))
                 .andDo(print())
@@ -1018,23 +993,6 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
     }
 
-    /*@Test
-    public void test_Address_Delete_ShouldReturn_422Response_And_ErrorCode_PHARM_LEARN_CUST_003_WhenDeleted_ByInvalidId() throws Exception {
-        String id = " ";
-        MvcResult mvcResult = null;
-        String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "id";
-
-        mvcResult = this.mockMvc.perform(delete(ADDRESS_URI_BY_ID, id))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-    }*/
-
     @Test
     public void test_Address_Delete_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_005_WhenDeleted_ByInactiveId() throws Exception {
         String id = addressEntity3.getId().toString();
@@ -1162,26 +1120,6 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
     }
 
-    /*@Test
-    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ById_AndInvalidAddressLine1() throws Exception {
-        String id = addressEntity1.getId().toString();
-        MvcResult mvcResult = null;
-        String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "addressLine1";
-        addressForm.setPincode("");
-
-        mvcResult = mockMvc.perform(put(ADDRESS_URI_BY_ID, id)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(addressForm)))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-    }*/
-
     @ParameterizedTest
     @ValueSource(strings = { " ", "" })
     public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ById_AndEmptyAddressLine1(String addressLine1) throws Exception {
@@ -1225,12 +1163,12 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { " ", "", "r" })
-    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ById_AndEmptyInvalidStateId(String stateId) throws Exception {
+    @ValueSource(strings = { " ", "" })
+    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ById_AndEmptyStateId(String stateId) throws Exception {
         String id = addressEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "stateId";
+        String fieldName = "state";
         addressForm.setStateId(stateId);
 
         mvcResult = mockMvc.perform(put(ADDRESS_URI_BY_ID, id)
@@ -1242,16 +1180,37 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().toLowerCase().contains(fieldName));
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { " ", "", "r" })
-    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ById_AndEmptyInvalidCountryId(String countryId) throws Exception {
+    @ValueSource(strings = { "r" })
+    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ById_AndInvalidStateId(String stateId) throws Exception {
         String id = addressEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "countryId";
+        String fieldName = "state";
+        addressForm.setStateId(stateId);
+
+        mvcResult = mockMvc.perform(put(ADDRESS_URI_BY_ID, id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(addressForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().toLowerCase().contains(fieldName));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { " ", "" })
+    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ById_AndEmptyCountryId(String countryId) throws Exception {
+        String id = addressEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "country";
         addressForm.setCountryId(countryId);
 
         mvcResult = mockMvc.perform(put(ADDRESS_URI_BY_ID, id)
@@ -1263,7 +1222,28 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().toLowerCase().contains(fieldName));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "r" })
+    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ById_AndInvalidCountryId(String countryId) throws Exception {
+        String id = addressEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "country";
+        addressForm.setCountryId(countryId);
+
+        mvcResult = mockMvc.perform(put(ADDRESS_URI_BY_ID, id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(addressForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().toLowerCase().contains(fieldName));
     }
 
     @Test
@@ -1292,8 +1272,11 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         String id = addressEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_EXISTS.getErrorCode();
-        String field1Name = "phoneNumber";
-        addressForm.setAccountId(addressEntity2.getAccount().getId().toString());
+        String field1Name = "name";
+        String field2Name = "accountId";
+        String field1Value = addressForm.getName();
+        String field2Value = addressEntity2.getAccount().getId().toString();
+        addressForm.setAccountId(field2Value);
 
         mvcResult = mockMvc.perform(put(ADDRESS_URI_BY_ID, id)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -1305,6 +1288,9 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertEquals(HttpStatus.CONFLICT.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field1Name));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field1Value));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field2Name));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field2Value));
     }
 
     @Test
@@ -1386,10 +1372,13 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         String id = addressEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_EXISTS.getErrorCode();
-        String fieldName = "accountId";
-        String fieldValue = addressEntity2.getAccount().getId().toString();
+        String field1Name = "name";
+        String field2Name = "accountId";
+        String field1Value = "default";
+        String field2Value = addressEntity2.getAccount().getId().toString();
         patches = Arrays.asList(
-                new PatchOperationForm("replace", "/" + fieldName, fieldValue));
+                new PatchOperationForm("replace", "/" + field1Name, field1Value),
+                new PatchOperationForm("replace", "/" + field2Name, field2Value));
 
 
         mvcResult = this.mockMvc.perform(patch(ADDRESS_URI_BY_ID, id)
@@ -1400,8 +1389,10 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
 
         Assertions.assertNotNull(mvcResult);Assertions.assertEquals(HttpStatus.CONFLICT.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldValue));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field1Name));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field1Value));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field2Name));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field2Value));
     }
 
     @Test

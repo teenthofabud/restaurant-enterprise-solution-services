@@ -44,8 +44,6 @@ import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -82,13 +80,6 @@ public class AddressServiceImpl implements AddressService {
     private Validator countryIdValidator;
     private Validator stateIdValidator;
     private Validator cityIdValidator;
-
-    private EntityManager em;
-
-    @Autowired
-    public void setEm(EntityManager em) {
-        this.em = em;
-    }
 
     private String dobFormat;
 
@@ -479,16 +470,16 @@ public class AddressServiceImpl implements AddressService {
         }
         log.debug("All attributes of AddressForm are valid");
 
-        AddressEntity expectedEntity = form2EntityConverter.convert(form);
-
         log.debug(AddressMessageTemplate.MSG_TEMPLATE_ADDRESS_EXISTENCE_BY_NAME_AND_ACCOUNT_ID.getValue(), form.getName(), form.getAccountId());
-        if(repository.existsByNameAndAccountId(expectedEntity.getName(), expectedEntity.getAccount().getId())) {
-            log.debug(AddressMessageTemplate.MSG_TEMPLATE_ADDRESS_EXISTS_BY_NAME_AND_ACCOUNT_ID.getValue(), expectedEntity.getName(), expectedEntity.getAccount().getId());
+        if(repository.existsByNameAndAccountId(form.getName(), Long.parseLong(form.getAccountId()))) {
+            log.debug(AddressMessageTemplate.MSG_TEMPLATE_ADDRESS_EXISTS_BY_NAME_AND_ACCOUNT_ID.getValue(), form.getName(), form.getAccountId());
             throw new AddressException(CustomerErrorCode.CUST_EXISTS,
                     new Object[]{ "name: " + form.getName(), "accountId: " + form.getAccountId() });
         }
         log.debug(AddressMessageTemplate.MSG_TEMPLATE_ADDRESS_NON_EXISTENCE_BY_NAME_AND_ACCOUNT_ID.getValue(),
-                expectedEntity.getName(), expectedEntity.getAccount().getId());
+                form.getName(), form.getAccountId());
+
+        AddressEntity expectedEntity = form2EntityConverter.convert(form);
 
         log.debug("Saving {}", expectedEntity);
         AddressEntity actualEntity = repository.save(expectedEntity);
@@ -523,20 +514,6 @@ public class AddressServiceImpl implements AddressService {
             throw new AddressException(CustomerErrorCode.CUST_INACTIVE, new Object[] { String.valueOf(id) });
         }
         log.debug("AddressEntity is active with id: {}", id);
-
-        Query q = em.createNativeQuery("select * from customer_address");
-        List<Object[]> r = q.getResultList();
-        log.info(q.getHints().toString());
-        log.info("result set size " + r.size());
-        for(int i = 0 ; i < r.size() ; i++) {
-            Object[] o = r.get(i);
-            log.info(" index " + i + " has " + o.length + " columns");
-            List<String> f = new ArrayList<>(o.length);
-            for(Object j : o) {
-                f.add(j != null ? j.toString() : "");
-            }
-            log.info(String.join(",", f));
-        }
 
         if(form == null) {
             log.debug("AddressForm is null");

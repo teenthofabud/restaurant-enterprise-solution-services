@@ -37,7 +37,7 @@ public class StateISOValidator implements Validator {
         String stateIso = (String) target;
         Optional<Object> optionalCountryIso = TOABValidationContextHolder.getSupportingValidationParameterContext("countryIso");
         if(optionalCountryIso.isEmpty()) {
-            throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, "countryIso is required to get state details");
+            throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, "countryIso is required to get state details", new Object[] { "country iso is required" });
         }
         String countryIso =  optionalCountryIso.get().toString();
         log.debug("Validating state iso: {}", stateIso);

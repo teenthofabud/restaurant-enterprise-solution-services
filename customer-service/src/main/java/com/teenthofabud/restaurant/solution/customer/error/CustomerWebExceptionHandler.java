@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class CustomerWebExceptionHandler extends TOABBaseWebExceptionHandler {
 
     @ExceptionHandler(value = { AccountException.class, AddressException.class })
-    public ResponseEntity<ErrorVo> handleDownloadSubDomainExceptions(TOABBaseException e) {
+    public ResponseEntity<ErrorVo> handleCustomerSubDomainExceptions(TOABBaseException e) {
         ResponseEntity<ErrorVo>  response = super.parseExceptionToResponse(e);
         return response;
     }
