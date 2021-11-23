@@ -3,10 +3,13 @@ package com.teenthofabud.restaurant.solution.customer.account.validator;
 import com.teenthofabud.core.common.validator.RelaxedValidator;
 import com.teenthofabud.restaurant.solution.customer.account.data.AccountForm;
 import com.teenthofabud.restaurant.solution.customer.error.CustomerErrorCode;
+import com.teenthofabud.restaurant.solution.customer.integration.metadata.gender.validator.GenderIdValidator;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
 
 import java.util.List;
@@ -20,6 +23,13 @@ public class AccountFormRelaxedValidator implements RelaxedValidator<AccountForm
     @Value("#{'${res.customer.account.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
+    }
+
+    private GenderIdValidator genderIdValidator;
+
+    @Autowired
+    public void setGenderIdValidator(GenderIdValidator genderIdValidator) {
+        this.genderIdValidator = genderIdValidator;
     }
 
     @Override
@@ -64,6 +74,16 @@ public class AccountFormRelaxedValidator implements RelaxedValidator<AccountForm
             errors.rejectValue("dateOfBirth", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
             log.debug("AccountForm.dateOfBirth is empty");
             return false;
+        } else if(!fieldsToEscape.contains("dateOfBirth") && form.getDateOfBirth() != null && StringUtils.hasText(StringUtils.trimWhitespace(form.getGenderId()))) {
+            Errors err = new DirectFieldBindingResult(form.getGenderId(), "AccountForm");
+            genderIdValidator.validate(form.getGenderId(), err);
+            if(err.hasErrors()) {
+                log.debug("AccountForm.genderId is invalid");
+                CustomerErrorCode ec = CustomerErrorCode.valueOf(err.getGlobalError().getCode());
+                log.debug("AccountForm error detail: {}", ec);
+                errors.rejectValue("genderId", ec.name());
+                return false;
+            }
         }
         log.debug("AccountForm.dateOfBirth is valid");
         return true;

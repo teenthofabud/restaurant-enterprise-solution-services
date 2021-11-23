@@ -89,6 +89,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         accountForm.setLastName("New Last Name");
         accountForm.setCountryCode("91");
         accountForm.setPhoneNumber("1234567890");
+        accountForm.setGenderId(genderVo.getId());
 
         patches = Arrays.asList(
                 new PatchOperationForm("replace", "/firstName", "patched first name"),
@@ -100,6 +101,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         accountEntity1.setLastName("Account 1 Last Name");
         accountEntity1.setCountryCode("91");
         accountEntity1.setPhoneNumber("1122334455");
+        accountEntity1.setGenderId(genderVo.getId());
         accountEntity1.setActive(Boolean.TRUE);
 
         accountEntity2 = new AccountEntity();
@@ -107,6 +109,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         accountEntity2.setLastName("Account 2 Last Name");
         accountEntity2.setCountryCode("91");
         accountEntity2.setPhoneNumber("0987654321");
+        accountEntity2.setGenderId(genderVo.getId());
         accountEntity2.setActive(Boolean.TRUE);
 
         accountEntity3 = new AccountEntity();
@@ -114,6 +117,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         accountEntity3.setLastName("Account 3 Last Name");
         accountEntity3.setCountryCode("91");
         accountEntity3.setPhoneNumber("3487561290");
+        accountEntity3.setGenderId(genderVo.getId());
         accountEntity3.setActive(Boolean.TRUE);
 
         accountEntity4 = new AccountEntity();
@@ -121,6 +125,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         accountEntity4.setLastName("Account 4 Last Name");
         accountEntity4.setCountryCode("91");
         accountEntity4.setPhoneNumber("3907451274");
+        accountEntity4.setGenderId(genderVo.getId());
         accountEntity4.setActive(Boolean.FALSE);
 
         accountEntity1 = accountRepository.save(accountEntity1);
@@ -131,6 +136,8 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         accountVo1.setLastName(accountEntity1.getLastName());
         accountVo1.setCountryCode(accountEntity1.getCountryCode());
         accountVo1.setPhoneNumber(accountEntity1.getPhoneNumber());
+        accountVo1.setGenderId(accountEntity1.getGenderId());
+        accountVo1.setGender(genderVo);
 
         accountEntity2 = accountRepository.save(accountEntity2);
 
@@ -140,6 +147,8 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         accountVo2.setLastName(accountEntity2.getLastName());
         accountVo2.setCountryCode(accountEntity2.getCountryCode());
         accountVo2.setPhoneNumber(accountEntity2.getPhoneNumber());
+        accountVo2.setGenderId(accountEntity2.getGenderId());
+        accountVo2.setGender(genderVo);
 
         accountEntity3 = accountRepository.save(accountEntity3);
 
@@ -149,6 +158,8 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         accountVo3.setLastName(accountEntity3.getLastName());
         accountVo3.setCountryCode(accountEntity3.getCountryCode());
         accountVo3.setPhoneNumber(accountEntity3.getPhoneNumber());
+        accountVo3.setGenderId(accountEntity3.getGenderId());
+        accountVo3.setGender(genderVo);
 
         accountEntity4 = accountRepository.save(accountEntity4);
 
@@ -158,6 +169,8 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         accountVo4.setLastName(accountEntity4.getLastName());
         accountVo4.setCountryCode(accountEntity4.getCountryCode());
         accountVo4.setPhoneNumber(accountEntity4.getPhoneNumber());
+        accountVo4.setGenderId(accountEntity4.getGenderId());
+        accountVo4.setGender(genderVo);
 
     }
 
@@ -319,15 +332,12 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertEquals(accountList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo[].class).length);
     }
 
-    /**
-     * TODO: implement when gender service is ready
-     */
-    /*@Test
-    public void test_Account_Get_ShouldReturn_200Response_And_AccountListNaturallyOrdered_WhenRequested_ForAccounts_ByAlbumId() throws Exception {
+    @Test
+    public void test_Account_Get_ShouldReturn_200Response_And_AccountListNaturallyOrdered_WhenRequested_ForAccounts_ByGenderId() throws Exception {
         MvcResult mvcResult = null;
-        Set<AccountVo> accountList = new TreeSet<>(Arrays.asList(accountVo1, accountVo4));
+        List<AccountVo> accountList = Arrays.asList(accountVo1, accountVo2, accountVo3, accountVo4);
 
-        mvcResult = this.mockMvc.perform(get(ACCOUNT_URI_BY_ALBUM_ID, albumEntity1.getId()))
+        mvcResult = this.mockMvc.perform(get(ACCOUNT_URI_BY_GENDER_ID, genderVo.getId()))
                 .andDo(print())
                 .andReturn();
 
@@ -337,12 +347,12 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Account_Get_ShouldReturn_200Response_And_AccountListNaturallyOrdered_WhenRequested_ForAccounts_ByEmptyAlbumId() throws Exception {
+    public void test_Account_Get_ShouldReturn_200Response_And_AccountListNaturallyOrdered_WhenRequested_ForAccounts_ByEmptyGenderId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "albumId";
+        String fieldName = "genderId";
 
-        mvcResult = this.mockMvc.perform(get(ACCOUNT_URI_BY_ALBUM_ID, " "))
+        mvcResult = this.mockMvc.perform(get(ACCOUNT_URI_BY_GENDER_ID, " "))
                 .andDo(print())
                 .andReturn();
 
@@ -353,22 +363,22 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Account_Get_ShouldReturn_404Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ByAbsentAlbumId() throws Exception {
+    public void test_Account_Get_ShouldReturn_404Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ByAbsentGenderId() throws Exception {
         MvcResult mvcResult = null;
-        String albumId = "kk";
-        String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "albumId";
+        String genderId = "3";
+        String errorCode = "TOAB-META-002";
+        String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(get(ACCOUNT_URI_BY_ALBUM_ID, albumId))
+        mvcResult = this.mockMvc.perform(get(ACCOUNT_URI_BY_GENDER_ID, genderId))
                 .andDo(print())
                 .andReturn();
 
         Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(albumId));
-    }*/
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(genderId));
+    }
 
     @ParameterizedTest
     @ValueSource(strings = { "", " " })
@@ -576,6 +586,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     public void test_Account_Get_ShouldReturn_200Response_And_AccountDetails_WhenRequested_ById() throws Exception {
         String id = accountEntity1.getId().toString();
         MvcResult mvcResult = null;
+        accountVo1.setGender(null);
 
         mvcResult = this.mockMvc.perform(get(ACCOUNT_URI_BY_ID, id))
                 .andDo(print())

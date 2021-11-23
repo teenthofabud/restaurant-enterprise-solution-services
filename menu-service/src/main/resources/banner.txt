@@ -13,5 +13,5 @@
 
    : : ${application.title} : :             (v${application.version})
 
-https://patorjk.com/software/taag/#p=display&f=Big%20Money-ne&t=CUSTOMER
+https://patorjk.com/software/taag/#p=display&f=Big%20Money-ne&t=MENU
 

@@ -23,7 +23,6 @@ public class AccountForm {
     private String firstName;
     @ToString.Include
     private String lastName;
-    @JsonIgnore
     @ToString.Include
     private String genderId;
     @JsonIgnore
@@ -33,7 +32,6 @@ public class AccountForm {
     private String phoneNumber;
     @ToString.Include
     private String countryCode;
-    @JsonIgnore
     @ToString.Include
     private String emailId;
 
