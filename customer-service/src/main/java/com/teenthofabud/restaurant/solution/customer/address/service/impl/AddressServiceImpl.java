@@ -236,7 +236,7 @@ public class AddressServiceImpl implements AddressService {
         log.info("Requesting AddressEntity that match with accountId: {}", accountId);
         Errors err = new DirectFieldBindingResult(accountId, "AddressForm");
         try {
-            AccountVo accountVo = accountService.retrieveDetailsById(accountId, Optional.of(TOABCascadeLevel.TWO));
+            AccountVo accountVo = accountService.retrieveDetailsById(accountId, Optional.of(TOABCascadeLevel.ONE));
             if(!accountVo.getActive()) {
                 throw new AccountException(CustomerErrorCode.CUST_INACTIVE, new Object [] { accountId });
             }

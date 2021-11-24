@@ -29,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import javax.persistence.EntityManager;
 import java.util.*;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -329,6 +328,26 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
+    public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_WithInvalidCityId() throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "cityId";
+        addressForm.setCityId("r");
+
+        mvcResult = mockMvc.perform(post(ADDRESS_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(addressForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+
+    }
+
+    @Test
     public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_WithEmptyPincode() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
@@ -369,11 +388,111 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
+    public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_WithInvalidStateId() throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "state";
+        addressForm.setStateId("11r");
+
+        mvcResult = mockMvc.perform(post(ADDRESS_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(addressForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().toLowerCase().contains(fieldName));
+
+    }
+
+    @Test
     public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_WithEmptyCountryId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "countryId";
         addressForm.setCountryId("");
+
+        mvcResult = mockMvc.perform(post(ADDRESS_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(addressForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+
+    }
+
+    @Test
+    public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_WithInvalidCountryId() throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "country";
+        addressForm.setCountryId("11r");
+
+        mvcResult = mockMvc.perform(post(ADDRESS_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(addressForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().toLowerCase().contains(fieldName));
+
+    }
+
+    @Test
+    public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_WithEmptyAccountId() throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "accountId";
+        addressForm.setAccountId("");
+
+        mvcResult = mockMvc.perform(post(ADDRESS_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(addressForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+
+    }
+
+    @Test
+    public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_WithInvalidAccountId() throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "accountId";
+        addressForm.setAccountId("r");
+
+        mvcResult = mockMvc.perform(post(ADDRESS_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(addressForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+
+    }
+
+    @Test
+    public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_WithAbsentAccountId() throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "accountId";
+        addressForm.setAccountId("99999");
 
         mvcResult = mockMvc.perform(post(ADDRESS_URI)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -1163,6 +1282,48 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @ParameterizedTest
+    @ValueSource(strings = { " ", "", "r" })
+    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ById_AndEmptyInvalidAccountId(String accountId) throws Exception {
+        String id = addressEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "accountId";
+        addressForm.setAccountId(accountId);
+
+        mvcResult = mockMvc.perform(put(ADDRESS_URI_BY_ID, id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(addressForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "99999" })
+    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ById_AndAbsentAccountId(String accountId) throws Exception {
+        String id = addressEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "accountId";
+        addressForm.setAccountId(accountId);
+
+        mvcResult = mockMvc.perform(put(ADDRESS_URI_BY_ID, id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(addressForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+    }
+
+    @ParameterizedTest
     @ValueSource(strings = { " ", "" })
     public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ById_AndEmptyStateId(String stateId) throws Exception {
         String id = addressEntity1.getId().toString();
@@ -1448,6 +1609,190 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         mvcResult = mockMvc.perform(patch(ADDRESS_URI_BY_ID, id)
                 .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                 .content(om.writeValueAsString(patches)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { " ", "" })
+    public void test_Address_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndEmptyCityId(String cityId) throws Exception {
+        String id = addressEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = TOABErrorCode.PATCH_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "value";
+        patches = Arrays.asList(
+                new PatchOperationForm("replace", "/cityId", cityId));
+
+        mvcResult = mockMvc.perform(patch(ADDRESS_URI_BY_ID, id)
+                        .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
+                        .content(om.writeValueAsString(patches)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "r" })
+    public void test_Address_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndInvalidCityId(String cityId) throws Exception {
+        String id = addressEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "cityId";
+        patches = Arrays.asList(
+                new PatchOperationForm("replace", "/" + fieldName, cityId));
+
+        mvcResult = mockMvc.perform(patch(ADDRESS_URI_BY_ID, id)
+                        .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
+                        .content(om.writeValueAsString(patches)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { " ", "" })
+    public void test_Address_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndEmptyStateId(String stateId) throws Exception {
+        String id = addressEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = TOABErrorCode.PATCH_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "value";
+        patches = Arrays.asList(
+                new PatchOperationForm("replace", "/" + fieldName, stateId));
+
+        mvcResult = mockMvc.perform(patch(ADDRESS_URI_BY_ID, id)
+                        .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
+                        .content(om.writeValueAsString(patches)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "r" })
+    public void test_Address_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndInvalidStateId(String stateId) throws Exception {
+        String id = addressEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "state";
+        patches = Arrays.asList(
+                new PatchOperationForm("replace", "/countryId", addressEntity1.getCountryId()),
+                new PatchOperationForm("replace", "/stateId", stateId));
+
+        mvcResult = mockMvc.perform(patch(ADDRESS_URI_BY_ID, id)
+                        .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
+                        .content(om.writeValueAsString(patches)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().toLowerCase().contains(fieldName));
+
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { " ", "" })
+    public void test_Address_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndEmptyCountryId(String countryId) throws Exception {
+        String id = addressEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = TOABErrorCode.PATCH_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "value";
+        patches = Arrays.asList(
+                new PatchOperationForm("replace", "/countryId", countryId));
+
+        mvcResult = mockMvc.perform(patch(ADDRESS_URI_BY_ID, id)
+                        .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
+                        .content(om.writeValueAsString(patches)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "r" })
+    public void test_Address_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndInvalidCountryId(String countryId) throws Exception {
+        String id = addressEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "country";
+        patches = Arrays.asList(
+                new PatchOperationForm("replace", "/countryId", countryId));
+
+        mvcResult = mockMvc.perform(patch(ADDRESS_URI_BY_ID, id)
+                        .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
+                        .content(om.writeValueAsString(patches)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().toLowerCase().contains(fieldName));
+
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { " ", "" })
+    public void test_Address_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndEmptyAccountId(String accountId) throws Exception {
+        String id = addressEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = TOABErrorCode.PATCH_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "value";
+        patches = Arrays.asList(
+                new PatchOperationForm("replace", "/accountId", accountId));
+
+        mvcResult = mockMvc.perform(patch(ADDRESS_URI_BY_ID, id)
+                        .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
+                        .content(om.writeValueAsString(patches)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "r" })
+    public void test_Address_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndInvalidAccountId(String accountId) throws Exception {
+        String id = addressEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "accountId";
+        patches = Arrays.asList(
+                new PatchOperationForm("replace", "/" + fieldName, accountId));
+
+        mvcResult = mockMvc.perform(patch(ADDRESS_URI_BY_ID, id)
+                        .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
+                        .content(om.writeValueAsString(patches)))
                 .andDo(print())
                 .andReturn();
 

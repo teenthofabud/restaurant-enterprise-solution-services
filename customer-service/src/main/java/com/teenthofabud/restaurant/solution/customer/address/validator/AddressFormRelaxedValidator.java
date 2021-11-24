@@ -1,7 +1,11 @@
 package com.teenthofabud.restaurant.solution.customer.address.validator;
 
+import com.teenthofabud.core.common.constant.TOABCascadeLevel;
 import com.teenthofabud.core.common.data.dto.TOABValidationContextHolder;
 import com.teenthofabud.core.common.validator.RelaxedValidator;
+import com.teenthofabud.restaurant.solution.customer.account.data.AccountException;
+import com.teenthofabud.restaurant.solution.customer.account.data.AccountVo;
+import com.teenthofabud.restaurant.solution.customer.account.service.AccountService;
 import com.teenthofabud.restaurant.solution.customer.address.data.AddressConstant;
 import com.teenthofabud.restaurant.solution.customer.address.data.AddressForm;
 import com.teenthofabud.restaurant.solution.customer.error.CustomerErrorCode;
@@ -16,12 +20,14 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @Slf4j
 public class AddressFormRelaxedValidator implements RelaxedValidator<AddressForm>  {
 
     private List<String> fieldsToEscape;
+    private AccountService accountService;
 
     @Value("#{'${res.customer.address.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
@@ -31,6 +37,11 @@ public class AddressFormRelaxedValidator implements RelaxedValidator<AddressForm
     private Validator countryIdValidator;
     private Validator stateIdValidator;
     private Validator cityIdValidator;
+
+    @Autowired
+    public void setAccountService(AccountService accountService) {
+        this.accountService = accountService;
+    }
 
     @Autowired
     @Qualifier("countryIdValidator")
@@ -129,6 +140,20 @@ public class AddressFormRelaxedValidator implements RelaxedValidator<AddressForm
             errors.rejectValue("accountId", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
             log.debug("AddressForm.accountId is empty");
             return false;
+        } else if(!fieldsToEscape.contains("accountId") && form.getAccountId() != null && StringUtils.hasText(StringUtils.trimWhitespace(form.getAccountId()))){
+            String accountId = form.getAccountId();
+            try {
+                AccountVo accountVo = accountService.retrieveDetailsById(accountId, Optional.of(TOABCascadeLevel.ONE));
+                if(!accountVo.getActive()) {
+                    log.debug("AddressForm.accountId is inactive");
+                    errors.rejectValue("accountId", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
+                    return false;
+                }
+            } catch (AccountException e) {
+                log.debug("AddressForm.accountId is invalid");
+                errors.rejectValue("accountId", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
+                return false;
+            }
         }
         log.debug("AddressForm.accountId is valid");
 
