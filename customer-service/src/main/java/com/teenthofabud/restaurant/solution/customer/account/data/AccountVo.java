@@ -6,10 +6,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.teenthofabud.core.common.data.vo.TOABBaseVo;
+import com.teenthofabud.restaurant.solution.customer.address.data.AddressVo;
 import com.teenthofabud.restaurant.solution.customer.integration.metadata.gender.data.GenderVo;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -41,6 +43,8 @@ public class AccountVo extends TOABBaseVo implements Comparable<AccountVo> {
     private String countryCode;
     @ToString.Include
     private String emailId;
+    @ToString.Include
+    private List<AddressVo> addresses;
 
     @Override
     public int compareTo(AccountVo o) {

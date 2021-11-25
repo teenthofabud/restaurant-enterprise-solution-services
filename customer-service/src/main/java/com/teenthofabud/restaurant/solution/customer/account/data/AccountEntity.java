@@ -17,7 +17,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+@ToString(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "customer_account")
 @EntityListeners(AuditingEntityListener.class)

@@ -5,7 +5,6 @@ import com.teenthofabud.core.common.constant.TOABCascadeLevel;
 import com.teenthofabud.core.common.data.form.PatchOperationForm;
 import com.teenthofabud.core.common.data.vo.CreatedVo;
 import com.teenthofabud.core.common.data.vo.ErrorVo;
-import com.teenthofabud.restaurant.solution.customer.address.converter.AddressEntity2VoConverter;
 import com.teenthofabud.restaurant.solution.customer.address.data.AddressException;
 import com.teenthofabud.restaurant.solution.customer.address.data.AddressForm;
 import com.teenthofabud.restaurant.solution.customer.address.data.AddressMessageTemplate;
@@ -27,6 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -189,12 +189,30 @@ public class AddressController {
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("accountid/{accountId}")
-    public List<AddressVo> getAllAddresssByAlbumId(@PathVariable String accountId) throws AddressException {
+    public List<AddressVo> getAllAddresssByAlbumId(@PathVariable String accountId, @RequestParam(required = false)
+    @io.swagger.v3.oas.annotations.Parameter(in = ParameterIn.QUERY, description = "levels of nested fields to be unfolded within the response body")
+            String cascadeUntilLevel) throws AddressException {
+        List<AddressVo> matchedByAccountIds = new ArrayList<>();
         log.debug("Requesting all available addresses with given accountId");
-        if(StringUtils.hasText(StringUtils.trimWhitespace(accountId))) {
-            List<AddressVo> matchedByAccountIds = service.retrieveAllMatchingDetailsByAccountId(accountId);
+        if(StringUtils.hasText(StringUtils.trimWhitespace(accountId)) && StringUtils.isEmpty(StringUtils.trimWhitespace(cascadeUntilLevel))) {
+            matchedByAccountIds = service.retrieveAllMatchingDetailsByAccountId(accountId, Optional.empty());
             log.debug("Responding with all available addresses with given accountId");
             return matchedByAccountIds;
+        } else if(StringUtils.hasText(StringUtils.trimWhitespace(accountId)) && StringUtils.hasText(StringUtils.trimWhitespace(cascadeUntilLevel))) {
+            try {
+                Integer cascadeLevelCode = Integer.parseInt(cascadeUntilLevel);
+                if(cascadeLevelCode < 0) {
+                    throw new NumberFormatException();
+                }
+                log.debug("Requested with cascade level code: {}", cascadeLevelCode);
+                Optional<TOABCascadeLevel> optCascadeLevel = TOABCascadeLevel.findByLevelCode(cascadeUntilLevel);
+                matchedByAccountIds = service.retrieveAllMatchingDetailsByAccountId(accountId, optCascadeLevel);
+                log.debug("Responding with successful retrieval of existing address details with given accountId having fields cascaded to given level");
+                return matchedByAccountIds;
+            } catch (NumberFormatException e) {
+                log.debug(AddressMessageTemplate.MSG_TEMPLATE_ADDRESS_CASCADE_LEVEL_EMPTY.getValue());
+                throw new AddressException(CustomerErrorCode.CUST_ATTRIBUTE_INVALID, new Object[] { "cascadeUntilLevel", cascadeUntilLevel });
+            }
         }
         log.debug("address accountId is empty");
         throw new AddressException(CustomerErrorCode.CUST_ATTRIBUTE_INVALID, new Object[] { "accountId", accountId });

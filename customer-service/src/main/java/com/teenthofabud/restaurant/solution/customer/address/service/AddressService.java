@@ -18,7 +18,10 @@ public interface AddressService {
 
     public AddressVo retrieveDetailsById(String id, Optional<TOABCascadeLevel> optionalCascadeLevel) throws AddressException;
 
+    @Deprecated
     public List<AddressVo> retrieveAllMatchingDetailsByAccountId(String accountId) throws AddressException;
+
+    public List<AddressVo> retrieveAllMatchingDetailsByAccountId(String accountId, Optional<TOABCascadeLevel> optionalCascadeLevel) throws AddressException;
 
     @Deprecated
     public List<AddressVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalName,

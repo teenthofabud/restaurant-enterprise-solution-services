@@ -226,7 +226,6 @@ public class AddressServiceImpl implements AddressService {
         AddressVo vo = entity2VoConverter.convert(entity);
         log.debug("AddressVo populated with fields cascaded to level: {}", cascadeLevel);
         TOABRequestContextHolder.clearCascadeLevelContext();
-
         return vo;
     }
 
@@ -248,6 +247,33 @@ public class AddressServiceImpl implements AddressService {
         if(addressEntityList != null && !addressEntityList.isEmpty()) {
             List<AddressVo> matchedAddressList = entity2DetailedVoList(addressEntityList);
             log.info("Found {} AddressVo matching with accountId: {}", matchedAddressList.size(),accountId);
+            return matchedAddressList;
+        }
+        log.debug("No AddressVo found matching with accountId: {}", accountId);
+        throw new AddressException(CustomerErrorCode.CUST_NOT_FOUND, new Object[] { "accountId", accountId });
+    }
+
+    @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+    @Override
+    public List<AddressVo> retrieveAllMatchingDetailsByAccountId(String accountId, Optional<TOABCascadeLevel> optionalCascadeLevel) throws AddressException {
+        log.info("Requesting AddressEntity that match with accountId: {}", accountId);
+        Errors err = new DirectFieldBindingResult(accountId, "AddressForm");
+        try {
+            AccountVo accountVo = accountService.retrieveDetailsById(accountId, Optional.of(TOABCascadeLevel.ONE));
+            if(!accountVo.getActive()) {
+                throw new AccountException(CustomerErrorCode.CUST_INACTIVE, new Object [] { accountId });
+            }
+        } catch (AccountException e) {
+            log.error("accountId is invalid", e);
+            throw new AddressException(CustomerErrorCode.CUST_ATTRIBUTE_INVALID, new Object [] { "accountId: " + accountId });
+        }
+        List<AddressEntity> addressEntityList = repository.findByAccountId(Long.parseLong(accountId));
+        if(addressEntityList != null && !addressEntityList.isEmpty()) {
+            TOABCascadeLevel cascadeLevel = optionalCascadeLevel.isPresent() ? optionalCascadeLevel.get() : TOABCascadeLevel.ZERO;
+            TOABRequestContextHolder.setCascadeLevelContext(cascadeLevel);
+            List<AddressVo> matchedAddressList = entity2DetailedVoList(addressEntityList);
+            log.info("Found {} AddressVo matching with accountId: {}", matchedAddressList.size(),accountId);
+            TOABRequestContextHolder.clearCascadeLevelContext();
             return matchedAddressList;
         }
         log.debug("No AddressVo found matching with accountId: {}", accountId);
@@ -740,7 +766,6 @@ public class AddressServiceImpl implements AddressService {
             log.debug(AddressMessageTemplate.MSG_TEMPLATE_ADDRESS_NON_EXISTENCE_BY_NAME_AND_ACCOUNT_ID.getValue(),
                     actualEntity.getName(),  patchedAddressForm.getAccountId().get());
         }
-
     }
 
     private void checkUniquenessOfAddress(AddressForm addressForm, AddressEntity actualEntity) throws AddressException {
@@ -797,7 +822,6 @@ public class AddressServiceImpl implements AddressService {
             log.debug(AddressMessageTemplate.MSG_TEMPLATE_ADDRESS_NON_EXISTENCE_BY_NAME_AND_ACCOUNT_ID.getValue(),
                     actualEntity.getName(),  addressForm.getAccountId());
         }
-
     }
 
 }

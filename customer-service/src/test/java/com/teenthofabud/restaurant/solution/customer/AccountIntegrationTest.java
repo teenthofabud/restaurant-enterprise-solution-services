@@ -8,6 +8,10 @@ import com.teenthofabud.restaurant.solution.customer.account.data.AccountEntity;
 import com.teenthofabud.restaurant.solution.customer.account.data.AccountForm;
 import com.teenthofabud.restaurant.solution.customer.account.data.AccountVo;
 import com.teenthofabud.restaurant.solution.customer.account.repository.AccountRepository;
+import com.teenthofabud.restaurant.solution.customer.address.data.AddressEntity;
+import com.teenthofabud.restaurant.solution.customer.address.data.AddressForm;
+import com.teenthofabud.restaurant.solution.customer.address.data.AddressVo;
+import com.teenthofabud.restaurant.solution.customer.address.repository.AddressRepository;
 import com.teenthofabud.restaurant.solution.customer.error.CustomerErrorCode;
 import com.teenthofabud.restaurant.solution.customer.integration.metadata.gender.data.GenderVo;
 import org.junit.jupiter.api.*;
@@ -51,6 +55,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     private AccountRepository accountRepository;
 
     private int metadataServicePort;
+    private AddressRepository addressRepository;
 
     @Value("${customer.metadata.service.port}")
     public void setMetadataServicePort(int metadataServicePort) {
@@ -65,7 +70,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     private GenderVo genderVo;
 
     private AccountForm accountForm;
-    private AccountVo accountVo1;
+    /*private AccountVo accountVo1;
     private AccountVo accountVo2;
     private AccountVo accountVo3;
     private AccountVo accountVo4;
@@ -180,7 +185,268 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         accountRepository.deleteById(accountEntity2.getId());
         accountRepository.deleteById(accountEntity3.getId());
         accountRepository.deleteById(accountEntity4.getId());
+    }*/
+
+    @Autowired
+    public void setAddressRepository(AddressRepository addressRepository) {
+        this.addressRepository = addressRepository;
     }
+
+    private AccountVo accountVo1;
+    private AccountVo accountVo2;
+    private AccountVo accountVo3;
+    private AccountVo accountVo4;
+    private AccountEntity accountEntity1;
+    private AccountEntity accountEntity2;
+    private AccountEntity accountEntity3;
+    private AccountEntity accountEntity4;
+
+    private AddressForm addressForm;
+    private AddressVo addressVo1;
+    private AddressVo addressVo2;
+    private AddressVo addressVo3;
+    private AddressVo addressVo4;
+    private AddressEntity addressEntity1;
+    private AddressEntity addressEntity2;
+    private AddressEntity addressEntity3;
+
+    private List<PatchOperationForm> patches;
+
+    @BeforeEach
+    private void init() {
+
+        genderVo = new GenderVo();
+        genderVo.setActive(Boolean.TRUE);
+        genderVo.setName("Gender 1");
+        genderVo.setId("1");
+
+        accountForm = new AccountForm();
+        accountForm.setFirstName("New First Name");
+        accountForm.setLastName("New Last Name");
+        accountForm.setCountryCode("91");
+        accountForm.setPhoneNumber("1234567890");
+        accountForm.setGenderId(genderVo.getId());
+
+        patches = Arrays.asList(
+                new PatchOperationForm("replace", "/firstName", "patched first name"),
+                new PatchOperationForm("replace", "/lastName", "patched last name"),
+                new PatchOperationForm("replace", "/phoneNumber", "6666666666"));
+
+
+        accountEntity1 = new AccountEntity();
+        accountEntity1.setFirstName("Account 1 First Name");
+        accountEntity1.setLastName("Account 1 Last Name");
+        accountEntity1.setCountryCode("91");
+        accountEntity1.setPhoneNumber("1122334455");
+        accountEntity1.setGenderId(genderVo.getId());
+        accountEntity1.setActive(Boolean.TRUE);
+
+        accountEntity1 = accountRepository.save(accountEntity1);
+
+        accountVo1 = new AccountVo();
+        accountVo1.setId(accountEntity1.getId().toString());
+        accountVo1.setFirstName(accountEntity1.getFirstName());
+        accountVo1.setLastName(accountEntity1.getLastName());
+        accountVo1.setCountryCode(accountEntity1.getCountryCode());
+        accountVo1.setPhoneNumber(accountEntity1.getPhoneNumber());
+        accountVo1.setGender(genderVo);
+        accountVo1.setGenderId(accountEntity1.getGenderId());
+
+        accountEntity2 = new AccountEntity();
+        accountEntity2.setFirstName("Account 2 First Name");
+        accountEntity2.setLastName("Account 2 Last Name");
+        accountEntity2.setCountryCode("91");
+        accountEntity2.setPhoneNumber("0987654321");
+        accountEntity2.setGenderId(genderVo.getId());
+        accountEntity2.setActive(Boolean.TRUE);
+
+        accountEntity2 = accountRepository.save(accountEntity2);
+
+        accountVo2 = new AccountVo();
+        accountVo2.setId(accountEntity2.getId().toString());
+        accountVo2.setFirstName(accountEntity2.getFirstName());
+        accountVo2.setLastName(accountEntity2.getLastName());
+        accountVo2.setCountryCode(accountEntity2.getCountryCode());
+        accountVo2.setPhoneNumber(accountEntity2.getPhoneNumber());
+        accountVo2.setGender(genderVo);
+        accountVo2.setGenderId(accountEntity1.getGenderId());
+
+        accountEntity3 = new AccountEntity();
+        accountEntity3.setFirstName("Account 3 First Name");
+        accountEntity3.setLastName("Account 3 Last Name");
+        accountEntity3.setCountryCode("91");
+        accountEntity3.setPhoneNumber("7766441236");
+        accountEntity3.setGenderId(genderVo.getId());
+        accountEntity3.setActive(Boolean.FALSE);
+
+        accountEntity3 = accountRepository.save(accountEntity3);
+
+        accountVo3 = new AccountVo();
+        accountVo3.setId(accountEntity3.getId().toString());
+        accountVo3.setFirstName(accountEntity3.getFirstName());
+        accountVo3.setLastName(accountEntity3.getLastName());
+        accountVo3.setCountryCode(accountEntity3.getCountryCode());
+        accountVo3.setPhoneNumber(accountEntity3.getPhoneNumber());
+        accountVo3.setGender(genderVo);
+        accountVo3.setGenderId(accountEntity1.getGenderId());
+
+        accountEntity4 = new AccountEntity();
+        accountEntity4.setFirstName("Account 4 First Name");
+        accountEntity4.setLastName("Account 4 Last Name");
+        accountEntity4.setCountryCode("91");
+        accountEntity4.setPhoneNumber("6299711209");
+        accountEntity4.setGenderId(genderVo.getId());
+        accountEntity4.setActive(Boolean.FALSE);
+        //accountEntity4.setActive(Boolean.TRUE);//here
+
+        accountEntity4 = accountRepository.save(accountEntity4);
+
+        accountVo4 = new AccountVo();
+        accountVo4.setId(accountEntity4.getId().toString());
+        accountVo4.setFirstName(accountEntity4.getFirstName());
+        accountVo4.setLastName(accountEntity4.getLastName());
+        accountVo4.setCountryCode(accountEntity4.getCountryCode());
+        accountVo4.setPhoneNumber(accountEntity4.getPhoneNumber());
+        accountVo4.setGender(genderVo);
+        accountVo4.setGenderId(accountEntity1.getGenderId());
+
+        addressForm = new AddressForm();
+        addressForm.setAddressLine1("New Something First");
+        addressForm.setAddressLine2("New Something Next");
+        addressForm.setAccountId(accountEntity4.getId().toString());
+        addressForm.setCityId("133024");
+        addressForm.setPincode("200012");
+        addressForm.setStateId("MH");
+        addressForm.setCountryId("IN");
+
+        /*patches = Arrays.asList(
+                new PatchOperationForm("replace", "/addressLine1", "patched first name"),
+                new PatchOperationForm("replace", "/addressLine2", "patched last name"),
+                new PatchOperationForm("replace", "/name", "patched name"));*/
+
+        addressEntity1 = new AddressEntity();
+        addressEntity1.setName("default");
+        addressEntity1.setAddressLine1("Address 1 First Name");
+        addressEntity1.setAddressLine2("Address 1 Last Name");
+        addressEntity1.setCountryId("IN");
+        addressEntity1.setStateId("MH");
+        addressEntity1.setCityId("133024");
+        addressEntity1.setPincode("200088");
+        addressEntity1.setActive(Boolean.TRUE);
+        addressEntity1.setAccount(accountEntity1);
+
+        addressEntity1 = addressRepository.save(addressEntity1);
+
+        addressVo1 = new AddressVo();
+        addressVo1.setId(addressEntity1.getId().toString());
+        addressVo1.setName(addressEntity1.getName());
+        addressVo1.setAddressLine1(addressEntity1.getAddressLine1());
+        addressVo1.setAddressLine2(addressEntity1.getAddressLine2());
+        addressVo1.setCountryId(addressEntity1.getCountryId());
+        addressVo1.setStateId(addressEntity1.getStateId());
+        addressVo1.setCityId(addressEntity1.getCityId());
+        addressVo1.setPincode(addressEntity1.getPincode());
+        addressVo1.setAccountId(addressEntity1.getAccount().getId().toString());
+        //addressVo1.setAccount(accountVo1);
+
+        addressEntity2 = new AddressEntity();
+        addressEntity2.setName("default");
+        addressEntity2.setAddressLine1("Address 2 First Name");
+        addressEntity2.setAddressLine2("Address 2 Last Name");
+        addressEntity2.setCountryId("IN");
+        addressEntity2.setStateId("MH");
+        addressEntity2.setCityId("133024");
+        addressEntity2.setPincode("200111");
+        addressEntity2.setActive(Boolean.TRUE);
+        addressEntity2.setAccount(accountEntity2);
+
+        addressEntity2 = addressRepository.save(addressEntity2);
+
+        addressVo2 = new AddressVo();
+        addressVo2.setId(addressEntity2.getId().toString());
+        addressVo2.setName(addressEntity2.getName());
+        addressVo2.setAddressLine1(addressEntity2.getAddressLine1());
+        addressVo2.setAddressLine2(addressEntity2.getAddressLine2());
+        addressVo2.setCountryId(addressEntity2.getCountryId());
+        addressVo2.setStateId(addressEntity2.getStateId());
+        addressVo2.setCityId(addressEntity2.getCityId());
+        addressVo2.setPincode(addressEntity2.getPincode());
+        addressVo2.setAccountId(addressEntity2.getAccount().getId().toString());
+        //addressVo2.setAccount(accountVo2);
+
+        addressEntity3 = new AddressEntity();
+        addressEntity3.setName("default");
+        addressEntity3.setAddressLine1("Address 3 First Name");
+        addressEntity3.setAddressLine2("Address 3 Last Name");
+        addressEntity3.setCountryId("IN");
+        addressEntity3.setStateId("MH");
+        addressEntity3.setCityId("133024");
+        addressEntity3.setPincode("200009");
+        addressEntity3.setActive(Boolean.FALSE);
+        addressEntity3.setAccount(accountEntity3);
+
+        addressEntity3 = addressRepository.save(addressEntity3);
+
+        addressVo3 = new AddressVo();
+        addressVo3.setId(addressEntity3.getId().toString());
+        addressVo3.setName(addressEntity3.getName());
+        addressVo3.setAddressLine1(addressEntity3.getAddressLine1());
+        addressVo3.setAddressLine2(addressEntity3.getAddressLine2());
+        addressVo3.setCountryId(addressEntity3.getCountryId());
+        addressVo3.setStateId(addressEntity3.getStateId());
+        addressVo3.setCityId(addressEntity3.getCityId());
+        addressVo3.setPincode(addressEntity3.getPincode());
+        addressVo3.setAccountId(addressEntity3.getAccount().getId().toString());
+        //addressVo3.setAccount(accountVo3);
+
+        addressVo4 = new AddressVo();
+        addressVo4.setId(UUID.randomUUID().toString());
+        addressVo4.setName(addressForm.getName());
+        addressVo4.setAddressLine1(addressForm.getAddressLine1());
+        addressVo4.setAddressLine2(addressForm.getAddressLine2());
+        addressVo4.setCountryId(addressForm.getCountryId());
+        addressVo4.setStateId(addressForm.getStateId());
+        addressVo4.setCityId(addressForm.getCityId());
+        addressVo4.setPincode(addressForm.getPincode());
+        addressVo4.setAccountId(addressForm.getAccountId());
+
+        accountEntity1.setAddresses(new ArrayList<AddressEntity>(List.of(addressEntity1)));
+        accountEntity1 = accountRepository.save(accountEntity1);
+        accountEntity2.setAddresses(new ArrayList<AddressEntity>(List.of(addressEntity2)));
+        accountEntity2 = accountRepository.save(accountEntity2);
+        accountEntity3.setAddresses(new ArrayList<AddressEntity>(List.of(addressEntity3)));
+        accountEntity3 = accountRepository.save(accountEntity3);
+
+        addressVo1.setAccount(accountVo1);
+        addressVo2.setAccount(accountVo2);
+        addressVo3.setAccount(accountVo3);
+
+        accountVo1.setAddresses(Arrays.asList(addressVo1));
+        accountVo2.setAddresses(Arrays.asList(addressVo2));
+        accountVo3.setAddresses(Arrays.asList(addressVo3));
+    }
+
+    @AfterEach
+    private void destroy() {
+        addressEntity1.setAccount(null);
+        addressEntity2.setAccount(null);
+        addressEntity3.setAccount(null);
+
+        addressRepository.deleteById(addressEntity1.getId());
+        addressRepository.deleteById(addressEntity2.getId());
+        addressRepository.deleteById(addressEntity3.getId());
+
+        accountEntity1.setAddresses(null);
+        accountEntity2.setAddresses(null);
+        accountEntity3.setAddresses(null);
+        accountEntity4.setAddresses(null);
+
+        accountRepository.deleteById(accountEntity1.getId());
+        accountRepository.deleteById(accountEntity2.getId());
+        accountRepository.deleteById(accountEntity3.getId());
+        accountRepository.deleteById(accountEntity4.getId());
+    }
+
 
     @Test
     public void test_Account_Post_ShouldReturn_201Response_And_NewAccountId_WhenPosted_WithValidAccountForm() throws Exception {
@@ -587,6 +853,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         String id = accountEntity1.getId().toString();
         MvcResult mvcResult = null;
         accountVo1.setGender(null);
+        accountVo1.setAddresses(null);
 
         mvcResult = this.mockMvc.perform(get(ACCOUNT_URI_BY_ID, id))
                 .andDo(print())
@@ -634,7 +901,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
 
     @Test
     public void test_Account_Delete_ShouldReturn_204Response_And_NoResponseBody_WhenDeleted_ById() throws Exception {
-        String id = accountEntity3.getId().toString();
+        String id = accountEntity2.getId().toString();
         MvcResult mvcResult = null;
 
         mvcResult = this.mockMvc.perform(delete(ACCOUNT_URI_BY_ID, id))
@@ -660,6 +927,29 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertEquals(accountVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getId());
         Assertions.assertEquals(accountVo1.getFirstName(), om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getFirstName());
         Assertions.assertEquals(accountVo1.getLastName(), om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getLastName());
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getCreatedBy()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getModifiedBy()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getCreatedOn()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getModifiedOn()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getActive()));
+    }
+
+    @Test
+    public void test_Account_Get_ShouldReturn_200Response_And_DomainDetails_WhenRequested_ById_AndSecondLevel_Cascade() throws Exception {
+        String id = accountEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        mvcResult = this.mockMvc.perform(get(ACCOUNT_URI_BY_ID, id)
+                        .queryParam("cascadeUntilLevel", TOABCascadeLevel.TWO.getLevelCode()))
+                .andDo(print())
+                .andReturn();
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(accountVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getId());
+        Assertions.assertEquals(accountVo1.getFirstName(), om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getFirstName());
+        Assertions.assertEquals(accountVo1.getLastName(), om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getLastName());
+        Assertions.assertTrue(accountVo1.getGender().toString().compareTo(om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getGender().toString()) == 0);
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getAddresses() != null);
+        Assertions.assertEquals(accountVo1.getAddresses().size(), om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getAddresses().size());
         Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getCreatedBy()));
         Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getModifiedBy()));
         Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getCreatedOn()));

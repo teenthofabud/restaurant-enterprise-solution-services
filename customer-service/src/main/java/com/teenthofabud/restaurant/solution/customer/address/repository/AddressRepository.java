@@ -17,9 +17,6 @@ public interface AddressRepository extends TOABSimpleEntityBaseRepository<Addres
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     public AddressEntity save(AddressEntity entity);
 
-    @Lock(LockModeType.PESSIMISTIC_READ)
-    List<AddressEntity> findByNameAndAccountId(String name, Long accountId);
-
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Boolean existsByNameAndAccountId(String name, Long accountId);
 }

@@ -55,6 +55,11 @@ public class AddressEntitySelfMapper implements SingleChannelMapper<AddressEntit
             changeSW = true;
             log.debug("Source AccountEntity.stateId is valid");
         }
+        if(source.getAccount() != null && source.getAccount().compareTo(target.getAccount()) != 0) {
+            target.setAccount(source.getAccount());
+            changeSW = true;
+            log.debug("Source AccountEntity.accountId is valid");
+        }
         if(changeSW) {
             log.debug("All provided AccountEntity attributes are valid");
             return Optional.of(target);

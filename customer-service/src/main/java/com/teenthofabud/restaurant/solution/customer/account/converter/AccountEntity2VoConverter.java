@@ -3,29 +3,49 @@ package com.teenthofabud.restaurant.solution.customer.account.converter;
 import com.teenthofabud.core.common.constant.TOABCascadeLevel;
 import com.teenthofabud.core.common.converter.TOABBaseEntity2VoConverter;
 import com.teenthofabud.core.common.data.dto.TOABRequestContextHolder;
+import com.teenthofabud.core.common.error.TOABErrorCode;
+import com.teenthofabud.core.common.error.TOABSystemException;
 import com.teenthofabud.restaurant.solution.customer.account.data.AccountEntity;
 import com.teenthofabud.restaurant.solution.customer.account.data.AccountVo;
+import com.teenthofabud.restaurant.solution.customer.address.converter.AddressEntity2VoConverter;
+import com.teenthofabud.restaurant.solution.customer.address.data.AddressEntity;
+import com.teenthofabud.restaurant.solution.customer.address.data.AddressVo;
+import com.teenthofabud.restaurant.solution.customer.address.service.AddressService;
 import com.teenthofabud.restaurant.solution.customer.integration.metadata.gender.data.GenderVo;
 import com.teenthofabud.restaurant.solution.customer.integration.metadata.gender.proxy.GenderServiceClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.*;
 
 @Component
 @Slf4j
 public class AccountEntity2VoConverter extends TOABBaseEntity2VoConverter<AccountEntity, AccountVo> implements Converter<AccountEntity, AccountVo> {
 
     private GenderServiceClient genderServiceClient;
-
+    private AddressService addressService;
     private List<String> fieldsToEscape;
+    private AddressEntity2VoConverter entity2VoConverter;
 
     @Value("#{'${res.customer.account.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
+    }
+
+    @Autowired
+    public void setAddressService(AddressService addressService) {
+        this.addressService = addressService;
+    }
+
+    @Autowired
+    public void setEntity2VoConverter(AddressEntity2VoConverter entity2VoConverter) {
+        this.entity2VoConverter = entity2VoConverter;
     }
 
     @Autowired
@@ -55,7 +75,10 @@ public class AccountEntity2VoConverter extends TOABBaseEntity2VoConverter<Accoun
             vo.setDateOfBirth(entity.getDateOfBirth());
         }
         if(!fieldsToEscape.contains("genderId")) {
-            this.expandSecondLevelFields(entity, vo);
+            this.expandSecondLevelFields(entity, vo, "genderId");
+        }
+        if(!fieldsToEscape.contains("addresses")) {
+            this.expandSecondLevelFields(entity, vo, "addresses");
         }
         if(!fieldsToEscape.contains("emailId")) {
             vo.setEmailId(entity.getEmailId());
@@ -65,13 +88,69 @@ public class AccountEntity2VoConverter extends TOABBaseEntity2VoConverter<Accoun
         return vo;
     }
 
+    private List<AddressVo> entity2DetailedVoList(List<AddressEntity> addressEntityList) {
+        List<AddressVo> addressDetailsList = new ArrayList<>(addressEntityList.size());
+        for(AddressEntity entity : addressEntityList) {
+            AddressVo vo = entity2VoConverter.convert(entity);
+            log.debug("Converting {} to {}", entity, vo);
+            addressDetailsList.add(vo);
+        }
+        return addressDetailsList;
+    }
+
+    @Deprecated
     private void expandSecondLevelFields(AccountEntity entity, AccountVo vo) {
         TOABCascadeLevel cascadeLevel = TOABRequestContextHolder.getCascadeLevelContext();
         switch(cascadeLevel) {
             case TWO:
-                GenderVo genderVo = genderServiceClient.getGenderDetailsById(entity.getGenderId());
-                vo.setGender(genderVo);
-                log.debug("Retrieved {} for genderId: {}", vo, entity.getGenderId());
+                if(!fieldsToEscape.contains("genderId")) {
+                    GenderVo genderVo = genderServiceClient.getGenderDetailsById(entity.getGenderId());
+                    vo.setGender(genderVo);
+                    log.debug("Retrieved {} for genderId: {}", vo, entity.getGenderId());
+                }
+                if(!fieldsToEscape.contains("addresses")) {
+                    List<AddressEntity> addressEntities = entity.getAddresses();
+                    List<AddressVo> addressDetailsList = entity2DetailedVoList(addressEntities);
+                    vo.setAddresses(addressDetailsList);
+                    log.debug("Retrieved {} addresses for account id: {}", addressDetailsList.size(), entity.getId());
+                }
+                break;
+            default:
+                vo.setGenderId(entity.getGenderId());
+                log.debug("only first level cascaded for genderId");
+                break;
+        }
+    }
+
+    private void expandSecondLevelFields(AccountEntity entity, AccountVo vo, String fieldName) {
+        TOABCascadeLevel cascadeLevel = TOABRequestContextHolder.getCascadeLevelContext();
+        switch(cascadeLevel) {
+            case TWO:
+                if(!fieldsToEscape.contains("genderId") && fieldName.compareTo("genderId") == 0) {
+                    GenderVo genderVo = genderServiceClient.getGenderDetailsById(entity.getGenderId());
+                    vo.setGender(genderVo);
+                    log.debug("Retrieved {} for genderId: {}", vo, entity.getGenderId());
+                }
+                if(!fieldsToEscape.contains("addresses") && fieldName.compareTo("addresses") == 0) {
+                    Callable<List<AddressVo>> addressEntity2VoConversion = () -> {
+                        TOABRequestContextHolder.setCascadeLevelContext(TOABCascadeLevel.ZERO);
+                        List<AddressEntity> addressEntities = entity.getAddresses();
+                        List<AddressVo> addressDetailsList = entity2DetailedVoList(addressEntities);
+                        TOABRequestContextHolder.clearCascadeLevelContext();
+                        return addressDetailsList;
+                    };
+                    ExecutorService executorService = Executors.newFixedThreadPool(1, new CustomizableThreadFactory("addressEntity2VoConversion-"));
+                    Future<List<AddressVo>> addressEntity2VoConversionResult = executorService.submit(addressEntity2VoConversion);
+                    try {
+                        List<AddressVo> addressDetailsList = addressEntity2VoConversionResult.get();
+                        vo.setAddresses(addressDetailsList);
+                        log.debug("Retrieved {} addresses for account id: {}", addressDetailsList.size(), entity.getId());
+                    } catch (InterruptedException | ExecutionException e) {
+                        log.error("Unable to perform addressEntity2VoConversion", e);
+                        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, "Unable to perform addressEntity2VoConversion",
+                                new Object[] { "addressEntity2VoConversion failure: " + e.getMessage() });
+                    }
+                }
                 break;
             default:
                 vo.setGenderId(entity.getGenderId());

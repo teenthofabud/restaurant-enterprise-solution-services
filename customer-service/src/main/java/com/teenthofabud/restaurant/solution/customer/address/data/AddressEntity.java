@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+@ToString(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "customer_address")
 @EntityListeners(AuditingEntityListener.class)

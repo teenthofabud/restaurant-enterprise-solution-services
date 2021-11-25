@@ -20,7 +20,7 @@ public class AccountEntitySelfMapper implements SingleChannelMapper<AccountEntit
             changeSW = true;
             log.debug("Source AccountEntity.id is valid");
         }
-        if(source.getGenderId() != null && source.getGenderId().compareTo(target.getGenderId()) != 0) {
+        if(source.getGenderId() != null && StringUtils.hasText(StringUtils.trimWhitespace(source.getGenderId())) && source.getGenderId().compareTo(target.getGenderId()) != 0) {
             target.setGenderId(source.getGenderId());
             changeSW = true;
             log.debug("Source AccountEntity.genderId is valid");
