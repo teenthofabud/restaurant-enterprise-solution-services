@@ -24,6 +24,7 @@ import com.teenthofabud.restaurant.solution.customer.account.mapper.AccountEntit
 import com.teenthofabud.restaurant.solution.customer.account.mapper.AccountForm2EntityMapper;
 import com.teenthofabud.restaurant.solution.customer.account.repository.AccountRepository;
 import com.teenthofabud.restaurant.solution.customer.account.service.AccountService;
+import com.teenthofabud.restaurant.solution.customer.utils.CustomerServiceHelper;
 import com.teenthofabud.restaurant.solution.customer.account.validator.AccountDtoValidator;
 import com.teenthofabud.restaurant.solution.customer.account.validator.AccountFormRelaxedValidator;
 import com.teenthofabud.restaurant.solution.customer.account.validator.AccountFormValidator;
@@ -47,7 +48,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -74,6 +74,7 @@ public class AccountServiceImpl implements AccountService {
     private AccountFormRelaxedValidator relaxedFormValidator;
     private AccountDtoValidator dtoValidator;
     private AccountRepository repository;
+    private CustomerServiceHelper customerServiceHelper;
     private TOABBaseService toabBaseService;
     private ObjectMapper om;
     private GenderIdValidator genderIdValidator;
@@ -88,6 +89,11 @@ public class AccountServiceImpl implements AccountService {
     @Autowired
     public void setGenderIdValidator(GenderIdValidator genderIdValidator) {
         this.genderIdValidator = genderIdValidator;
+    }
+
+    @Autowired
+    public void setCustomerServiceHelper(CustomerServiceHelper customerServiceHelper) {
+        this.customerServiceHelper = customerServiceHelper;
     }
 
     @Autowired
@@ -148,16 +154,6 @@ public class AccountServiceImpl implements AccountService {
     @Autowired
     public void setFormValidator(AccountFormValidator formValidator) {
         this.formValidator = formValidator;
-    }
-
-    private List<AccountVo> entity2DetailedVoList(List<AccountEntity> accountEntityList) {
-        List<AccountVo> accountDetailsList = new ArrayList<>(accountEntityList.size());
-        for(AccountEntity entity : accountEntityList) {
-            AccountVo vo = entity2VoConverter.convert(entity);
-            log.debug("Converting {} to {}", entity, vo);
-            accountDetailsList.add(vo);
-        }
-        return accountDetailsList;
     }
 
     private Long parseAccountId(String id) throws AccountException {
@@ -241,7 +237,7 @@ public class AccountServiceImpl implements AccountService {
         }
         List<AccountEntity> accountEntityList = repository.findByGenderId(genderId);
         if(accountEntityList != null && !accountEntityList.isEmpty()) {
-            List<AccountVo> matchedAccountList = entity2DetailedVoList(accountEntityList);
+            List<AccountVo> matchedAccountList = customerServiceHelper.accountEntity2DetailedVoList(accountEntityList);
             log.info("Found {} AccountVo matching with genderId: {}", matchedAccountList.size(),genderId);
             return matchedAccountList;
         }
@@ -300,7 +296,7 @@ public class AccountServiceImpl implements AccountService {
         Example<AccountEntity> accountEntityExample = Example.of(entity, matcherCriteria);
         List<AccountEntity> accountEntityList = repository.findAll(accountEntityExample);
         if(accountEntityList != null && !accountEntityList.isEmpty()) {
-            matchedAccountList = entity2DetailedVoList(accountEntityList);
+            matchedAccountList = customerServiceHelper.accountEntity2DetailedVoList(accountEntityList);
             log.info("Found {} AccountVo matching with provided parameters : {}", matchedAccountList.size(), providedFilters);
         }
         log.info("No AccountVo available matching with provided parameters : {}", matchedAccountList.size(), providedFilters);
@@ -375,7 +371,7 @@ public class AccountServiceImpl implements AccountService {
         Example<AccountEntity> accountEntityExample = Example.of(entity, matcherCriteria);
         List<AccountEntity> accountEntityList = repository.findAll(accountEntityExample);
         if(accountEntityList != null && !accountEntityList.isEmpty()) {
-            matchedAccountList = entity2DetailedVoList(accountEntityList);
+            matchedAccountList = customerServiceHelper.accountEntity2DetailedVoList(accountEntityList);
             log.info("Found {} AccountVo matching with provided parameters : {}", matchedAccountList.size(), providedFilters);
         }
         log.info("No AccountVo available matching with provided parameters : {}", matchedAccountList.size(), providedFilters);

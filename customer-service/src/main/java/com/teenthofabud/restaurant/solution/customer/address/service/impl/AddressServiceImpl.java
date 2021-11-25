@@ -31,6 +31,7 @@ import com.teenthofabud.restaurant.solution.customer.address.validator.AddressDt
 import com.teenthofabud.restaurant.solution.customer.address.validator.AddressFormRelaxedValidator;
 import com.teenthofabud.restaurant.solution.customer.address.validator.AddressFormValidator;
 import com.teenthofabud.restaurant.solution.customer.error.CustomerErrorCode;
+import com.teenthofabud.restaurant.solution.customer.utils.CustomerServiceHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,7 +48,6 @@ import org.springframework.validation.Validator;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -80,12 +80,19 @@ public class AddressServiceImpl implements AddressService {
     private Validator countryIdValidator;
     private Validator stateIdValidator;
     private Validator cityIdValidator;
+    private CustomerServiceHelper customerServiceHelper;
 
     private String dobFormat;
 
     @Value("${res.customer.dob.format}")
     public void setDobFormat(String dobFormat) {
         this.dobFormat = dobFormat;
+    }
+
+
+    @Autowired
+    public void setCustomerServiceHelper(CustomerServiceHelper customerServiceHelper) {
+        this.customerServiceHelper = customerServiceHelper;
     }
 
     @Autowired
@@ -168,16 +175,6 @@ public class AddressServiceImpl implements AddressService {
         this.formValidator = formValidator;
     }
 
-    private List<AddressVo> entity2DetailedVoList(List<AddressEntity> addressEntityList) {
-        List<AddressVo> addressDetailsList = new ArrayList<>(addressEntityList.size());
-        for(AddressEntity entity : addressEntityList) {
-            AddressVo vo = entity2VoConverter.convert(entity);
-            log.debug("Converting {} to {}", entity, vo);
-            addressDetailsList.add(vo);
-        }
-        return addressDetailsList;
-    }
-
     private Long parseAddressId(String id) throws AddressException {
         Long addressId = null;
         try {
@@ -245,7 +242,7 @@ public class AddressServiceImpl implements AddressService {
         }
         List<AddressEntity> addressEntityList = repository.findByAccountId(Long.parseLong(accountId));
         if(addressEntityList != null && !addressEntityList.isEmpty()) {
-            List<AddressVo> matchedAddressList = entity2DetailedVoList(addressEntityList);
+            List<AddressVo> matchedAddressList = customerServiceHelper.addressEntity2DetailedVoList(addressEntityList);
             log.info("Found {} AddressVo matching with accountId: {}", matchedAddressList.size(),accountId);
             return matchedAddressList;
         }
@@ -271,7 +268,7 @@ public class AddressServiceImpl implements AddressService {
         if(addressEntityList != null && !addressEntityList.isEmpty()) {
             TOABCascadeLevel cascadeLevel = optionalCascadeLevel.isPresent() ? optionalCascadeLevel.get() : TOABCascadeLevel.ZERO;
             TOABRequestContextHolder.setCascadeLevelContext(cascadeLevel);
-            List<AddressVo> matchedAddressList = entity2DetailedVoList(addressEntityList);
+            List<AddressVo> matchedAddressList = customerServiceHelper.addressEntity2DetailedVoList(addressEntityList);
             log.info("Found {} AddressVo matching with accountId: {}", matchedAddressList.size(),accountId);
             TOABRequestContextHolder.clearCascadeLevelContext();
             return matchedAddressList;
@@ -361,7 +358,7 @@ public class AddressServiceImpl implements AddressService {
         Example<AddressEntity> addressEntityExample = Example.of(entity, matcherCriteria);
         List<AddressEntity> addressEntityList = repository.findAll(addressEntityExample);
         if(addressEntityList != null && !addressEntityList.isEmpty()) {
-            matchedAddressList = entity2DetailedVoList(addressEntityList);
+            matchedAddressList = customerServiceHelper.addressEntity2DetailedVoList(addressEntityList);
             log.info("Found {} AddressVo matching with provided parameters : {}", matchedAddressList.size(), providedFilters);
         }
         log.info("No AddressVo available matching with provided parameters : {}", matchedAddressList.size(), providedFilters);
@@ -466,7 +463,7 @@ public class AddressServiceImpl implements AddressService {
         Example<AddressEntity> addressEntityExample = Example.of(entity, matcherCriteria);
         List<AddressEntity> addressEntityList = repository.findAll(addressEntityExample);
         if(addressEntityList != null && !addressEntityList.isEmpty()) {
-            matchedAddressList = entity2DetailedVoList(addressEntityList);
+            matchedAddressList = customerServiceHelper.addressEntity2DetailedVoList(addressEntityList);
             log.info("Found {} AddressVo matching with provided parameters : {}", matchedAddressList.size(), providedFilters);
         }
         log.info("No AddressVo available matching with provided parameters : {}", matchedAddressList.size(), providedFilters);

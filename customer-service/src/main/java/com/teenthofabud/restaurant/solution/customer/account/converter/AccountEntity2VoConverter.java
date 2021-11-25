@@ -7,7 +7,7 @@ import com.teenthofabud.core.common.error.TOABErrorCode;
 import com.teenthofabud.core.common.error.TOABSystemException;
 import com.teenthofabud.restaurant.solution.customer.account.data.AccountEntity;
 import com.teenthofabud.restaurant.solution.customer.account.data.AccountVo;
-import com.teenthofabud.restaurant.solution.customer.address.converter.AddressEntity2VoConverter;
+import com.teenthofabud.restaurant.solution.customer.utils.CustomerServiceHelper;
 import com.teenthofabud.restaurant.solution.customer.address.data.AddressEntity;
 import com.teenthofabud.restaurant.solution.customer.address.data.AddressVo;
 import com.teenthofabud.restaurant.solution.customer.address.service.AddressService;
@@ -20,7 +20,6 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -31,7 +30,7 @@ public class AccountEntity2VoConverter extends TOABBaseEntity2VoConverter<Accoun
     private GenderServiceClient genderServiceClient;
     private AddressService addressService;
     private List<String> fieldsToEscape;
-    private AddressEntity2VoConverter entity2VoConverter;
+    private CustomerServiceHelper customerServiceHelper;
 
     @Value("#{'${res.customer.account.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
@@ -39,13 +38,13 @@ public class AccountEntity2VoConverter extends TOABBaseEntity2VoConverter<Accoun
     }
 
     @Autowired
-    public void setAddressService(AddressService addressService) {
-        this.addressService = addressService;
+    public void setAccountServiceHelper(CustomerServiceHelper customerServiceHelper) {
+        this.customerServiceHelper = customerServiceHelper;
     }
 
     @Autowired
-    public void setEntity2VoConverter(AddressEntity2VoConverter entity2VoConverter) {
-        this.entity2VoConverter = entity2VoConverter;
+    public void setAddressService(AddressService addressService) {
+        this.addressService = addressService;
     }
 
     @Autowired
@@ -88,16 +87,6 @@ public class AccountEntity2VoConverter extends TOABBaseEntity2VoConverter<Accoun
         return vo;
     }
 
-    private List<AddressVo> entity2DetailedVoList(List<AddressEntity> addressEntityList) {
-        List<AddressVo> addressDetailsList = new ArrayList<>(addressEntityList.size());
-        for(AddressEntity entity : addressEntityList) {
-            AddressVo vo = entity2VoConverter.convert(entity);
-            log.debug("Converting {} to {}", entity, vo);
-            addressDetailsList.add(vo);
-        }
-        return addressDetailsList;
-    }
-
     @Deprecated
     private void expandSecondLevelFields(AccountEntity entity, AccountVo vo) {
         TOABCascadeLevel cascadeLevel = TOABRequestContextHolder.getCascadeLevelContext();
@@ -110,7 +99,7 @@ public class AccountEntity2VoConverter extends TOABBaseEntity2VoConverter<Accoun
                 }
                 if(!fieldsToEscape.contains("addresses")) {
                     List<AddressEntity> addressEntities = entity.getAddresses();
-                    List<AddressVo> addressDetailsList = entity2DetailedVoList(addressEntities);
+                    List<AddressVo> addressDetailsList = customerServiceHelper.addressEntity2DetailedVoList(addressEntities);
                     vo.setAddresses(addressDetailsList);
                     log.debug("Retrieved {} addresses for account id: {}", addressDetailsList.size(), entity.getId());
                 }
@@ -135,7 +124,7 @@ public class AccountEntity2VoConverter extends TOABBaseEntity2VoConverter<Accoun
                     Callable<List<AddressVo>> addressEntity2VoConversion = () -> {
                         TOABRequestContextHolder.setCascadeLevelContext(TOABCascadeLevel.ZERO);
                         List<AddressEntity> addressEntities = entity.getAddresses();
-                        List<AddressVo> addressDetailsList = entity2DetailedVoList(addressEntities);
+                        List<AddressVo> addressDetailsList = customerServiceHelper.addressEntity2DetailedVoList(addressEntities);
                         TOABRequestContextHolder.clearCascadeLevelContext();
                         return addressDetailsList;
                     };
