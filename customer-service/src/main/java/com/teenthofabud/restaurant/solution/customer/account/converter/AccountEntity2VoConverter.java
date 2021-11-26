@@ -99,7 +99,7 @@ public class AccountEntity2VoConverter extends TOABBaseEntity2VoConverter<Accoun
                 }
                 if(!fieldsToEscape.contains("addresses")) {
                     List<AddressEntity> addressEntities = entity.getAddresses();
-                    List<AddressVo> addressDetailsList = customerServiceHelper.addressEntity2DetailedVoList(addressEntities);
+                    List<AddressVo> addressDetailsList = customerServiceHelper.addressEntity2DetailedVo(addressEntities);
                     vo.setAddresses(addressDetailsList);
                     log.debug("Retrieved {} addresses for account id: {}", addressDetailsList.size(), entity.getId());
                 }
@@ -124,7 +124,7 @@ public class AccountEntity2VoConverter extends TOABBaseEntity2VoConverter<Accoun
                     Callable<List<AddressVo>> addressEntity2VoConversion = () -> {
                         TOABRequestContextHolder.setCascadeLevelContext(TOABCascadeLevel.ZERO);
                         List<AddressEntity> addressEntities = entity.getAddresses();
-                        List<AddressVo> addressDetailsList = customerServiceHelper.addressEntity2DetailedVoList(addressEntities);
+                        List<AddressVo> addressDetailsList = customerServiceHelper.addressEntity2DetailedVo(addressEntities);
                         TOABRequestContextHolder.clearCascadeLevelContext();
                         return addressDetailsList;
                     };

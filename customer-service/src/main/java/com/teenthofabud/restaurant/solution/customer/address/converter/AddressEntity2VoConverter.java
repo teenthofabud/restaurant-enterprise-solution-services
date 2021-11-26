@@ -5,6 +5,7 @@ import com.teenthofabud.core.common.converter.TOABBaseEntity2VoConverter;
 import com.teenthofabud.core.common.data.dto.TOABRequestContextHolder;
 import com.teenthofabud.core.common.error.TOABErrorCode;
 import com.teenthofabud.core.common.error.TOABSystemException;
+import com.teenthofabud.restaurant.solution.customer.CustomerServiceApplication;
 import com.teenthofabud.restaurant.solution.customer.account.converter.AccountEntity2VoConverter;
 import com.teenthofabud.restaurant.solution.customer.account.data.AccountVo;
 import com.teenthofabud.restaurant.solution.customer.address.data.AddressEntity;
@@ -13,6 +14,7 @@ import com.teenthofabud.restaurant.solution.customer.integration.external.countr
 import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.data.CountryVo;
 import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.data.StateVo;
 import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.proxy.CountryStateCityApiClient;
+import com.teenthofabud.restaurant.solution.customer.utils.CustomerServiceHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,12 +37,12 @@ public class AddressEntity2VoConverter extends TOABBaseEntity2VoConverter<Addres
         this.fieldsToEscape = fieldsToEscape;
     }
 
-    private AccountEntity2VoConverter accountEntity2VoConverter;
+    private CustomerServiceHelper customerServiceHelper;
     private CountryStateCityApiClient countryStateCityApiClient;
 
     @Autowired
-    public void setAccountEntity2VoConverter(AccountEntity2VoConverter accountEntity2VoConverter) {
-        this.accountEntity2VoConverter = accountEntity2VoConverter;
+    public void setCustomerServiceHelper(CustomerServiceHelper customerServiceHelper) {
+        this.customerServiceHelper = customerServiceHelper;
     }
 
     @Autowired
@@ -83,35 +85,6 @@ public class AddressEntity2VoConverter extends TOABBaseEntity2VoConverter<Addres
         return vo;
     }
 
-    @Deprecated
-    private void expandSecondLevelFields(AddressEntity entity, AddressVo vo) {
-        TOABCascadeLevel cascadeLevel = TOABRequestContextHolder.getCascadeLevelContext();
-        switch(cascadeLevel) {
-            case TWO:
-                AccountVo accountVo = accountEntity2VoConverter.convert(entity.getAccount());
-                vo.setAccount(accountVo);
-                log.debug("Retrieved {} for accountId: {}", accountVo, entity.getAccount().getId());
-                CountryVo country = countryStateCityApiClient.getCountryDetailsFromISO2Code(entity.getCountryId());
-                log.debug("Retrieved {} for country is: {}", country, entity.getCountryId());
-                vo.setCountry(country);
-                StateVo state = countryStateCityApiClient.getTheStateDetailsFromISO2Code(entity.getCountryId(), entity.getStateId());
-                log.debug("Retrieved {} for state id: {}", state, entity.getStateId());
-                vo.setState(state);
-                List<CityVo> cities = countryStateCityApiClient.getTheListOfCitiesInACountry(entity.getCountryId());
-                Optional<CityVo> optionalCity = cities.stream().filter(c -> c.getId().toString().compareTo(entity.getCityId()) == 0).findFirst();
-                log.debug("Retrieved {} for city id: {}", optionalCity.get(), entity.getCityId());
-                vo.setCity(optionalCity.get());
-                break;
-            default:
-                vo.setAccountId(entity.getAccount().getId().toString());
-                vo.setCityId(entity.getCityId());
-                vo.setStateId(entity.getStateId());
-                vo.setCountryId(entity.getCountryId());
-                log.debug("only first level cascaded for accountId");
-                break;
-        }
-    }
-
     private void expandSecondLevelFields(AddressEntity entity, AddressVo vo, String fieldName) {
         TOABCascadeLevel cascadeLevel = TOABRequestContextHolder.getCascadeLevelContext();
         switch(cascadeLevel) {
@@ -119,7 +92,7 @@ public class AddressEntity2VoConverter extends TOABBaseEntity2VoConverter<Addres
                 if(!fieldsToEscape.contains("accountId") && fieldName.compareTo("accountId") == 0) {
                     Callable<AccountVo> accountEntity2VoConversion = () -> {
                         TOABRequestContextHolder.setCascadeLevelContext(TOABCascadeLevel.ZERO);
-                        AccountVo accountVo = accountEntity2VoConverter.convert(entity.getAccount());
+                        AccountVo accountVo = customerServiceHelper.accountEntity2DetailedVo(entity.getAccount());
                         TOABRequestContextHolder.clearCascadeLevelContext();
                         return accountVo;
                     };

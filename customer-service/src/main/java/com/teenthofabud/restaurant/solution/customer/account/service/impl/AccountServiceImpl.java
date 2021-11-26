@@ -65,7 +65,6 @@ public class AccountServiceImpl implements AccountService {
         return Integer.compare(s1.getFirstName().compareTo(s2.getFirstName()), s1.getLastName().compareTo(s2.getLastName()));
     };
 
-    private AccountEntity2VoConverter entity2VoConverter;
     private AccountForm2EntityConverter form2EntityConverter;
     private AccountDto2EntityConverter dto2EntityConverter;
     private AccountForm2EntityMapper form2EntityMapper;
@@ -99,11 +98,6 @@ public class AccountServiceImpl implements AccountService {
     @Autowired
     public void setToabBaseService(TOABBaseService toabBaseService) {
         this.toabBaseService = toabBaseService;
-    }
-
-    @Autowired
-    public void setEntity2VoConverter(AccountEntity2VoConverter entity2VoConverter) {
-        this.entity2VoConverter = entity2VoConverter;
     }
 
     @Autowired
@@ -177,12 +171,9 @@ public class AccountServiceImpl implements AccountService {
     public Set<AccountVo> retrieveAllByNaturalOrdering() {
         log.info("Requesting all AccountEntity by their natural ordering");
         List<AccountEntity> accountEntityList = repository.findAll();
+        List<AccountVo> accountVoList = customerServiceHelper.accountEntity2DetailedVo(accountEntityList);
         Set<AccountVo> naturallyOrderedSet = new TreeSet<AccountVo>(CMP_BY_FIRST_NAME_AND_LAST_NAME);
-        for(AccountEntity entity : accountEntityList) {
-            AccountVo dto = entity2VoConverter.convert(entity);
-            log.debug("Converting {} to {}", entity, dto);
-            naturallyOrderedSet.add(dto);
-        }
+        naturallyOrderedSet.addAll(accountVoList);
         log.info("{} AccountVo available", naturallyOrderedSet.size());
         return naturallyOrderedSet;
     }
@@ -198,7 +189,7 @@ public class AccountServiceImpl implements AccountService {
             throw new AccountException(CustomerErrorCode.CUST_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
         AccountEntity entity = optEntity.get();
-        AccountVo vo = entity2VoConverter.convert(entity);
+        AccountVo vo = customerServiceHelper.accountEntity2DetailedVo(entity);
         log.info("Found AccountVo by id: {}", id);
         return vo;
     }
@@ -217,7 +208,7 @@ public class AccountServiceImpl implements AccountService {
         AccountEntity entity = optEntity.get();
         TOABCascadeLevel cascadeLevel = optionalCascadeLevel.isPresent() ? optionalCascadeLevel.get() : TOABCascadeLevel.ZERO;
         TOABRequestContextHolder.setCascadeLevelContext(cascadeLevel);
-        AccountVo vo = entity2VoConverter.convert(entity);
+        AccountVo vo = customerServiceHelper.accountEntity2DetailedVo(entity);
         log.debug("AccountVo populated with fields cascaded to level: {}", cascadeLevel);
         TOABRequestContextHolder.clearCascadeLevelContext();
         return vo;
@@ -237,7 +228,7 @@ public class AccountServiceImpl implements AccountService {
         }
         List<AccountEntity> accountEntityList = repository.findByGenderId(genderId);
         if(accountEntityList != null && !accountEntityList.isEmpty()) {
-            List<AccountVo> matchedAccountList = customerServiceHelper.accountEntity2DetailedVoList(accountEntityList);
+            List<AccountVo> matchedAccountList = customerServiceHelper.accountEntity2DetailedVo(accountEntityList);
             log.info("Found {} AccountVo matching with genderId: {}", matchedAccountList.size(),genderId);
             return matchedAccountList;
         }
@@ -296,7 +287,7 @@ public class AccountServiceImpl implements AccountService {
         Example<AccountEntity> accountEntityExample = Example.of(entity, matcherCriteria);
         List<AccountEntity> accountEntityList = repository.findAll(accountEntityExample);
         if(accountEntityList != null && !accountEntityList.isEmpty()) {
-            matchedAccountList = customerServiceHelper.accountEntity2DetailedVoList(accountEntityList);
+            matchedAccountList = customerServiceHelper.accountEntity2DetailedVo(accountEntityList);
             log.info("Found {} AccountVo matching with provided parameters : {}", matchedAccountList.size(), providedFilters);
         }
         log.info("No AccountVo available matching with provided parameters : {}", matchedAccountList.size(), providedFilters);
@@ -371,7 +362,7 @@ public class AccountServiceImpl implements AccountService {
         Example<AccountEntity> accountEntityExample = Example.of(entity, matcherCriteria);
         List<AccountEntity> accountEntityList = repository.findAll(accountEntityExample);
         if(accountEntityList != null && !accountEntityList.isEmpty()) {
-            matchedAccountList = customerServiceHelper.accountEntity2DetailedVoList(accountEntityList);
+            matchedAccountList = customerServiceHelper.accountEntity2DetailedVo(accountEntityList);
             log.info("Found {} AccountVo matching with provided parameters : {}", matchedAccountList.size(), providedFilters);
         }
         log.info("No AccountVo available matching with provided parameters : {}", matchedAccountList.size(), providedFilters);
