@@ -1,23 +1,12 @@
 package com.teenthofabud.restaurant.solution.establishmentarea.kitchen.data;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import com.teenthofabud.core.common.data.entity.TOABBaseEntity;
 
 import com.teenthofabud.restaurant.solution.establishmentarea.floor.data.FloorEntity;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Getter
 @Setter
@@ -25,6 +14,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @Entity
 @Table(name = "kitchen")
+@EntityListeners(AuditingEntityListener.class)
+@ToString(onlyExplicitlyIncluded = true)
 public class KitchenEntity extends TOABBaseEntity {
 
 	@Id
