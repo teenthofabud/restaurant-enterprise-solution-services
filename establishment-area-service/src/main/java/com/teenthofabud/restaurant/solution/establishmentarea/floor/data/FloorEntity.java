@@ -33,13 +33,13 @@ public class FloorEntity extends TOABBaseEntity{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
-	private int flrId;
+	private Long flrId;
 	@Column(name = "name")
 	private String flrName;
 	
-	@OneToMany(mappedBy = "floor",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "floor",fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
 	private List<KitchenEntity> kitchen = new ArrayList<KitchenEntity>();
 	
-	@OneToMany(mappedBy = "floor",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "floor",fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
 	private List<TableEntity> table = new ArrayList<TableEntity>();
 }

@@ -30,7 +30,7 @@ public class KitchenEntity extends TOABBaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
-	private int kitchenId;
+	private Long kitchenId;
 
 	@Column(name = "name")
 	private String kitchenName;

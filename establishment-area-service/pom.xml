@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.teenthofabud.restaurant.solution</groupId>
         <artifactId>restaurant-enterprise-solution-services</artifactId>
-        <version>2021.1-SNAPSHOT</version>
+        <version>2021.2-SNAPSHOT</version>
         <!--<relativePath/>-->
     </parent>
 
@@ -17,7 +17,7 @@
 
     <groupId>com.teenthofabud.restaurant.solution</groupId>
     <artifactId>restaurant-solution-establishment-area-service</artifactId>
-    <version>2021.1-SNAPSHOT</version>
+    <version>2021.2-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>${service.prefix}-service</name>
     <description>manage entity definition attributes for establishment area service</description>
