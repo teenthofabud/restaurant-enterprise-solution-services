@@ -188,7 +188,7 @@ public class AccountController {
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("genderid/{genderId}")
-    public List<AccountVo> getAllAccountsByAlbumId(@PathVariable String genderId) throws AccountException {
+    public List<AccountVo> getAllAccountsByGenderId(@PathVariable String genderId) throws AccountException {
         log.debug("Requesting all available accounts with given genderId");
         if(StringUtils.hasText(StringUtils.trimWhitespace(genderId))) {
             List<AccountVo> matchedByGenderIds = service.retrieveAllMatchingDetailsByGenderId(genderId);

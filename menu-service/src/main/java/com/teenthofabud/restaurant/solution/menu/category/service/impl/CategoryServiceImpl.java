@@ -12,7 +12,6 @@ import com.teenthofabud.core.common.error.TOABBaseException;
 import com.teenthofabud.core.common.error.TOABSystemException;
 import com.teenthofabud.core.common.service.TOABBaseService;
 import com.teenthofabud.restaurant.solution.menu.category.converter.CategoryDto2EntityConverter;
-import com.teenthofabud.restaurant.solution.menu.category.converter.CategoryEntity2VoConverter;
 import com.teenthofabud.restaurant.solution.menu.category.converter.CategoryForm2EntityConverter;
 import com.teenthofabud.restaurant.solution.menu.category.data.*;
 import com.teenthofabud.restaurant.solution.menu.category.mapper.CategoryEntitySelfMapper;
@@ -23,6 +22,7 @@ import com.teenthofabud.restaurant.solution.menu.category.validator.CategoryDtoV
 import com.teenthofabud.restaurant.solution.menu.category.validator.CategoryFormRelaxedValidator;
 import com.teenthofabud.restaurant.solution.menu.category.validator.CategoryFormValidator;
 import com.teenthofabud.restaurant.solution.menu.error.MenuErrorCode;
+import com.teenthofabud.restaurant.solution.menu.utils.MenuServiceHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -47,7 +47,6 @@ public class CategoryServiceImpl implements CategoryService {
         return s1.getName().compareTo(s2.getName());
     };
 
-    private CategoryEntity2VoConverter entity2VoConverter;
     private CategoryForm2EntityConverter form2EntityConverter;
     private CategoryDto2EntityConverter dto2EntityConverter;
     private CategoryForm2EntityMapper form2EntityMapper;
@@ -58,15 +57,17 @@ public class CategoryServiceImpl implements CategoryService {
     private CategoryRepository repository;
     private TOABBaseService toabBaseService;
     private ObjectMapper om;
+    private MenuServiceHelper menuServiceHelper;
 
     @Autowired
     public void setToabBaseService(TOABBaseService toabBaseService) {
         this.toabBaseService = toabBaseService;
     }
 
+
     @Autowired
-    public void setEntity2VoConverter(CategoryEntity2VoConverter entity2VoConverter) {
-        this.entity2VoConverter = entity2VoConverter;
+    public void setMenuServiceHelper(MenuServiceHelper menuServiceHelper) {
+        this.menuServiceHelper = menuServiceHelper;
     }
 
     @Autowired
@@ -119,16 +120,6 @@ public class CategoryServiceImpl implements CategoryService {
         this.formValidator = formValidator;
     }
 
-    private List<CategoryVo> entity2DetailedVoList(List<CategoryEntity> categoryEntityList) {
-        List<CategoryVo> categoryDetailsList = new ArrayList<>(categoryEntityList.size());
-        for(CategoryEntity entity : categoryEntityList) {
-            CategoryVo vo = entity2VoConverter.convert(entity);
-            log.debug("Converting {} to {}", entity, vo);
-            categoryDetailsList.add(vo);
-        }
-        return categoryDetailsList;
-    }
-
     private Long parseCategoryId(String id) throws CategoryException {
         Long categoryId = null;
         try {
@@ -150,12 +141,9 @@ public class CategoryServiceImpl implements CategoryService {
     public Set<CategoryVo> retrieveAllByNaturalOrdering() {
         log.info("Requesting all CategoryEntity by their natural ordering");
         List<CategoryEntity> categoryEntityList = repository.findAll();
-        Set<CategoryVo> naturallyOrderedSet = new TreeSet<CategoryVo>(CMP_BY_NAME);
-        for(CategoryEntity entity : categoryEntityList) {
-            CategoryVo dto = entity2VoConverter.convert(entity);
-            log.debug("Converting {} to {}", entity, dto);
-            naturallyOrderedSet.add(dto);
-        }
+        List<CategoryVo> categoryVoList = menuServiceHelper.categoryEntity2DetailedVo(categoryEntityList);
+        Set<CategoryVo> naturallyOrderedSet = new TreeSet<>(CMP_BY_NAME);
+        naturallyOrderedSet.addAll(categoryVoList);
         log.info("{} CategoryVo available", naturallyOrderedSet.size());
         return naturallyOrderedSet;
     }
@@ -174,7 +162,7 @@ public class CategoryServiceImpl implements CategoryService {
         CategoryEntity entity = optEntity.get();
         TOABCascadeLevel cascadeLevel = optionalCascadeLevel.isPresent() ? optionalCascadeLevel.get() : TOABCascadeLevel.ZERO;
         TOABRequestContextHolder.setCascadeLevelContext(cascadeLevel);
-        CategoryVo vo = entity2VoConverter.convert(entity);
+        CategoryVo vo = menuServiceHelper.categoryEntity2DetailedVo(entity);
         log.debug("CategoryVo populated with fields cascaded to level: {}", cascadeLevel);
         TOABRequestContextHolder.clearCascadeLevelContext();
         return vo;
@@ -215,10 +203,8 @@ public class CategoryServiceImpl implements CategoryService {
         }
         Example<CategoryEntity> categoryEntityExample = Example.of(entity, matcherCriteria);
         List<CategoryEntity> categoryEntityList = repository.findAll(categoryEntityExample);
-        if(categoryEntityList != null && !categoryEntityList.isEmpty()) {
-            matchedCategoryList = entity2DetailedVoList(categoryEntityList);
-            log.info("Found {} CategoryVo matching with provided parameters : {}", matchedCategoryList.size(), providedFilters);
-        }
+        matchedCategoryList = menuServiceHelper.categoryEntity2DetailedVo(categoryEntityList);
+        log.info("Found {} CategoryVo matching with provided parameters : {}", matchedCategoryList.size(), providedFilters);
         log.info("No CategoryVo available matching with provided parameters : {}", matchedCategoryList.size(), providedFilters);
         return matchedCategoryList;
     }
@@ -455,7 +441,7 @@ public class CategoryServiceImpl implements CategoryService {
                 || repository.existsByName(patchedCategoryForm.getName().get())) {
             log.debug(CategoryMessageTemplate.MSG_TEMPLATE_CATEGORY_EXISTS_BY_NAME.getValue(), patchedCategoryForm.getName().get());
             throw new CategoryException(MenuErrorCode.MENU_EXISTS,
-                    new Object[]{ "phoneNumber", patchedCategoryForm.getName().get() });
+                    new Object[]{ "name", patchedCategoryForm.getName().get() });
         }
         log.debug(CategoryMessageTemplate.MSG_TEMPLATE_CATEGORY_NON_EXISTENCE_BY_NAME.getValue(), patchedCategoryForm.getName().get());
 

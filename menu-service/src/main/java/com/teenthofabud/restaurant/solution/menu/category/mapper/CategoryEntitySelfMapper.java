@@ -4,6 +4,7 @@ import com.teenthofabud.core.common.mapper.SingleChannelMapper;
 import com.teenthofabud.restaurant.solution.menu.category.data.CategoryEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.Optional;
 
@@ -19,12 +20,12 @@ public class CategoryEntitySelfMapper implements SingleChannelMapper<CategoryEnt
             changeSW = true;
             log.debug("Source CategoryEntity.id is valid");
         }
-        if(source.getName() != null && source.getName().compareTo(target.getName()) != 0) {
+        if(source.getName() != null && StringUtils.hasText(StringUtils.trimWhitespace(source.getName())) && source.getName().compareTo(target.getName()) != 0) {
             target.setName(source.getName());
             changeSW = true;
             log.debug("Source CategoryEntity.name is valid");
         }
-        if(source.getDescription() != null && source.getDescription().compareTo(target.getDescription()) != 0) {
+        if(source.getDescription() != null && StringUtils.hasText(StringUtils.trimWhitespace(source.getDescription())) && source.getDescription().compareTo(target.getDescription()) != 0) {
             target.setDescription(source.getDescription());
             changeSW = true;
             log.debug("Source CategoryEntity.description is valid");

@@ -9,6 +9,10 @@ import com.teenthofabud.restaurant.solution.menu.category.data.CategoryForm;
 import com.teenthofabud.restaurant.solution.menu.category.data.CategoryVo;
 import com.teenthofabud.restaurant.solution.menu.category.repository.CategoryRepository;
 import com.teenthofabud.restaurant.solution.menu.error.MenuErrorCode;
+import com.teenthofabud.restaurant.solution.menu.item.data.ItemEntity;
+import com.teenthofabud.restaurant.solution.menu.item.data.ItemVo;
+import com.teenthofabud.restaurant.solution.menu.item.data.VegeterianStatus;
+import com.teenthofabud.restaurant.solution.menu.item.repository.ItemRepository;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -47,10 +51,11 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
     private static final String CATEGORY_URI_FILTER = "/category/filter";
 
     private CategoryRepository categoryRepository;
+    private ItemRepository itemRepository;
 
     private int metadataServicePort;
 
-    @Value("${customer.metadata.service.port}")
+    @Value("${menu.metadata.service.port}")
     public void setMetadataServicePort(int metadataServicePort) {
         this.metadataServicePort = metadataServicePort;
     }
@@ -58,6 +63,11 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
     @Autowired
     public void setCategoryRepository(CategoryRepository categoryRepository) {
         this.categoryRepository = categoryRepository;
+    }
+
+    @Autowired
+    public void setItemRepository(ItemRepository itemRepository) {
+        this.itemRepository = itemRepository;
     }
 
     private CategoryForm categoryForm;
@@ -72,8 +82,23 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
 
     private List<PatchOperationForm> patches;
 
+    private ItemVo itemVo1;
+    private ItemVo itemVo2;
+    private ItemVo itemVo3;
+    private ItemVo itemVo4;
+    private ItemVo itemVo5;
+    private ItemEntity itemEntity1;
+    private ItemEntity itemEntity2;
+    private ItemEntity itemEntity3;
+    private ItemEntity itemEntity4;
+    private ItemEntity itemEntity5;
+
     @BeforeEach
     private void init() {
+
+        /**
+         * Category
+         */
 
         categoryForm = new CategoryForm();
         categoryForm.setName("New Name");
@@ -131,10 +156,141 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
         categoryVo4.setName(categoryEntity4.getName());
         categoryVo4.setDescription(categoryEntity4.getDescription());
 
+        /**
+         * Item
+         */
+
+        itemEntity1 = new ItemEntity();
+        itemEntity1.setName("Item 1");
+        itemEntity1.setIsVegeterian(Boolean.FALSE);
+        itemEntity1.setImageUrl("Item 1 Image");
+        itemEntity1.setDescription("Item 1 description");
+        itemEntity1.setActive(Boolean.TRUE);
+        itemEntity1.setCategory(categoryEntity1);
+
+        itemEntity1 = itemRepository.save(itemEntity1);
+
+        itemVo1 = new ItemVo();
+        itemVo1.setId(itemEntity1.getId().toString());
+        itemVo1.setName(itemEntity1.getName());
+        itemVo1.setIsVegeterian(VegeterianStatus.getSwitchValue(itemEntity1.getIsVegeterian()));
+        itemVo1.setCategoryId(itemEntity1.getCategory().getId().toString());
+        itemVo1.setDescription(itemEntity1.getDescription());
+        itemVo1.setImageUrl(itemEntity1.getImageUrl());
+
+        itemEntity2 = new ItemEntity();
+        itemEntity2.setName("Item 2");
+        itemEntity2.setIsVegeterian(Boolean.TRUE);
+        itemEntity2.setImageUrl("Item 2 Image");
+        itemEntity2.setDescription("Item 2 description");
+        itemEntity2.setActive(Boolean.TRUE);
+        itemEntity2.setCategory(categoryEntity2);
+
+        itemEntity2 = itemRepository.save(itemEntity2);
+
+        itemVo2 = new ItemVo();
+        itemVo2.setId(itemEntity2.getId().toString());
+        itemVo2.setName(itemEntity2.getName());
+        itemVo2.setIsVegeterian(VegeterianStatus.getSwitchValue(itemEntity2.getIsVegeterian()));
+        itemVo2.setCategoryId(itemEntity2.getCategory().getId().toString());
+        itemVo2.setDescription(itemEntity2.getDescription());
+        itemVo2.setImageUrl(itemEntity2.getImageUrl());
+
+        itemEntity3 = new ItemEntity();
+        itemEntity3.setName("Item 3");
+        itemEntity3.setIsVegeterian(Boolean.FALSE);
+        itemEntity3.setImageUrl("Item 3 Image");
+        itemEntity3.setDescription("Item 3 description");
+        itemEntity3.setActive(Boolean.TRUE);
+        itemEntity3.setCategory(categoryEntity3);
+
+        itemEntity3 = itemRepository.save(itemEntity3);
+
+        itemVo3 = new ItemVo();
+        itemVo3.setId(itemEntity3.getId().toString());
+        itemVo3.setName(itemEntity3.getName());
+        itemVo3.setIsVegeterian(VegeterianStatus.getSwitchValue(itemEntity3.getIsVegeterian()));
+        itemVo3.setCategoryId(itemEntity3.getCategory().getId().toString());
+        itemVo3.setDescription(itemEntity3.getDescription());
+        itemVo3.setImageUrl(itemEntity3.getImageUrl());
+
+        itemEntity4 = new ItemEntity();
+        itemEntity4.setName("Item 4");
+        itemEntity4.setIsVegeterian(Boolean.TRUE);
+        itemEntity4.setImageUrl("Item 4 Image");
+        itemEntity4.setDescription("Item 4 description");
+        itemEntity4.setActive(Boolean.TRUE);
+        itemEntity4.setCategory(categoryEntity4);
+
+        itemEntity4 = itemRepository.save(itemEntity4);
+
+        itemVo4 = new ItemVo();
+        itemVo4.setId(itemEntity4.getId().toString());
+        itemVo4.setName(itemEntity4.getName());
+        itemVo4.setIsVegeterian(VegeterianStatus.getSwitchValue(itemEntity4.getIsVegeterian()));
+        itemVo4.setCategoryId(itemEntity4.getCategory().getId().toString());
+        itemVo4.setDescription(itemEntity4.getDescription());
+        itemVo4.setImageUrl(itemEntity4.getImageUrl());
+
+        itemEntity5 = new ItemEntity();
+        itemEntity5.setName("Item 5");
+        itemEntity5.setIsVegeterian(Boolean.FALSE);
+        itemEntity5.setImageUrl("Item 5 Image");
+        itemEntity5.setDescription("Item 5 description");
+        itemEntity5.setActive(Boolean.TRUE);
+        itemEntity5.setCategory(categoryEntity4);
+
+        itemEntity5 = itemRepository.save(itemEntity5);
+
+        itemVo5 = new ItemVo();
+        itemVo5.setId(itemEntity5.getId().toString());
+        itemVo5.setName(itemEntity5.getName());
+        itemVo5.setIsVegeterian(VegeterianStatus.getSwitchValue(itemEntity5.getIsVegeterian()));
+        itemVo5.setCategoryId(itemEntity5.getCategory().getId().toString());
+        itemVo5.setDescription(itemEntity5.getDescription());
+        itemVo5.setImageUrl(itemEntity5.getImageUrl());
+
+        categoryEntity1.setItems(new ArrayList<ItemEntity>(List.of(itemEntity1)));
+        categoryEntity1 = categoryRepository.save(categoryEntity1);
+        categoryEntity2.setItems(new ArrayList<ItemEntity>(List.of(itemEntity2)));
+        categoryEntity2 = categoryRepository.save(categoryEntity2);
+        categoryEntity3.setItems(new ArrayList<ItemEntity>(List.of(itemEntity3)));
+        categoryEntity3 = categoryRepository.save(categoryEntity3);
+        categoryEntity4.setItems(new ArrayList<ItemEntity>(List.of(itemEntity4, itemEntity5)));
+        categoryEntity4 = categoryRepository.save(categoryEntity4);
+
+        itemVo1.setCategory(categoryVo1);
+        itemVo2.setCategory(categoryVo2);
+        itemVo3.setCategory(categoryVo3);
+        itemVo4.setCategory(categoryVo4);
+        itemVo5.setCategory(categoryVo4);
+
+        categoryVo1.setItems(Arrays.asList(itemVo1));
+        categoryVo2.setItems(Arrays.asList(itemVo2));
+        categoryVo3.setItems(Arrays.asList(itemVo3));
+        categoryVo4.setItems(Arrays.asList(itemVo4, itemVo5));
+
     }
 
     @AfterEach
     private void destroy() {
+        itemEntity1.setCategory(null);
+        itemEntity2.setCategory(null);
+        itemEntity3.setCategory(null);
+        itemEntity4.setCategory(null);
+        itemEntity5.setCategory(null);
+
+        itemRepository.deleteById(itemEntity1.getId());
+        itemRepository.deleteById(itemEntity2.getId());
+        itemRepository.deleteById(itemEntity3.getId());
+        itemRepository.deleteById(itemEntity4.getId());
+        itemRepository.deleteById(itemEntity5.getId());
+
+        categoryEntity1.setItems(null);
+        categoryEntity2.setItems(null);
+        categoryEntity3.setItems(null);
+        categoryEntity4.setItems(null);
+        
         categoryRepository.deleteById(categoryEntity1.getId());
         categoryRepository.deleteById(categoryEntity2.getId());
         categoryRepository.deleteById(categoryEntity3.getId());
@@ -157,7 +313,7 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Category_Post_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_MENU_001_WhenRequested_WithEmptyName() throws Exception {
+    public void test_Category_Post_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_WithEmptyName() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "name";
@@ -193,7 +349,7 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Category_Post_ShouldReturn_422Response_And_ErrorCode_PHARM_LEARN_MENU_003_WhenPosted_WithNoCategoryForm() throws Exception {
+    public void test_Category_Post_ShouldReturn_422Response_And_ErrorCode_RES_MENU_003_WhenPosted_WithNoCategoryForm() throws Exception {
         String id = categoryEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_UNEXPECTED.getErrorCode();
@@ -229,7 +385,7 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "", " " })
-    public void test_Category_Get_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_MENU_001_WhenRequestedBy_EmptyNameOnly(String name) throws Exception {
+    public void test_Category_Get_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequestedBy_EmptyNameOnly(String name) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "filters";
@@ -246,7 +402,7 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "", " " })
-    public void test_Category_Get_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_MENU_001_WhenRequestedBy_EmptyDescriptionOnly(String description) throws Exception {
+    public void test_Category_Get_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequestedBy_EmptyDescriptionOnly(String description) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "filters";
@@ -263,7 +419,7 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "", " " })
-    public void test_Category_Get_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_MENU_001_WhenRequestedBy_EmptyPhoneNumberOnly(String phoneNumber) throws Exception {
+    public void test_Category_Get_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequestedBy_EmptyPhoneNumberOnly(String phoneNumber) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "filters";
@@ -357,8 +513,7 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
 
         mvcResult = this.mockMvc.perform(get(CATEGORY_URI_FILTER)
                         .queryParam("name", "Category 1")
-                        .queryParam("description", "Category 1")
-                        .queryParam("phoneNumber", "1122334455"))
+                        .queryParam("description", "Category 1"))
                 .andDo(print())
                 .andReturn();
 
@@ -404,6 +559,7 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
     public void test_Category_Get_ShouldReturn_200Response_And_CategoryDetails_WhenRequested_ById() throws Exception {
         String id = categoryEntity1.getId().toString();
         MvcResult mvcResult = null;
+        categoryVo1.setItems(null);
 
         mvcResult = this.mockMvc.perform(get(CATEGORY_URI_BY_ID, id))
                 .andDo(print())
@@ -417,7 +573,7 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { " ", "r" })
-    public void test_Category_Get_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_MENU_001_WhenRequestedBy_EmptyInvalidId(String id) throws Exception {
+    public void test_Category_Get_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequestedBy_EmptyInvalidId(String id) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "id";
@@ -433,7 +589,7 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Category_Get_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_MENU_002_WhenRequested_ByAbsentId() throws Exception {
+    public void test_Category_Get_ShouldReturn_400Response_And_ErrorCode_RES_MENU_002_WhenRequested_ByAbsentId() throws Exception {
         String id = "5";
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_NOT_FOUND.getErrorCode();
@@ -485,7 +641,30 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Category_Delete_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_MENU_001__WhenDeleted_ByEmptyId() throws Exception {
+    public void test_Category_Get_ShouldReturn_200Response_And_DomainDetails_WhenRequested_ById_AndSecondLevel_Cascade() throws Exception {
+        String id = categoryEntity1.getId().toString();
+        MvcResult mvcResult = null;
+
+        mvcResult = this.mockMvc.perform(get(CATEGORY_URI_BY_ID, id)
+                        .queryParam("cascadeUntilLevel", TOABCascadeLevel.TWO.getLevelCode()))
+                .andDo(print())
+                .andReturn();
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(categoryVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), CategoryVo.class).getId());
+        Assertions.assertEquals(categoryVo1.getName(), om.readValue(mvcResult.getResponse().getContentAsString(), CategoryVo.class).getName());
+        Assertions.assertEquals(categoryVo1.getDescription(), om.readValue(mvcResult.getResponse().getContentAsString(), CategoryVo.class).getDescription());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), CategoryVo.class).getItems() != null);
+        Assertions.assertEquals(categoryVo1.getItems().size(), om.readValue(mvcResult.getResponse().getContentAsString(), CategoryVo.class).getItems().size());
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), CategoryVo.class).getCreatedBy()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), CategoryVo.class).getModifiedBy()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), CategoryVo.class).getCreatedOn()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), CategoryVo.class).getModifiedOn()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), CategoryVo.class).getActive()));
+    }
+
+    @Test
+    public void test_Category_Delete_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001__WhenDeleted_ByEmptyId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "id";
@@ -501,7 +680,7 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Category_Delete_ShouldReturn_422Response_And_ErrorCode_PHARM_LEARN_MENU_003_WhenDeleted_ByInvalidId() throws Exception {
+    public void test_Category_Delete_ShouldReturn_422Response_And_ErrorCode_RES_MENU_003_WhenDeleted_ByInvalidId() throws Exception {
         String id = " ";
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
@@ -518,7 +697,7 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Category_Delete_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_MENU_005_WhenDeleted_ByInactiveId() throws Exception {
+    public void test_Category_Delete_ShouldReturn_400Response_And_ErrorCode_RES_MENU_005_WhenDeleted_ByInactiveId() throws Exception {
         String id = categoryEntity4.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_INACTIVE.getErrorCode();
@@ -534,7 +713,7 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Category_Delete_ShouldReturn_404Response_And_ErrorCode_PHARM_LEARN_MENU_002_WhenDeleted_ByAbsentId() throws Exception {
+    public void test_Category_Delete_ShouldReturn_404Response_And_ErrorCode_RES_MENU_002_WhenDeleted_ByAbsentId() throws Exception {
         String id = "5";
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_NOT_FOUND.getErrorCode();
@@ -569,7 +748,7 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { " ", "r" })
-    public void test_Category_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_MENU_001_WhenUpdatedBy_EmptyInvalidId_AndCategoryDetails(String id) throws Exception {
+    public void test_Category_Put_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenUpdatedBy_EmptyInvalidId_AndCategoryDetails(String id) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "id";
@@ -587,7 +766,7 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Category_Put_ShouldReturn_404Response_And_ErrorCode_PHARM_LEARN_MENU_002_WhenUpdated_ByAbsentId_AndCategoryDetails() throws Exception {
+    public void test_Category_Put_ShouldReturn_404Response_And_ErrorCode_RES_MENU_002_WhenUpdated_ByAbsentId_AndCategoryDetails() throws Exception {
         String id = "5";
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_NOT_FOUND.getErrorCode();
@@ -607,7 +786,7 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Category_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_MENU_005_WhenUpdated_ByInactiveId_AndCategoryDetails() throws Exception {
+    public void test_Category_Put_ShouldReturn_400Response_And_ErrorCode_RES_MENU_005_WhenUpdated_ByInactiveId_AndCategoryDetails() throws Exception {
         String id = categoryEntity4.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_INACTIVE.getErrorCode();
@@ -625,7 +804,7 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Category_Put_ShouldReturn_422Response_And_ErrorCode_PHARM_LEARN_MENU_003_WhenUpdated_ById_AndNoCategoryDetails() throws Exception {
+    public void test_Category_Put_ShouldReturn_422Response_And_ErrorCode_RES_MENU_003_WhenUpdated_ById_AndNoCategoryDetails() throws Exception {
         String id = categoryEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_UNEXPECTED.getErrorCode();
@@ -645,7 +824,7 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Category_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_MENU_001_WhenRequested_ById_AndInvalidName() throws Exception {
+    public void test_Category_Put_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_ById_AndInvalidName() throws Exception {
         String id = categoryEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
@@ -665,7 +844,7 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Category_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_MENU_001_WhenRequested_ById_AndInvalidDescription() throws Exception {
+    public void test_Category_Put_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_ById_AndInvalidDescription() throws Exception {
         String id = categoryEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
@@ -685,7 +864,7 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Category_Put_ShouldReturn_422Response_And_ErrorCode_PHARM_LEARN_MENU_003_WhenUpdated_ById_AndEmptyCategoryDetails() throws Exception {
+    public void test_Category_Put_ShouldReturn_422Response_And_ErrorCode_RES_MENU_003_WhenUpdated_ById_AndEmptyCategoryDetails() throws Exception {
         String id = categoryEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_UNEXPECTED.getErrorCode();
@@ -740,7 +919,7 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Category_Patch_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_MENU_002_WhenUpdated_ByInvalidId_AndCategoryDetails() throws Exception {
+    public void test_Category_Patch_ShouldReturn_400Response_And_ErrorCode_RES_MENU_002_WhenUpdated_ByInvalidId_AndCategoryDetails() throws Exception {
         String id = "r";
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
@@ -760,7 +939,7 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Category_Patch_ShouldReturn_404Response_And_ErrorCode_PHARM_LEARN_MENU_002_WhenUpdated_ByAbsentId_AndCategoryDetails() throws Exception {
+    public void test_Category_Patch_ShouldReturn_404Response_And_ErrorCode_RES_MENU_002_WhenUpdated_ByAbsentId_AndCategoryDetails() throws Exception {
         String id = "5";
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_NOT_FOUND.getErrorCode();
@@ -780,7 +959,7 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Category_Patch_ShouldReturn_422Response_And_ErrorCode_PHARM_LEARN_MENU_003_WhenUpdated_ById_AndNoCategoryDetails() throws Exception {
+    public void test_Category_Patch_ShouldReturn_422Response_And_ErrorCode_RES_MENU_003_WhenUpdated_ById_AndNoCategoryDetails() throws Exception {
         String id = categoryEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_UNEXPECTED.getErrorCode();
@@ -799,7 +978,7 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Category_Patch_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_MENU_001_WhenRequested_ById_AndInvalidActive() throws Exception {
+    public void test_Category_Patch_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_ById_AndInvalidActive() throws Exception {
         String id = categoryEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
@@ -843,7 +1022,7 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Category_Patch_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_MENU_001_WhenRequested_ById_AndInvalidDefinitionOfCategoryAttribute() throws Exception {
+    public void test_Category_Patch_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_ById_AndInvalidDefinitionOfCategoryAttribute() throws Exception {
         String id = categoryEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();

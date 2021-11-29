@@ -12,6 +12,9 @@ import com.teenthofabud.restaurant.solution.customer.address.data.AddressVo;
 import com.teenthofabud.restaurant.solution.customer.address.repository.AddressRepository;
 import com.teenthofabud.restaurant.solution.customer.error.CustomerErrorCode;
 import com.teenthofabud.restaurant.solution.customer.account.data.AccountVo;
+import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.data.CityVo;
+import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.data.CountryVo;
+import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.data.StateVo;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -70,6 +73,10 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         this.accountRepository = accountRepository;
     }
 
+    private CityVo cityVo;
+    private StateVo stateVo;
+    private CountryVo countryVo;
+
     private AccountVo accountVo1;
     private AccountVo accountVo2;
     private AccountVo accountVo3;
@@ -92,6 +99,21 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
 
     @BeforeEach
     private void init() {
+
+        cityVo = new CityVo();
+        cityVo.setId(133024L);
+        cityVo.setName("Mumbai");
+
+        stateVo = new StateVo();
+        stateVo.setId("4008");
+        stateVo.setName("Maharashtra");
+        stateVo.setIso2("MH");
+
+        countryVo = new CountryVo();
+        countryVo.setId(101L);
+        countryVo.setName("India");
+        countryVo.setIso2("IN");
+        countryVo.setIso3("IND");
 
         accountEntity1 = new AccountEntity();
         accountEntity1.setFirstName("Account 1 First Name");
@@ -288,7 +310,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_WithEmptyAddressLine1() throws Exception {
+    public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_WithEmptyAddressLine1() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "addressLine1";
@@ -308,7 +330,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_WithEmptyCityId() throws Exception {
+    public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_WithEmptyCityId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "cityId";
@@ -328,7 +350,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_WithInvalidCityId() throws Exception {
+    public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_WithInvalidCityId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "cityId";
@@ -348,7 +370,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_WithEmptyPincode() throws Exception {
+    public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_WithEmptyPincode() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "pincode";
@@ -368,7 +390,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_WithEmptyStateId() throws Exception {
+    public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_WithEmptyStateId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "stateId";
@@ -388,7 +410,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_WithInvalidStateId() throws Exception {
+    public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_WithInvalidStateId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "state";
@@ -408,7 +430,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_WithEmptyCountryId() throws Exception {
+    public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_WithEmptyCountryId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "countryId";
@@ -428,7 +450,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_WithInvalidCountryId() throws Exception {
+    public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_WithInvalidCountryId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "country";
@@ -448,7 +470,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_WithEmptyAccountId() throws Exception {
+    public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_WithEmptyAccountId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "accountId";
@@ -468,7 +490,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_WithInvalidAccountId() throws Exception {
+    public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_WithInvalidAccountId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "accountId";
@@ -488,7 +510,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_WithAbsentAccountId() throws Exception {
+    public void test_Address_Post_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_WithAbsentAccountId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "accountId";
@@ -508,7 +530,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Post_ShouldReturn_409Response_And_ErrorCode_PHARM_LEARN_CUST_004_WhenRequested_WithDuplicateAddress() throws Exception {
+    public void test_Address_Post_ShouldReturn_409Response_And_ErrorCode_RES_CUST_004_WhenRequested_WithDuplicateAddress() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_EXISTS.getErrorCode();
         String field1Name = "name";
@@ -533,7 +555,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Post_ShouldReturn_422Response_And_ErrorCode_PHARM_LEARN_CUST_003_WhenPosted_WithNoAddressForm() throws Exception {
+    public void test_Address_Post_ShouldReturn_422Response_And_ErrorCode_RES_CUST_003_WhenPosted_WithNoAddressForm() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_UNEXPECTED.getErrorCode();
         String fieldName = "form";
@@ -600,7 +622,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Get_ShouldReturn_404Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ByAbsentAccountId() throws Exception {
+    public void test_Address_Get_ShouldReturn_404Response_And_ErrorCode_RES_CUST_001_WhenRequested_ByAbsentAccountId() throws Exception {
         MvcResult mvcResult = null;
         String albumId = "kk";
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
@@ -619,7 +641,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "", " " })
-    public void test_Address_Get_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequestedBy_EmptyAddressLine1Only(String addressLine1) throws Exception {
+    public void test_Address_Get_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequestedBy_EmptyAddressLine1Only(String addressLine1) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "filters";
@@ -636,7 +658,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "", " " })
-    public void test_Address_Get_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequestedBy_EmptyPincodeOnly(String pincode) throws Exception {
+    public void test_Address_Get_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequestedBy_EmptyPincodeOnly(String pincode) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "filters";
@@ -653,7 +675,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "", " " })
-    public void test_Address_Get_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequestedBy_EmptyCityIdOnly(String cityId) throws Exception {
+    public void test_Address_Get_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequestedBy_EmptyCityIdOnly(String cityId) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "filters";
@@ -670,7 +692,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "", " " })
-    public void test_Address_Get_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequestedBy_EmptyStateIdOnly(String stateId) throws Exception {
+    public void test_Address_Get_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequestedBy_EmptyStateIdOnly(String stateId) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "filters";
@@ -687,7 +709,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "", " " })
-    public void test_Address_Get_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequestedBy_EmptyCountryIdOnly(String countryId) throws Exception {
+    public void test_Address_Get_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequestedBy_EmptyCountryIdOnly(String countryId) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "filters";
@@ -1024,7 +1046,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { " ", "r" })
-    public void test_Address_Get_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequestedBy_EmptyInvalidId(String id) throws Exception {
+    public void test_Address_Get_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequestedBy_EmptyInvalidId(String id) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "id";
@@ -1040,7 +1062,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Get_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_002_WhenRequested_ByAbsentId() throws Exception {
+    public void test_Address_Get_ShouldReturn_400Response_And_ErrorCode_RES_CUST_002_WhenRequested_ByAbsentId() throws Exception {
         String id = "55";
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_NOT_FOUND.getErrorCode();
@@ -1088,6 +1110,41 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertEquals(addressVo1.getCityId(), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getCityId());
         Assertions.assertEquals(addressVo1.getStateId(), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getStateId());
         Assertions.assertEquals(addressVo1.getCountryId(), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getCountryId());
+        Assertions.assertEquals(addressVo1.getAccountId(), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getAccountId());
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getCreatedBy()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getModifiedBy()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getCreatedOn()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getModifiedOn()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getActive()));
+    }
+
+    @Test
+    public void test_Address_Get_ShouldReturn_200Response_And_DomainDetails_WhenRequested_ById_AndSecondLevel_Cascade() throws Exception {
+        String id = addressEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        addressVo1.setCity(cityVo);
+        addressVo1.setState(stateVo);
+        addressVo1.setCountry(countryVo);
+
+        mvcResult = this.mockMvc.perform(get(ADDRESS_URI_BY_ID, id)
+                        .queryParam("cascadeUntilLevel", TOABCascadeLevel.TWO.getLevelCode()))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(addressVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getId());
+        Assertions.assertEquals(addressVo1.getAddressLine1(), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getAddressLine1());
+        Assertions.assertEquals(addressVo1.getAddressLine2(), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getAddressLine2());
+        Assertions.assertEquals(addressVo1.getPincode(), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getPincode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getCity() != null);
+        Assertions.assertEquals(addressVo1.getCity().getId(), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getCity().getId());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getState() != null);
+        Assertions.assertEquals(addressVo1.getState().getId(), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getState().getId());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getCountry() != null);
+        Assertions.assertEquals(addressVo1.getCountry().getId(), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getCountry().getId());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getAccount() != null);
+        Assertions.assertEquals(addressVo1.getAccount().getId(), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getAccount().getId());
         Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getCreatedBy()));
         Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getModifiedBy()));
         Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getCreatedOn()));
@@ -1097,7 +1154,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { " ", "r" })
-    public void test_Address_Delete_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001__WhenDeleted_ByEmptyInvalidId(String id) throws Exception {
+    public void test_Address_Delete_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001__WhenDeleted_ByEmptyInvalidId(String id) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "id";
@@ -1113,7 +1170,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Delete_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_005_WhenDeleted_ByInactiveId() throws Exception {
+    public void test_Address_Delete_ShouldReturn_400Response_And_ErrorCode_RES_CUST_005_WhenDeleted_ByInactiveId() throws Exception {
         String id = addressEntity3.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_INACTIVE.getErrorCode();
@@ -1129,7 +1186,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Delete_ShouldReturn_404Response_And_ErrorCode_PHARM_LEARN_CUST_002_WhenDeleted_ByAbsentId() throws Exception {
+    public void test_Address_Delete_ShouldReturn_404Response_And_ErrorCode_RES_CUST_002_WhenDeleted_ByAbsentId() throws Exception {
         String id = "55";
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_NOT_FOUND.getErrorCode();
@@ -1164,7 +1221,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { " ", "r" })
-    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenUpdatedBy_EmptyInvalidId_AndAddressDetails(String id) throws Exception {
+    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenUpdatedBy_EmptyInvalidId_AndAddressDetails(String id) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "id";
@@ -1182,7 +1239,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Put_ShouldReturn_404Response_And_ErrorCode_PHARM_LEARN_CUST_002_WhenUpdated_ByAbsentId_AndAddressDetails() throws Exception {
+    public void test_Address_Put_ShouldReturn_404Response_And_ErrorCode_RES_CUST_002_WhenUpdated_ByAbsentId_AndAddressDetails() throws Exception {
         String id = "55";
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_NOT_FOUND.getErrorCode();
@@ -1202,7 +1259,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_005_WhenUpdated_ByInactiveId_AndAddressDetails() throws Exception {
+    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_RES_CUST_005_WhenUpdated_ByInactiveId_AndAddressDetails() throws Exception {
         String id = addressEntity3.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_INACTIVE.getErrorCode();
@@ -1220,7 +1277,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Put_ShouldReturn_422Response_And_ErrorCode_PHARM_LEARN_CUST_003_WhenUpdated_ById_AndNoAddressDetails() throws Exception {
+    public void test_Address_Put_ShouldReturn_422Response_And_ErrorCode_RES_CUST_003_WhenUpdated_ById_AndNoAddressDetails() throws Exception {
         String id = addressEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_UNEXPECTED.getErrorCode();
@@ -1241,7 +1298,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { " ", "" })
-    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ById_AndEmptyAddressLine1(String addressLine1) throws Exception {
+    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_ById_AndEmptyAddressLine1(String addressLine1) throws Exception {
         String id = addressEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
@@ -1262,7 +1319,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { " ", "", "r" })
-    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ById_AndEmptyInvalidCityId(String cityId) throws Exception {
+    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_ById_AndEmptyInvalidCityId(String cityId) throws Exception {
         String id = addressEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
@@ -1283,7 +1340,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { " ", "", "r" })
-    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ById_AndEmptyInvalidAccountId(String accountId) throws Exception {
+    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_ById_AndEmptyInvalidAccountId(String accountId) throws Exception {
         String id = addressEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
@@ -1304,7 +1361,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "99999" })
-    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ById_AndAbsentAccountId(String accountId) throws Exception {
+    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_ById_AndAbsentAccountId(String accountId) throws Exception {
         String id = addressEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
@@ -1325,7 +1382,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { " ", "" })
-    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ById_AndEmptyStateId(String stateId) throws Exception {
+    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_ById_AndEmptyStateId(String stateId) throws Exception {
         String id = addressEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
@@ -1346,7 +1403,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "r" })
-    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ById_AndInvalidStateId(String stateId) throws Exception {
+    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_ById_AndInvalidStateId(String stateId) throws Exception {
         String id = addressEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
@@ -1367,7 +1424,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { " ", "" })
-    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ById_AndEmptyCountryId(String countryId) throws Exception {
+    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_ById_AndEmptyCountryId(String countryId) throws Exception {
         String id = addressEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
@@ -1388,7 +1445,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "r" })
-    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ById_AndInvalidCountryId(String countryId) throws Exception {
+    public void test_Address_Put_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_ById_AndInvalidCountryId(String countryId) throws Exception {
         String id = addressEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
@@ -1408,7 +1465,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Put_ShouldReturn_422Response_And_ErrorCode_PHARM_LEARN_CUST_003_WhenUpdated_ById_AndEmptyAddressDetails() throws Exception {
+    public void test_Address_Put_ShouldReturn_422Response_And_ErrorCode_RES_CUST_003_WhenUpdated_ById_AndEmptyAddressDetails() throws Exception {
         String id = addressEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_UNEXPECTED.getErrorCode();
@@ -1429,7 +1486,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Put_ShouldReturn_409Response_And_ErrorCode_PHARM_LEARN_CUST_004_WhenUpdated_ById_AndDuplicateAddressDetails() throws Exception {
+    public void test_Address_Put_ShouldReturn_409Response_And_ErrorCode_RES_CUST_004_WhenUpdated_ById_AndDuplicateAddressDetails() throws Exception {
         String id = addressEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_EXISTS.getErrorCode();
@@ -1489,7 +1546,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Patch_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_002_WhenUpdated_ByInvalidId_AndAddressDetails() throws Exception {
+    public void test_Address_Patch_ShouldReturn_400Response_And_ErrorCode_RES_CUST_002_WhenUpdated_ByInvalidId_AndAddressDetails() throws Exception {
         String id = "r";
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
@@ -1509,7 +1566,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Patch_ShouldReturn_404Response_And_ErrorCode_PHARM_LEARN_CUST_002_WhenUpdated_ByAbsentId_AndAddressDetails() throws Exception {
+    public void test_Address_Patch_ShouldReturn_404Response_And_ErrorCode_RES_CUST_002_WhenUpdated_ByAbsentId_AndAddressDetails() throws Exception {
         String id = "5";
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_NOT_FOUND.getErrorCode();
@@ -1529,7 +1586,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Patch_ShouldReturn_409Response_And_ErrorCode_PHARM_LEARN_CUST_002_WhenUpdated_ById_AndDuplicateAddressDetails() throws Exception {
+    public void test_Address_Patch_ShouldReturn_409Response_And_ErrorCode_RES_CUST_002_WhenUpdated_ById_AndDuplicateAddressDetails() throws Exception {
         String id = addressEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_EXISTS.getErrorCode();
@@ -1557,7 +1614,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Patch_ShouldReturn_422Response_And_ErrorCode_PHARM_LEARN_CUST_003_WhenUpdated_ById_AndNoAddressDetails() throws Exception {
+    public void test_Address_Patch_ShouldReturn_422Response_And_ErrorCode_RES_CUST_003_WhenUpdated_ById_AndNoAddressDetails() throws Exception {
         String id = addressEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_UNEXPECTED.getErrorCode();
@@ -1576,7 +1633,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Patch_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ById_AndInvalidActive() throws Exception {
+    public void test_Address_Patch_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_ById_AndInvalidActive() throws Exception {
         String id = addressEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
@@ -1804,7 +1861,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Address_Patch_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ById_AndInvalidDefinitionOfAddressAttribute() throws Exception {
+    public void test_Address_Patch_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_ById_AndInvalidDefinitionOfAddressAttribute() throws Exception {
         String id = addressEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();

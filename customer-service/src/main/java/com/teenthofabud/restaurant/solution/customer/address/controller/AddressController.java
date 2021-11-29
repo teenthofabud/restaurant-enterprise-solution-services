@@ -189,7 +189,7 @@ public class AddressController {
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("accountid/{accountId}")
-    public List<AddressVo> getAllAddresssByAlbumId(@PathVariable String accountId, @RequestParam(required = false)
+    public List<AddressVo> getAllAddresssByAccountId(@PathVariable String accountId, @RequestParam(required = false)
     @io.swagger.v3.oas.annotations.Parameter(in = ParameterIn.QUERY, description = "levels of nested fields to be unfolded within the response body")
             String cascadeUntilLevel) throws AddressException {
         List<AddressVo> matchedByAccountIds = new ArrayList<>();

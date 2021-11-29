@@ -16,7 +16,6 @@ import java.util.Optional;
 @Slf4j
 public class CategoryDtoValidator implements Validator {
 
-    private String dobFormat;
     private List<String> fieldsToEscape;
 
     @Value("#{'${res.menu.category.fields-to-escape}'.split(',')}")

@@ -348,7 +348,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Account_Post_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_WithEmptyFirstName() throws Exception {
+    public void test_Account_Post_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_WithEmptyFirstName() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "firstName";
@@ -368,7 +368,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Account_Post_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_WithEmptyLastName() throws Exception {
+    public void test_Account_Post_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_WithEmptyLastName() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "lastName";
@@ -388,7 +388,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Account_Post_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_WithEmptyCountryCode() throws Exception {
+    public void test_Account_Post_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_WithEmptyCountryCode() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "countryCode";
@@ -408,7 +408,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Account_Post_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_WithEmptyPhoneNumber() throws Exception {
+    public void test_Account_Post_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_WithEmptyPhoneNumber() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "phoneNumber";
@@ -429,7 +429,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
 
 
     @Test
-    public void test_Account_Post_ShouldReturn_409Response_And_ErrorCode_PHARM_LEARN_CUST_004_WhenRequested_WithDuplicateAccount() throws Exception {
+    public void test_Account_Post_ShouldReturn_409Response_And_ErrorCode_RES_CUST_004_WhenRequested_WithDuplicateAccount() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_EXISTS.getErrorCode();
         String field1Name = "phoneNumber";
@@ -448,7 +448,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Account_Post_ShouldReturn_422Response_And_ErrorCode_PHARM_LEARN_CUST_003_WhenPosted_WithNoAccountForm() throws Exception {
+    public void test_Account_Post_ShouldReturn_422Response_And_ErrorCode_RES_CUST_003_WhenPosted_WithNoAccountForm() throws Exception {
         String id = accountEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_UNEXPECTED.getErrorCode();
@@ -513,7 +513,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Account_Get_ShouldReturn_404Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ByAbsentGenderId() throws Exception {
+    public void test_Account_Get_ShouldReturn_404Response_And_ErrorCode_RES_CUST_001_WhenRequested_ByAbsentGenderId() throws Exception {
         MvcResult mvcResult = null;
         String genderId = "3";
         String errorCode = "TOAB-META-002";
@@ -532,7 +532,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "", " " })
-    public void test_Account_Get_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequestedBy_EmptyFirstNameOnly(String firstName) throws Exception {
+    public void test_Account_Get_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequestedBy_EmptyFirstNameOnly(String firstName) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "filters";
@@ -549,7 +549,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "", " " })
-    public void test_Account_Get_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequestedBy_EmptyLastNameOnly(String lastName) throws Exception {
+    public void test_Account_Get_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequestedBy_EmptyLastNameOnly(String lastName) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "filters";
@@ -566,7 +566,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "", " " })
-    public void test_Account_Get_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequestedBy_EmptyPhoneNumberOnly(String phoneNumber) throws Exception {
+    public void test_Account_Get_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequestedBy_EmptyPhoneNumberOnly(String phoneNumber) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "filters";
@@ -751,7 +751,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { " ", "r" })
-    public void test_Account_Get_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequestedBy_EmptyInvalidId(String id) throws Exception {
+    public void test_Account_Get_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequestedBy_EmptyInvalidId(String id) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "id";
@@ -767,7 +767,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Account_Get_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_002_WhenRequested_ByAbsentId() throws Exception {
+    public void test_Account_Get_ShouldReturn_400Response_And_ErrorCode_RES_CUST_002_WhenRequested_ByAbsentId() throws Exception {
         String id = "5";
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_NOT_FOUND.getErrorCode();
@@ -842,7 +842,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Account_Delete_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001__WhenDeleted_ByEmptyId() throws Exception {
+    public void test_Account_Delete_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001__WhenDeleted_ByEmptyId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "id";
@@ -858,7 +858,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Account_Delete_ShouldReturn_422Response_And_ErrorCode_PHARM_LEARN_CUST_003_WhenDeleted_ByInvalidId() throws Exception {
+    public void test_Account_Delete_ShouldReturn_422Response_And_ErrorCode_RES_CUST_003_WhenDeleted_ByInvalidId() throws Exception {
         String id = " ";
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
@@ -875,7 +875,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Account_Delete_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_005_WhenDeleted_ByInactiveId() throws Exception {
+    public void test_Account_Delete_ShouldReturn_400Response_And_ErrorCode_RES_CUST_005_WhenDeleted_ByInactiveId() throws Exception {
         String id = accountEntity4.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_INACTIVE.getErrorCode();
@@ -891,7 +891,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Account_Delete_ShouldReturn_404Response_And_ErrorCode_PHARM_LEARN_CUST_002_WhenDeleted_ByAbsentId() throws Exception {
+    public void test_Account_Delete_ShouldReturn_404Response_And_ErrorCode_RES_CUST_002_WhenDeleted_ByAbsentId() throws Exception {
         String id = "5";
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_NOT_FOUND.getErrorCode();
@@ -926,7 +926,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { " ", "r" })
-    public void test_Account_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenUpdatedBy_EmptyInvalidId_AndAccountDetails(String id) throws Exception {
+    public void test_Account_Put_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenUpdatedBy_EmptyInvalidId_AndAccountDetails(String id) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "id";
@@ -944,7 +944,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Account_Put_ShouldReturn_404Response_And_ErrorCode_PHARM_LEARN_CUST_002_WhenUpdated_ByAbsentId_AndAccountDetails() throws Exception {
+    public void test_Account_Put_ShouldReturn_404Response_And_ErrorCode_RES_CUST_002_WhenUpdated_ByAbsentId_AndAccountDetails() throws Exception {
         String id = "5";
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_NOT_FOUND.getErrorCode();
@@ -964,7 +964,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Account_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_005_WhenUpdated_ByInactiveId_AndAccountDetails() throws Exception {
+    public void test_Account_Put_ShouldReturn_400Response_And_ErrorCode_RES_CUST_005_WhenUpdated_ByInactiveId_AndAccountDetails() throws Exception {
         String id = accountEntity4.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_INACTIVE.getErrorCode();
@@ -982,7 +982,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Account_Put_ShouldReturn_422Response_And_ErrorCode_PHARM_LEARN_CUST_003_WhenUpdated_ById_AndNoAccountDetails() throws Exception {
+    public void test_Account_Put_ShouldReturn_422Response_And_ErrorCode_RES_CUST_003_WhenUpdated_ById_AndNoAccountDetails() throws Exception {
         String id = accountEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_UNEXPECTED.getErrorCode();
@@ -1002,7 +1002,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Account_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ById_AndInvalidFirstName() throws Exception {
+    public void test_Account_Put_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_ById_AndInvalidFirstName() throws Exception {
         String id = accountEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
@@ -1022,7 +1022,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Account_Put_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ById_AndInvalidLastName() throws Exception {
+    public void test_Account_Put_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_ById_AndInvalidLastName() throws Exception {
         String id = accountEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
@@ -1042,7 +1042,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Account_Put_ShouldReturn_422Response_And_ErrorCode_PHARM_LEARN_CUST_003_WhenUpdated_ById_AndEmptyAccountDetails() throws Exception {
+    public void test_Account_Put_ShouldReturn_422Response_And_ErrorCode_RES_CUST_003_WhenUpdated_ById_AndEmptyAccountDetails() throws Exception {
         String id = accountEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_UNEXPECTED.getErrorCode();
@@ -1063,7 +1063,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Account_Put_ShouldReturn_409Response_And_ErrorCode_PHARM_LEARN_CUST_004_WhenUpdated_ById_AndDuplicateAccountDetails() throws Exception {
+    public void test_Account_Put_ShouldReturn_409Response_And_ErrorCode_RES_CUST_004_WhenUpdated_ById_AndDuplicateAccountDetails() throws Exception {
         String id = accountEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_EXISTS.getErrorCode();
@@ -1117,7 +1117,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Account_Patch_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_002_WhenUpdated_ByInvalidId_AndAccountDetails() throws Exception {
+    public void test_Account_Patch_ShouldReturn_400Response_And_ErrorCode_RES_CUST_002_WhenUpdated_ByInvalidId_AndAccountDetails() throws Exception {
         String id = "r";
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
@@ -1137,7 +1137,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Account_Patch_ShouldReturn_404Response_And_ErrorCode_PHARM_LEARN_CUST_002_WhenUpdated_ByAbsentId_AndAccountDetails() throws Exception {
+    public void test_Account_Patch_ShouldReturn_404Response_And_ErrorCode_RES_CUST_002_WhenUpdated_ByAbsentId_AndAccountDetails() throws Exception {
         String id = "5";
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_NOT_FOUND.getErrorCode();
@@ -1157,7 +1157,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Account_Patch_ShouldReturn_409Response_And_ErrorCode_PHARM_LEARN_CUST_002_WhenUpdated_ById_AndDuplicateAccountDetails() throws Exception {
+    public void test_Account_Patch_ShouldReturn_409Response_And_ErrorCode_RES_CUST_002_WhenUpdated_ById_AndDuplicateAccountDetails() throws Exception {
         String id = accountEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_EXISTS.getErrorCode();
@@ -1181,7 +1181,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Account_Patch_ShouldReturn_422Response_And_ErrorCode_PHARM_LEARN_CUST_003_WhenUpdated_ById_AndNoAccountDetails() throws Exception {
+    public void test_Account_Patch_ShouldReturn_422Response_And_ErrorCode_RES_CUST_003_WhenUpdated_ById_AndNoAccountDetails() throws Exception {
         String id = accountEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_UNEXPECTED.getErrorCode();
@@ -1200,7 +1200,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Account_Patch_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ById_AndInvalidActive() throws Exception {
+    public void test_Account_Patch_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_ById_AndInvalidActive() throws Exception {
         String id = accountEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();
@@ -1244,7 +1244,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
     }
 
     @Test
-    public void test_Account_Patch_ShouldReturn_400Response_And_ErrorCode_PHARM_LEARN_CUST_001_WhenRequested_ById_AndInvalidDefinitionOfAccountAttribute() throws Exception {
+    public void test_Account_Patch_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_ById_AndInvalidDefinitionOfAccountAttribute() throws Exception {
         String id = accountEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = CustomerErrorCode.CUST_ATTRIBUTE_INVALID.getErrorCode();

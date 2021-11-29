@@ -12,7 +12,6 @@ import com.teenthofabud.core.common.error.TOABBaseException;
 import com.teenthofabud.core.common.error.TOABSystemException;
 import com.teenthofabud.core.common.service.TOABBaseService;
 import com.teenthofabud.restaurant.solution.customer.account.converter.AccountDto2EntityConverter;
-import com.teenthofabud.restaurant.solution.customer.account.converter.AccountEntity2VoConverter;
 import com.teenthofabud.restaurant.solution.customer.account.converter.AccountForm2EntityConverter;
 import com.teenthofabud.restaurant.solution.customer.account.data.AccountDto;
 import com.teenthofabud.restaurant.solution.customer.account.data.AccountEntity;
@@ -227,9 +226,9 @@ public class AccountServiceImpl implements AccountService {
             throw new AccountException(ec, new Object [] { "genderId: " + genderId });
         }
         List<AccountEntity> accountEntityList = repository.findByGenderId(genderId);
-        if(accountEntityList != null && !accountEntityList.isEmpty()) {
-            List<AccountVo> matchedAccountList = customerServiceHelper.accountEntity2DetailedVo(accountEntityList);
-            log.info("Found {} AccountVo matching with genderId: {}", matchedAccountList.size(),genderId);
+        List<AccountVo> matchedAccountList = customerServiceHelper.accountEntity2DetailedVo(accountEntityList);
+        log.info("Found {} AccountVo matching with genderId: {}", matchedAccountList.size(),genderId);
+        if(matchedAccountList != null && !matchedAccountList.isEmpty()) {
             return matchedAccountList;
         }
         log.debug("No AccountVo found matching with genderId: {}", genderId);
@@ -286,11 +285,8 @@ public class AccountServiceImpl implements AccountService {
         }
         Example<AccountEntity> accountEntityExample = Example.of(entity, matcherCriteria);
         List<AccountEntity> accountEntityList = repository.findAll(accountEntityExample);
-        if(accountEntityList != null && !accountEntityList.isEmpty()) {
-            matchedAccountList = customerServiceHelper.accountEntity2DetailedVo(accountEntityList);
-            log.info("Found {} AccountVo matching with provided parameters : {}", matchedAccountList.size(), providedFilters);
-        }
-        log.info("No AccountVo available matching with provided parameters : {}", matchedAccountList.size(), providedFilters);
+        matchedAccountList = customerServiceHelper.accountEntity2DetailedVo(accountEntityList);
+        log.info("Found {} AccountVo matching with provided parameters : {}", matchedAccountList.size(), providedFilters);
         return matchedAccountList;
     }
 
@@ -361,11 +357,8 @@ public class AccountServiceImpl implements AccountService {
         }
         Example<AccountEntity> accountEntityExample = Example.of(entity, matcherCriteria);
         List<AccountEntity> accountEntityList = repository.findAll(accountEntityExample);
-        if(accountEntityList != null && !accountEntityList.isEmpty()) {
-            matchedAccountList = customerServiceHelper.accountEntity2DetailedVo(accountEntityList);
-            log.info("Found {} AccountVo matching with provided parameters : {}", matchedAccountList.size(), providedFilters);
-        }
-        log.info("No AccountVo available matching with provided parameters : {}", matchedAccountList.size(), providedFilters);
+        matchedAccountList = customerServiceHelper.accountEntity2DetailedVo(accountEntityList);
+        log.info("Found {} AccountVo matching with provided parameters : {}", matchedAccountList.size(), providedFilters);
         return matchedAccountList;
     }
 

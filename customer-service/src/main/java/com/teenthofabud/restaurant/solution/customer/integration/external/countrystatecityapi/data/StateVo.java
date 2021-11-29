@@ -18,13 +18,7 @@ public class StateVo implements Comparable<StateVo> {
     @ToString.Include
     private String name;
     @ToString.Include
-    @JsonProperty("country_id")
-    private String countryId;
-    @ToString.Include
     private String iso2;
-    @ToString.Include
-    @JsonProperty("country_code")
-    private String countryCode;
 
     @Override
     public int compareTo(StateVo o) {

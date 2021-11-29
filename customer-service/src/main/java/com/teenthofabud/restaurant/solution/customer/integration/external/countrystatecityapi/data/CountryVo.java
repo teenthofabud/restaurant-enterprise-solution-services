@@ -21,11 +21,6 @@ public class CountryVo implements Comparable<CountryVo> {
     private String iso3;
     @ToString.Include
     private String iso2;
-    @ToString.Include
-    @JsonProperty("phonecode")
-    private String phoneCode;
-    @ToString.Include
-    private String currency;
 
     @Override
     public int compareTo(CountryVo o) {

@@ -1,20 +1,18 @@
-package com.teenthofabud.restaurant.solution.menu.category.data;
+package com.teenthofabud.restaurant.solution.menu.item.data;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.teenthofabud.core.common.data.vo.TOABBaseVo;
-import com.teenthofabud.restaurant.solution.menu.item.data.ItemVo;
+import com.teenthofabud.restaurant.solution.menu.category.data.CategoryVo;
 import lombok.*;
-
-import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(onlyExplicitlyIncluded = true)
+@ToString
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class CategoryVo extends TOABBaseVo implements Comparable<CategoryVo> {
+public class ItemVo extends TOABBaseVo implements Comparable<ItemVo> {
 
     @EqualsAndHashCode.Include
     @ToString.Include
@@ -24,10 +22,16 @@ public class CategoryVo extends TOABBaseVo implements Comparable<CategoryVo> {
     @ToString.Include
     private String description;
     @ToString.Include
-    private List<ItemVo> items;
+    private VegeterianStatus isVegeterian;
+    @ToString.Include
+    private String imageUrl;
+    @ToString.Include
+    private String categoryId;
+    @ToString.Include
+    private CategoryVo category;
 
     @Override
-    public int compareTo(CategoryVo o) {
+    public int compareTo(ItemVo o) {
         return this.getName().compareTo(o.getName());
     }
 }

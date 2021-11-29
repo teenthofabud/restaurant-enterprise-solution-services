@@ -254,16 +254,16 @@ public class AddressServiceImpl implements AddressService {
             throw new AddressException(CustomerErrorCode.CUST_ATTRIBUTE_INVALID, new Object [] { "accountId: " + accountId });
         }
         List<AddressEntity> addressEntityList = repository.findByAccountId(Long.parseLong(accountId));
-        if(addressEntityList != null && !addressEntityList.isEmpty()) {
-            TOABCascadeLevel cascadeLevel = optionalCascadeLevel.isPresent() ? optionalCascadeLevel.get() : TOABCascadeLevel.ZERO;
-            TOABRequestContextHolder.setCascadeLevelContext(cascadeLevel);
-            List<AddressVo> matchedAddressList = customerServiceHelper.addressEntity2DetailedVo(addressEntityList);
-            log.info("Found {} AddressVo matching with accountId: {}", matchedAddressList.size(),accountId);
-            TOABRequestContextHolder.clearCascadeLevelContext();
-            return matchedAddressList;
+        TOABCascadeLevel cascadeLevel = optionalCascadeLevel.isPresent() ? optionalCascadeLevel.get() : TOABCascadeLevel.ZERO;
+        TOABRequestContextHolder.setCascadeLevelContext(cascadeLevel);
+        List<AddressVo> matchedAddressList = customerServiceHelper.addressEntity2DetailedVo(addressEntityList);
+        log.info("Found {} AddressVo matching with accountId: {}", matchedAddressList.size(),accountId);
+        TOABRequestContextHolder.clearCascadeLevelContext();
+        if(matchedAddressList.isEmpty()) {
+            log.debug("No AddressVo found matching with accountId: {}", accountId);
+            throw new AddressException(CustomerErrorCode.CUST_NOT_FOUND, new Object[] { "accountId", accountId });
         }
-        log.debug("No AddressVo found matching with accountId: {}", accountId);
-        throw new AddressException(CustomerErrorCode.CUST_NOT_FOUND, new Object[] { "accountId", accountId });
+        return matchedAddressList;
     }
 
     @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
