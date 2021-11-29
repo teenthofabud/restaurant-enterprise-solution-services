@@ -11,7 +11,7 @@
     </parent>
 
     <properties>
-        <start-class>com.teenthofabud.restaurant.solution.customer.MenuServiceApplication</start-class>
+        <start-class>com.teenthofabud.restaurant.solution.customer.CustomerServiceApplication</start-class>
         <service.prefix>customer</service.prefix>
     </properties>
 
