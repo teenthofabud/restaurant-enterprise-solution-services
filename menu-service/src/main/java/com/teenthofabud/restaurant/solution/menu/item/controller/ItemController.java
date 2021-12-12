@@ -34,7 +34,7 @@ import java.util.Set;
 @RestController
 @RequestMapping("item")
 @Slf4j
-@Tag(name = "Item API", description = "Manage Categories and their details")
+@Tag(name = "Item API", description = "Manage Items and their details")
 public class ItemController {
 
     private static final String MEDIA_MENU_APPLICATION_JSON_PATCH = "application/json-patch+json";
@@ -166,16 +166,16 @@ public class ItemController {
 
     @Operation(summary = "Get all Item details")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Retrieve all available Categories and their details ordered by first name, last name",
+            @ApiResponse(responseCode = "200", description = "Retrieve all available Items and their details ordered by first name, last name",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = ItemVo.class))) })
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
     public Set<ItemVo> getAllItemNaturallyOrdered() {
-        log.debug("Requesting all available categories by their natural orders");
-        Set<ItemVo> naturallyOrderedCategories = service.retrieveAllByNaturalOrdering();
-        log.debug("Responding with all available categories by their natural orders");
-        return naturallyOrderedCategories;
+        log.debug("Requesting all available items by their natural orders");
+        Set<ItemVo> naturallyOrderedItems = service.retrieveAllByNaturalOrdering();
+        log.debug("Responding with all available items by their natural orders");
+        return naturallyOrderedItems;
     }
 
     @Operation(summary = "Get all Item details by category id", hidden = true)
@@ -220,19 +220,19 @@ public class ItemController {
 
     @Operation(summary = "Get all Item details by name, description")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Retrieve all available Categories and their details that match the provided name, description",
+            @ApiResponse(responseCode = "200", description = "Retrieve all available Items and their details that match the provided name, description",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = ItemVo.class))) }),
             @ApiResponse(responseCode = "400", description = "Item search filters are invalid",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) }),
-            @ApiResponse(responseCode = "404", description = "No Categories available by the given filters",
+            @ApiResponse(responseCode = "404", description = "No Items available by the given filters",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("filter")
-    public List<ItemVo> getAllCategoriesByFilters(@RequestParam(required = false) String name,
+    public List<ItemVo> getAllItemsByFilters(@RequestParam(required = false) String name,
                                                   @RequestParam(required = false) String description,
                                                   @RequestParam(required = false) String isVegeterian) throws ItemException {
-        log.debug("Requesting all available categories with given filters");
+        log.debug("Requesting all available items with given filters");
         boolean emptyName = !StringUtils.hasText(StringUtils.trimWhitespace(name));
         boolean emptyDescription = !StringUtils.hasText(StringUtils.trimWhitespace(description));
         boolean emptyIsVegeterian = !StringUtils.hasText(StringUtils.trimWhitespace(isVegeterian));
@@ -241,7 +241,7 @@ public class ItemController {
             Optional<String> optDescription = emptyDescription ? Optional.empty() : Optional.of(description);
             Optional<String> optIsVegeterian = emptyIsVegeterian ? Optional.empty() : Optional.of(isVegeterian);
             List<ItemVo> matchedByFilter = service.retrieveAllMatchingDetailsByCriteria(optName, optDescription, optIsVegeterian);
-            log.debug("Responding with all available categories with given filters");
+            log.debug("Responding with all available items with given filters");
             return matchedByFilter;
         }
         log.debug("item filters are empty");

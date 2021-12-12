@@ -4,15 +4,14 @@ import com.teenthofabud.core.common.constant.TOABCascadeLevel;
 import com.teenthofabud.core.common.data.form.PatchOperationForm;
 import com.teenthofabud.core.common.data.vo.ErrorVo;
 import com.teenthofabud.core.common.error.TOABErrorCode;
-import com.teenthofabud.restaurant.solution.menu.category.data.CategoryEntity;
-import com.teenthofabud.restaurant.solution.menu.category.data.CategoryVo;
-import com.teenthofabud.restaurant.solution.menu.category.repository.CategoryRepository;
-import com.teenthofabud.restaurant.solution.menu.error.MenuErrorCode;
 import com.teenthofabud.restaurant.solution.menu.item.data.ItemEntity;
-import com.teenthofabud.restaurant.solution.menu.item.data.ItemForm;
 import com.teenthofabud.restaurant.solution.menu.item.data.ItemVo;
-import com.teenthofabud.restaurant.solution.menu.item.data.VegeterianStatus;
 import com.teenthofabud.restaurant.solution.menu.item.repository.ItemRepository;
+import com.teenthofabud.restaurant.solution.menu.error.MenuErrorCode;
+import com.teenthofabud.restaurant.solution.menu.price.data.PriceEntity;
+import com.teenthofabud.restaurant.solution.menu.price.data.PriceForm;
+import com.teenthofabud.restaurant.solution.menu.price.data.PriceVo;
+import com.teenthofabud.restaurant.solution.menu.price.repository.PriceRepository;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -29,10 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -44,49 +40,49 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
-public class ItemIntegrationTest extends MenuIntegrationBaseTest {
+public class PriceIntegrationTest extends MenuIntegrationBaseTest {
 
     private static final String MEDIA_TYPE_APPLICATION_JSON_PATCH = "application/json-patch+json";
 
-    private static final String ITEM_URI = "/item";
-    private static final String ITEM_URI_BY_ID = "/item/{id}";
-    private static final String ITEM_URI_BY_CATEGORY_ID = "/item/categoryid/{categoryId}";
-    private static final String ITEM_URI_FILTER = "/item/filter";
+    private static final String PRICE_URI = "/price";
+    private static final String PRICE_URI_BY_ID = "/price/{id}";
+    private static final String PRICE_URI_BY_ITEM_ID = "/price/itemid/{itemId}";
+    private static final String PRICE_URI_FILTER = "/price/filter";
 
+    private PriceRepository priceRepository;
     private ItemRepository itemRepository;
-    private CategoryRepository categoryRepository;
+
+    @Autowired
+    public void setPriceRepository(PriceRepository priceRepository) {
+        this.priceRepository = priceRepository;
+    }
 
     @Autowired
     public void setItemRepository(ItemRepository itemRepository) {
         this.itemRepository = itemRepository;
     }
 
-    @Autowired
-    public void setCategoryRepository(CategoryRepository categoryRepository) {
-        this.categoryRepository = categoryRepository;
-    }
-
-    private CategoryVo categoryVo1;
-    private CategoryVo categoryVo2;
-    private CategoryVo categoryVo3;
-    private CategoryVo categoryVo4;
-    private CategoryEntity categoryEntity1;
-    private CategoryEntity categoryEntity2;
-    private CategoryEntity categoryEntity3;
-    private CategoryEntity categoryEntity4;
-
-    private ItemForm itemForm;
     private ItemVo itemVo1;
     private ItemVo itemVo2;
     private ItemVo itemVo3;
     private ItemVo itemVo4;
-    private ItemVo itemVo5;
-    private ItemVo itemVo6;
     private ItemEntity itemEntity1;
     private ItemEntity itemEntity2;
     private ItemEntity itemEntity3;
     private ItemEntity itemEntity4;
-    private ItemEntity itemEntity5;
+
+    private PriceForm priceForm;
+    private PriceVo priceVo1;
+    private PriceVo priceVo2;
+    private PriceVo priceVo3;
+    private PriceVo priceVo4;
+    private PriceVo priceVo5;
+    private PriceVo priceVo6;
+    private PriceEntity priceEntity1;
+    private PriceEntity priceEntity2;
+    private PriceEntity priceEntity3;
+    private PriceEntity priceEntity4;
+    private PriceEntity priceEntity5;
 
     private List<PatchOperationForm> patches;
 
@@ -94,206 +90,182 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     private void init() {
 
         /**
-         * Category
-         */
-
-        categoryEntity1 = new CategoryEntity();
-        categoryEntity1.setName("Category 1 Name");
-        categoryEntity1.setDescription("Category 1 Description");
-        categoryEntity1.setActive(Boolean.TRUE);
-
-        categoryEntity1 = categoryRepository.save(categoryEntity1);
-
-        categoryVo1 = new CategoryVo();
-        categoryVo1.setId(categoryEntity1.getId().toString());
-        categoryVo1.setName(categoryEntity1.getName());
-        categoryVo1.setDescription(categoryEntity1.getDescription());
-
-        categoryEntity2 = new CategoryEntity();
-        categoryEntity2.setName("Category 2 Name");
-        categoryEntity2.setDescription("Category 2 Description");
-        categoryEntity2.setActive(Boolean.FALSE);
-
-        categoryEntity2 = categoryRepository.save(categoryEntity2);
-
-        categoryVo2 = new CategoryVo();
-        categoryVo2.setId(categoryEntity2.getId().toString());
-        categoryVo2.setName(categoryEntity2.getName());
-        categoryVo2.setDescription(categoryEntity2.getDescription());
-
-        categoryEntity3 = new CategoryEntity();
-        categoryEntity3.setName("Category 3 Name");
-        categoryEntity3.setDescription("Category 3 Description");
-        categoryEntity3.setActive(Boolean.TRUE);
-
-        categoryEntity3 = categoryRepository.save(categoryEntity3);
-
-        categoryVo3 = new CategoryVo();
-        categoryVo3.setId(categoryEntity3.getId().toString());
-        categoryVo3.setName(categoryEntity3.getName());
-        categoryVo3.setDescription(categoryEntity3.getDescription());
-
-        categoryEntity4 = new CategoryEntity();
-        categoryEntity4.setName("Category 4 Name");
-        categoryEntity4.setDescription("Category 4 Description");
-        categoryEntity4.setActive(Boolean.TRUE);
-
-        categoryEntity4 = categoryRepository.save(categoryEntity4);
-
-        categoryVo4 = new CategoryVo();
-        categoryVo4.setId(categoryEntity4.getId().toString());
-        categoryVo4.setName(categoryEntity4.getName());
-        categoryVo4.setDescription(categoryEntity4.getDescription());
-
-        /**
          * Item
          */
 
-        itemForm = new ItemForm();
-        itemForm.setDescription("Item New Description");
-        itemForm.setName("Item New Name");
-        itemForm.setCategoryId(categoryEntity3.getId().toString());
-        itemForm.setImageUrl("Item New Image");
-        itemForm.setIsVegeterian("YES");
-
-        patches = Arrays.asList(
-                new PatchOperationForm("replace", "/name", "patched first name"),
-                new PatchOperationForm("replace", "/categoryId", categoryEntity3.getId().toString()),
-                new PatchOperationForm("replace", "/isVegeterian", "NO"));
-
         itemEntity1 = new ItemEntity();
-        itemEntity1.setName("Item 1");
-        itemEntity1.setIsVegeterian(Boolean.FALSE);
-        itemEntity1.setImageUrl("Item 1 Image");
-        itemEntity1.setDescription("Item 1 description");
+        itemEntity1.setName("Item 1 Name");
+        itemEntity1.setDescription("Item 1 Description");
         itemEntity1.setActive(Boolean.TRUE);
-        itemEntity1.setCategory(categoryEntity1);
 
         itemEntity1 = itemRepository.save(itemEntity1);
 
         itemVo1 = new ItemVo();
         itemVo1.setId(itemEntity1.getId().toString());
         itemVo1.setName(itemEntity1.getName());
-        itemVo1.setIsVegeterian(VegeterianStatus.getSwitchValue(itemEntity1.getIsVegeterian()));
-        itemVo1.setCategoryId(itemEntity1.getCategory().getId().toString());
         itemVo1.setDescription(itemEntity1.getDescription());
-        itemVo1.setImageUrl(itemEntity1.getImageUrl());
-        itemVo1.setCategory(categoryVo1);
 
         itemEntity2 = new ItemEntity();
-        itemEntity2.setName("Item 2");
-        itemEntity2.setIsVegeterian(Boolean.TRUE);
-        itemEntity2.setImageUrl("Item 2 Image");
-        itemEntity2.setDescription("Item 2 description");
+        itemEntity2.setName("Item 2 Name");
+        itemEntity2.setDescription("Item 2 Description");
         itemEntity2.setActive(Boolean.FALSE);
-        itemEntity2.setCategory(categoryEntity2);
 
         itemEntity2 = itemRepository.save(itemEntity2);
 
         itemVo2 = new ItemVo();
         itemVo2.setId(itemEntity2.getId().toString());
         itemVo2.setName(itemEntity2.getName());
-        itemVo2.setIsVegeterian(VegeterianStatus.getSwitchValue(itemEntity2.getIsVegeterian()));
-        itemVo2.setCategoryId(itemEntity2.getCategory().getId().toString());
         itemVo2.setDescription(itemEntity2.getDescription());
-        itemVo2.setImageUrl(itemEntity2.getImageUrl());
-        itemVo2.setCategory(categoryVo2);
 
         itemEntity3 = new ItemEntity();
-        itemEntity3.setName("Item 3");
-        itemEntity3.setIsVegeterian(Boolean.FALSE);
-        itemEntity3.setImageUrl("Item 3 Image");
-        itemEntity3.setDescription("Item 3 description");
+        itemEntity3.setName("Item 3 Name");
+        itemEntity3.setDescription("Item 3 Description");
         itemEntity3.setActive(Boolean.TRUE);
-        itemEntity3.setCategory(categoryEntity3);
 
         itemEntity3 = itemRepository.save(itemEntity3);
 
         itemVo3 = new ItemVo();
         itemVo3.setId(itemEntity3.getId().toString());
         itemVo3.setName(itemEntity3.getName());
-        itemVo3.setIsVegeterian(VegeterianStatus.getSwitchValue(itemEntity3.getIsVegeterian()));
-        itemVo3.setCategoryId(itemEntity3.getCategory().getId().toString());
         itemVo3.setDescription(itemEntity3.getDescription());
-        itemVo3.setImageUrl(itemEntity3.getImageUrl());
-        itemVo3.setCategory(categoryVo3);
 
         itemEntity4 = new ItemEntity();
-        itemEntity4.setName("Item 4");
-        itemEntity4.setIsVegeterian(Boolean.TRUE);
-        itemEntity4.setImageUrl("Item 4 Image");
-        itemEntity4.setDescription("Item 4 description");
+        itemEntity4.setName("Item 4 Name");
+        itemEntity4.setDescription("Item 4 Description");
         itemEntity4.setActive(Boolean.TRUE);
-        itemEntity4.setCategory(categoryEntity4);
 
         itemEntity4 = itemRepository.save(itemEntity4);
 
         itemVo4 = new ItemVo();
         itemVo4.setId(itemEntity4.getId().toString());
         itemVo4.setName(itemEntity4.getName());
-        itemVo4.setIsVegeterian(VegeterianStatus.getSwitchValue(itemEntity4.getIsVegeterian()));
-        itemVo4.setCategoryId(itemEntity4.getCategory().getId().toString());
         itemVo4.setDescription(itemEntity4.getDescription());
-        itemVo4.setImageUrl(itemEntity4.getImageUrl());
-        itemVo4.setCategory(categoryVo4);
 
-        itemEntity5 = new ItemEntity();
-        itemEntity5.setName("Item 5");
-        itemEntity5.setIsVegeterian(Boolean.FALSE);
-        itemEntity5.setImageUrl("Item 5 Image");
-        itemEntity5.setDescription("Item 5 description");
-        itemEntity5.setActive(Boolean.TRUE);
-        itemEntity5.setCategory(categoryEntity4);
+        /**
+         * Price
+         */
 
-        itemEntity5 = itemRepository.save(itemEntity5);
+        priceForm = new PriceForm();
+        priceForm.setAmount(12.0);
+        priceForm.setCurrencyId("INR");
+        priceForm.setItemId(itemEntity3.getId().toString());
 
-        itemVo5 = new ItemVo();
-        itemVo5.setId(itemEntity5.getId().toString());
-        itemVo5.setName(itemEntity5.getName());
-        itemVo5.setIsVegeterian(VegeterianStatus.getSwitchValue(itemEntity5.getIsVegeterian()));
-        itemVo5.setCategoryId(itemEntity5.getCategory().getId().toString());
-        itemVo5.setDescription(itemEntity5.getDescription());
-        itemVo5.setImageUrl(itemEntity5.getImageUrl());
-        itemVo5.setCategory(categoryVo4);
+        patches = Arrays.asList(
+                new PatchOperationForm("replace", "/amount", "13"),
+                new PatchOperationForm("replace", "/currencyId", "USD"),
+                new PatchOperationForm("replace", "/itemId", itemEntity3.getId().toString()));
 
-        itemVo6 = new ItemVo();
-        itemVo6.setId(UUID.randomUUID().toString());
-        itemVo6.setName(itemForm.getName());
-        itemVo6.setIsVegeterian(VegeterianStatus.valueOf(itemForm.getIsVegeterian()));
-        itemVo6.setCategoryId(itemForm.getCategoryId());
-        itemVo6.setDescription(itemForm.getDescription());
-        itemVo6.setImageUrl(itemForm.getImageUrl());
-        itemVo6.setCategory(categoryVo3);
+        priceEntity1 = new PriceEntity();
+        priceEntity1.setAmount(22.0d);
+        priceEntity1.setCurrencyId("INR");
+        priceEntity1.setActive(Boolean.TRUE);
+        priceEntity1.setItem(itemEntity1);
+
+        priceEntity1 = priceRepository.save(priceEntity1);
+
+        priceVo1 = new PriceVo();
+        priceVo1.setId(priceEntity1.getId().toString());
+        priceVo1.setAmount(priceEntity1.getAmount());
+        priceVo1.setCurrency(Currency.getInstance(priceEntity1.getCurrencyId()));
+        priceVo1.setItemId(priceEntity1.getItem().getId().toString());
+        priceVo1.setItem(itemVo1);
+
+        priceEntity2 = new PriceEntity();
+        priceEntity2.setAmount(32.0d);
+        priceEntity2.setCurrencyId("EUR");
+        priceEntity2.setActive(Boolean.FALSE);
+        priceEntity2.setItem(itemEntity2);
+
+        priceEntity2 = priceRepository.save(priceEntity2);
+
+        priceVo2 = new PriceVo();
+        priceVo2.setId(priceEntity2.getId().toString());
+        priceVo2.setAmount(priceEntity2.getAmount());
+        priceVo2.setCurrency(Currency.getInstance(priceEntity2.getCurrencyId()));
+        priceVo2.setItemId(priceEntity2.getItem().getId().toString());
+        priceVo2.setItem(itemVo2);
+
+        priceEntity3 = new PriceEntity();
+        priceEntity3.setAmount(42.0d);
+        priceEntity3.setCurrencyId("INR");
+        priceEntity3.setActive(Boolean.TRUE);
+        priceEntity3.setItem(itemEntity3);
+
+        priceEntity3 = priceRepository.save(priceEntity3);
+
+        priceVo3 = new PriceVo();
+        priceVo3.setId(priceEntity3.getId().toString());
+        priceVo3.setAmount(priceEntity3.getAmount());
+        priceVo3.setCurrency(Currency.getInstance(priceEntity3.getCurrencyId()));
+        priceVo3.setItemId(priceEntity3.getItem().getId().toString());
+        priceVo3.setItem(itemVo3);
+
+        priceEntity4 = new PriceEntity();
+        priceEntity4.setAmount(52.0d);
+        priceEntity4.setCurrencyId("EUR");
+        priceEntity4.setActive(Boolean.TRUE);
+        priceEntity4.setItem(itemEntity4);
+
+        priceEntity4 = priceRepository.save(priceEntity4);
+
+        priceVo4 = new PriceVo();
+        priceVo4.setId(priceEntity4.getId().toString());
+        priceVo4.setAmount(priceEntity4.getAmount());
+        priceVo4.setCurrency(Currency.getInstance(priceEntity4.getCurrencyId()));
+        priceVo4.setItemId(priceEntity4.getItem().getId().toString());
+        priceVo4.setItem(itemVo4);
+
+        priceEntity5 = new PriceEntity();
+        priceEntity5.setAmount(442.0d);
+        priceEntity5.setCurrencyId("INR");
+        priceEntity5.setActive(Boolean.TRUE);
+        priceEntity5.setItem(itemEntity4);
+
+        priceEntity5 = priceRepository.save(priceEntity5);
+
+        priceVo5 = new PriceVo();
+        priceVo5.setId(priceEntity5.getId().toString());
+        priceVo5.setAmount(priceEntity4.getAmount());
+        priceVo5.setCurrency(Currency.getInstance(priceEntity4.getCurrencyId()));
+        priceVo5.setItemId(priceEntity5.getItem().getId().toString());
+        priceVo5.setItem(itemVo4);
+
+        priceVo6 = new PriceVo();
+        priceVo6.setId(UUID.randomUUID().toString());
+        priceVo6.setAmount(priceForm.getAmount());
+        priceVo6.setCurrency(Currency.getInstance(priceForm.getCurrencyId()));
+        priceVo6.setItemId(priceForm.getItemId());
+        priceVo6.setItem(itemVo3);
 
     }
 
     @AfterEach
     private void destroy() {
-        itemEntity1.setCategory(null);
-        itemEntity2.setCategory(null);
-        itemEntity3.setCategory(null);
-        itemEntity4.setCategory(null);
-        itemEntity5.setCategory(null);
+        priceEntity1.setItem(null);
+        priceEntity2.setItem(null);
+        priceEntity3.setItem(null);
+        priceEntity4.setItem(null);
+        priceEntity5.setItem(null);
+
+        priceRepository.deleteById(priceEntity1.getId());
+        priceRepository.deleteById(priceEntity2.getId());
+        priceRepository.deleteById(priceEntity3.getId());
+        priceRepository.deleteById(priceEntity4.getId());
+        priceRepository.deleteById(priceEntity5.getId());
 
         itemRepository.deleteById(itemEntity1.getId());
         itemRepository.deleteById(itemEntity2.getId());
         itemRepository.deleteById(itemEntity3.getId());
         itemRepository.deleteById(itemEntity4.getId());
-        itemRepository.deleteById(itemEntity5.getId());
-
-        categoryRepository.deleteById(categoryEntity1.getId());
-        categoryRepository.deleteById(categoryEntity2.getId());
-        categoryRepository.deleteById(categoryEntity3.getId());
-        categoryRepository.deleteById(categoryEntity4.getId());
     }
 
     @Test
-    public void test_Item_Post_ShouldReturn_201Response_And_NewItemId_WhenPosted_WithValidItemForm() throws Exception {
+    public void test_Price_Post_ShouldReturn_201Response_And_NewPriceId_WhenPosted_WithValidPriceForm() throws Exception {
         MvcResult mvcResult = null;
 
-        mvcResult = this.mockMvc.perform(post(ITEM_URI)
+        mvcResult = this.mockMvc.perform(post(PRICE_URI)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(itemForm)))
+                .content(om.writeValueAsString(priceForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -303,15 +275,15 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Post_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_WithEmptyName() throws Exception {
+    public void test_Price_Post_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_WithEmptyAmount() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "name";
-        itemForm.setName("");
+        String fieldName = "amount";
+        priceForm.setAmount(null);
 
-        mvcResult = mockMvc.perform(post(ITEM_URI)
+        mvcResult = mockMvc.perform(post(PRICE_URI)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(itemForm)))
+                .content(om.writeValueAsString(priceForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -323,15 +295,15 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Post_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_WithEmptyIsVegeterian() throws Exception {
+    public void test_Price_Post_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_WithEmptyCurrencyId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "isVegeterian";
-        itemForm.setIsVegeterian("");
+        String fieldName = "currencyId";
+        priceForm.setCurrencyId("");
 
-        mvcResult = mockMvc.perform(post(ITEM_URI)
+        mvcResult = mockMvc.perform(post(PRICE_URI)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(itemForm)))
+                        .content(om.writeValueAsString(priceForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -341,17 +313,17 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
 
     }
-    
+
     @Test
-    public void test_Item_Post_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_WithEmptyImageUrl() throws Exception {
+    public void test_Price_Post_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_WithEmptyItemId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "imageUrl";
-        itemForm.setImageUrl("");
+        String fieldName = "itemId";
+        priceForm.setItemId("");
 
-        mvcResult = mockMvc.perform(post(ITEM_URI)
+        mvcResult = mockMvc.perform(post(PRICE_URI)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(itemForm)))
+                        .content(om.writeValueAsString(priceForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -363,15 +335,15 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Post_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_WithEmptyCategoryId() throws Exception {
+    public void test_Price_Post_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_WithInactiveItemId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "categoryId";
-        itemForm.setCategoryId("");
+        String fieldName = "itemId";
+        priceForm.setItemId(itemEntity2.getId().toString());
 
-        mvcResult = mockMvc.perform(post(ITEM_URI)
+        mvcResult = mockMvc.perform(post(PRICE_URI)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(itemForm)))
+                        .content(om.writeValueAsString(priceForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -383,15 +355,15 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Post_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_WithInactiveCategoryId() throws Exception {
+    public void test_Price_Post_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_WithInvalidAmount() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "categoryId";
-        itemForm.setCategoryId(categoryEntity2.getId().toString());
+        String fieldName = "amount";
+        priceForm.setAmount(-9.0d);
 
-        mvcResult = mockMvc.perform(post(ITEM_URI)
+        mvcResult = mockMvc.perform(post(PRICE_URI)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(itemForm)))
+                        .content(om.writeValueAsString(priceForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -403,15 +375,15 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Post_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_WithInvalidIsVegeterian() throws Exception {
+    public void test_Price_Post_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_WithInvalidCurrencyId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "isVegeterian";
-        itemForm.setIsVegeterian("r");
+        String fieldName = "currencyId";
+        priceForm.setCurrencyId("r");
 
-        mvcResult = mockMvc.perform(post(ITEM_URI)
+        mvcResult = mockMvc.perform(post(PRICE_URI)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(itemForm)))
+                        .content(om.writeValueAsString(priceForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -423,15 +395,15 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Post_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_WithInvalidCategoryId() throws Exception {
+    public void test_Price_Post_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_WithInvalidItemId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "categoryId";
-        itemForm.setCategoryId("r");
+        String fieldName = "itemId";
+        priceForm.setItemId("r");
 
-        mvcResult = mockMvc.perform(post(ITEM_URI)
+        mvcResult = mockMvc.perform(post(PRICE_URI)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(itemForm)))
+                        .content(om.writeValueAsString(priceForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -443,15 +415,15 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Post_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_WithAbsentCategoryId() throws Exception {
+    public void test_Price_Post_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_WithAbsentItemId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "categoryId";
-        itemForm.setCategoryId("99999");
+        String fieldName = "itemId";
+        priceForm.setItemId(String.valueOf(Long.MAX_VALUE));
 
-        mvcResult = mockMvc.perform(post(ITEM_URI)
+        mvcResult = mockMvc.perform(post(PRICE_URI)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(itemForm)))
+                        .content(om.writeValueAsString(priceForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -463,19 +435,19 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Post_ShouldReturn_409Response_And_ErrorCode_RES_MENU_004_WhenRequested_WithDuplicateItem() throws Exception {
+    public void test_Price_Post_ShouldReturn_409Response_And_ErrorCode_RES_MENU_004_WhenRequested_WithDuplicatePrice() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_EXISTS.getErrorCode();
-        String field1Name = "name";
-        String field2Name = "categoryId";
-        String field1Value = itemEntity1.getName();
-        String field2Value = itemEntity1.getCategory().getId().toString();
-        itemForm.setName(field1Value);
-        itemForm.setCategoryId(field2Value);
+        String field1Name = "itemId";
+        String field2Name = "currencyId";
+        String field1Value = priceEntity1.getItem().getId().toString();
+        String field2Value = priceEntity1.getCurrencyId();
+        priceForm.setCurrencyId(field2Value);
+        priceForm.setItemId(field1Value);
 
-        mvcResult = mockMvc.perform(post(ITEM_URI)
+        mvcResult = mockMvc.perform(post(PRICE_URI)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(itemForm)))
+                .content(om.writeValueAsString(priceForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -489,13 +461,13 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Post_ShouldReturn_422Response_And_ErrorCode_RES_MENU_003_WhenPosted_WithNoItemForm() throws Exception {
+    public void test_Price_Post_ShouldReturn_422Response_And_ErrorCode_RES_MENU_003_WhenPosted_WithNoPriceForm() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_UNEXPECTED.getErrorCode();
         String fieldName = "form";
         String message = "not provided";
 
-        mvcResult = mockMvc.perform(post(ITEM_URI)
+        mvcResult = mockMvc.perform(post(PRICE_URI)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andReturn();
@@ -509,43 +481,43 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Get_ShouldReturn_200Response_And_ItemListNaturallyOrdered_WhenRequested_ForAllItems() throws Exception {
+    public void test_Price_Get_ShouldReturn_200Response_And_PriceListNaturallyOrdered_WhenRequested_ForAllPrices() throws Exception {
         MvcResult mvcResult = null;
-        List<ItemVo> itemList = new ArrayList<>(Arrays.asList(itemVo5, itemVo1));
+        List<PriceVo> priceList = new ArrayList<>(Arrays.asList(priceVo5, priceVo1));
 
-        mvcResult = this.mockMvc.perform(get(ITEM_URI))
+        mvcResult = this.mockMvc.perform(get(PRICE_URI))
                 .andDo(print())
                 .andReturn();
 
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(itemList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo[].class).length);
+        Assertions.assertEquals(priceList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo[].class).length);
     }
 
     @Test
-    public void test_Item_Get_ShouldReturn_200Response_And_ItemListNaturallyOrdered_WhenRequested_ForItems_ByCategoryId() throws Exception {
+    public void test_Price_Get_ShouldReturn_200Response_And_PriceListNaturallyOrdered_WhenRequested_ForPrices_ByItemId() throws Exception {
         MvcResult mvcResult = null;
-        itemVo4.setCategory(null);
-        itemVo5.setCategory(null);
-        List<ItemVo> itemList = Arrays.asList(itemVo4, itemVo5);
+        priceVo4.setItem(null);
+        priceVo5.setItem(null);
+        List<PriceVo> priceList = Arrays.asList(priceVo4, priceVo5);
 
-        mvcResult = this.mockMvc.perform(get(ITEM_URI_BY_CATEGORY_ID, categoryEntity4.getId()))
+        mvcResult = this.mockMvc.perform(get(PRICE_URI_BY_ITEM_ID, itemEntity4.getId()))
                 .andDo(print())
                 .andReturn();
 
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(itemList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo[].class).length);
-        Assertions.assertEquals(om.writeValueAsString(itemList), mvcResult.getResponse().getContentAsString());
+        Assertions.assertEquals(priceList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo[].class).length);
+        Assertions.assertEquals(om.writeValueAsString(priceList), mvcResult.getResponse().getContentAsString());
     }
 
     @Test
-    public void test_Item_Get_ShouldReturn_200Response_And_ItemListNaturallyOrdered_WhenRequested_ForItems_ByEmptyCategoryId() throws Exception {
+    public void test_Price_Get_ShouldReturn_200Response_And_PriceListNaturallyOrdered_WhenRequested_ForPrices_ByEmptyItemId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "categoryId";
+        String fieldName = "itemId";
 
-        mvcResult = this.mockMvc.perform(get(ITEM_URI_BY_CATEGORY_ID, " "))
+        mvcResult = this.mockMvc.perform(get(PRICE_URI_BY_ITEM_ID, " "))
                 .andDo(print())
                 .andReturn();
 
@@ -556,13 +528,13 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Get_ShouldReturn_404Response_And_ErrorCode_RES_MENU_001_WhenRequested_ByAbsentCategoryId() throws Exception {
+    public void test_Price_Get_ShouldReturn_404Response_And_ErrorCode_RES_MENU_001_WhenRequested_ByAbsentItemId() throws Exception {
         MvcResult mvcResult = null;
-        String categoryId = "kk";
+        String itemId = String.valueOf(Long.MAX_VALUE);
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "categoryId";
+        String fieldName = "itemId";
 
-        mvcResult = this.mockMvc.perform(get(ITEM_URI_BY_CATEGORY_ID, categoryId))
+        mvcResult = this.mockMvc.perform(get(PRICE_URI_BY_ITEM_ID, itemId))
                 .andDo(print())
                 .andReturn();
 
@@ -570,17 +542,35 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(categoryId));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(itemId));
     }
 
     @Test
-    public void test_Item_Get_ShouldReturn_404Response_And_ErrorCode_RES_MENU_001_WhenRequested_ByInactiveCategoryId() throws Exception {
+    public void test_Price_Get_ShouldReturn_404Response_And_ErrorCode_RES_MENU_001_WhenRequested_ByInvalidItemId() throws Exception {
         MvcResult mvcResult = null;
-        String categoryId = categoryEntity2.getId().toString();
+        String itemId = "kk";
+        String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "itemId";
+
+        mvcResult = this.mockMvc.perform(get(PRICE_URI_BY_ITEM_ID, itemId))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(itemId));
+    }
+
+    @Test
+    public void test_Price_Get_ShouldReturn_404Response_And_ErrorCode_RES_MENU_001_WhenRequested_ByInactiveItemId() throws Exception {
+        MvcResult mvcResult = null;
+        String itemId = itemEntity2.getId().toString();
         String errorCode = MenuErrorCode.MENU_INACTIVE.getErrorCode();
         String errorName = "deactivated";
 
-        mvcResult = this.mockMvc.perform(get(ITEM_URI_BY_CATEGORY_ID, categoryId))
+        mvcResult = this.mockMvc.perform(get(PRICE_URI_BY_ITEM_ID, itemId))
                 .andDo(print())
                 .andReturn();
 
@@ -588,34 +578,17 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(errorName));
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(categoryId));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(itemId));
     }
 
     @ParameterizedTest
     @ValueSource(strings = { "", " " })
-    public void test_Item_Get_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequestedBy_EmptyNameOnly(String name) throws Exception {
+    public void test_Price_Get_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequestedBy_EmptyCurrencyIdOnly(String currencyId) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "filters";
 
-        mvcResult = this.mockMvc.perform(get(ITEM_URI_FILTER).queryParam("name", name))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = { "", " " })
-    public void test_Item_Get_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequestedBy_EmptyImageUrlOnly(String imageUrl) throws Exception {
-        MvcResult mvcResult = null;
-        String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "filters";
-
-        mvcResult = this.mockMvc.perform(get(ITEM_URI_FILTER).queryParam("imageUrl", imageUrl))
+        mvcResult = this.mockMvc.perform(get(PRICE_URI_FILTER).queryParam("currencyId", currencyId))
                 .andDo(print())
                 .andReturn();
 
@@ -627,12 +600,12 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "", " " })
-    public void test_Item_Get_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequestedBy_EmptyIsVegeterianOnly(String isVegeterian) throws Exception {
+    public void test_Price_Get_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequestedBy_EmptyItemIdOnly(String itemId) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "filters";
 
-        mvcResult = this.mockMvc.perform(get(ITEM_URI_FILTER).queryParam("isVegeterian", isVegeterian))
+        mvcResult = this.mockMvc.perform(get(PRICE_URI_FILTER).queryParam("itemId", itemId))
                 .andDo(print())
                 .andReturn();
 
@@ -642,14 +615,14 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = { "", " " })
-    public void test_Item_Get_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequestedBy_EmptyCategoryIdOnly(String categoryId) throws Exception {
+
+    @Test
+    public void test_Price_Get_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001__WhenRequestedBy_UnsupportedFilterAttribute() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "filters";
 
-        mvcResult = this.mockMvc.perform(get(ITEM_URI_FILTER).queryParam("categoryId", categoryId))
+        mvcResult = this.mockMvc.perform(get(PRICE_URI_FILTER).queryParam("imageUrl", "Hey"))
                 .andDo(print())
                 .andReturn();
 
@@ -660,25 +633,12 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Get_ShouldReturn_200Response_And_EmptyItemList_WhenRequestedBy_AbsentNameName() throws Exception {
-        MvcResult mvcResult = null;
-
-        mvcResult = this.mockMvc.perform(get(ITEM_URI_FILTER).queryParam("name", "Hey"))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(0, om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo[].class).length);
-    }
-
-    @Test
-    public void test_Item_Get_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001__WhenRequestedBy_UnsupportedFilterAttribute() throws Exception {
+    public void test_Price_Get_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequestedBy_InvalidCurrencyId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "filters";
+        String fieldName = "currencyId";
 
-        mvcResult = this.mockMvc.perform(get(ITEM_URI_FILTER).queryParam("imageUrl", "Hey"))
+        mvcResult = this.mockMvc.perform(get(PRICE_URI_FILTER).queryParam("currencyId", "r1"))
                 .andDo(print())
                 .andReturn();
 
@@ -689,12 +649,12 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Get_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequestedBy_InvalidIsVegeterian() throws Exception {
+    public void test_Price_Get_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequestedBy_InvalidItemId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "isVegeterian";
+        String fieldName = "itemId";
 
-        mvcResult = this.mockMvc.perform(get(ITEM_URI_FILTER).queryParam("isVegeterian", "Hey"))
+        mvcResult = this.mockMvc.perform(get(PRICE_URI_FILTER).queryParam("itemId", "r1"))
                 .andDo(print())
                 .andReturn();
 
@@ -705,158 +665,81 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Get_ShouldReturn_200Response_And_ItemListNaturallyOrdered_WhenRequested_ForItems_WithName() throws Exception {
+    public void test_Price_Get_ShouldReturn_200Response_And_PriceListNaturallyOrdered_WhenRequested_ForPrices_WithCurrencyId() throws Exception {
         MvcResult mvcResult = null;
-        itemVo1.setCategory(null);
-        List<ItemVo> itemList = new ArrayList<>(Arrays.asList(itemVo1));
+        priceVo1.setItem(null);
+        List<PriceVo> priceList = new ArrayList<>(Arrays.asList(priceVo1, priceVo3, priceVo5));
 
-        mvcResult = this.mockMvc.perform(get(ITEM_URI_FILTER)
-                        .queryParam("name", "Item 1"))
+        mvcResult = this.mockMvc.perform(get(PRICE_URI_FILTER)
+                        .queryParam("currencyId", "INR"))
                 .andDo(print())
                 .andReturn();
 
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(itemList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo[].class).length);
-        Assertions.assertEquals(om.writeValueAsString(itemList), mvcResult.getResponse().getContentAsString());
+        Assertions.assertEquals(priceList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo[].class).length);
+        Assertions.assertEquals(om.writeValueAsString(priceList), mvcResult.getResponse().getContentAsString());
     }
 
     @Test
-    public void test_Item_Get_ShouldReturn_200Response_And_ItemListNaturallyOrdered_WhenRequested_ForItems_WithDescription() throws Exception {
+    public void test_Price_Get_ShouldReturn_200Response_And_PriceListNaturallyOrdered_WhenRequested_ForPrices_WithItemId() throws Exception {
         MvcResult mvcResult = null;
-        itemVo1.setCategory(null);
-        List<ItemVo> itemList = new ArrayList<>(Arrays.asList(itemVo1));
+        priceVo1.setItem(null);
+        List<PriceVo> priceList = new ArrayList<>(Arrays.asList(priceVo1));
 
-        mvcResult = this.mockMvc.perform(get(ITEM_URI_FILTER)
-                        .queryParam("description", "Item 1"))
+        mvcResult = this.mockMvc.perform(get(PRICE_URI_FILTER)
+                        .queryParam("itemId", itemEntity1.getId().toString()))
                 .andDo(print())
                 .andReturn();
 
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(itemList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo[].class).length);
-        Assertions.assertEquals(om.writeValueAsString(itemList), mvcResult.getResponse().getContentAsString());
+        Assertions.assertEquals(priceList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo[].class).length);
+        Assertions.assertEquals(om.writeValueAsString(priceList), mvcResult.getResponse().getContentAsString());
     }
 
     @Test
-    public void test_Item_Get_ShouldReturn_200Response_And_ItemListNaturallyOrdered_WhenRequested_ForItems_WithIsVegeterian() throws Exception {
+    public void test_Price_Get_ShouldReturn_200Response_And_PriceListNaturallyOrdered_WhenRequested_ForPrices_WithItemIdAndCurrencyId() throws Exception {
         MvcResult mvcResult = null;
-        itemVo2.setCategory(null);
-        itemVo4.setCategory(null);
-        List<ItemVo> itemList = new ArrayList<>(Arrays.asList(itemVo2, itemVo4));
+        priceVo2.setItem(null);
+        List<PriceVo> priceList = Arrays.asList(priceVo2);
 
-        mvcResult = this.mockMvc.perform(get(ITEM_URI_FILTER)
-                        .queryParam("isVegeterian", "YES"))
+        mvcResult = this.mockMvc.perform(get(PRICE_URI_FILTER)
+                        .queryParam("itemId", itemEntity2.getId().toString())
+                        .queryParam("currencyId", "EUR"))
                 .andDo(print())
                 .andReturn();
 
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(itemList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo[].class).length);
-        Assertions.assertEquals(om.writeValueAsString(itemList), mvcResult.getResponse().getContentAsString());
+        Assertions.assertEquals(priceList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo[].class).length);
+        Assertions.assertEquals(om.writeValueAsString(priceList), mvcResult.getResponse().getContentAsString());
     }
 
     @Test
-    public void test_Item_Get_ShouldReturn_200Response_And_ItemListNaturallyOrdered_WhenRequested_ForItems_WithNameAndIsVegeterian() throws Exception {
+    public void test_Price_Get_ShouldReturn_200Response_And_PriceDetails_WhenRequested_ById() throws Exception {
+        String id = priceEntity1.getId().toString();
         MvcResult mvcResult = null;
-        itemVo2.setCategory(null);
-        itemVo4.setCategory(null);
-        List<ItemVo> itemList = Arrays.asList(itemVo2, itemVo4);
+        priceVo1.setItem(null);
 
-        mvcResult = this.mockMvc.perform(get(ITEM_URI_FILTER)
-                        .queryParam("isVegeterian", "YES")
-                        .queryParam("name", "Item"))
+        mvcResult = this.mockMvc.perform(get(PRICE_URI_BY_ID, id))
                 .andDo(print())
                 .andReturn();
 
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(itemList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo[].class).length);
-        Assertions.assertEquals(om.writeValueAsString(itemList), mvcResult.getResponse().getContentAsString());
-    }
-
-    @Test
-    public void test_Item_Get_ShouldReturn_200Response_And_ItemListNaturallyOrdered_WhenRequested_ForItems_WithDescriptionAndIsVegeterian() throws Exception {
-        MvcResult mvcResult = null;
-        itemVo1.setCategory(null);
-        itemVo3.setCategory(null);
-        itemVo5.setCategory(null);
-        List<ItemVo> itemList = Arrays.asList(itemVo1, itemVo3, itemVo5);
-
-        mvcResult = this.mockMvc.perform(get(ITEM_URI_FILTER)
-                        .queryParam("description", "Item")
-                        .queryParam("isVegeterian", "NO"))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(itemList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo[].class).length);
-        Assertions.assertEquals(om.writeValueAsString(itemList), mvcResult.getResponse().getContentAsString());
-    }
-
-    @Test
-    public void test_Item_Get_ShouldReturn_200Response_And_ItemListNaturallyOrdered_WhenRequested_ForItems_WithNameAndIsVegeterianAndDescription() throws Exception {
-        MvcResult mvcResult = null;
-        itemVo1.setCategory(null);
-        itemVo3.setCategory(null);
-        itemVo5.setCategory(null);
-        List<ItemVo> itemList = Arrays.asList(itemVo1, itemVo3, itemVo5);
-
-        mvcResult = this.mockMvc.perform(get(ITEM_URI_FILTER)
-                        .queryParam("name", "Item")
-                        .queryParam("isVegeterian", "NO")
-                        .queryParam("description", "Item"))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(itemList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo[].class).length);
-        Assertions.assertEquals(om.writeValueAsString(itemList), mvcResult.getResponse().getContentAsString());
-    }
-
-    @Test
-    public void test_Item_Get_ShouldReturn_200Response_And_EmptyItemList_WhenRequested_ForItems_WithAbsent_NameAndIsVegeterianAndDescription() throws Exception {
-        MvcResult mvcResult = null;
-        List<ItemVo> itemList = new ArrayList<>();
-
-        mvcResult = this.mockMvc.perform(get(ITEM_URI_FILTER)
-                        .queryParam("name", "Item 1")
-                        .queryParam("isVegeterian", "NO")
-                        .queryParam("description", UUID.randomUUID().toString()))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(itemList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo[].class).length);
-    }
-
-    @Test
-    public void test_Item_Get_ShouldReturn_200Response_And_ItemDetails_WhenRequested_ById() throws Exception {
-        String id = itemEntity1.getId().toString();
-        MvcResult mvcResult = null;
-        itemVo1.setCategory(null);
-
-        mvcResult = this.mockMvc.perform(get(ITEM_URI_BY_ID, id))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(om.writeValueAsString(itemVo1), mvcResult.getResponse().getContentAsString());
-        Assertions.assertEquals(itemVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getId());
+        Assertions.assertEquals(om.writeValueAsString(priceVo1), mvcResult.getResponse().getContentAsString());
+        Assertions.assertEquals(priceVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getId());
     }
 
     @ParameterizedTest
     @ValueSource(strings = { " ", "r" })
-    public void test_Item_Get_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequestedBy_EmptyInvalidId(String id) throws Exception {
+    public void test_Price_Get_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequestedBy_EmptyInvalidId(String id) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(get(ITEM_URI_BY_ID, id))
+        mvcResult = this.mockMvc.perform(get(PRICE_URI_BY_ID, id))
                 .andDo(print())
                 .andReturn();
 
@@ -867,13 +750,13 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Get_ShouldReturn_400Response_And_ErrorCode_RES_MENU_002_WhenRequested_ByAbsentId() throws Exception {
-        String id = "55";
+    public void test_Price_Get_ShouldReturn_400Response_And_ErrorCode_RES_MENU_002_WhenRequested_ByAbsentId() throws Exception {
+        String id = String.valueOf(Long.MAX_VALUE);
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_NOT_FOUND.getErrorCode();
         String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(get(ITEM_URI_BY_ID, id))
+        mvcResult = this.mockMvc.perform(get(PRICE_URI_BY_ID, id))
                 .andDo(print())
                 .andReturn();
 
@@ -884,11 +767,11 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Delete_ShouldReturn_204Response_And_NoResponseBody_WhenDeleted_ById() throws Exception {
-        String id = itemEntity4.getId().toString();
+    public void test_Price_Delete_ShouldReturn_204Response_And_NoResponseBody_WhenDeleted_ById() throws Exception {
+        String id = priceEntity4.getId().toString();
         MvcResult mvcResult = null;
 
-        mvcResult = this.mockMvc.perform(delete(ITEM_URI_BY_ID, id))
+        mvcResult = this.mockMvc.perform(delete(PRICE_URI_BY_ID, id))
                 .andDo(print())
                 .andReturn();
 
@@ -898,62 +781,59 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Get_ShouldReturn_200Response_And_DomainDetails_WhenRequested_ById_AndFirstLevel_Cascade() throws Exception {
-        String id = itemEntity1.getId().toString();
+    public void test_Price_Get_ShouldReturn_200Response_And_DomainDetails_WhenRequested_ById_AndFirstLevel_Cascade() throws Exception {
+        String id = priceEntity1.getId().toString();
         MvcResult mvcResult = null;
 
-        mvcResult = this.mockMvc.perform(get(ITEM_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(get(PRICE_URI_BY_ID, id)
                         .queryParam("cascadeUntilLevel", TOABCascadeLevel.ONE.getLevelCode()))
                 .andDo(print())
                 .andReturn();
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(itemVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getId());
-        Assertions.assertEquals(itemVo1.getName(), om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getName());
-        Assertions.assertEquals(itemVo1.getDescription(), om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getDescription());
-        Assertions.assertEquals(itemVo1.getImageUrl(), om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getImageUrl());
-        Assertions.assertEquals(itemVo1.getIsVegeterian(), om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getIsVegeterian());
-        Assertions.assertEquals(itemVo1.getCategoryId(), om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getCategoryId());
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getCreatedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getModifiedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getCreatedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getModifiedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getActive()));
+        Assertions.assertEquals(priceVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getId());
+        Assertions.assertEquals(priceVo1.getCurrencyId(), om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getCurrencyId());
+        Assertions.assertEquals(priceVo1.getItemId(), om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getItemId());
+        Assertions.assertEquals(priceVo1.getAmount(), om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getAmount());
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getCreatedBy()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getModifiedBy()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getCreatedOn()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getModifiedOn()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getActive()));
     }
 
     @Test
-    public void test_Item_Get_ShouldReturn_200Response_And_DomainDetails_WhenRequested_ById_AndSecondLevel_Cascade() throws Exception {
-        String id = itemEntity1.getId().toString();
+    public void test_Price_Get_ShouldReturn_200Response_And_DomainDetails_WhenRequested_ById_AndSecondLevel_Cascade() throws Exception {
+        String id = priceEntity1.getId().toString();
         MvcResult mvcResult = null;
 
-        mvcResult = this.mockMvc.perform(get(ITEM_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(get(PRICE_URI_BY_ID, id)
                         .queryParam("cascadeUntilLevel", TOABCascadeLevel.TWO.getLevelCode()))
                 .andDo(print())
                 .andReturn();
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(itemVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getId());
-        Assertions.assertEquals(itemVo1.getName(), om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getName());
-        Assertions.assertEquals(itemVo1.getDescription(), om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getDescription());
-        Assertions.assertEquals(itemVo1.getImageUrl(), om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getImageUrl());
-        Assertions.assertEquals(itemVo1.getIsVegeterian(), om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getIsVegeterian());
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getCategory() != null);
-        Assertions.assertEquals(itemVo1.getCategory().getId(), om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getCategory().getId());
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getCreatedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getModifiedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getCreatedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getModifiedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getActive()));
+        Assertions.assertEquals(priceVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getId());
+        Assertions.assertEquals(priceVo1.getAmount(), om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getAmount());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getItem() != null);
+        Assertions.assertEquals(priceVo1.getItem().getId(), om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getItem().getId());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getItem() != null);
+        Assertions.assertEquals(priceVo1.getCurrency().getCurrencyCode(), om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getCurrency().getCurrencyCode());
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getCreatedBy()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getModifiedBy()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getCreatedOn()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getModifiedOn()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getActive()));
     }
 
     @ParameterizedTest
     @ValueSource(strings = { " ", "r" })
-    public void test_Item_Delete_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenDeleted_ByEmptyInvalidId(String id) throws Exception {
+    public void test_Price_Delete_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenDeleted_ByEmptyInvalidId(String id) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(delete(ITEM_URI_BY_ID, id))
+        mvcResult = this.mockMvc.perform(delete(PRICE_URI_BY_ID, id))
                 .andDo(print())
                 .andReturn();
 
@@ -964,12 +844,12 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Delete_ShouldReturn_400Response_And_ErrorCode_RES_MENU_005_WhenDeleted_ByInactiveId() throws Exception {
-        String id = itemEntity2.getId().toString();
+    public void test_Price_Delete_ShouldReturn_400Response_And_ErrorCode_RES_MENU_005_WhenDeleted_ByInactiveId() throws Exception {
+        String id = priceEntity2.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_INACTIVE.getErrorCode();
 
-        mvcResult = this.mockMvc.perform(delete(ITEM_URI_BY_ID, id))
+        mvcResult = this.mockMvc.perform(delete(PRICE_URI_BY_ID, id))
                 .andDo(print())
                 .andReturn();
 
@@ -980,13 +860,13 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Delete_ShouldReturn_404Response_And_ErrorCode_RES_MENU_002_WhenDeleted_ByAbsentId() throws Exception {
+    public void test_Price_Delete_ShouldReturn_404Response_And_ErrorCode_RES_MENU_002_WhenDeleted_ByAbsentId() throws Exception {
         String id = "55";
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_NOT_FOUND.getErrorCode();
         String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(delete(ITEM_URI_BY_ID, id))
+        mvcResult = this.mockMvc.perform(delete(PRICE_URI_BY_ID, id))
                 .andDo(print())
                 .andReturn();
 
@@ -997,14 +877,48 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Put_ShouldReturn_204Response_And_NoResponseBody_WhenUpdated_ById_AndItemDetails() throws Exception {
-        String id = itemEntity1.getId().toString();
+    public void test_Price_Put_ShouldReturn_204Response_And_NoResponseBody_WhenUpdated_ById_AndPriceDetails_Amount() throws Exception {
+        String id = priceEntity1.getId().toString();
         MvcResult mvcResult = null;
-        itemForm.setName("Ferran");
+        priceForm.setAmount(665.0d);
 
-        mvcResult = this.mockMvc.perform(put(ITEM_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(put(PRICE_URI_BY_ID, id)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(itemForm)))
+                .content(om.writeValueAsString(priceForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.NO_CONTENT.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals("", mvcResult.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void test_Price_Put_ShouldReturn_204Response_And_NoResponseBody_WhenUpdated_ById_AndPriceDetails_CurrencyId() throws Exception {
+        String id = priceEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        priceForm.setCurrencyId("CAD");
+
+        mvcResult = this.mockMvc.perform(put(PRICE_URI_BY_ID, id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(priceForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.NO_CONTENT.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals("", mvcResult.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void test_Price_Put_ShouldReturn_204Response_And_NoResponseBody_WhenUpdated_ById_AndPriceDetails_ItemId() throws Exception {
+        String id = priceEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        priceForm.setItemId(itemEntity2.getId().toString());
+
+        mvcResult = this.mockMvc.perform(put(PRICE_URI_BY_ID, id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(priceForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -1015,14 +929,14 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { " ", "r" })
-    public void test_Item_Put_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenUpdatedBy_EmptyInvalidId_AndItemDetails(String id) throws Exception {
+    public void test_Price_Put_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenUpdatedBy_EmptyInvalidId_AndPriceDetails(String id) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(put(ITEM_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(put(PRICE_URI_BY_ID, id)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(itemForm)))
+                .content(om.writeValueAsString(priceForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -1033,15 +947,15 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Put_ShouldReturn_404Response_And_ErrorCode_RES_MENU_002_WhenUpdated_ByAbsentId_AndItemDetails() throws Exception {
+    public void test_Price_Put_ShouldReturn_404Response_And_ErrorCode_RES_MENU_002_WhenUpdated_ByAbsentId_AndPriceDetails() throws Exception {
         String id = "55";
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_NOT_FOUND.getErrorCode();
         String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(put(ITEM_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(put(PRICE_URI_BY_ID, id)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(itemForm)))
+                .content(om.writeValueAsString(priceForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -1053,14 +967,14 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Put_ShouldReturn_400Response_And_ErrorCode_RES_MENU_005_WhenUpdated_ByInactiveId_AndItemDetails() throws Exception {
-        String id = itemEntity2.getId().toString();
+    public void test_Price_Put_ShouldReturn_400Response_And_ErrorCode_RES_MENU_005_WhenUpdated_ByInactiveId_AndPriceDetails() throws Exception {
+        String id = priceEntity2.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_INACTIVE.getErrorCode();
 
-        mvcResult = this.mockMvc.perform(put(ITEM_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(put(PRICE_URI_BY_ID, id)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(itemForm)))
+                .content(om.writeValueAsString(priceForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -1071,14 +985,14 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Put_ShouldReturn_422Response_And_ErrorCode_RES_MENU_003_WhenUpdated_ById_AndNoItemDetails() throws Exception {
-        String id = itemEntity1.getId().toString();
+    public void test_Price_Put_ShouldReturn_422Response_And_ErrorCode_RES_MENU_003_WhenUpdated_ById_AndNoPriceDetails() throws Exception {
+        String id = priceEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_UNEXPECTED.getErrorCode();
         String fieldName = "form";
         String message = "not provided";
 
-        mvcResult = this.mockMvc.perform(put(ITEM_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(put(PRICE_URI_BY_ID, id)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andReturn();
@@ -1092,16 +1006,16 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { " ", "" })
-    public void test_Item_Put_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_ById_AndEmptyName(String name) throws Exception {
-        String id = itemEntity1.getId().toString();
+    public void test_Price_Put_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_ById_AndEmptyName(String name) throws Exception {
+        String id = priceEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "name";
-        itemForm.setName(name);
+        priceForm.setName(name);
 
-        mvcResult = mockMvc.perform(put(ITEM_URI_BY_ID, id)
+        mvcResult = mockMvc.perform(put(PRICE_URI_BY_ID, id)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(itemForm)))
+                        .content(om.writeValueAsString(priceForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -1113,16 +1027,16 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { " ", "", "r" })
-    public void test_Item_Put_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_ById_AndEmptyInvalidIsVegeterian(String isVegeterian) throws Exception {
-        String id = itemEntity1.getId().toString();
+    public void test_Price_Put_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_ById_AndEmptyInvalidIsVegeterian(String isVegeterian) throws Exception {
+        String id = priceEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "isVegeterian";
-        itemForm.setIsVegeterian(isVegeterian);
+        priceForm.setIsVegeterian(isVegeterian);
 
-        mvcResult = mockMvc.perform(put(ITEM_URI_BY_ID, id)
+        mvcResult = mockMvc.perform(put(PRICE_URI_BY_ID, id)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(itemForm)))
+                        .content(om.writeValueAsString(priceForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -1134,16 +1048,16 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { " ", "", "r" })
-    public void test_Item_Put_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_ById_AndEmptyInvalidCategoryId(String categoryId) throws Exception {
-        String id = itemEntity1.getId().toString();
+    public void test_Price_Put_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_ById_AndEmptyInvalidItemId(String itemId) throws Exception {
+        String id = priceEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "categoryId";
-        itemForm.setCategoryId(categoryId);
+        String fieldName = "itemId";
+        priceForm.setItemId(itemId);
 
-        mvcResult = mockMvc.perform(put(ITEM_URI_BY_ID, id)
+        mvcResult = mockMvc.perform(put(PRICE_URI_BY_ID, id)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(itemForm)))
+                        .content(om.writeValueAsString(priceForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -1155,16 +1069,16 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "99999" })
-    public void test_Item_Put_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_ById_AndAbsentCategoryId(String categoryId) throws Exception {
-        String id = itemEntity1.getId().toString();
+    public void test_Price_Put_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_ById_AndAbsentItemId(String itemId) throws Exception {
+        String id = priceEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "categoryId";
-        itemForm.setCategoryId(categoryId);
+        String fieldName = "itemId";
+        priceForm.setItemId(itemId);
 
-        mvcResult = mockMvc.perform(put(ITEM_URI_BY_ID, id)
+        mvcResult = mockMvc.perform(put(PRICE_URI_BY_ID, id)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(itemForm)))
+                        .content(om.writeValueAsString(priceForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -1175,17 +1089,17 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Put_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_ById_AndInactiveCategoryId() throws Exception {
-        String id = itemEntity1.getId().toString();
+    public void test_Price_Put_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_ById_AndInactiveItemId() throws Exception {
+        String id = priceEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
-        String categoryId = categoryEntity2.getId().toString();
-        String fieldName = "categoryId";
-        itemForm.setCategoryId(categoryId);
+        String itemId = itemEntity2.getId().toString();
+        String fieldName = "itemId";
+        priceForm.setItemId(itemId);
 
-        mvcResult = mockMvc.perform(put(ITEM_URI_BY_ID, id)
+        mvcResult = mockMvc.perform(put(PRICE_URI_BY_ID, id)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(itemForm)))
+                        .content(om.writeValueAsString(priceForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -1196,16 +1110,16 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Put_ShouldReturn_422Response_And_ErrorCode_RES_MENU_003_WhenUpdated_ById_AndEmptyItemDetails() throws Exception {
-        String id = itemEntity1.getId().toString();
+    public void test_Price_Put_ShouldReturn_422Response_And_ErrorCode_RES_MENU_003_WhenUpdated_ById_AndEmptyPriceDetails() throws Exception {
+        String id = priceEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_UNEXPECTED.getErrorCode();
         String fieldName = "form";
         String message = "fields are expected with new values";
 
-        mvcResult = this.mockMvc.perform(put(ITEM_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(put(PRICE_URI_BY_ID, id)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(new ItemForm())))
+                .content(om.writeValueAsString(new PriceForm())))
                 .andDo(print())
                 .andReturn();
 
@@ -1217,20 +1131,20 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Put_ShouldReturn_409Response_And_ErrorCode_RES_MENU_004_WhenUpdated_ById_AndDuplicateItemDetails() throws Exception {
-        String id = itemEntity1.getId().toString();
+    public void test_Price_Put_ShouldReturn_409Response_And_ErrorCode_RES_MENU_004_WhenUpdated_ById_AndDuplicatePriceDetails() throws Exception {
+        String id = priceEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_EXISTS.getErrorCode();
         String field1Name = "name";
-        String field2Name = "categoryId";
-        String field1Value = itemEntity1.getName();
-        String field2Value = itemEntity1.getCategory().getId().toString();
-        itemForm.setName(field1Value);
-        itemForm.setCategoryId(field2Value);
+        String field2Name = "itemId";
+        String field1Value = priceEntity1.getName();
+        String field2Value = priceEntity1.getItem().getId().toString();
+        priceForm.setName(field1Value);
+        priceForm.setItemId(field2Value);
 
-        mvcResult = mockMvc.perform(put(ITEM_URI_BY_ID, id)
+        mvcResult = mockMvc.perform(put(PRICE_URI_BY_ID, id)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(itemForm)))
+                .content(om.writeValueAsString(priceForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -1244,11 +1158,11 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Patch_ShouldReturn_204Response_And_NoResponseBody_WhenUpdated_ById_AndItemDetails() throws Exception {
-        String id = itemEntity1.getId().toString();
+    public void test_Price_Patch_ShouldReturn_204Response_And_NoResponseBody_WhenUpdated_ById_AndPriceDetails() throws Exception {
+        String id = priceEntity1.getId().toString();
         MvcResult mvcResult = null;
 
-        mvcResult = this.mockMvc.perform(patch(ITEM_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(patch(PRICE_URI_BY_ID, id)
                 .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                 .content(om.writeValueAsString(patches)))
                 .andDo(print())
@@ -1260,12 +1174,12 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenUpdated_ByEmptyId_AndItemDetails() throws Exception {
+    public void test_Price_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenUpdated_ByEmptyId_AndPriceDetails() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(patch(ITEM_URI_BY_ID, " ")
+        mvcResult = this.mockMvc.perform(patch(PRICE_URI_BY_ID, " ")
                 .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                 .content(om.writeValueAsString(patches)))
                 .andDo(print())
@@ -1278,13 +1192,13 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Patch_ShouldReturn_400Response_And_ErrorCode_RES_MENU_002_WhenUpdated_ByInvalidId_AndItemDetails() throws Exception {
+    public void test_Price_Patch_ShouldReturn_400Response_And_ErrorCode_RES_MENU_002_WhenUpdated_ByInvalidId_AndPriceDetails() throws Exception {
         String id = "r";
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(patch(ITEM_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(patch(PRICE_URI_BY_ID, id)
                 .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                 .content(om.writeValueAsString(patches)))
                 .andDo(print())
@@ -1298,13 +1212,13 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Patch_ShouldReturn_404Response_And_ErrorCode_RES_MENU_002_WhenUpdated_ByAbsentId_AndItemDetails() throws Exception {
+    public void test_Price_Patch_ShouldReturn_404Response_And_ErrorCode_RES_MENU_002_WhenUpdated_ByAbsentId_AndPriceDetails() throws Exception {
         String id = "5";
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_NOT_FOUND.getErrorCode();
         String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(patch(ITEM_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(patch(PRICE_URI_BY_ID, id)
                 .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                 .content(om.writeValueAsString(patches)))
                 .andDo(print())
@@ -1318,20 +1232,20 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Patch_ShouldReturn_409Response_And_ErrorCode_RES_MENU_002_WhenUpdated_ById_AndDuplicateItemDetails() throws Exception {
-        String id = itemEntity1.getId().toString();
+    public void test_Price_Patch_ShouldReturn_409Response_And_ErrorCode_RES_MENU_002_WhenUpdated_ById_AndDuplicatePriceDetails() throws Exception {
+        String id = priceEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_EXISTS.getErrorCode();
         String field1Name = "name";
-        String field2Name = "categoryId";
-        String field1Value = itemEntity1.getName();
-        String field2Value = itemEntity1.getCategory().getId().toString();
+        String field2Name = "itemId";
+        String field1Value = priceEntity1.getName();
+        String field2Value = priceEntity1.getItem().getId().toString();
         patches = Arrays.asList(
                 new PatchOperationForm("replace", "/" + field1Name, field1Value),
                 new PatchOperationForm("replace", "/" + field2Name, field2Value));
 
 
-        mvcResult = this.mockMvc.perform(patch(ITEM_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(patch(PRICE_URI_BY_ID, id)
                 .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                 .content(om.writeValueAsString(patches)))
                 .andDo(print())
@@ -1346,14 +1260,14 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Patch_ShouldReturn_422Response_And_ErrorCode_RES_MENU_003_WhenUpdated_ById_AndNoItemDetails() throws Exception {
-        String id = itemEntity1.getId().toString();
+    public void test_Price_Patch_ShouldReturn_422Response_And_ErrorCode_RES_MENU_003_WhenUpdated_ById_AndNoPriceDetails() throws Exception {
+        String id = priceEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_UNEXPECTED.getErrorCode();
         String fieldName = "patch";
         String message = "not provided";
 
-        mvcResult = this.mockMvc.perform(patch(ITEM_URI_BY_ID, id))
+        mvcResult = this.mockMvc.perform(patch(PRICE_URI_BY_ID, id))
                 .andDo(print())
                 .andReturn();
 
@@ -1365,15 +1279,15 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Patch_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_ById_AndInvalidActive() throws Exception {
-        String id = itemEntity1.getId().toString();
+    public void test_Price_Patch_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_ById_AndInvalidActive() throws Exception {
+        String id = priceEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "active";
         patches = Arrays.asList(
                 new PatchOperationForm("replace", "/active", "x"));
 
-        mvcResult = mockMvc.perform(patch(ITEM_URI_BY_ID, id)
+        mvcResult = mockMvc.perform(patch(PRICE_URI_BY_ID, id)
                 .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                 .content(om.writeValueAsString(patches)))
                 .andDo(print())
@@ -1387,15 +1301,15 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndInvalidName() throws Exception {
-        String id = itemEntity1.getId().toString();
+    public void test_Price_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndInvalidName() throws Exception {
+        String id = priceEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = TOABErrorCode.PATCH_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "value";
         patches = Arrays.asList(
                 new PatchOperationForm("replace", "/name", " "));
 
-        mvcResult = mockMvc.perform(patch(ITEM_URI_BY_ID, id)
+        mvcResult = mockMvc.perform(patch(PRICE_URI_BY_ID, id)
                 .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                 .content(om.writeValueAsString(patches)))
                 .andDo(print())
@@ -1410,15 +1324,15 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { " ", "" })
-    public void test_Item_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndEmptyIsVegeterian(String isVegeterian) throws Exception {
-        String id = itemEntity1.getId().toString();
+    public void test_Price_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndEmptyIsVegeterian(String isVegeterian) throws Exception {
+        String id = priceEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = TOABErrorCode.PATCH_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "value";
         patches = Arrays.asList(
                 new PatchOperationForm("replace", "/isVegeterian", isVegeterian));
 
-        mvcResult = mockMvc.perform(patch(ITEM_URI_BY_ID, id)
+        mvcResult = mockMvc.perform(patch(PRICE_URI_BY_ID, id)
                         .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                         .content(om.writeValueAsString(patches)))
                 .andDo(print())
@@ -1432,15 +1346,15 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "r" })
-    public void test_Item_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndInvalidIsVegeterian(String isVegeterian) throws Exception {
-        String id = itemEntity1.getId().toString();
+    public void test_Price_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndInvalidIsVegeterian(String isVegeterian) throws Exception {
+        String id = priceEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "isVegeterian";
         patches = Arrays.asList(
                 new PatchOperationForm("replace", "/" + fieldName, isVegeterian));
 
-        mvcResult = mockMvc.perform(patch(ITEM_URI_BY_ID, id)
+        mvcResult = mockMvc.perform(patch(PRICE_URI_BY_ID, id)
                         .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                         .content(om.writeValueAsString(patches)))
                 .andDo(print())
@@ -1455,15 +1369,15 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { " ", "" })
-    public void test_Item_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndEmptyCategoryId(String categoryId) throws Exception {
-        String id = itemEntity1.getId().toString();
+    public void test_Price_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndEmptyItemId(String itemId) throws Exception {
+        String id = priceEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = TOABErrorCode.PATCH_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "value";
         patches = Arrays.asList(
-                new PatchOperationForm("replace", "/categoryId", categoryId));
+                new PatchOperationForm("replace", "/itemId", itemId));
 
-        mvcResult = mockMvc.perform(patch(ITEM_URI_BY_ID, id)
+        mvcResult = mockMvc.perform(patch(PRICE_URI_BY_ID, id)
                         .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                         .content(om.writeValueAsString(patches)))
                 .andDo(print())
@@ -1478,15 +1392,15 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "r" })
-    public void test_Item_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndInvalidCategoryId(String categoryId) throws Exception {
-        String id = itemEntity1.getId().toString();
+    public void test_Price_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndInvalidItemId(String itemId) throws Exception {
+        String id = priceEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "categoryId";
+        String fieldName = "itemId";
         patches = Arrays.asList(
-                new PatchOperationForm("replace", "/" + fieldName, categoryId));
+                new PatchOperationForm("replace", "/" + fieldName, itemId));
 
-        mvcResult = mockMvc.perform(patch(ITEM_URI_BY_ID, id)
+        mvcResult = mockMvc.perform(patch(PRICE_URI_BY_ID, id)
                         .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                         .content(om.writeValueAsString(patches)))
                 .andDo(print())
@@ -1500,16 +1414,16 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndInactiveCategoryId() throws Exception {
-        String id = itemEntity1.getId().toString();
+    public void test_Price_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndInactiveItemId() throws Exception {
+        String id = priceEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
-        String categoryId = categoryEntity2.getId().toString();
-        String fieldName = "categoryId";
+        String itemId = itemEntity2.getId().toString();
+        String fieldName = "itemId";
         patches = Arrays.asList(
-                new PatchOperationForm("replace", "/" + fieldName, categoryId));
+                new PatchOperationForm("replace", "/" + fieldName, itemId));
 
-        mvcResult = mockMvc.perform(patch(ITEM_URI_BY_ID, id)
+        mvcResult = mockMvc.perform(patch(PRICE_URI_BY_ID, id)
                         .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                         .content(om.writeValueAsString(patches)))
                 .andDo(print())
@@ -1523,15 +1437,15 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Item_Patch_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_ById_AndInvalidDefinitionOfItemAttribute() throws Exception {
-        String id = itemEntity1.getId().toString();
+    public void test_Price_Patch_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequested_ById_AndInvalidDefinitionOfPriceAttribute() throws Exception {
+        String id = priceEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "path";
         patches = Arrays.asList(
                 new PatchOperationForm("replace", "/x", "x"));
 
-        mvcResult = mockMvc.perform(patch(ITEM_URI_BY_ID, id)
+        mvcResult = mockMvc.perform(patch(PRICE_URI_BY_ID, id)
                 .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                 .content(om.writeValueAsString(patches)))
                 .andDo(print())

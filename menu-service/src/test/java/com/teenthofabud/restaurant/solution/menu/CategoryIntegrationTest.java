@@ -17,7 +17,6 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -52,13 +51,6 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
 
     private CategoryRepository categoryRepository;
     private ItemRepository itemRepository;
-
-    private int metadataServicePort;
-
-    @Value("${menu.metadata.service.port}")
-    public void setMetadataServicePort(int metadataServicePort) {
-        this.metadataServicePort = metadataServicePort;
-    }
 
     @Autowired
     public void setCategoryRepository(CategoryRepository categoryRepository) {
@@ -1043,18 +1035,4 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
 
     }
 
-    @Override
-    public String getSimulationBaseLocation() {
-        return "simulation/metadata-service";
-    }
-
-    @Override
-    public Integer getServicePort() {
-        return this.metadataServicePort;
-    }
-
-    @Override
-    public String[] getSimulationFilePaths() {
-        return new String[] { String.join("/", getSimulationBaseLocation(), "simulation-v3.json") };
-    }
 }

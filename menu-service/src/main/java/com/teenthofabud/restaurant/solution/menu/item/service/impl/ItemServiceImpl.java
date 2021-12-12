@@ -50,7 +50,6 @@ public class ItemServiceImpl implements ItemService {
         return Integer.compare(s1.getCategoryId().compareTo(s2.getCategoryId()), s1.getName().compareTo(s2.getName()));
     };
 
-    //private ItemEntity2VoConverter entity2VoConverter;
     private ItemForm2EntityConverter form2EntityConverter;
     private ItemDto2EntityConverter dto2EntityConverter;
     private ItemForm2EntityMapper form2EntityMapper;
@@ -78,11 +77,6 @@ public class ItemServiceImpl implements ItemService {
     public void setToabBaseService(TOABBaseService toabBaseService) {
         this.toabBaseService = toabBaseService;
     }
-
-    /*@Autowired
-    public void setEntity2VoConverter(ItemEntity2VoConverter entity2VoConverter) {
-        this.entity2VoConverter = entity2VoConverter;
-    }*/
 
     @Autowired
     public void setDto2EntityConverter(ItemDto2EntityConverter dto2EntityConverter) {
@@ -133,16 +127,6 @@ public class ItemServiceImpl implements ItemService {
     public void setFormValidator(ItemFormValidator formValidator) {
         this.formValidator = formValidator;
     }
-
-    /*private List<ItemVo> entity2DetailedVoList(List<ItemEntity> itemEntityList) {
-        List<ItemVo> itemDetailsList = new ArrayList<>(itemEntityList.size());
-        for(ItemEntity entity : itemEntityList) {
-            ItemVo vo = entity2VoConverter.convert(entity);
-            log.debug("Converting {} to {}", entity, vo);
-            itemDetailsList.add(vo);
-        }
-        return itemDetailsList;
-    }*/
 
     private Long parseItemId(String id) throws ItemException {
         Long itemId = null;
@@ -206,14 +190,6 @@ public class ItemServiceImpl implements ItemService {
             throw new ItemException(MenuErrorCode.MENU_ATTRIBUTE_INVALID, new Object [] { "categoryId: " + categoryId });
         }
         List<ItemEntity> itemEntityList = repository.findByCategoryId(Long.parseLong(categoryId));
-        /*if(itemEntityList != null && !itemEntityList.isEmpty()) {
-            TOABCascadeLevel cascadeLevel = optionalCascadeLevel.isPresent() ? optionalCascadeLevel.get() : TOABCascadeLevel.ZERO;
-            TOABRequestContextHolder.setCascadeLevelContext(cascadeLevel);
-            List<ItemVo> matchedItemList = menuServiceHelper.itemEntity2DetailedVo()
-            log.info("Found {} ItemVo matching with categoryId: {}", matchedItemList.size(),categoryId);
-            TOABRequestContextHolder.clearCascadeLevelContext();
-            return matchedItemList;
-        }*/
         TOABCascadeLevel cascadeLevel = optionalCascadeLevel.isPresent() ? optionalCascadeLevel.get() : TOABCascadeLevel.ZERO;
         TOABRequestContextHolder.setCascadeLevelContext(cascadeLevel);
         List<ItemVo> matchedItemList = menuServiceHelper.itemEntity2DetailedVo(itemEntityList);
@@ -378,15 +354,6 @@ public class ItemServiceImpl implements ItemService {
 
         ItemEntity expectedEntity = optExpectedEntity.get();
 
-        /*log.debug(ItemMessageTemplate.MSG_TEMPLATE_ITEM_EXISTENCE_BY_NAME_AND_CATEGORY_ID.getValue(), form.getName(), form.getCategoryId());
-        if(actualEntity.getName().compareTo(expectedEntity.getName()) == 0
-                || repository.existsByNameAndCategoryId(expectedEntity.getName(), expectedEntity.getCategory().getId())) {
-            log.debug(ItemMessageTemplate.MSG_TEMPLATE_ITEM_EXISTS_BY_NAME_AND_CATEGORY_ID.getValue(), expectedEntity.getName(),
-                    expectedEntity.getCategory().getId());
-            throw new ItemException(MenuErrorCode.MENU_EXISTS,
-                    new Object[]{ "name: " + actualEntity.getName(), ", categoryId: " + actualEntity.getCategory().getId() });
-        }
-        log.debug(ItemMessageTemplate.MSG_TEMPLATE_ITEM_NON_EXISTENCE_BY_NAME_AND_CATEGORY_ID.getValue(), expectedEntity.getName());*/
         checkUniquenessOfItem(form, actualEntity);
 
         entitySelfMapper.compareAndMap(expectedEntity, actualEntity);
@@ -511,17 +478,6 @@ public class ItemServiceImpl implements ItemService {
         }
         log.debug("All attributes of patched ItemDto are valid");
 
-        /*log.debug(ItemMessageTemplate.MSG_TEMPLATE_ITEM_EXISTENCE_BY_NAME_AND_CATEGORY_ID.getValue(), patchedItemForm.getName().get(),
-                patchedItemForm.getCategoryId().get());
-        if(actualEntity.getName().compareTo(patchedItemForm.getName().get()) == 0
-                || repository.existsByNameAndCategoryId(patchedItemForm.getName().get(), Long.parseLong(patchedItemForm.getCategoryId().get()))) {
-            log.debug(ItemMessageTemplate.MSG_TEMPLATE_ITEM_EXISTS_BY_NAME_AND_CATEGORY_ID.getValue(), patchedItemForm.getName().get(),
-                    patchedItemForm.getCategoryId().get());
-            throw new ItemException(MenuErrorCode.MENU_EXISTS,
-                    new Object[]{ "name: " + patchedItemForm.getName().get(), ", categoryId: " + patchedItemForm.getCategoryId().get() });
-        }
-        log.debug(ItemMessageTemplate.MSG_TEMPLATE_ITEM_NON_EXISTENCE_BY_NAME_AND_CATEGORY_ID.getValue(), patchedItemForm.getName().get(),
-                patchedItemForm.getCategoryId().get());*/
         checkUniquenessOfItem(patchedItemForm, actualEntity);
 
         log.debug("Comparatively copying patched attributes from ItemDto to ItemEntity");
