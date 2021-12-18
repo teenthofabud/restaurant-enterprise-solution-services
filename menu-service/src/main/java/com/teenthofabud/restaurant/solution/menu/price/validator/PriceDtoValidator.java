@@ -56,7 +56,12 @@ public class PriceDtoValidator implements Validator {
             return;
         } if(!fieldsToEscape.contains("amount") && optAmount.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optAmount.get()))) {
             try {
-                Double.parseDouble(optAmount.get());
+                Double price = Double.parseDouble(optAmount.get());
+                if(price <= 0.0d) {
+                    errors.rejectValue("amount", MenuErrorCode.MENU_ATTRIBUTE_INVALID.name());
+                    log.debug("PriceDto.amount is invalid");
+                    return;
+                }
             } catch (NumberFormatException e) {
                 errors.rejectValue("amount", MenuErrorCode.MENU_ATTRIBUTE_INVALID.name());
                 log.debug("PriceDto.amount is invalid");
