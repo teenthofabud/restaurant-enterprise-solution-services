@@ -11,7 +11,7 @@
 
     <groupId>com.teenthofabud.restaurant.solution</groupId>
     <artifactId>restaurant-enterprise-solution-services</artifactId>
-    <version>2021.2-SNAPSHOT</version>
+    <version>2021.3-SNAPSHOT</version>
     <name>restaurant-enterprise-solution-services</name>
     <packaging>pom</packaging>
 
@@ -19,6 +19,7 @@
         <module>establishment-area-service</module>
         <module>customer-service</module>
         <module>menu-service</module>
+        <module>settings-service</module>
     </modules>
 
     <properties>
@@ -28,7 +29,7 @@
         <sonar.organization>teenthofabud</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
-        <toab-chassis-sdk.version>1.7.1-SNAPSHOT</toab-chassis-sdk.version>
+        <toab-chassis-sdk.version>1.7.2-SNAPSHOT</toab-chassis-sdk.version>
         <json-patch.version>1.13</json-patch.version>
         <jackson-datatype-jdk8.version>2.12.3</jackson-datatype-jdk8.version>
         <javax.json-api.version>1.1.4</javax.json-api.version>
