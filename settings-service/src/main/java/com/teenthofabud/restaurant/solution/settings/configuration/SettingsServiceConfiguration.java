@@ -15,7 +15,8 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 @EnableEurekaClient
 @EnableMongoAuditing
 @EnableMongoRepositories(basePackages = { "com.teenthofabud.restaurant.solution.settings.paymentmethod.repository",
-        "com.teenthofabud.restaurant.solution.settings.charge.repository" },
+        "com.teenthofabud.restaurant.solution.settings.charge.repository",
+        "com.teenthofabud.restaurant.solution.settings.discount.repository"},
         repositoryBaseClass = TOABBaseMongoRepositoryImpl.class)
 public class SettingsServiceConfiguration {
 

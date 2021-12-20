@@ -1,8 +1,8 @@
-package com.teenthofabud.restaurant.solution.settings.paymentmethod.mapper;
+package com.teenthofabud.restaurant.solution.settings.discount.mapper;
 
 import com.teenthofabud.core.common.mapper.DualChannelMapper;
-import com.teenthofabud.restaurant.solution.settings.paymentmethod.data.PaymentMethodDocument;
-import com.teenthofabud.restaurant.solution.settings.paymentmethod.data.PaymentMethodForm;
+import com.teenthofabud.restaurant.solution.settings.discount.data.DiscountDocument;
+import com.teenthofabud.restaurant.solution.settings.discount.data.DiscountForm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -13,18 +13,18 @@ import java.util.Optional;
 
 @Component
 @Slf4j
-public class PaymentMethodForm2DocumentMapper implements DualChannelMapper<PaymentMethodDocument, PaymentMethodForm> {
+public class DiscountForm2DocumentMapper implements DualChannelMapper<DiscountDocument, DiscountForm> {
 
     private List<String> fieldsToEscape;
 
-    @Value("#{'${res.settings.paymentmethod.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.settings.discount.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }
 
     @Override
-    public Optional<PaymentMethodDocument> compareAndMap(PaymentMethodDocument actualDocument, PaymentMethodForm form) {
-        PaymentMethodDocument expectedDocument = new PaymentMethodDocument();
+    public Optional<DiscountDocument> compareAndMap(DiscountDocument actualDocument, DiscountForm form) {
+        DiscountDocument expectedDocument = new DiscountDocument();
         boolean changeSW = false;
         // direct copy
         expectedDocument.setId(actualDocument.getId());
@@ -51,6 +51,14 @@ public class PaymentMethodForm2DocumentMapper implements DualChannelMapper<Payme
         } else {
             expectedDocument.setDescription(actualDocument.getDescription());
             log.debug("DiscountForm.description: is unchanged");
+        }
+        if(!fieldsToEscape.contains("rate") && form.getRate() != null && form.getRate().compareTo(actualDocument.getRate()) != 0) {
+            expectedDocument.setRate(form.getRate());
+            changeSW = true;
+            log.debug("DiscountForm.rate: {} is different as DiscountDocument.rate: {}", form.getRate(), actualDocument.getRate());
+        } else {
+            expectedDocument.setRate(actualDocument.getRate());
+            log.debug("DiscountForm.rate: is unchanged");
         }
         return changeSW ? Optional.of(expectedDocument) : Optional.empty();
     }

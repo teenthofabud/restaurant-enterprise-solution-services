@@ -1,4 +1,4 @@
-package com.teenthofabud.restaurant.solution.settings.charge.data;
+package com.teenthofabud.restaurant.solution.settings.discount.data;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,7 +11,7 @@ import java.util.Optional;
 @Setter
 @ToString
 @AllArgsConstructor
-public class ChargeDto {
+public class DiscountDto {
 
     @ToString.Include
     private Optional<String> name;
@@ -22,7 +22,7 @@ public class ChargeDto {
     @ToString.Include
     private Optional<String> active;
 
-    public ChargeDto() {
+    public DiscountDto() {
         this.name = Optional.ofNullable(null);
         this.active = Optional.ofNullable(null);
         this.description = Optional.ofNullable(null);

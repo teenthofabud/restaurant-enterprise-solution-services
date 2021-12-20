@@ -136,29 +136,29 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
 
     @Override
     public Set<PaymentMethodVo> retrieveAllByNaturalOrdering() {
-        log.info("Requesting all ChargeDocument by their natural ordering");
+        log.info("Requesting all DiscountDocument by their natural ordering");
         List<PaymentMethodDocument> paymentMethodDocumentList = repository.findAll();
         List<PaymentMethodVo> paymentMethodVoList = settingsServiceHelper.paymentMethodDocument2DetailedVo(paymentMethodDocumentList);
         Set<PaymentMethodVo> naturallyOrderedSet = new TreeSet<>(CMP_BY_NAME);
         naturallyOrderedSet.addAll(paymentMethodVoList);
-        log.info("{} ChargeVo available", naturallyOrderedSet.size());
+        log.info("{} DiscountVo available", naturallyOrderedSet.size());
         return naturallyOrderedSet;
     }
 
     @Override
     public PaymentMethodVo retrieveDetailsById(String id, Optional<TOABCascadeLevel> optionalCascadeLevel) throws PaymentMethodException {
-        log.info("Requesting ChargeDocument by id: {}", id);
+        log.info("Requesting DiscountDocument by id: {}", id);
         Optional<PaymentMethodDocument> optDocument = repository.findById(id);
         if(optDocument.isEmpty()) {
-            log.debug("No ChargeDocument found by id: {}", id);
+            log.debug("No DiscountDocument found by id: {}", id);
             throw new PaymentMethodException(SettingsErrorCode.SETTINGS_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
-        log.info("Found ChargeVo by id: {}", id);
+        log.info("Found DiscountVo by id: {}", id);
         PaymentMethodDocument entity = optDocument.get();
         TOABCascadeLevel cascadeLevel = optionalCascadeLevel.isPresent() ? optionalCascadeLevel.get() : TOABCascadeLevel.ZERO;
         TOABRequestContextHolder.setCascadeLevelContext(cascadeLevel);
         PaymentMethodVo vo = settingsServiceHelper.paymentMethodDocument2DetailedVo(entity);
-        log.debug("ChargeVo populated with fields cascaded to level: {}", cascadeLevel);
+        log.debug("DiscountVo populated with fields cascaded to level: {}", cascadeLevel);
         TOABRequestContextHolder.clearCascadeLevelContext();
         return vo;
     }
@@ -198,32 +198,32 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
         Example<PaymentMethodDocument> paymentMethodDocumentExample = Example.of(entity, matcherCriteria);
         List<PaymentMethodDocument> paymentMethodDocumentList = repository.findAll(paymentMethodDocumentExample);
         matchedPaymentMethodList = settingsServiceHelper.paymentMethodDocument2DetailedVo(paymentMethodDocumentList);
-        log.info("Found {} ChargeVo matching with provided parameters : {}", matchedPaymentMethodList.size(), providedFilters);
-        log.info("No ChargeVo available matching with provided parameters : {}", matchedPaymentMethodList.size(), providedFilters);
+        log.info("Found {} DiscountVo matching with provided parameters : {}", matchedPaymentMethodList.size(), providedFilters);
+        log.info("No DiscountVo available matching with provided parameters : {}", matchedPaymentMethodList.size(), providedFilters);
         return matchedPaymentMethodList;
     }
 
     @Override
     public String createPaymentMethod(PaymentMethodForm form) throws PaymentMethodException {
-        log.info("Creating new ChargeDocument");
+        log.info("Creating new DiscountDocument");
 
         if(form == null) {
-            log.debug("ChargeForm provided is null");
+            log.debug("DiscountForm provided is null");
             throw new PaymentMethodException(SettingsErrorCode.SETTINGS_ATTRIBUTE_UNEXPECTED,
                     new Object[]{ "form", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
         }
         log.debug("Form details: {}", form);
 
-        log.debug("Validating provided attributes of ChargeForm");
+        log.debug("Validating provided attributes of DiscountForm");
         Errors err = new DirectFieldBindingResult(form, form.getClass().getSimpleName());
         formValidator.validate(form, err);
         if(err.hasErrors()) {
-            log.debug("ChargeForm has {} errors", err.getErrorCount());
+            log.debug("DiscountForm has {} errors", err.getErrorCount());
             SettingsErrorCode ec = SettingsErrorCode.valueOf(err.getFieldError().getCode());
-            log.debug("ChargeForm error detail: {}", ec);
+            log.debug("DiscountForm error detail: {}", ec);
             throw new PaymentMethodException(ec, new Object[] { err.getFieldError().getField() });
         }
-        log.debug("All attributes of ChargeForm are valid");
+        log.debug("All attributes of DiscountForm are valid");
 
         PaymentMethodDocument expectedDocument = form2DocumentConverter.convert(form);
 
@@ -242,15 +242,15 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
         if(actualDocument == null) {
             log.debug("Unable to create {}", expectedDocument);
             throw new PaymentMethodException(SettingsErrorCode.SETTINGS_ACTION_FAILURE,
-                    new Object[]{ "creation", "unable to persist ChargeForm details" });
+                    new Object[]{ "creation", "unable to persist DiscountForm details" });
         }
-        log.info("Created new ChargeForm with id: {}", actualDocument.getId());
+        log.info("Created new DiscountForm with id: {}", actualDocument.getId());
         return actualDocument.getId().toString();
     }
 
     @Override
     public void updatePaymentMethod(String id, PaymentMethodForm form) throws PaymentMethodException {
-        log.info("Updating ChargeForm by id: {}", id);
+        log.info("Updating DiscountForm by id: {}", id);
 
         log.debug(PaymentMethodMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_PAYMENT_METHOD_ENTITY_ID.getValue(), id);
         Optional<PaymentMethodDocument> optActualDocument = repository.findById(id);
@@ -262,37 +262,37 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
 
         PaymentMethodDocument actualDocument = optActualDocument.get();
         if(!actualDocument.getActive()) {
-            log.debug("ChargeDocument is inactive with id: {}", id);
+            log.debug("DiscountDocument is inactive with id: {}", id);
             throw new PaymentMethodException(SettingsErrorCode.SETTINGS_INACTIVE, new Object[] { String.valueOf(id) });
         }
-        log.debug("ChargeDocument is active with id: {}", id);
+        log.debug("DiscountDocument is active with id: {}", id);
 
         if(form == null) {
-            log.debug("ChargeForm is null");
+            log.debug("DiscountForm is null");
             throw new PaymentMethodException(SettingsErrorCode.SETTINGS_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
         }
         log.debug("Form details : {}", form);
 
-        log.debug("Validating provided attributes of ChargeForm");
+        log.debug("Validating provided attributes of DiscountForm");
         Errors err = new DirectFieldBindingResult(form, form.getClass().getSimpleName());
         Boolean allEmpty = relaxedFormValidator.validateLoosely(form, err);
         if(err.hasErrors()) {
-            log.debug("ChargeForm has {} errors", err.getErrorCount());
+            log.debug("DiscountForm has {} errors", err.getErrorCount());
             SettingsErrorCode ec = SettingsErrorCode.valueOf(err.getFieldError().getCode());
-            log.debug("ChargeForm error detail: {}", ec);
+            log.debug("DiscountForm error detail: {}", ec);
             throw new PaymentMethodException(ec, new Object[] { err.getFieldError().getField(), err.getFieldError().getCode() });
         } else if (!allEmpty) {
-            log.debug("All attributes of ChargeForm are empty");
+            log.debug("All attributes of DiscountForm are empty");
             throw new PaymentMethodException(SettingsErrorCode.SETTINGS_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are empty" });
         }
-        log.debug("All attributes of ChargeForm are valid");
+        log.debug("All attributes of DiscountForm are valid");
 
         Optional<PaymentMethodDocument> optExpectedDocument = form2DocumentMapper.compareAndMap(actualDocument, form);
         if(optExpectedDocument.isEmpty()) {
-            log.debug("No new value for attributes of ChargeForm");
+            log.debug("No new value for attributes of DiscountForm");
             throw new PaymentMethodException(SettingsErrorCode.SETTINGS_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are expected with new values" });
         }
-        log.debug("Successfully compared and copied attributes from ChargeForm to ChargeDocument");
+        log.debug("Successfully compared and copied attributes from DiscountForm to DiscountDocument");
 
         PaymentMethodDocument expectedDocument = optExpectedDocument.get();
 
@@ -306,7 +306,7 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
         log.debug(PaymentMethodMessageTemplate.MSG_TEMPLATE_PAYMENT_METHOD_NON_EXISTENCE_BY_NAME.getValue(), expectedDocument.getName());
 
         entitySelfMapper.compareAndMap(expectedDocument, actualDocument);
-        log.debug("Compared and copied attributes from ChargeDocument to ChargeForm");
+        log.debug("Compared and copied attributes from DiscountDocument to DiscountForm");
         actualDocument.setModifiedOn(LocalDateTime.now(ZoneOffset.UTC));
 
         log.debug("Updating: {}", actualDocument);
@@ -317,12 +317,12 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
             throw new PaymentMethodException(SettingsErrorCode.SETTINGS_ACTION_FAILURE,
                     new Object[]{ "update", "unable to persist currency paymentMethod details" });
         }
-        log.info("Updated existing ChargeDocument with id: {}", actualDocument.getId());
+        log.info("Updated existing DiscountDocument with id: {}", actualDocument.getId());
     }
 
     @Override
     public void deletePaymentMethod(String id) throws PaymentMethodException {
-        log.info("Soft deleting ChargeDocument by id: {}", id);
+        log.info("Soft deleting DiscountDocument by id: {}", id);
 
         log.debug(PaymentMethodMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_PAYMENT_METHOD_ENTITY_ID.getValue(), id);
         Optional<PaymentMethodDocument> optDocument = repository.findById(id);
@@ -334,10 +334,10 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
 
         PaymentMethodDocument actualDocument = optDocument.get();
         if(!actualDocument.getActive()) {
-            log.debug("ChargeDocument is inactive with id: {}", id);
+            log.debug("DiscountDocument is inactive with id: {}", id);
             throw new PaymentMethodException(SettingsErrorCode.SETTINGS_INACTIVE, new Object[] { String.valueOf(id) });
         }
-        log.debug("ChargeDocument is active with id: {}", id);
+        log.debug("DiscountDocument is active with id: {}", id);
 
         actualDocument.setActive(Boolean.FALSE);
         actualDocument.setModifiedOn(LocalDateTime.now(ZoneOffset.UTC));
@@ -350,12 +350,12 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
                     new Object[]{ "deletion", "unable to soft delete current paymentMethod details with id:" + id });
         }
 
-        log.info("Soft deleted existing ChargeDocument with id: {}", actualDocument.getId());
+        log.info("Soft deleted existing DiscountDocument with id: {}", actualDocument.getId());
     }
 
     @Override
     public void applyPatchOnPaymentMethod(String id, List<PatchOperationForm> patches) throws PaymentMethodException {
-        log.info("Patching ChargeDocument by id: {}", id);
+        log.info("Patching DiscountDocument by id: {}", id);
 
         log.debug(PaymentMethodMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_PAYMENT_METHOD_ENTITY_ID.getValue(), id);
         Optional<PaymentMethodDocument> optActualDocument = repository.findById(id);
@@ -384,7 +384,7 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
         log.debug("Validated patch list items for PaymentMethod");
 
 
-        log.debug("Patching list items to ChargeDto");
+        log.debug("Patching list items to DiscountDto");
         PaymentMethodDto patchedPaymentMethodForm = new PaymentMethodDto();
         try {
             log.debug("Preparing patch list items for PaymentMethod");
@@ -393,35 +393,35 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
             log.debug("Prepared patch list items for PaymentMethod");
             JsonNode blankPaymentMethodDtoTree = om.convertValue(new PaymentMethodDto(), JsonNode.class);
             JsonNode patchedPaymentMethodFormTree = paymentMethodPatch.apply(blankPaymentMethodDtoTree);
-            log.debug("Applying patch list items to ChargeDto");
+            log.debug("Applying patch list items to DiscountDto");
             patchedPaymentMethodForm = om.treeToValue(patchedPaymentMethodFormTree, PaymentMethodDto.class);
-            log.debug("Applied patch list items to ChargeDto");
+            log.debug("Applied patch list items to DiscountDto");
         } catch (JsonPatchException e) {
-            log.debug("Failed to patch list items to ChargeDto: {}", e);
+            log.debug("Failed to patch list items to DiscountDto: {}", e);
             PaymentMethodException ex = null;
             if(e.getMessage().contains("no such path in target")) {
-                log.debug("Invalid patch attribute in ChargeDto");
+                log.debug("Invalid patch attribute in DiscountDto");
                 ex = new PaymentMethodException(SettingsErrorCode.SETTINGS_ATTRIBUTE_INVALID, new Object[]{ "path" });
             } else {
                 ex = new PaymentMethodException(SettingsErrorCode.SETTINGS_ACTION_FAILURE, new Object[]{ "patching", "internal error: " + e.getMessage() });
             }
             throw ex;
         } catch (IOException e) {
-            log.debug("Failed to patch list items to ChargeDto: {}", e);
+            log.debug("Failed to patch list items to DiscountDto: {}", e);
             throw new PaymentMethodException(SettingsErrorCode.SETTINGS_ACTION_FAILURE, new Object[]{ "patching", "internal error: " + e.getMessage() });
         }
-        log.debug("Successfully to patch list items to ChargeDto");
+        log.debug("Successfully to patch list items to DiscountDto");
 
-        log.debug("Validating patched ChargeDto");
+        log.debug("Validating patched DiscountDto");
         Errors err = new DirectFieldBindingResult(patchedPaymentMethodForm, patchedPaymentMethodForm.getClass().getSimpleName());
         dtoValidator.validate(patchedPaymentMethodForm, err);
         if(err.hasErrors()) {
-            log.debug("Patched ChargeDto has {} errors", err.getErrorCount());
+            log.debug("Patched DiscountDto has {} errors", err.getErrorCount());
             SettingsErrorCode ec = SettingsErrorCode.valueOf(err.getFieldError().getCode());
-            log.debug("Patched ChargeDto error detail: {}", ec);
+            log.debug("Patched DiscountDto error detail: {}", ec);
             throw new PaymentMethodException(ec, new Object[] { err.getFieldError().getField() });
         }
-        log.debug("All attributes of patched ChargeDto are valid");
+        log.debug("All attributes of patched DiscountDto are valid");
 
         log.debug(PaymentMethodMessageTemplate.MSG_TEMPLATE_PAYMENT_METHOD_EXISTENCE_BY_NAME.getValue(), patchedPaymentMethodForm.getName().get());
         if(actualDocument.getName().compareTo(patchedPaymentMethodForm.getName().get()) == 0
@@ -433,22 +433,22 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
         log.debug(PaymentMethodMessageTemplate.MSG_TEMPLATE_PAYMENT_METHOD_NON_EXISTENCE_BY_NAME.getValue(), patchedPaymentMethodForm.getName().get());
 
 
-        log.debug("Comparatively copying patched attributes from ChargeDto to ChargeDocument");
+        log.debug("Comparatively copying patched attributes from DiscountDto to DiscountDocument");
         try {
             dto2DocumentConverter.compareAndMap(patchedPaymentMethodForm, actualDocument);
         } catch (TOABBaseException e) {
             throw (PaymentMethodException) e;
         }
-        log.debug("Comparatively copied patched attributes from ChargeDto to ChargeDocument");
+        log.debug("Comparatively copied patched attributes from DiscountDto to DiscountDocument");
 
-        log.debug("Saving patched ChargeDocument: {}", actualDocument);
+        log.debug("Saving patched DiscountDocument: {}", actualDocument);
         actualDocument = repository.save(actualDocument);
-        log.debug("Saved patched ChargeDocument: {}", actualDocument);
+        log.debug("Saved patched DiscountDocument: {}", actualDocument);
         if(actualDocument == null) {
-            log.debug("Unable to patch delete ChargeDocument with id:{}", id);
+            log.debug("Unable to patch delete DiscountDocument with id:{}", id);
             throw new PaymentMethodException(SettingsErrorCode.SETTINGS_ACTION_FAILURE,
                     new Object[]{ "patching", "unable to patch currency paymentMethod details with id:" + id });
         }
-        log.info("Patched ChargeDocument with id:{}", id);
+        log.info("Patched DiscountDocument with id:{}", id);
     }
 }

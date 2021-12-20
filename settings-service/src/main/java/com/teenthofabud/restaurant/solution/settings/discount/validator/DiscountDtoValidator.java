@@ -1,7 +1,7 @@
-package com.teenthofabud.restaurant.solution.settings.paymentmethod.validator;
+package com.teenthofabud.restaurant.solution.settings.discount.validator;
 
+import com.teenthofabud.restaurant.solution.settings.discount.data.DiscountDto;
 import com.teenthofabud.restaurant.solution.settings.error.SettingsErrorCode;
-import com.teenthofabud.restaurant.solution.settings.paymentmethod.data.PaymentMethodDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -14,23 +14,23 @@ import java.util.Optional;
 
 @Component
 @Slf4j
-public class PaymentMethodDtoValidator implements Validator {
+public class DiscountDtoValidator implements Validator {
 
     private List<String> fieldsToEscape;
 
-    @Value("#{'${res.settings.paymentmethod.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.settings.discount.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }
 
     @Override
     public boolean supports(Class<?> clazz) {
-        return clazz.isAssignableFrom(PaymentMethodDto.class);
+        return clazz.isAssignableFrom(DiscountDto.class);
     }
 
     @Override
     public void validate(Object target, Errors errors) {
-        PaymentMethodDto dto = (PaymentMethodDto) target;
+        DiscountDto dto = (DiscountDto) target;
         Optional<String> optName = dto.getName();
         if(!fieldsToEscape.contains("name") && optName.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optName.get()))) {
             errors.rejectValue("name", SettingsErrorCode.SETTINGS_ATTRIBUTE_INVALID.name());
@@ -42,6 +42,22 @@ public class PaymentMethodDtoValidator implements Validator {
             errors.rejectValue("description", SettingsErrorCode.SETTINGS_ATTRIBUTE_INVALID.name());
             log.debug("DiscountDto.description is invalid");
             return;
+        }
+        Optional<String> optRate = dto.getRate();
+        if(!fieldsToEscape.contains("rate") && optRate.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optRate.get()))) {
+            errors.rejectValue("rate", SettingsErrorCode.SETTINGS_ATTRIBUTE_INVALID.name());
+            log.debug("DiscountDto.rate is empty");
+            return;
+        } else if(!fieldsToEscape.contains("rate") && optRate.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optRate.get()))) {
+            try {
+                if(Double.parseDouble(optRate.get()) < 0.0d) {
+                    throw new NumberFormatException("charge rate can't be negative");
+                }
+            } catch (NumberFormatException e) {
+                errors.rejectValue("rate", SettingsErrorCode.SETTINGS_ATTRIBUTE_INVALID.name());
+                log.debug("DiscountDto.rate is invalid");
+                return;
+            }
         }
         Optional<String> optActive = dto.getActive();
         if(!fieldsToEscape.contains("active") && optActive.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optActive.get()))) {

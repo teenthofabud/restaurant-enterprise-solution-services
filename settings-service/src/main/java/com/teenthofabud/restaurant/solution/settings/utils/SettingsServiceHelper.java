@@ -4,6 +4,10 @@ import com.teenthofabud.restaurant.solution.settings.charge.converter.ChargeDocu
 import com.teenthofabud.restaurant.solution.settings.charge.data.ChargeDocument;
 import com.teenthofabud.restaurant.solution.settings.charge.data.ChargeException;
 import com.teenthofabud.restaurant.solution.settings.charge.data.ChargeVo;
+import com.teenthofabud.restaurant.solution.settings.discount.converter.DiscountDocument2VoConverter;
+import com.teenthofabud.restaurant.solution.settings.discount.data.DiscountDocument;
+import com.teenthofabud.restaurant.solution.settings.discount.data.DiscountException;
+import com.teenthofabud.restaurant.solution.settings.discount.data.DiscountVo;
 import com.teenthofabud.restaurant.solution.settings.error.SettingsErrorCode;
 import com.teenthofabud.restaurant.solution.settings.paymentmethod.converter.PaymentMethodDocument2VoConverter;
 import com.teenthofabud.restaurant.solution.settings.paymentmethod.data.PaymentMethodDocument;
@@ -21,12 +25,12 @@ public class SettingsServiceHelper {
 
     private PaymentMethodDocument2VoConverter paymentMethodDocument2VoConverter;
     private ChargeDocument2VoConverter chargeDocument2VoConverter;
-    //private PriceDocument2VoConverter priceDocument2VoConverter;
+    private DiscountDocument2VoConverter discountDocument2VoConverter;
 
-    /*@Autowired
-    public void setPriceDocument2VoConverter(PriceDocument2VoConverter priceDocument2VoConverter) {
-        this.priceDocument2VoConverter = priceDocument2VoConverter;
-    }*/
+    @Autowired
+    public void setDiscountDocument2VoConverter(DiscountDocument2VoConverter discountDocument2VoConverter) {
+        this.discountDocument2VoConverter = discountDocument2VoConverter;
+    }
 
     @Autowired
     public void setPaymentMethodDocument2VoConverter(PaymentMethodDocument2VoConverter paymentMethodDocument2VoConverter) {
@@ -80,24 +84,24 @@ public class SettingsServiceHelper {
         throw new PaymentMethodException(SettingsErrorCode.SETTINGS_ACTION_FAILURE, new Object[] { "paymentMethod entity is null" });
     }
 
-    /*public List<PriceVo> priceDocument2DetailedVo(List<PriceDocument> priceDocumentList) {
-        List<PriceVo> priceDetailsList = new LinkedList<>();
-        if(priceDocumentList != null && !priceDocumentList.isEmpty()) {
-            for(PriceDocument entity : priceDocumentList) {
-                PriceVo vo = priceDocument2VoConverter.convert(entity);
+    public List<DiscountVo> discountDocument2DetailedVo(List<DiscountDocument> discountDocumentList) {
+        List<DiscountVo> discountDetailsList = new LinkedList<>();
+        if(discountDocumentList != null && !discountDocumentList.isEmpty()) {
+            for(DiscountDocument entity : discountDocumentList) {
+                DiscountVo vo = discountDocument2VoConverter.convert(entity);
                 log.debug("Converting {} to {}", entity, vo);
-                priceDetailsList.add(vo);
+                discountDetailsList.add(vo);
             }
         }
-        return priceDetailsList;
+        return discountDetailsList;
     }
 
-    public PriceVo priceDocument2DetailedVo(PriceDocument priceDocument) throws PriceException {
-        if(priceDocument != null) {
-            PriceVo vo = priceDocument2VoConverter.convert(priceDocument);
-            log.debug("Converting {} to {}", priceDocument, vo);
+    public DiscountVo discountDocument2DetailedVo(DiscountDocument discountDocument) throws DiscountException {
+        if(discountDocument != null) {
+            DiscountVo vo = discountDocument2VoConverter.convert(discountDocument);
+            log.debug("Converting {} to {}", discountDocument, vo);
             return vo;
         }
-        throw new PriceException(SettingsErrorCode.SETTINGS_ACTION_FAILURE, new Object[] { "price entity is null" });
-    }*/
+        throw new DiscountException(SettingsErrorCode.SETTINGS_ACTION_FAILURE, new Object[] { "discount entity is null" });
+    }
 }
