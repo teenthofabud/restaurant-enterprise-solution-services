@@ -1,5 +1,9 @@
 package com.teenthofabud.restaurant.solution.settings.utils;
 
+import com.teenthofabud.restaurant.solution.settings.charge.converter.ChargeDocument2VoConverter;
+import com.teenthofabud.restaurant.solution.settings.charge.data.ChargeDocument;
+import com.teenthofabud.restaurant.solution.settings.charge.data.ChargeException;
+import com.teenthofabud.restaurant.solution.settings.charge.data.ChargeVo;
 import com.teenthofabud.restaurant.solution.settings.error.SettingsErrorCode;
 import com.teenthofabud.restaurant.solution.settings.paymentmethod.converter.PaymentMethodDocument2VoConverter;
 import com.teenthofabud.restaurant.solution.settings.paymentmethod.data.PaymentMethodDocument;
@@ -16,7 +20,7 @@ import java.util.*;
 public class SettingsServiceHelper {
 
     private PaymentMethodDocument2VoConverter paymentMethodDocument2VoConverter;
-    //private ItemDocument2VoConverter itemDocument2VoConverter;
+    private ChargeDocument2VoConverter chargeDocument2VoConverter;
     //private PriceDocument2VoConverter priceDocument2VoConverter;
 
     /*@Autowired
@@ -29,10 +33,10 @@ public class SettingsServiceHelper {
         this.paymentMethodDocument2VoConverter = paymentMethodDocument2VoConverter;
     }
 
-    /*@Autowired
-    public void setItemDocument2VoConverter(ItemDocument2VoConverter itemDocument2VoConverter) {
-        this.itemDocument2VoConverter = itemDocument2VoConverter;
-    }*/
+    @Autowired
+    public void setChargeDocument2VoConverter(ChargeDocument2VoConverter chargeDocument2VoConverter) {
+        this.chargeDocument2VoConverter = chargeDocument2VoConverter;
+    }
 
     public List<PaymentMethodVo> paymentMethodDocument2DetailedVo(List<? extends PaymentMethodDocument> paymentMethodDocumentList) {
         List<PaymentMethodVo> paymentMethodDetailsList = new LinkedList<>();
@@ -46,28 +50,26 @@ public class SettingsServiceHelper {
         return paymentMethodDetailsList;
     }
 
-    /*public List<ItemVo> itemDocument2DetailedVo(List<? extends ItemDocument> itemDocumentList) {
-        List<ItemVo> itemDetailsList = new LinkedList<>();
-        if(itemDocumentList != null && !itemDocumentList.isEmpty()) {
-            for(ItemDocument entity : itemDocumentList) {
-                ItemVo vo = itemDocument2VoConverter.convert(entity);
+    public List<ChargeVo> chargeDocument2DetailedVo(List<? extends ChargeDocument> chargeDocumentList) {
+        List<ChargeVo> chargeDetailsList = new LinkedList<>();
+        if(chargeDocumentList != null && !chargeDocumentList.isEmpty()) {
+            for(ChargeDocument entity : chargeDocumentList) {
+                ChargeVo vo = chargeDocument2VoConverter.convert(entity);
                 log.debug("Converting {} to {}", entity, vo);
-                itemDetailsList.add(vo);
+                chargeDetailsList.add(vo);
             }
         }
-        return itemDetailsList;
+        return chargeDetailsList;
     }
     
-    public ItemVo itemDocument2DetailedVo(ItemDocument itemDocument) throws ItemException {
-        if(itemDocument != null) {
-            ItemVo vo = itemDocument2VoConverter.convert(itemDocument);
-            log.debug("Converting {} to {}", itemDocument, vo);
+    public ChargeVo chargeDocument2DetailedVo(ChargeDocument chargeDocument) throws ChargeException {
+        if(chargeDocument != null) {
+            ChargeVo vo = chargeDocument2VoConverter.convert(chargeDocument);
+            log.debug("Converting {} to {}", chargeDocument, vo);
             return vo;
         }
-        throw new ItemException(SettingsErrorCode.SETTINGS_ACTION_FAILURE, new Object[] { "item entity is null" });
+        throw new ChargeException(SettingsErrorCode.SETTINGS_ACTION_FAILURE, new Object[] { "charge entity is null" });
     }
-    
-    */
 
     public PaymentMethodVo paymentMethodDocument2DetailedVo(PaymentMethodDocument paymentMethodDocument) throws PaymentMethodException {
         if(paymentMethodDocument != null) {

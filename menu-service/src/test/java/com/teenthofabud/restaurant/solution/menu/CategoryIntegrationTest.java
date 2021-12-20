@@ -409,23 +409,6 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = { "", " " })
-    public void test_Category_Get_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequestedBy_EmptyPhoneNumberOnly(String phoneNumber) throws Exception {
-        MvcResult mvcResult = null;
-        String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "filters";
-
-        mvcResult = this.mockMvc.perform(get(CATEGORY_URI_FILTER).queryParam("phoneNumber", phoneNumber))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-    }
-
     @Test
     public void test_Category_Get_ShouldReturn_200Response_And_EmptyCategoryList_WhenRequestedBy_AbsentName() throws Exception {
         MvcResult mvcResult = null;
@@ -499,22 +482,6 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Category_Get_ShouldReturn_200Response_And_CategoryListNaturallyOrdered_WhenRequested_ForCategories_WithNameAndDescriptionAndPhoneNumber() throws Exception {
-        MvcResult mvcResult = null;
-        Set<CategoryVo> categoryList = new TreeSet<>(Arrays.asList(categoryVo1));
-
-        mvcResult = this.mockMvc.perform(get(CATEGORY_URI_FILTER)
-                        .queryParam("name", "Category 1")
-                        .queryParam("description", "Category 1"))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(categoryList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), CategoryVo[].class).length);
-    }
-
-    @Test
     public void test_Category_Get_ShouldReturn_200Response_And_EmptyCategoryList_WhenRequested_ForCategories_WithAbsent_WithNameAndDescription() throws Exception {
         MvcResult mvcResult = null;
         Set<CategoryVo> categoryList = new TreeSet<>();
@@ -522,23 +489,6 @@ public class CategoryIntegrationTest extends MenuIntegrationBaseTest {
         mvcResult = this.mockMvc.perform(get(CATEGORY_URI_FILTER)
                         .queryParam("name", "Category 1")
                         .queryParam("description", UUID.randomUUID().toString()))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(categoryList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), CategoryVo[].class).length);
-    }
-
-    @Test
-    public void test_Category_Get_ShouldReturn_200Response_And_EmptyCategoryList_WhenRequested_ForCategories_WithAbsent_WithNameAndDescriptionAndPhoneNumber() throws Exception {
-        MvcResult mvcResult = null;
-        Set<CategoryVo> categoryList = new TreeSet<>();
-
-        mvcResult = this.mockMvc.perform(get(CATEGORY_URI_FILTER)
-                        .queryParam("name", "Category 1")
-                        .queryParam("description", UUID.randomUUID().toString())
-                        .queryParam("phoneNumber", "1122334455"))
                 .andDo(print())
                 .andReturn();
 

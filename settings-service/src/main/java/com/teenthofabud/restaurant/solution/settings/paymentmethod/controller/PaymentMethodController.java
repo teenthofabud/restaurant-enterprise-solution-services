@@ -69,7 +69,7 @@ public class PaymentMethodController {
             createdVo.setId(id);
             return createdVo;
         }
-        log.debug("PaymentMethodForm is null");
+        log.debug("ChargeForm is null");
         throw new PaymentMethodException(SettingsErrorCode.SETTINGS_ATTRIBUTE_UNEXPECTED,
                 new Object[]{ "form", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
     }
@@ -97,7 +97,7 @@ public class PaymentMethodController {
                 log.debug("Responding with successful updation of attributes for existing paymentMethod");
                 return;
             }
-            log.debug("PaymentMethodForm is null");
+            log.debug("ChargeForm is null");
             throw new PaymentMethodException(SettingsErrorCode.SETTINGS_ATTRIBUTE_UNEXPECTED,
                     new Object[]{ "form", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
         }

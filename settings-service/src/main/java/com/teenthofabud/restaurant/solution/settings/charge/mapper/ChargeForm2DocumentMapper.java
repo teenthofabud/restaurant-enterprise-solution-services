@@ -1,8 +1,8 @@
-package com.teenthofabud.restaurant.solution.settings.paymentmethod.mapper;
+package com.teenthofabud.restaurant.solution.settings.charge.mapper;
 
 import com.teenthofabud.core.common.mapper.DualChannelMapper;
-import com.teenthofabud.restaurant.solution.settings.paymentmethod.data.PaymentMethodDocument;
-import com.teenthofabud.restaurant.solution.settings.paymentmethod.data.PaymentMethodForm;
+import com.teenthofabud.restaurant.solution.settings.charge.data.ChargeDocument;
+import com.teenthofabud.restaurant.solution.settings.charge.data.ChargeForm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -13,18 +13,18 @@ import java.util.Optional;
 
 @Component
 @Slf4j
-public class PaymentMethodForm2DocumentMapper implements DualChannelMapper<PaymentMethodDocument, PaymentMethodForm> {
+public class ChargeForm2DocumentMapper implements DualChannelMapper<ChargeDocument, ChargeForm> {
 
     private List<String> fieldsToEscape;
 
-    @Value("#{'${res.settings.paymentmethod.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.settings.charge.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }
 
     @Override
-    public Optional<PaymentMethodDocument> compareAndMap(PaymentMethodDocument actualDocument, PaymentMethodForm form) {
-        PaymentMethodDocument expectedDocument = new PaymentMethodDocument();
+    public Optional<ChargeDocument> compareAndMap(ChargeDocument actualDocument, ChargeForm form) {
+        ChargeDocument expectedDocument = new ChargeDocument();
         boolean changeSW = false;
         // direct copy
         expectedDocument.setId(actualDocument.getId());
@@ -51,6 +51,14 @@ public class PaymentMethodForm2DocumentMapper implements DualChannelMapper<Payme
         } else {
             expectedDocument.setDescription(actualDocument.getDescription());
             log.debug("ChargeForm.description: is unchanged");
+        }
+        if(!fieldsToEscape.contains("rate") && form.getRate() != null && form.getRate().compareTo(actualDocument.getRate()) != 0) {
+            expectedDocument.setRate(form.getRate());
+            changeSW = true;
+            log.debug("ChargeForm.rate: {} is different as ChargeDocument.rate: {}", form.getRate(), actualDocument.getRate());
+        } else {
+            expectedDocument.setRate(actualDocument.getRate());
+            log.debug("ChargeForm.rate: is unchanged");
         }
         return changeSW ? Optional.of(expectedDocument) : Optional.empty();
     }

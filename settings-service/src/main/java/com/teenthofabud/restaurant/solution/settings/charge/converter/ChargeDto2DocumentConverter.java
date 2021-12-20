@@ -1,9 +1,9 @@
-package com.teenthofabud.restaurant.solution.settings.paymentmethod.converter;
+package com.teenthofabud.restaurant.solution.settings.charge.converter;
 
 import com.teenthofabud.core.common.converter.ComparativePatchConverter;
 import com.teenthofabud.core.common.error.TOABBaseException;
-import com.teenthofabud.restaurant.solution.settings.paymentmethod.data.PaymentMethodDocument;
-import com.teenthofabud.restaurant.solution.settings.paymentmethod.data.PaymentMethodDto;
+import com.teenthofabud.restaurant.solution.settings.charge.data.ChargeDocument;
+import com.teenthofabud.restaurant.solution.settings.charge.data.ChargeDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -17,7 +17,7 @@ import java.util.Optional;
 
 @Component
 @Slf4j
-public class PaymentMethodDto2DocumentConverter implements ComparativePatchConverter<PaymentMethodDto, PaymentMethodDocument> {
+public class ChargeDto2DocumentConverter implements ComparativePatchConverter<ChargeDto, ChargeDocument> {
 
     private static final Integer NO_OF_COMPARABLE_AND_MAPPABLE_FIELDS = 3;
 
@@ -29,7 +29,7 @@ public class PaymentMethodDto2DocumentConverter implements ComparativePatchConve
     }
 
     @Override
-    public void compareAndMap(PaymentMethodDto dto, PaymentMethodDocument actualDocument) throws TOABBaseException {
+    public void compareAndMap(ChargeDto dto, ChargeDocument actualDocument) throws TOABBaseException {
         boolean[] changeSW = new boolean[NO_OF_COMPARABLE_AND_MAPPABLE_FIELDS]; // size = number of attributes in dto
         Arrays.fill(changeSW, Boolean.FALSE);
         int i = 0;
@@ -44,6 +44,12 @@ public class PaymentMethodDto2DocumentConverter implements ComparativePatchConve
             actualDocument.setDescription(optDescription.get());
             changeSW[i++] = true;
             log.debug("ChargeDto.description is valid");
+        }
+        Optional<String> optRate = dto.getRate();
+        if(!fieldsToEscape.contains("rate") && optRate.isPresent()) {
+            actualDocument.setRate(Double.parseDouble(optRate.get()));
+            changeSW[i++] = true;
+            log.debug("ChargeDto.rate is valid");
         }
         Optional<String> optActive = dto.getActive();
         if(!fieldsToEscape.contains("active") && optActive.isPresent()) {

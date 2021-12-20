@@ -1,7 +1,7 @@
-package com.teenthofabud.restaurant.solution.settings.paymentmethod.mapper;
+package com.teenthofabud.restaurant.solution.settings.charge.mapper;
 
 import com.teenthofabud.core.common.mapper.SingleChannelMapper;
-import com.teenthofabud.restaurant.solution.settings.paymentmethod.data.PaymentMethodDocument;
+import com.teenthofabud.restaurant.solution.settings.charge.data.ChargeDocument;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -10,10 +10,10 @@ import java.util.Optional;
 
 @Component
 @Slf4j
-public class PaymentMethodDocumentSelfMapper implements SingleChannelMapper<PaymentMethodDocument> {
+public class ChargeDocumentSelfMapper implements SingleChannelMapper<ChargeDocument> {
 
     @Override
-    public Optional<PaymentMethodDocument> compareAndMap(PaymentMethodDocument source, PaymentMethodDocument target) {
+    public Optional<ChargeDocument> compareAndMap(ChargeDocument source, ChargeDocument target) {
         boolean changeSW = false;
         if(source.getId() != null && source.getId().compareTo(target.getId()) != 0) {
             target.setId(source.getId());
@@ -29,6 +29,11 @@ public class PaymentMethodDocumentSelfMapper implements SingleChannelMapper<Paym
             target.setDescription(source.getDescription());
             changeSW = true;
             log.debug("Source ChargeDocument.description is valid");
+        }
+        if(source.getRate() != null && source.getRate() != null && source.getRate().compareTo(target.getRate()) != 0) {
+            target.setRate(source.getRate());
+            changeSW = true;
+            log.debug("Source ChargeDocument.rate is valid");
         }
         if(changeSW) {
             log.debug("All provided ChargeDocument attributes are valid");
