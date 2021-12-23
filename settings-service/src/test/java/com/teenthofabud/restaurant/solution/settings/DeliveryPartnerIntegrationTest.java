@@ -6,10 +6,10 @@ import com.teenthofabud.core.common.data.form.PatchOperationForm;
 import com.teenthofabud.core.common.data.vo.ErrorVo;
 import com.teenthofabud.core.common.error.TOABErrorCode;
 import com.teenthofabud.restaurant.solution.settings.error.SettingsErrorCode;
-import com.teenthofabud.restaurant.solution.settings.paymentmethod.data.PaymentMethodDocument;
-import com.teenthofabud.restaurant.solution.settings.paymentmethod.data.PaymentMethodForm;
-import com.teenthofabud.restaurant.solution.settings.paymentmethod.data.PaymentMethodVo;
-import com.teenthofabud.restaurant.solution.settings.paymentmethod.repository.PaymentMethodRepository;
+import com.teenthofabud.restaurant.solution.settings.deliverypartner.data.DeliveryPartnerDocument;
+import com.teenthofabud.restaurant.solution.settings.deliverypartner.data.DeliveryPartnerForm;
+import com.teenthofabud.restaurant.solution.settings.deliverypartner.data.DeliveryPartnerVo;
+import com.teenthofabud.restaurant.solution.settings.deliverypartner.repository.DeliveryPartnerRepository;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -27,7 +27,6 @@ import org.springframework.util.StringUtils;
 import java.util.*;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @AutoConfigureMockMvc
@@ -35,31 +34,31 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
+public class DeliveryPartnerIntegrationTest extends SettingsIntegrationBaseTest {
 
     private static final String MEDIA_TYPE_APPLICATION_JSON_PATCH = "application/json-patch+json";
 
-    private static final String PAYMENT_METHOD_URI = "/paymentmethod";
-    private static final String PAYMENT_METHOD_URI_BY_ID = "/paymentmethod/{id}";
-    private static final String PAYMENT_METHOD_URI_FILTER = "/paymentmethod/filter";
+    private static final String DELIVERY_PARTNER_URI = "/deliverypartner";
+    private static final String DELIVERY_PARTNER_URI_BY_ID = "/deliverypartner/{id}";
+    private static final String DELIVERY_PARTNER_URI_FILTER = "/deliverypartner/filter";
 
-    private PaymentMethodRepository paymentMethodRepository;
+    private DeliveryPartnerRepository deliveryPartnerRepository;
 
     @Autowired
-    public void setPaymentMethodRepository(PaymentMethodRepository paymentMethodRepository) {
-        this.paymentMethodRepository = paymentMethodRepository;
+    public void setDeliveryPartnerRepository(DeliveryPartnerRepository deliveryPartnerRepository) {
+        this.deliveryPartnerRepository = deliveryPartnerRepository;
     }
     
-    private PaymentMethodForm paymentMethodForm;
-    private PaymentMethodVo paymentMethodVo1;
-    private PaymentMethodVo paymentMethodVo2;
-    private PaymentMethodVo paymentMethodVo3;
-    private PaymentMethodVo paymentMethodVo4;
-    private PaymentMethodVo paymentMethodVo5;
-    private PaymentMethodDocument paymentMethodDocument1;
-    private PaymentMethodDocument paymentMethodDocument2;
-    private PaymentMethodDocument paymentMethodDocument3;
-    private PaymentMethodDocument paymentMethodDocument4;
+    private DeliveryPartnerForm deliveryPartnerForm;
+    private DeliveryPartnerVo deliveryPartnerVo1;
+    private DeliveryPartnerVo deliveryPartnerVo2;
+    private DeliveryPartnerVo deliveryPartnerVo3;
+    private DeliveryPartnerVo deliveryPartnerVo4;
+    private DeliveryPartnerVo deliveryPartnerVo5;
+    private DeliveryPartnerDocument deliveryPartnerDocument1;
+    private DeliveryPartnerDocument deliveryPartnerDocument2;
+    private DeliveryPartnerDocument deliveryPartnerDocument3;
+    private DeliveryPartnerDocument deliveryPartnerDocument4;
 
     private List<PatchOperationForm> patches;
 
@@ -67,92 +66,110 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
     private void init() {
 
         /**
-         * PaymentMethod
+         * DeliveryPartner
          */
 
-        paymentMethodForm = new PaymentMethodForm();
-        paymentMethodForm.setName("New Name");
-        paymentMethodForm.setDescription("New Description");
+        deliveryPartnerForm = new DeliveryPartnerForm();
+        deliveryPartnerForm.setName("New Name");
+        deliveryPartnerForm.setDescription("New Description");
 
         patches = Arrays.asList(
                 new PatchOperationForm("replace", "/name", "patched name"),
                 new PatchOperationForm("replace", "/description", "patched description"));
 
-        paymentMethodDocument1 = new PaymentMethodDocument();
-        paymentMethodDocument1.setName("PaymentMethod 1 Name");
-        paymentMethodDocument1.setDescription("PaymentMethod 1 Description");
-        paymentMethodDocument1.setActive(Boolean.TRUE);
+        deliveryPartnerDocument1 = new DeliveryPartnerDocument();
+        deliveryPartnerDocument1.setName("DeliveryPartner 1 Name");
+        deliveryPartnerDocument1.setDescription("DeliveryPartner 1 Description");
+        deliveryPartnerDocument1.setActive(Boolean.TRUE);
 
-        paymentMethodDocument2 = new PaymentMethodDocument();
-        paymentMethodDocument2.setName("PaymentMethod 2 Name");
-        paymentMethodDocument2.setDescription("PaymentMethod 2 Description");
-        paymentMethodDocument2.setActive(Boolean.TRUE);
+        deliveryPartnerDocument2 = new DeliveryPartnerDocument();
+        deliveryPartnerDocument2.setName("DeliveryPartner 2 Name");
+        deliveryPartnerDocument2.setDescription("DeliveryPartner 2 Description");
+        deliveryPartnerDocument2.setActive(Boolean.TRUE);
 
-        paymentMethodDocument3 = new PaymentMethodDocument();
-        paymentMethodDocument3.setName("PaymentMethod 3 Name");
-        paymentMethodDocument3.setDescription("PaymentMethod 3 Description");
-        paymentMethodDocument3.setActive(Boolean.TRUE);
+        deliveryPartnerDocument3 = new DeliveryPartnerDocument();
+        deliveryPartnerDocument3.setName("DeliveryPartner 3 Name");
+        deliveryPartnerDocument3.setDescription("DeliveryPartner 3 Description");
+        deliveryPartnerDocument3.setActive(Boolean.TRUE);
 
-        paymentMethodDocument4 = new PaymentMethodDocument();
-        paymentMethodDocument4.setName("PaymentMethod 4 Name");
-        paymentMethodDocument4.setDescription("PaymentMethod 4 Description");
-        paymentMethodDocument4.setActive(Boolean.FALSE);
+        deliveryPartnerDocument4 = new DeliveryPartnerDocument();
+        deliveryPartnerDocument4.setName("DeliveryPartner 4 Name");
+        deliveryPartnerDocument4.setDescription("DeliveryPartner 4 Description");
+        deliveryPartnerDocument4.setActive(Boolean.FALSE);
 
-        paymentMethodDocument1 = paymentMethodRepository.save(paymentMethodDocument1);
+        deliveryPartnerDocument1 = deliveryPartnerRepository.save(deliveryPartnerDocument1);
 
-        paymentMethodVo1 = new PaymentMethodVo();
-        paymentMethodVo1.setId(paymentMethodDocument1.getId().toString());
-        paymentMethodVo1.setName(paymentMethodDocument1.getName());
-        paymentMethodVo1.setDescription(paymentMethodDocument1.getDescription());
+        deliveryPartnerVo1 = new DeliveryPartnerVo();
+        deliveryPartnerVo1.setId(deliveryPartnerDocument1.getId().toString());
+        deliveryPartnerVo1.setName(deliveryPartnerDocument1.getName());
+        deliveryPartnerVo1.setDescription(deliveryPartnerDocument1.getDescription());
 
-        paymentMethodDocument2 = paymentMethodRepository.save(paymentMethodDocument2);
+        deliveryPartnerDocument2 = deliveryPartnerRepository.save(deliveryPartnerDocument2);
 
-        paymentMethodVo2 = new PaymentMethodVo();
-        paymentMethodVo2.setId(paymentMethodDocument2.getId().toString());
-        paymentMethodVo2.setName(paymentMethodDocument2.getName());
-        paymentMethodVo2.setDescription(paymentMethodDocument2.getDescription());
+        deliveryPartnerVo2 = new DeliveryPartnerVo();
+        deliveryPartnerVo2.setId(deliveryPartnerDocument2.getId().toString());
+        deliveryPartnerVo2.setName(deliveryPartnerDocument2.getName());
+        deliveryPartnerVo2.setDescription(deliveryPartnerDocument2.getDescription());
 
-        paymentMethodDocument3 = paymentMethodRepository.save(paymentMethodDocument3);
+        deliveryPartnerDocument3 = deliveryPartnerRepository.save(deliveryPartnerDocument3);
 
-        paymentMethodVo3 = new PaymentMethodVo();
-        paymentMethodVo3.setId(paymentMethodDocument3.getId().toString());
-        paymentMethodVo3.setName(paymentMethodDocument3.getName());
-        paymentMethodVo3.setDescription(paymentMethodDocument3.getDescription());
+        deliveryPartnerVo3 = new DeliveryPartnerVo();
+        deliveryPartnerVo3.setId(deliveryPartnerDocument3.getId().toString());
+        deliveryPartnerVo3.setName(deliveryPartnerDocument3.getName());
+        deliveryPartnerVo3.setDescription(deliveryPartnerDocument3.getDescription());
 
-        paymentMethodDocument4 = paymentMethodRepository.save(paymentMethodDocument4);
+        deliveryPartnerDocument4 = deliveryPartnerRepository.save(deliveryPartnerDocument4);
 
-        paymentMethodVo4 = new PaymentMethodVo();
-        paymentMethodVo4.setId(paymentMethodDocument4.getId().toString());
-        paymentMethodVo4.setName(paymentMethodDocument4.getName());
-        paymentMethodVo4.setDescription(paymentMethodDocument4.getDescription());
+        deliveryPartnerVo4 = new DeliveryPartnerVo();
+        deliveryPartnerVo4.setId(deliveryPartnerDocument4.getId().toString());
+        deliveryPartnerVo4.setName(deliveryPartnerDocument4.getName());
+        deliveryPartnerVo4.setDescription(deliveryPartnerDocument4.getDescription());
 
-        paymentMethodVo5 = new PaymentMethodVo();
-        paymentMethodVo5.setId(UUID.randomUUID().toString());
-        paymentMethodVo5.setName(paymentMethodForm.getName());
-        paymentMethodVo5.setDescription(paymentMethodForm.getDescription());
+        deliveryPartnerVo5 = new DeliveryPartnerVo();
+        deliveryPartnerVo5.setId(UUID.randomUUID().toString());
+        deliveryPartnerVo5.setName(deliveryPartnerForm.getName());
+        deliveryPartnerVo5.setDescription(deliveryPartnerForm.getDescription());
 
-        paymentMethodDocument1 = paymentMethodRepository.save(paymentMethodDocument1);
-        paymentMethodDocument2 = paymentMethodRepository.save(paymentMethodDocument2);
-        paymentMethodDocument3 = paymentMethodRepository.save(paymentMethodDocument3);
-        paymentMethodDocument4 = paymentMethodRepository.save(paymentMethodDocument4);
+        deliveryPartnerDocument1 = deliveryPartnerRepository.save(deliveryPartnerDocument1);
+        deliveryPartnerDocument2 = deliveryPartnerRepository.save(deliveryPartnerDocument2);
+        deliveryPartnerDocument3 = deliveryPartnerRepository.save(deliveryPartnerDocument3);
+        deliveryPartnerDocument4 = deliveryPartnerRepository.save(deliveryPartnerDocument4);
 
     }
 
     @AfterEach
     private void destroy() {
-        paymentMethodRepository.deleteById(paymentMethodDocument1.getId());
-        paymentMethodRepository.deleteById(paymentMethodDocument2.getId());
-        paymentMethodRepository.deleteById(paymentMethodDocument3.getId());
-        paymentMethodRepository.deleteById(paymentMethodDocument4.getId());
+        deliveryPartnerRepository.deleteById(deliveryPartnerDocument1.getId());
+        deliveryPartnerRepository.deleteById(deliveryPartnerDocument2.getId());
+        deliveryPartnerRepository.deleteById(deliveryPartnerDocument3.getId());
+        deliveryPartnerRepository.deleteById(deliveryPartnerDocument4.getId());
     }
 
     @Test
-    public void test_PaymentMethod_Post_ShouldReturn_201Response_And_NewPaymentMethodId_WhenPosted_WithValidPaymentMethodForm() throws Exception {
+    public void test_DeliveryPartner_Get_ShouldReturn_200Response_And_DeliveryPartnerListNaturallyOrdered_WhenRequested_ForAllDeliveryPartners() throws Exception {
+        MvcResult mvcResult = null;
+        DeliveryPartnerVo deliveryPartnerVo6 = new DeliveryPartnerVo();
+        deliveryPartnerVo6.setId(UUID.randomUUID().toString());
+        deliveryPartnerVo6.setName("Another Name");
+        deliveryPartnerVo6.setDescription("");
+        List<DeliveryPartnerVo> deliveryPartnerList = Arrays.asList(deliveryPartnerVo1, deliveryPartnerVo2, deliveryPartnerVo3, deliveryPartnerVo4, deliveryPartnerVo5, deliveryPartnerVo6);
+
+        mvcResult = this.mockMvc.perform(get(DELIVERY_PARTNER_URI))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(deliveryPartnerList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo[].class).length);
+    }
+
+    @Test
+    public void test_DeliveryPartner_Post_ShouldReturn_201Response_And_NewDeliveryPartnerId_WhenPosted_WithValidDeliveryPartnerForm() throws Exception {
         MvcResult mvcResult = null;
 
-        mvcResult = this.mockMvc.perform(post(PAYMENT_METHOD_URI)
+        mvcResult = this.mockMvc.perform(post(DELIVERY_PARTNER_URI)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(paymentMethodForm)))
+                        .content(om.writeValueAsString(deliveryPartnerForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -162,15 +179,15 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
     }
 
     @Test
-    public void test_PaymentMethod_Post_ShouldReturn_400Response_And_ErrorCode_RES_SETTINGS_001_WhenRequested_WithEmptyName() throws Exception {
+    public void test_DeliveryPartner_Post_ShouldReturn_400Response_And_ErrorCode_RES_SETTINGS_001_WhenRequested_WithEmptyName() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = SettingsErrorCode.SETTINGS_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "name";
-        paymentMethodForm.setName("");
+        deliveryPartnerForm.setName("");
 
-        mvcResult = mockMvc.perform(post(PAYMENT_METHOD_URI)
+        mvcResult = mockMvc.perform(post(DELIVERY_PARTNER_URI)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(paymentMethodForm)))
+                        .content(om.writeValueAsString(deliveryPartnerForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -182,14 +199,14 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
     }
 
     @Test
-    public void test_PaymentMethod_Post_ShouldReturn_201Response_And_NewPaymentMethodId_WhenPosted_WithEmptyDescription() throws Exception {
+    public void test_DeliveryPartner_Post_ShouldReturn_201Response_And_NewDeliveryPartnerId_WhenPosted_WithEmptyDescription() throws Exception {
         MvcResult mvcResult = null;
-        paymentMethodForm.setName("New PaymentMethod Name");
-        paymentMethodForm.setDescription("");
+        deliveryPartnerForm.setName("Another Name");
+        deliveryPartnerForm.setDescription("");
 
-        mvcResult = mockMvc.perform(post(PAYMENT_METHOD_URI)
+        mvcResult = mockMvc.perform(post(DELIVERY_PARTNER_URI)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(paymentMethodForm)))
+                        .content(om.writeValueAsString(deliveryPartnerForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -199,14 +216,14 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
     }
 
     @Test
-    public void test_PaymentMethod_Post_ShouldReturn_422Response_And_ErrorCode_RES_SETTINGS_003_WhenPosted_WithNoPaymentMethodForm() throws Exception {
-        String id = paymentMethodDocument1.getId().toString();
+    public void test_DeliveryPartner_Post_ShouldReturn_422Response_And_ErrorCode_RES_SETTINGS_003_WhenPosted_WithNoDeliveryPartnerForm() throws Exception {
+        String id = deliveryPartnerDocument1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = SettingsErrorCode.SETTINGS_ATTRIBUTE_UNEXPECTED.getErrorCode();
         String fieldName = "form";
         String message = "not provided";
 
-        mvcResult = mockMvc.perform(post(PAYMENT_METHOD_URI)
+        mvcResult = mockMvc.perform(post(DELIVERY_PARTNER_URI)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andReturn();
@@ -219,28 +236,14 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
 
     }
 
-    @Test
-    public void test_PaymentMethod_Get_ShouldReturn_200Response_And_PaymentMethodListNaturallyOrdered_WhenRequested_ForAllPaymentMethods() throws Exception {
-        MvcResult mvcResult = null;
-        Set<PaymentMethodVo> paymentMethodList = new TreeSet<>(Arrays.asList(paymentMethodVo1, paymentMethodVo2, paymentMethodVo3, paymentMethodVo4, paymentMethodVo5));
-
-        mvcResult = this.mockMvc.perform(get(PAYMENT_METHOD_URI))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(paymentMethodList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo[].class).length);
-    }
-
     @ParameterizedTest
     @ValueSource(strings = { "", " " })
-    public void test_PaymentMethod_Get_ShouldReturn_400Response_And_ErrorCode_RES_SETTINGS_001_WhenRequestedBy_EmptyNameOnly(String name) throws Exception {
+    public void test_DeliveryPartner_Get_ShouldReturn_400Response_And_ErrorCode_RES_SETTINGS_001_WhenRequestedBy_EmptyNameOnly(String name) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = SettingsErrorCode.SETTINGS_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "filters";
 
-        mvcResult = this.mockMvc.perform(get(PAYMENT_METHOD_URI_FILTER).queryParam("name", name))
+        mvcResult = this.mockMvc.perform(get(DELIVERY_PARTNER_URI_FILTER).queryParam("name", name))
                 .andDo(print())
                 .andReturn();
 
@@ -252,12 +255,12 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "", " " })
-    public void test_PaymentMethod_Get_ShouldReturn_400Response_And_ErrorCode_RES_SETTINGS_001_WhenRequestedBy_EmptyDescriptionOnly(String description) throws Exception {
+    public void test_DeliveryPartner_Get_ShouldReturn_400Response_And_ErrorCode_RES_SETTINGS_001_WhenRequestedBy_EmptyDescriptionOnly(String description) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = SettingsErrorCode.SETTINGS_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "filters";
 
-        mvcResult = this.mockMvc.perform(get(PAYMENT_METHOD_URI_FILTER).queryParam("description", description))
+        mvcResult = this.mockMvc.perform(get(DELIVERY_PARTNER_URI_FILTER).queryParam("description", description))
                 .andDo(print())
                 .andReturn();
 
@@ -268,116 +271,116 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
     }
 
     @Test
-    public void test_PaymentMethod_Get_ShouldReturn_200Response_And_EmptyPaymentMethodList_WhenRequestedBy_AbsentName() throws Exception {
+    public void test_DeliveryPartner_Get_ShouldReturn_200Response_And_EmptyDeliveryPartnerList_WhenRequestedBy_AbsentName() throws Exception {
         MvcResult mvcResult = null;
 
-        mvcResult = this.mockMvc.perform(get(PAYMENT_METHOD_URI_FILTER).queryParam("name", "Hey"))
+        mvcResult = this.mockMvc.perform(get(DELIVERY_PARTNER_URI_FILTER).queryParam("name", "Hey"))
                 .andDo(print())
                 .andReturn();
 
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(0, om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo[].class).length);
+        Assertions.assertEquals(0, om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo[].class).length);
     }
 
     @Test
-    public void test_PaymentMethod_Get_ShouldReturn_200Response_And_EmptyPaymentMethodList_WhenRequestedBy_AbsentDescription() throws Exception {
+    public void test_DeliveryPartner_Get_ShouldReturn_200Response_And_EmptyDeliveryPartnerList_WhenRequestedBy_AbsentDescription() throws Exception {
         MvcResult mvcResult = null;
 
-        mvcResult = this.mockMvc.perform(get(PAYMENT_METHOD_URI_FILTER).queryParam("description", "Hey"))
+        mvcResult = this.mockMvc.perform(get(DELIVERY_PARTNER_URI_FILTER).queryParam("description", "Hey"))
                 .andDo(print())
                 .andReturn();
 
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(0, om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo[].class).length);
+        Assertions.assertEquals(0, om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo[].class).length);
     }
 
     @Test
-    public void test_PaymentMethod_Get_ShouldReturn_200Response_And_PaymentMethodListNaturallyOrdered_WhenRequested_ForPaymentMethods_WithName() throws Exception {
+    public void test_DeliveryPartner_Get_ShouldReturn_200Response_And_DeliveryPartnerListNaturallyOrdered_WhenRequested_ForDeliveryPartners_WithName() throws Exception {
         MvcResult mvcResult = null;
-        List<PaymentMethodVo> paymentMethodList = new ArrayList<>(Arrays.asList(paymentMethodVo1, paymentMethodVo2, paymentMethodVo3, paymentMethodVo4));
+        List<DeliveryPartnerVo> deliveryPartnerList = new ArrayList<>(Arrays.asList(deliveryPartnerVo1, deliveryPartnerVo2, deliveryPartnerVo3, deliveryPartnerVo4));
 
-        mvcResult = this.mockMvc.perform(get(PAYMENT_METHOD_URI_FILTER)
-                        .queryParam("name", "PaymentMethod"))
+        mvcResult = this.mockMvc.perform(get(DELIVERY_PARTNER_URI_FILTER)
+                        .queryParam("name", "DeliveryPartner"))
                 .andDo(print())
                 .andReturn();
 
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(paymentMethodList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo[].class).length);
+        Assertions.assertEquals(deliveryPartnerList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo[].class).length);
     }
 
     @Test
-    public void test_PaymentMethod_Get_ShouldReturn_200Response_And_PaymentMethodListNaturallyOrdered_WhenRequested_ForPaymentMethods_WithDescription() throws Exception {
+    public void test_DeliveryPartner_Get_ShouldReturn_200Response_And_DeliveryPartnerListNaturallyOrdered_WhenRequested_ForDeliveryPartners_WithDescription() throws Exception {
         MvcResult mvcResult = null;
-        List<PaymentMethodVo> paymentMethodList = new ArrayList<>(Arrays.asList(paymentMethodVo2));
+        List<DeliveryPartnerVo> deliveryPartnerList = new ArrayList<>(Arrays.asList(deliveryPartnerVo2));
 
-        mvcResult = this.mockMvc.perform(get(PAYMENT_METHOD_URI_FILTER)
-                        .queryParam("description", "PaymentMethod 2"))
+        mvcResult = this.mockMvc.perform(get(DELIVERY_PARTNER_URI_FILTER)
+                        .queryParam("description", "DeliveryPartner 2"))
                 .andDo(print())
                 .andReturn();
 
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(paymentMethodList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo[].class).length);
+        Assertions.assertEquals(deliveryPartnerList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo[].class).length);
     }
 
     @Test
-    public void test_PaymentMethod_Get_ShouldReturn_200Response_And_PaymentMethodListNaturallyOrdered_WhenRequested_ForPaymentMethods_WithNameAndDescription() throws Exception {
+    public void test_DeliveryPartner_Get_ShouldReturn_200Response_And_DeliveryPartnerListNaturallyOrdered_WhenRequested_ForDeliveryPartners_WithNameAndDescription() throws Exception {
         MvcResult mvcResult = null;
-        Set<PaymentMethodVo> paymentMethodList = new TreeSet<>(Arrays.asList(paymentMethodVo1));
+        Set<DeliveryPartnerVo> deliveryPartnerList = new TreeSet<>(Arrays.asList(deliveryPartnerVo1));
 
-        mvcResult = this.mockMvc.perform(get(PAYMENT_METHOD_URI_FILTER)
-                        .queryParam("name", "PaymentMethod 1")
-                        .queryParam("description", "PaymentMethod 1"))
+        mvcResult = this.mockMvc.perform(get(DELIVERY_PARTNER_URI_FILTER)
+                        .queryParam("name", "DeliveryPartner 1")
+                        .queryParam("description", "DeliveryPartner 1"))
                 .andDo(print())
                 .andReturn();
 
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(paymentMethodList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo[].class).length);
+        Assertions.assertEquals(deliveryPartnerList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo[].class).length);
     }
 
     @Test
-    public void test_PaymentMethod_Get_ShouldReturn_200Response_And_EmptyPaymentMethodList_WhenRequested_ForPaymentMethods_WithAbsent_WithNameAndDescription() throws Exception {
+    public void test_DeliveryPartner_Get_ShouldReturn_200Response_And_EmptyDeliveryPartnerList_WhenRequested_ForDeliveryPartners_WithAbsent_WithNameAndDescription() throws Exception {
         MvcResult mvcResult = null;
-        Set<PaymentMethodVo> paymentMethodList = new TreeSet<>();
+        Set<DeliveryPartnerVo> deliveryPartnerList = new TreeSet<>();
 
-        mvcResult = this.mockMvc.perform(get(PAYMENT_METHOD_URI_FILTER)
-                        .queryParam("name", "PaymentMethod 1")
+        mvcResult = this.mockMvc.perform(get(DELIVERY_PARTNER_URI_FILTER)
+                        .queryParam("name", "DeliveryPartner 1")
                         .queryParam("description", UUID.randomUUID().toString()))
                 .andDo(print())
                 .andReturn();
 
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(paymentMethodList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo[].class).length);
+        Assertions.assertEquals(deliveryPartnerList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo[].class).length);
     }
 
     @Test
-    public void test_PaymentMethod_Get_ShouldReturn_200Response_And_PaymentMethodDetails_WhenRequested_ById() throws Exception {
-        String id = paymentMethodDocument1.getId().toString();
+    public void test_DeliveryPartner_Get_ShouldReturn_200Response_And_DeliveryPartnerDetails_WhenRequested_ById() throws Exception {
+        String id = deliveryPartnerDocument1.getId().toString();
         MvcResult mvcResult = null;
 
-        mvcResult = this.mockMvc.perform(get(PAYMENT_METHOD_URI_BY_ID, id))
+        mvcResult = this.mockMvc.perform(get(DELIVERY_PARTNER_URI_BY_ID, id))
                 .andDo(print())
                 .andReturn();
 
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(om.writeValueAsString(paymentMethodVo1), mvcResult.getResponse().getContentAsString());
-        Assertions.assertEquals(paymentMethodVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getId());
+        Assertions.assertEquals(om.writeValueAsString(deliveryPartnerVo1), mvcResult.getResponse().getContentAsString());
+        Assertions.assertEquals(deliveryPartnerVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getId());
     }
 
     @ParameterizedTest
     @ValueSource(strings = { " " })
-    public void test_PaymentMethod_Get_ShouldReturn_400Response_And_ErrorCode_RES_SETTINGS_001_WhenRequestedBy_EmptyId(String id) throws Exception {
+    public void test_DeliveryPartner_Get_ShouldReturn_400Response_And_ErrorCode_RES_SETTINGS_001_WhenRequestedBy_EmptyId(String id) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = SettingsErrorCode.SETTINGS_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(get(PAYMENT_METHOD_URI_BY_ID, id))
+        mvcResult = this.mockMvc.perform(get(DELIVERY_PARTNER_URI_BY_ID, id))
                 .andDo(print())
                 .andReturn();
 
@@ -388,13 +391,13 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
     }
 
     @Test
-    public void test_PaymentMethod_Get_ShouldReturn_400Response_And_ErrorCode_RES_SETTINGS_002_WhenRequested_ByAbsentId() throws Exception {
+    public void test_DeliveryPartner_Get_ShouldReturn_400Response_And_ErrorCode_RES_SETTINGS_002_WhenRequested_ByAbsentId() throws Exception {
         String id = "5";
         MvcResult mvcResult = null;
         String errorCode = SettingsErrorCode.SETTINGS_NOT_FOUND.getErrorCode();
         String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(get(PAYMENT_METHOD_URI_BY_ID, id))
+        mvcResult = this.mockMvc.perform(get(DELIVERY_PARTNER_URI_BY_ID, id))
                 .andDo(print())
                 .andReturn();
 
@@ -405,11 +408,11 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
     }
 
     @Test
-    public void test_PaymentMethod_Delete_ShouldReturn_204Response_And_NoResponseBody_WhenDeleted_ById() throws Exception {
-        String id = paymentMethodDocument3.getId().toString();
+    public void test_DeliveryPartner_Delete_ShouldReturn_204Response_And_NoResponseBody_WhenDeleted_ById() throws Exception {
+        String id = deliveryPartnerDocument3.getId().toString();
         MvcResult mvcResult = null;
 
-        mvcResult = this.mockMvc.perform(delete(PAYMENT_METHOD_URI_BY_ID, id))
+        mvcResult = this.mockMvc.perform(delete(DELIVERY_PARTNER_URI_BY_ID, id))
                 .andDo(print())
                 .andReturn();
 
@@ -419,54 +422,54 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
     }
 
     @Test
-    public void test_PaymentMethod_Get_ShouldReturn_200Response_And_DomainDetails_WhenRequested_ById_AndFirstLevel_Cascade() throws Exception {
-        String id = paymentMethodDocument1.getId().toString();
+    public void test_DeliveryPartner_Get_ShouldReturn_200Response_And_DomainDetails_WhenRequested_ById_AndFirstLevel_Cascade() throws Exception {
+        String id = deliveryPartnerDocument1.getId().toString();
         MvcResult mvcResult = null;
 
-        mvcResult = this.mockMvc.perform(get(PAYMENT_METHOD_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(get(DELIVERY_PARTNER_URI_BY_ID, id)
                         .queryParam("cascadeUntilLevel", TOABCascadeLevel.ONE.getLevelCode()))
                 .andDo(print())
                 .andReturn();
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(paymentMethodVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getId());
-        Assertions.assertEquals(paymentMethodVo1.getName(), om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getName());
-        Assertions.assertEquals(paymentMethodVo1.getDescription(), om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getDescription());
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getCreatedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getModifiedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getCreatedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getModifiedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getActive()));
+        Assertions.assertEquals(deliveryPartnerVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getId());
+        Assertions.assertEquals(deliveryPartnerVo1.getName(), om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getName());
+        Assertions.assertEquals(deliveryPartnerVo1.getDescription(), om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getDescription());
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getCreatedBy()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getModifiedBy()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getCreatedOn()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getModifiedOn()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getActive()));
     }
 
     @Test
-    public void test_PaymentMethod_Get_ShouldReturn_200Response_And_DomainDetails_WhenRequested_ById_AndSecondLevel_Cascade() throws Exception {
-        String id = paymentMethodDocument1.getId().toString();
+    public void test_DeliveryPartner_Get_ShouldReturn_200Response_And_DomainDetails_WhenRequested_ById_AndSecondLevel_Cascade() throws Exception {
+        String id = deliveryPartnerDocument1.getId().toString();
         MvcResult mvcResult = null;
 
-        mvcResult = this.mockMvc.perform(get(PAYMENT_METHOD_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(get(DELIVERY_PARTNER_URI_BY_ID, id)
                         .queryParam("cascadeUntilLevel", TOABCascadeLevel.TWO.getLevelCode()))
                 .andDo(print())
                 .andReturn();
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(paymentMethodVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getId());
-        Assertions.assertEquals(paymentMethodVo1.getName(), om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getName());
-        Assertions.assertEquals(paymentMethodVo1.getDescription(), om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getDescription());
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getCreatedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getModifiedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getCreatedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getModifiedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getActive()));
+        Assertions.assertEquals(deliveryPartnerVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getId());
+        Assertions.assertEquals(deliveryPartnerVo1.getName(), om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getName());
+        Assertions.assertEquals(deliveryPartnerVo1.getDescription(), om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getDescription());
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getCreatedBy()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getModifiedBy()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getCreatedOn()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getModifiedOn()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getActive()));
     }
 
     @Test
-    public void test_PaymentMethod_Delete_ShouldReturn_400Response_And_ErrorCode_RES_SETTINGS_001__WhenDeleted_ByEmptyId() throws Exception {
+    public void test_DeliveryPartner_Delete_ShouldReturn_400Response_And_ErrorCode_RES_SETTINGS_001__WhenDeleted_ByEmptyId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = SettingsErrorCode.SETTINGS_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(delete(PAYMENT_METHOD_URI_BY_ID, " "))
+        mvcResult = this.mockMvc.perform(delete(DELIVERY_PARTNER_URI_BY_ID, " "))
                 .andDo(print())
                 .andReturn();
 
@@ -477,13 +480,13 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
     }
 
     @Test
-    public void test_PaymentMethod_Delete_ShouldReturn_422Response_And_ErrorCode_RES_SETTINGS_003_WhenDeleted_ByInvalidId() throws Exception {
+    public void test_DeliveryPartner_Delete_ShouldReturn_422Response_And_ErrorCode_RES_SETTINGS_003_WhenDeleted_ByInvalidId() throws Exception {
         String id = " ";
         MvcResult mvcResult = null;
         String errorCode = SettingsErrorCode.SETTINGS_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(delete(PAYMENT_METHOD_URI_BY_ID, id))
+        mvcResult = this.mockMvc.perform(delete(DELIVERY_PARTNER_URI_BY_ID, id))
                 .andDo(print())
                 .andReturn();
 
@@ -494,12 +497,12 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
     }
 
     @Test
-    public void test_PaymentMethod_Delete_ShouldReturn_400Response_And_ErrorCode_RES_SETTINGS_005_WhenDeleted_ByInactiveId() throws Exception {
-        String id = paymentMethodDocument4.getId().toString();
+    public void test_DeliveryPartner_Delete_ShouldReturn_400Response_And_ErrorCode_RES_SETTINGS_005_WhenDeleted_ByInactiveId() throws Exception {
+        String id = deliveryPartnerDocument4.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = SettingsErrorCode.SETTINGS_INACTIVE.getErrorCode();
 
-        mvcResult = this.mockMvc.perform(delete(PAYMENT_METHOD_URI_BY_ID, id))
+        mvcResult = this.mockMvc.perform(delete(DELIVERY_PARTNER_URI_BY_ID, id))
                 .andDo(print())
                 .andReturn();
 
@@ -510,13 +513,13 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
     }
 
     @Test
-    public void test_PaymentMethod_Delete_ShouldReturn_404Response_And_ErrorCode_RES_SETTINGS_002_WhenDeleted_ByAbsentId() throws Exception {
+    public void test_DeliveryPartner_Delete_ShouldReturn_404Response_And_ErrorCode_RES_SETTINGS_002_WhenDeleted_ByAbsentId() throws Exception {
         String id = "5";
         MvcResult mvcResult = null;
         String errorCode = SettingsErrorCode.SETTINGS_NOT_FOUND.getErrorCode();
         String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(delete(PAYMENT_METHOD_URI_BY_ID, id))
+        mvcResult = this.mockMvc.perform(delete(DELIVERY_PARTNER_URI_BY_ID, id))
                 .andDo(print())
                 .andReturn();
 
@@ -527,14 +530,14 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
     }
 
     @Test
-    public void test_PaymentMethod_Put_ShouldReturn_204Response_And_NoResponseBody_WhenUpdated_ById_AndPaymentMethodDetails() throws Exception {
-        String id = paymentMethodDocument1.getId().toString();
+    public void test_DeliveryPartner_Put_ShouldReturn_204Response_And_NoResponseBody_WhenUpdated_ById_AndDeliveryPartnerDetails() throws Exception {
+        String id = deliveryPartnerDocument1.getId().toString();
         MvcResult mvcResult = null;
-        paymentMethodForm.setName("Ferran");
+        deliveryPartnerForm.setName("Ferran");
 
-        mvcResult = this.mockMvc.perform(put(PAYMENT_METHOD_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(put(DELIVERY_PARTNER_URI_BY_ID, id)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(paymentMethodForm)))
+                        .content(om.writeValueAsString(deliveryPartnerForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -545,14 +548,14 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { " " })
-    public void test_PaymentMethod_Put_ShouldReturn_400Response_And_ErrorCode_RES_SETTINGS_001_WhenUpdatedBy_EmptyId_AndPaymentMethodDetails(String id) throws Exception {
+    public void test_DeliveryPartner_Put_ShouldReturn_400Response_And_ErrorCode_RES_SETTINGS_001_WhenUpdatedBy_EmptyId_AndDeliveryPartnerDetails(String id) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = SettingsErrorCode.SETTINGS_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(put(PAYMENT_METHOD_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(put(DELIVERY_PARTNER_URI_BY_ID, id)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(paymentMethodForm)))
+                        .content(om.writeValueAsString(deliveryPartnerForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -563,15 +566,15 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
     }
 
     @Test
-    public void test_PaymentMethod_Put_ShouldReturn_404Response_And_ErrorCode_RES_SETTINGS_002_WhenUpdated_ByAbsentId_AndPaymentMethodDetails() throws Exception {
+    public void test_DeliveryPartner_Put_ShouldReturn_404Response_And_ErrorCode_RES_SETTINGS_002_WhenUpdated_ByAbsentId_AndDeliveryPartnerDetails() throws Exception {
         String id = "5";
         MvcResult mvcResult = null;
         String errorCode = SettingsErrorCode.SETTINGS_NOT_FOUND.getErrorCode();
         String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(put(PAYMENT_METHOD_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(put(DELIVERY_PARTNER_URI_BY_ID, id)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(paymentMethodForm)))
+                        .content(om.writeValueAsString(deliveryPartnerForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -583,14 +586,14 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
     }
 
     @Test
-    public void test_PaymentMethod_Put_ShouldReturn_400Response_And_ErrorCode_RES_SETTINGS_005_WhenUpdated_ByInactiveId_AndPaymentMethodDetails() throws Exception {
-        String id = paymentMethodDocument4.getId().toString();
+    public void test_DeliveryPartner_Put_ShouldReturn_400Response_And_ErrorCode_RES_SETTINGS_005_WhenUpdated_ByInactiveId_AndDeliveryPartnerDetails() throws Exception {
+        String id = deliveryPartnerDocument4.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = SettingsErrorCode.SETTINGS_INACTIVE.getErrorCode();
 
-        mvcResult = this.mockMvc.perform(put(PAYMENT_METHOD_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(put(DELIVERY_PARTNER_URI_BY_ID, id)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(paymentMethodForm)))
+                        .content(om.writeValueAsString(deliveryPartnerForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -601,14 +604,14 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
     }
 
     @Test
-    public void test_PaymentMethod_Put_ShouldReturn_422Response_And_ErrorCode_RES_SETTINGS_003_WhenUpdated_ById_AndNoPaymentMethodDetails() throws Exception {
-        String id = paymentMethodDocument1.getId().toString();
+    public void test_DeliveryPartner_Put_ShouldReturn_422Response_And_ErrorCode_RES_SETTINGS_003_WhenUpdated_ById_AndNoDeliveryPartnerDetails() throws Exception {
+        String id = deliveryPartnerDocument1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = SettingsErrorCode.SETTINGS_ATTRIBUTE_UNEXPECTED.getErrorCode();
         String fieldName = "form";
         String message = "not provided";
 
-        mvcResult = this.mockMvc.perform(put(PAYMENT_METHOD_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(put(DELIVERY_PARTNER_URI_BY_ID, id)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andReturn();
@@ -621,16 +624,16 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
     }
 
     @Test
-    public void test_PaymentMethod_Put_ShouldReturn_400Response_And_ErrorCode_RES_SETTINGS_001_WhenRequested_ById_AndInvalidName() throws Exception {
-        String id = paymentMethodDocument1.getId().toString();
+    public void test_DeliveryPartner_Put_ShouldReturn_400Response_And_ErrorCode_RES_SETTINGS_001_WhenRequested_ById_AndInvalidName() throws Exception {
+        String id = deliveryPartnerDocument1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = SettingsErrorCode.SETTINGS_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "name";
-        paymentMethodForm.setName("");
+        deliveryPartnerForm.setName("");
 
-        mvcResult = mockMvc.perform(put(PAYMENT_METHOD_URI_BY_ID, id)
+        mvcResult = mockMvc.perform(put(DELIVERY_PARTNER_URI_BY_ID, id)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(paymentMethodForm)))
+                        .content(om.writeValueAsString(deliveryPartnerForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -641,16 +644,16 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
     }
 
     @Test
-    public void test_PaymentMethod_Put_ShouldReturn_400Response_And_ErrorCode_RES_SETTINGS_001_WhenRequested_ById_AndInvalidDescription() throws Exception {
-        String id = paymentMethodDocument1.getId().toString();
+    public void test_DeliveryPartner_Put_ShouldReturn_400Response_And_ErrorCode_RES_SETTINGS_001_WhenRequested_ById_AndInvalidDescription() throws Exception {
+        String id = deliveryPartnerDocument1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = SettingsErrorCode.SETTINGS_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "description";
-        paymentMethodForm.setDescription("");
+        deliveryPartnerForm.setDescription("");
 
-        mvcResult = mockMvc.perform(put(PAYMENT_METHOD_URI_BY_ID, id)
+        mvcResult = mockMvc.perform(put(DELIVERY_PARTNER_URI_BY_ID, id)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(paymentMethodForm)))
+                        .content(om.writeValueAsString(deliveryPartnerForm)))
                 .andDo(print())
                 .andReturn();
 
@@ -661,16 +664,16 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
     }
 
     @Test
-    public void test_PaymentMethod_Put_ShouldReturn_422Response_And_ErrorCode_RES_SETTINGS_003_WhenUpdated_ById_AndEmptyPaymentMethodDetails() throws Exception {
-        String id = paymentMethodDocument1.getId().toString();
+    public void test_DeliveryPartner_Put_ShouldReturn_422Response_And_ErrorCode_RES_SETTINGS_003_WhenUpdated_ById_AndEmptyDeliveryPartnerDetails() throws Exception {
+        String id = deliveryPartnerDocument1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = SettingsErrorCode.SETTINGS_ATTRIBUTE_UNEXPECTED.getErrorCode();
         String fieldName = "form";
         String message = "fields are expected with new values";
 
-        mvcResult = this.mockMvc.perform(put(PAYMENT_METHOD_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(put(DELIVERY_PARTNER_URI_BY_ID, id)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(new PaymentMethodForm())))
+                        .content(om.writeValueAsString(new DeliveryPartnerForm())))
                 .andDo(print())
                 .andReturn();
 
@@ -682,11 +685,11 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
     }
 
     @Test
-    public void test_PaymentMethod_Patch_ShouldReturn_204Response_And_NoResponseBody_WhenUpdated_ById_AndPaymentMethodDetails() throws Exception {
-        String id = paymentMethodDocument4.getId().toString();
+    public void test_DeliveryPartner_Patch_ShouldReturn_204Response_And_NoResponseBody_WhenUpdated_ById_AndDeliveryPartnerDetails() throws Exception {
+        String id = deliveryPartnerDocument4.getId().toString();
         MvcResult mvcResult = null;
 
-        mvcResult = this.mockMvc.perform(patch(PAYMENT_METHOD_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(patch(DELIVERY_PARTNER_URI_BY_ID, id)
                         .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                         .content(om.writeValueAsString(patches)))
                 .andDo(print())
@@ -698,12 +701,12 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
     }
 
     @Test
-    public void test_PaymentMethod_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenUpdated_ByEmptyId_AndPaymentMethodDetails() throws Exception {
+    public void test_DeliveryPartner_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenUpdated_ByEmptyId_AndDeliveryPartnerDetails() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = SettingsErrorCode.SETTINGS_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(patch(PAYMENT_METHOD_URI_BY_ID, " ")
+        mvcResult = this.mockMvc.perform(patch(DELIVERY_PARTNER_URI_BY_ID, " ")
                         .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                         .content(om.writeValueAsString(patches)))
                 .andDo(print())
@@ -716,13 +719,13 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
     }
 
     /*@Test
-    public void test_PaymentMethod_Patch_ShouldReturn_400Response_And_ErrorCode_RES_SETTINGS_002_WhenUpdated_ByInvalidId_AndPaymentMethodDetails() throws Exception {
+    public void test_DeliveryPartner_Patch_ShouldReturn_400Response_And_ErrorCode_RES_SETTINGS_002_WhenUpdated_ByInvalidId_AndDeliveryPartnerDetails() throws Exception {
         String id = "r";
         MvcResult mvcResult = null;
         String errorCode = SettingsErrorCode.SETTINGS_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(patch(PAYMENT_METHOD_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(patch(DELIVERY_PARTNER_URI_BY_ID, id)
                         .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                         .content(om.writeValueAsString(patches)))
                 .andDo(print())
@@ -736,13 +739,13 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
     }*/
 
     @Test
-    public void test_PaymentMethod_Patch_ShouldReturn_404Response_And_ErrorCode_RES_SETTINGS_002_WhenUpdated_ByAbsentId_AndPaymentMethodDetails() throws Exception {
+    public void test_DeliveryPartner_Patch_ShouldReturn_404Response_And_ErrorCode_RES_SETTINGS_002_WhenUpdated_ByAbsentId_AndDeliveryPartnerDetails() throws Exception {
         String id = "5";
         MvcResult mvcResult = null;
         String errorCode = SettingsErrorCode.SETTINGS_NOT_FOUND.getErrorCode();
         String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(patch(PAYMENT_METHOD_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(patch(DELIVERY_PARTNER_URI_BY_ID, id)
                         .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                         .content(om.writeValueAsString(patches)))
                 .andDo(print())
@@ -756,14 +759,14 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
     }
 
     @Test
-    public void test_PaymentMethod_Patch_ShouldReturn_422Response_And_ErrorCode_RES_SETTINGS_003_WhenUpdated_ById_AndNoPaymentMethodDetails() throws Exception {
-        String id = paymentMethodDocument1.getId().toString();
+    public void test_DeliveryPartner_Patch_ShouldReturn_422Response_And_ErrorCode_RES_SETTINGS_003_WhenUpdated_ById_AndNoDeliveryPartnerDetails() throws Exception {
+        String id = deliveryPartnerDocument1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = SettingsErrorCode.SETTINGS_ATTRIBUTE_UNEXPECTED.getErrorCode();
         String fieldName = "patch";
         String message = "not provided";
 
-        mvcResult = this.mockMvc.perform(patch(PAYMENT_METHOD_URI_BY_ID, id))
+        mvcResult = this.mockMvc.perform(patch(DELIVERY_PARTNER_URI_BY_ID, id))
                 .andDo(print())
                 .andReturn();
 
@@ -775,15 +778,15 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
     }
 
     @Test
-    public void test_PaymentMethod_Patch_ShouldReturn_400Response_And_ErrorCode_RES_SETTINGS_001_WhenRequested_ById_AndInvalidActive() throws Exception {
-        String id = paymentMethodDocument1.getId().toString();
+    public void test_DeliveryPartner_Patch_ShouldReturn_400Response_And_ErrorCode_RES_SETTINGS_001_WhenRequested_ById_AndInvalidActive() throws Exception {
+        String id = deliveryPartnerDocument1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = SettingsErrorCode.SETTINGS_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "active";
         patches = Arrays.asList(
                 new PatchOperationForm("replace", "/active", "x"));
 
-        mvcResult = mockMvc.perform(patch(PAYMENT_METHOD_URI_BY_ID, id)
+        mvcResult = mockMvc.perform(patch(DELIVERY_PARTNER_URI_BY_ID, id)
                         .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                         .content(om.writeValueAsString(patches)))
                 .andDo(print())
@@ -797,15 +800,15 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
     }
 
     @Test
-    public void test_PaymentMethod_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndInvalidName() throws Exception {
-        String id = paymentMethodDocument1.getId().toString();
+    public void test_DeliveryPartner_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndInvalidName() throws Exception {
+        String id = deliveryPartnerDocument1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = TOABErrorCode.PATCH_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "value";
         patches = Arrays.asList(
                 new PatchOperationForm("replace", "/name", " "));
 
-        mvcResult = mockMvc.perform(patch(PAYMENT_METHOD_URI_BY_ID, id)
+        mvcResult = mockMvc.perform(patch(DELIVERY_PARTNER_URI_BY_ID, id)
                         .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                         .content(om.writeValueAsString(patches)))
                 .andDo(print())
@@ -819,15 +822,15 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
     }
 
     @Test
-    public void test_PaymentMethod_Patch_ShouldReturn_400Response_And_ErrorCode_RES_SETTINGS_001_WhenRequested_ById_AndInvalidDefinitionOfPaymentMethodAttribute() throws Exception {
-        String id = paymentMethodDocument1.getId().toString();
+    public void test_DeliveryPartner_Patch_ShouldReturn_400Response_And_ErrorCode_RES_SETTINGS_001_WhenRequested_ById_AndInvalidDefinitionOfDeliveryPartnerAttribute() throws Exception {
+        String id = deliveryPartnerDocument1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = SettingsErrorCode.SETTINGS_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "path";
         patches = Arrays.asList(
                 new PatchOperationForm("replace", "/x", "x"));
 
-        mvcResult = mockMvc.perform(patch(PAYMENT_METHOD_URI_BY_ID, id)
+        mvcResult = mockMvc.perform(patch(DELIVERY_PARTNER_URI_BY_ID, id)
                         .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                         .content(om.writeValueAsString(patches)))
                 .andDo(print())

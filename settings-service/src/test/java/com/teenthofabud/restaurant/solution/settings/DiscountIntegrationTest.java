@@ -38,9 +38,9 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
 
     private static final String MEDIA_TYPE_APPLICATION_JSON_PATCH = "application/json-patch+json";
 
-    private static final String CATEGORY_URI = "/discount";
-    private static final String CATEGORY_URI_BY_ID = "/discount/{id}";
-    private static final String CATEGORY_URI_FILTER = "/discount/filter";
+    private static final String DISCOUNT_URI = "/discount";
+    private static final String DISCOUNT_URI_BY_ID = "/discount/{id}";
+    private static final String DISCOUNT_URI_FILTER = "/discount/filter";
 
     private DiscountRepository discountRepository;
 
@@ -160,7 +160,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
     public void test_Discount_Post_ShouldReturn_201Response_And_NewDiscountId_WhenPosted_WithValidDiscountForm() throws Exception {
         MvcResult mvcResult = null;
 
-        mvcResult = this.mockMvc.perform(post(CATEGORY_URI)
+        mvcResult = this.mockMvc.perform(post(DISCOUNT_URI)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(discountForm)))
                 .andDo(print())
@@ -178,7 +178,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         String fieldName = "name";
         discountForm.setName("");
 
-        mvcResult = mockMvc.perform(post(CATEGORY_URI)
+        mvcResult = mockMvc.perform(post(DISCOUNT_URI)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(discountForm)))
                 .andDo(print())
@@ -197,7 +197,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         discountForm.setName("New Discount Name");
         discountForm.setDescription("");
 
-        mvcResult = mockMvc.perform(post(CATEGORY_URI)
+        mvcResult = mockMvc.perform(post(DISCOUNT_URI)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(discountForm)))
                 .andDo(print())
@@ -216,7 +216,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         String fieldName = "rate";
         discountForm.setRate(-9.8d);
 
-        mvcResult = mockMvc.perform(post(CATEGORY_URI)
+        mvcResult = mockMvc.perform(post(DISCOUNT_URI)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(discountForm)))
                 .andDo(print())
@@ -236,7 +236,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         String fieldName = "rate";
         discountForm.setRate(null);
 
-        mvcResult = mockMvc.perform(post(CATEGORY_URI)
+        mvcResult = mockMvc.perform(post(DISCOUNT_URI)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(discountForm)))
                 .andDo(print())
@@ -254,7 +254,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         discountForm.setName("New Discount Name");
         discountForm.setRate(null);
 
-        mvcResult = mockMvc.perform(post(CATEGORY_URI)
+        mvcResult = mockMvc.perform(post(DISCOUNT_URI)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(discountForm)))
                 .andDo(print())
@@ -271,7 +271,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         discountForm.setName("New Discount Name");
         discountForm.setRate(null);
 
-        mvcResult = mockMvc.perform(post(CATEGORY_URI)
+        mvcResult = mockMvc.perform(post(DISCOUNT_URI)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(discountForm)))
                 .andDo(print())
@@ -290,7 +290,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         String fieldName = "form";
         String message = "not provided";
 
-        mvcResult = mockMvc.perform(post(CATEGORY_URI)
+        mvcResult = mockMvc.perform(post(DISCOUNT_URI)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andReturn();
@@ -308,7 +308,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         MvcResult mvcResult = null;
         Set<DiscountVo> discountList = new TreeSet<>(Arrays.asList(discountVo1, discountVo2, discountVo3, discountVo4));
 
-        mvcResult = this.mockMvc.perform(get(CATEGORY_URI))
+        mvcResult = this.mockMvc.perform(get(DISCOUNT_URI))
                 .andDo(print())
                 .andReturn();
 
@@ -324,7 +324,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         String errorCode = SettingsErrorCode.SETTINGS_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "filters";
 
-        mvcResult = this.mockMvc.perform(get(CATEGORY_URI_FILTER).queryParam("name", name))
+        mvcResult = this.mockMvc.perform(get(DISCOUNT_URI_FILTER).queryParam("name", name))
                 .andDo(print())
                 .andReturn();
 
@@ -341,7 +341,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         String errorCode = SettingsErrorCode.SETTINGS_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "filters";
 
-        mvcResult = this.mockMvc.perform(get(CATEGORY_URI_FILTER).queryParam("description", description))
+        mvcResult = this.mockMvc.perform(get(DISCOUNT_URI_FILTER).queryParam("description", description))
                 .andDo(print())
                 .andReturn();
 
@@ -355,7 +355,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
     public void test_Discount_Get_ShouldReturn_200Response_And_EmptyDiscountList_WhenRequestedBy_AbsentName() throws Exception {
         MvcResult mvcResult = null;
 
-        mvcResult = this.mockMvc.perform(get(CATEGORY_URI_FILTER).queryParam("name", "Hey"))
+        mvcResult = this.mockMvc.perform(get(DISCOUNT_URI_FILTER).queryParam("name", "Hey"))
                 .andDo(print())
                 .andReturn();
 
@@ -368,7 +368,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
     public void test_Discount_Get_ShouldReturn_200Response_And_EmptyDiscountList_WhenRequestedBy_AbsentDescription() throws Exception {
         MvcResult mvcResult = null;
 
-        mvcResult = this.mockMvc.perform(get(CATEGORY_URI_FILTER).queryParam("description", "Hey"))
+        mvcResult = this.mockMvc.perform(get(DISCOUNT_URI_FILTER).queryParam("description", "Hey"))
                 .andDo(print())
                 .andReturn();
 
@@ -382,7 +382,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         MvcResult mvcResult = null;
         List<DiscountVo> discountList = new ArrayList<>(Arrays.asList(discountVo1, discountVo2, discountVo3, discountVo4));
 
-        mvcResult = this.mockMvc.perform(get(CATEGORY_URI_FILTER)
+        mvcResult = this.mockMvc.perform(get(DISCOUNT_URI_FILTER)
                         .queryParam("name", "Discount"))
                 .andDo(print())
                 .andReturn();
@@ -397,7 +397,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         MvcResult mvcResult = null;
         List<DiscountVo> discountList = new ArrayList<>(Arrays.asList(discountVo2));
 
-        mvcResult = this.mockMvc.perform(get(CATEGORY_URI_FILTER)
+        mvcResult = this.mockMvc.perform(get(DISCOUNT_URI_FILTER)
                         .queryParam("description", "Discount 2"))
                 .andDo(print())
                 .andReturn();
@@ -412,7 +412,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         MvcResult mvcResult = null;
         Set<DiscountVo> discountList = new TreeSet<>(Arrays.asList(discountVo1));
 
-        mvcResult = this.mockMvc.perform(get(CATEGORY_URI_FILTER)
+        mvcResult = this.mockMvc.perform(get(DISCOUNT_URI_FILTER)
                         .queryParam("name", "Discount 1")
                         .queryParam("description", "Discount 1"))
                 .andDo(print())
@@ -428,7 +428,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         MvcResult mvcResult = null;
         Set<DiscountVo> discountList = new TreeSet<>();
 
-        mvcResult = this.mockMvc.perform(get(CATEGORY_URI_FILTER)
+        mvcResult = this.mockMvc.perform(get(DISCOUNT_URI_FILTER)
                         .queryParam("name", "Discount 1")
                         .queryParam("description", UUID.randomUUID().toString()))
                 .andDo(print())
@@ -444,7 +444,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         String id = discountDocument1.getId().toString();
         MvcResult mvcResult = null;
 
-        mvcResult = this.mockMvc.perform(get(CATEGORY_URI_BY_ID, id))
+        mvcResult = this.mockMvc.perform(get(DISCOUNT_URI_BY_ID, id))
                 .andDo(print())
                 .andReturn();
 
@@ -461,7 +461,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         String errorCode = SettingsErrorCode.SETTINGS_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(get(CATEGORY_URI_BY_ID, id))
+        mvcResult = this.mockMvc.perform(get(DISCOUNT_URI_BY_ID, id))
                 .andDo(print())
                 .andReturn();
 
@@ -478,7 +478,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         String errorCode = SettingsErrorCode.SETTINGS_NOT_FOUND.getErrorCode();
         String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(get(CATEGORY_URI_BY_ID, id))
+        mvcResult = this.mockMvc.perform(get(DISCOUNT_URI_BY_ID, id))
                 .andDo(print())
                 .andReturn();
 
@@ -493,7 +493,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         String id = discountDocument3.getId().toString();
         MvcResult mvcResult = null;
 
-        mvcResult = this.mockMvc.perform(delete(CATEGORY_URI_BY_ID, id))
+        mvcResult = this.mockMvc.perform(delete(DISCOUNT_URI_BY_ID, id))
                 .andDo(print())
                 .andReturn();
 
@@ -507,7 +507,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         String id = discountDocument1.getId().toString();
         MvcResult mvcResult = null;
 
-        mvcResult = this.mockMvc.perform(get(CATEGORY_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(get(DISCOUNT_URI_BY_ID, id)
                         .queryParam("cascadeUntilLevel", TOABCascadeLevel.ONE.getLevelCode()))
                 .andDo(print())
                 .andReturn();
@@ -529,7 +529,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         String id = discountDocument1.getId().toString();
         MvcResult mvcResult = null;
 
-        mvcResult = this.mockMvc.perform(get(CATEGORY_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(get(DISCOUNT_URI_BY_ID, id)
                         .queryParam("cascadeUntilLevel", TOABCascadeLevel.TWO.getLevelCode()))
                 .andDo(print())
                 .andReturn();
@@ -552,7 +552,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         String errorCode = SettingsErrorCode.SETTINGS_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(delete(CATEGORY_URI_BY_ID, " "))
+        mvcResult = this.mockMvc.perform(delete(DISCOUNT_URI_BY_ID, " "))
                 .andDo(print())
                 .andReturn();
 
@@ -569,7 +569,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         String errorCode = SettingsErrorCode.SETTINGS_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(delete(CATEGORY_URI_BY_ID, id))
+        mvcResult = this.mockMvc.perform(delete(DISCOUNT_URI_BY_ID, id))
                 .andDo(print())
                 .andReturn();
 
@@ -585,7 +585,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         MvcResult mvcResult = null;
         String errorCode = SettingsErrorCode.SETTINGS_INACTIVE.getErrorCode();
 
-        mvcResult = this.mockMvc.perform(delete(CATEGORY_URI_BY_ID, id))
+        mvcResult = this.mockMvc.perform(delete(DISCOUNT_URI_BY_ID, id))
                 .andDo(print())
                 .andReturn();
 
@@ -602,7 +602,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         String errorCode = SettingsErrorCode.SETTINGS_NOT_FOUND.getErrorCode();
         String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(delete(CATEGORY_URI_BY_ID, id))
+        mvcResult = this.mockMvc.perform(delete(DISCOUNT_URI_BY_ID, id))
                 .andDo(print())
                 .andReturn();
 
@@ -618,7 +618,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         MvcResult mvcResult = null;
         discountForm.setName("Ferran");
 
-        mvcResult = this.mockMvc.perform(put(CATEGORY_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(put(DISCOUNT_URI_BY_ID, id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(discountForm)))
                 .andDo(print())
@@ -636,7 +636,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         String errorCode = SettingsErrorCode.SETTINGS_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(put(CATEGORY_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(put(DISCOUNT_URI_BY_ID, id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(discountForm)))
                 .andDo(print())
@@ -655,7 +655,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         String errorCode = SettingsErrorCode.SETTINGS_NOT_FOUND.getErrorCode();
         String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(put(CATEGORY_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(put(DISCOUNT_URI_BY_ID, id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(discountForm)))
                 .andDo(print())
@@ -674,7 +674,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         MvcResult mvcResult = null;
         String errorCode = SettingsErrorCode.SETTINGS_INACTIVE.getErrorCode();
 
-        mvcResult = this.mockMvc.perform(put(CATEGORY_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(put(DISCOUNT_URI_BY_ID, id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(discountForm)))
                 .andDo(print())
@@ -694,7 +694,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         String fieldName = "form";
         String message = "not provided";
 
-        mvcResult = this.mockMvc.perform(put(CATEGORY_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(put(DISCOUNT_URI_BY_ID, id)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andReturn();
@@ -714,7 +714,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         String fieldName = "name";
         discountForm.setName("");
 
-        mvcResult = mockMvc.perform(put(CATEGORY_URI_BY_ID, id)
+        mvcResult = mockMvc.perform(put(DISCOUNT_URI_BY_ID, id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(discountForm)))
                 .andDo(print())
@@ -734,7 +734,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         String fieldName = "description";
         discountForm.setDescription("");
 
-        mvcResult = mockMvc.perform(put(CATEGORY_URI_BY_ID, id)
+        mvcResult = mockMvc.perform(put(DISCOUNT_URI_BY_ID, id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(discountForm)))
                 .andDo(print())
@@ -754,7 +754,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         String fieldName = "rate";
         discountForm.setRate(-9.8d);
 
-        mvcResult = mockMvc.perform(put(CATEGORY_URI_BY_ID, id)
+        mvcResult = mockMvc.perform(put(DISCOUNT_URI_BY_ID, id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(discountForm)))
                 .andDo(print())
@@ -774,7 +774,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         String fieldName = "form";
         String message = "fields are expected with new values";
 
-        mvcResult = this.mockMvc.perform(put(CATEGORY_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(put(DISCOUNT_URI_BY_ID, id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(om.writeValueAsString(new DiscountForm())))
                 .andDo(print())
@@ -792,7 +792,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         String id = discountDocument4.getId().toString();
         MvcResult mvcResult = null;
 
-        mvcResult = this.mockMvc.perform(patch(CATEGORY_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(patch(DISCOUNT_URI_BY_ID, id)
                         .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                         .content(om.writeValueAsString(patches)))
                 .andDo(print())
@@ -809,7 +809,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         String errorCode = SettingsErrorCode.SETTINGS_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(patch(CATEGORY_URI_BY_ID, " ")
+        mvcResult = this.mockMvc.perform(patch(DISCOUNT_URI_BY_ID, " ")
                         .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                         .content(om.writeValueAsString(patches)))
                 .andDo(print())
@@ -828,7 +828,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         String errorCode = SettingsErrorCode.SETTINGS_NOT_FOUND.getErrorCode();
         String fieldName = "id";
 
-        mvcResult = this.mockMvc.perform(patch(CATEGORY_URI_BY_ID, id)
+        mvcResult = this.mockMvc.perform(patch(DISCOUNT_URI_BY_ID, id)
                         .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                         .content(om.writeValueAsString(patches)))
                 .andDo(print())
@@ -849,7 +849,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         String fieldName = "patch";
         String message = "not provided";
 
-        mvcResult = this.mockMvc.perform(patch(CATEGORY_URI_BY_ID, id))
+        mvcResult = this.mockMvc.perform(patch(DISCOUNT_URI_BY_ID, id))
                 .andDo(print())
                 .andReturn();
 
@@ -869,7 +869,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         patches = Arrays.asList(
                 new PatchOperationForm("replace", "/active", "x"));
 
-        mvcResult = mockMvc.perform(patch(CATEGORY_URI_BY_ID, id)
+        mvcResult = mockMvc.perform(patch(DISCOUNT_URI_BY_ID, id)
                         .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                         .content(om.writeValueAsString(patches)))
                 .andDo(print())
@@ -891,7 +891,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         patches = Arrays.asList(
                 new PatchOperationForm("replace", "/rate", "x"));
 
-        mvcResult = mockMvc.perform(patch(CATEGORY_URI_BY_ID, id)
+        mvcResult = mockMvc.perform(patch(DISCOUNT_URI_BY_ID, id)
                         .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                         .content(om.writeValueAsString(patches)))
                 .andDo(print())
@@ -913,7 +913,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         patches = Arrays.asList(
                 new PatchOperationForm("replace", "/name", " "));
 
-        mvcResult = mockMvc.perform(patch(CATEGORY_URI_BY_ID, id)
+        mvcResult = mockMvc.perform(patch(DISCOUNT_URI_BY_ID, id)
                         .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                         .content(om.writeValueAsString(patches)))
                 .andDo(print())
@@ -935,7 +935,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         patches = Arrays.asList(
                 new PatchOperationForm("replace", "/rate", " "));
 
-        mvcResult = mockMvc.perform(patch(CATEGORY_URI_BY_ID, id)
+        mvcResult = mockMvc.perform(patch(DISCOUNT_URI_BY_ID, id)
                         .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                         .content(om.writeValueAsString(patches)))
                 .andDo(print())
@@ -957,7 +957,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         patches = Arrays.asList(
                 new PatchOperationForm("replace", "/x", "x"));
 
-        mvcResult = mockMvc.perform(patch(CATEGORY_URI_BY_ID, id)
+        mvcResult = mockMvc.perform(patch(DISCOUNT_URI_BY_ID, id)
                         .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                         .content(om.writeValueAsString(patches)))
                 .andDo(print())

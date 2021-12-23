@@ -16,7 +16,8 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 @EnableMongoAuditing
 @EnableMongoRepositories(basePackages = { "com.teenthofabud.restaurant.solution.settings.paymentmethod.repository",
         "com.teenthofabud.restaurant.solution.settings.charge.repository",
-        "com.teenthofabud.restaurant.solution.settings.discount.repository"},
+        "com.teenthofabud.restaurant.solution.settings.discount.repository",
+        "com.teenthofabud.restaurant.solution.settings.deliverypartner.repository" },
         repositoryBaseClass = TOABBaseMongoRepositoryImpl.class)
 public class SettingsServiceConfiguration {
 

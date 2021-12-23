@@ -1,8 +1,8 @@
-package com.teenthofabud.restaurant.solution.settings.paymentmethod.validator;
+package com.teenthofabud.restaurant.solution.settings.deliverypartner.validator;
 
 import com.teenthofabud.core.common.validator.RelaxedValidator;
+import com.teenthofabud.restaurant.solution.settings.deliverypartner.data.DeliveryPartnerForm;
 import com.teenthofabud.restaurant.solution.settings.error.SettingsErrorCode;
-import com.teenthofabud.restaurant.solution.settings.paymentmethod.data.PaymentMethodForm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -13,29 +13,29 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class PaymentMethodFormRelaxedValidator implements RelaxedValidator<PaymentMethodForm>  {
+public class DeliveryPartnerFormRelaxedValidator implements RelaxedValidator<DeliveryPartnerForm>  {
 
     private List<String> fieldsToEscape;
 
-    @Value("#{'${res.settings.paymentmethod.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.settings.deliverypartner.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }
 
     @Override
-    public Boolean validateLoosely(PaymentMethodForm form, Errors errors) {
+    public Boolean validateLoosely(DeliveryPartnerForm form, Errors errors) {
         if(!fieldsToEscape.contains("name") && form.getName() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getName()))) {
             errors.rejectValue("name", SettingsErrorCode.SETTINGS_ATTRIBUTE_INVALID.name());
-            log.debug("PaymentMethodForm.name is empty");
+            log.debug("DeliveryPartnerForm.name is empty");
             return false;
         }
-        log.debug("PaymentMethodForm.name is valid");
+        log.debug("DeliveryPartnerForm.name is valid");
         if(!fieldsToEscape.contains("description") && form.getDescription() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getDescription()))) {
             errors.rejectValue("description", SettingsErrorCode.SETTINGS_ATTRIBUTE_INVALID.name());
-            log.debug("PaymentMethodForm.description is empty");
+            log.debug("DeliveryPartnerForm.description is empty");
             return false;
         }
-        log.debug("PaymentMethodForm.description is valid");
+        log.debug("DeliveryPartnerForm.description is valid");
         return true;
     }
 }
