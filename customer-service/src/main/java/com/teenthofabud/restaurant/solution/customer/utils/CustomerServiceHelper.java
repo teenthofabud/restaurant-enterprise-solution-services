@@ -1,5 +1,7 @@
 package com.teenthofabud.restaurant.solution.customer.utils;
 
+import com.teenthofabud.core.common.error.TOABErrorCode;
+import com.teenthofabud.core.common.error.TOABSystemException;
 import com.teenthofabud.restaurant.solution.customer.account.converter.AccountEntity2VoConverter;
 import com.teenthofabud.restaurant.solution.customer.account.data.AccountEntity;
 import com.teenthofabud.restaurant.solution.customer.account.data.AccountException;
@@ -38,40 +40,38 @@ public class CustomerServiceHelper {
         List<AccountVo> accountDetailsList = new LinkedList<>();
         if(accountEntityList != null && !accountEntityList.isEmpty()) {
             for(AccountEntity entity : accountEntityList) {
-                AccountVo vo = accountEntity2VoConverter.convert(entity);
-                log.debug("Converting {} to {}", entity, vo);
+                AccountVo vo = this.accountEntity2DetailedVo(entity);
                 accountDetailsList.add(vo);
             }
         }
         return accountDetailsList;
     }
 
-    public AccountVo accountEntity2DetailedVo(AccountEntity accountEntity) throws AccountException {
+    public AccountVo accountEntity2DetailedVo(AccountEntity accountEntity) {
         if(accountEntity != null) {
             AccountVo vo = accountEntity2VoConverter.convert(accountEntity);
             log.debug("Converting {} to {}", accountEntity, vo);
             return vo;
         }
-        throw new AccountException(CustomerErrorCode.CUST_ACTION_FAILURE, new Object[] { "account entity is null" });
+        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "account entity is null" });
     }
 
     public List<AddressVo> addressEntity2DetailedVo(List<? extends AddressEntity> addressEntityList) {
         List<AddressVo> addressDetailsList = new ArrayList<>(addressEntityList.size());
         for(AddressEntity entity : addressEntityList) {
-            AddressVo vo = addressEntity2VoConverter.convert(entity);
-            log.debug("Converting {} to {}", entity, vo);
+            AddressVo vo = this.addressEntity2DetailedVo(entity);
             addressDetailsList.add(vo);
         }
         return addressDetailsList;
     }
 
-    public AddressVo addressEntity2DetailedVo(AddressEntity addressEntity) throws AddressException {
+    public AddressVo addressEntity2DetailedVo(AddressEntity addressEntity) {
         if(addressEntity != null) {
             AddressVo vo = addressEntity2VoConverter.convert(addressEntity);
             log.debug("Converting {} to {}", addressEntity, vo);
             return vo;
         }
-        throw new AddressException(CustomerErrorCode.CUST_ACTION_FAILURE, new Object[] { "address entity is null" });
+        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "address entity is null" });
     }
 
 }

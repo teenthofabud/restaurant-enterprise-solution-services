@@ -1,8 +1,8 @@
 FROM adoptopenjdk:11-jre-hotspot-focal
 MAINTAINER Anirban Das <anirbandas18@live.com>
-RUN mkdir ~p -p /opt/restaurant-enterprise-solutions/restaurant-solution-menu-service
-COPY target/*.jar /opt/restaurant-enterprise-solutions/restaurant-solution-menu-service/menu-app.jar
-EXPOSE 12001
+RUN mkdir ~p -p /opt/restaurant-enterprise-solutions/restaurant-solution-settings-service
+COPY target/*.jar /opt/restaurant-enterprise-solutions/restaurant-solution-settings-service/settings-app.jar
+EXPOSE 13001
 CMD ["java", "-jar", \
 "-DSETTINGS_SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}", \
 "-DSETTINGS_EUREKA_CLIENT_ENABLED=${EUREKA_CLIENT_ENABLED}", \
@@ -28,4 +28,4 @@ CMD ["java", "-jar", \
 "-DSETTINGS_FEIGN_LOGGING_LEVEL=${FEIGN_LOGGING_LEVEL}", \
 "-DSETTINGS_METADATA_GENDER_FEIGN_LOGGING_LEVEL=${METADATA_GENDER_FEIGN_LOGGING_LEVEL}", \
 "-DSETTINGS_CIRCUIT_BREAKER_ENABLED=${CIRCUIT_BREAKER_ENABLED}", \
-"/opt/restaurant-enterprise-solutions/restaurant-solution-menu-service/menu-app.jar"]
+"/opt/restaurant-enterprise-solutions/restaurant-solution-settings-service/settings-app.jar"]

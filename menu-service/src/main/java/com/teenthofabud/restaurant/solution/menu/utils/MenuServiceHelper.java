@@ -48,8 +48,7 @@ public class MenuServiceHelper {
         List<CategoryVo> categoryDetailsList = new LinkedList<>();
         if(categoryEntityList != null && !categoryEntityList.isEmpty()) {
             for(CategoryEntity entity : categoryEntityList) {
-                CategoryVo vo = categoryEntity2VoConverter.convert(entity);
-                log.debug("Converting {} to {}", entity, vo);
+                CategoryVo vo = this.categoryEntity2DetailedVo(entity);
                 categoryDetailsList.add(vo);
             }
         }
@@ -60,30 +59,29 @@ public class MenuServiceHelper {
         List<ItemVo> itemDetailsList = new LinkedList<>();
         if(itemEntityList != null && !itemEntityList.isEmpty()) {
             for(ItemEntity entity : itemEntityList) {
-                ItemVo vo = itemEntity2VoConverter.convert(entity);
-                log.debug("Converting {} to {}", entity, vo);
+                ItemVo vo = this.itemEntity2DetailedVo(entity);
                 itemDetailsList.add(vo);
             }
         }
         return itemDetailsList;
     }
 
-    public CategoryVo categoryEntity2DetailedVo(CategoryEntity categoryEntity) throws CategoryException {
+    public CategoryVo categoryEntity2DetailedVo(CategoryEntity categoryEntity) {
         if(categoryEntity != null) {
             CategoryVo vo = categoryEntity2VoConverter.convert(categoryEntity);
             log.debug("Converting {} to {}", categoryEntity, vo);
             return vo;
         }
-        throw new CategoryException(MenuErrorCode.MENU_ACTION_FAILURE, new Object[] { "category entity is null" });
+        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "category entity is null" });
     }
 
-    public ItemVo itemEntity2DetailedVo(ItemEntity itemEntity) throws ItemException {
+    public ItemVo itemEntity2DetailedVo(ItemEntity itemEntity) {
         if(itemEntity != null) {
             ItemVo vo = itemEntity2VoConverter.convert(itemEntity);
             log.debug("Converting {} to {}", itemEntity, vo);
             return vo;
         }
-        throw new ItemException(MenuErrorCode.MENU_ACTION_FAILURE, new Object[] { "item entity is null" });
+        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "item entity is null" });
     }
 
     public boolean isCurrencyCodeValid(String currencyCode) {
@@ -100,20 +98,19 @@ public class MenuServiceHelper {
         List<PriceVo> priceDetailsList = new LinkedList<>();
         if(priceEntityList != null && !priceEntityList.isEmpty()) {
             for(PriceEntity entity : priceEntityList) {
-                PriceVo vo = priceEntity2VoConverter.convert(entity);
-                log.debug("Converting {} to {}", entity, vo);
+                PriceVo vo = this.priceEntity2DetailedVo(entity);
                 priceDetailsList.add(vo);
             }
         }
         return priceDetailsList;
     }
 
-    public PriceVo priceEntity2DetailedVo(PriceEntity priceEntity) throws PriceException {
+    public PriceVo priceEntity2DetailedVo(PriceEntity priceEntity) {
         if(priceEntity != null) {
             PriceVo vo = priceEntity2VoConverter.convert(priceEntity);
             log.debug("Converting {} to {}", priceEntity, vo);
             return vo;
         }
-        throw new PriceException(MenuErrorCode.MENU_ACTION_FAILURE, new Object[] { "price entity is null" });
+        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "price entity is null" });
     }
 }

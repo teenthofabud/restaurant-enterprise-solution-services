@@ -11,16 +11,18 @@
     </parent>
 
     <properties>
-        <start-class>com.teenthofabud.restaurant.solution.menu.MenuServiceApplication</start-class>
-        <service.prefix>menu</service.prefix>
+        <start-class>com.teenthofabud.restaurant.solution.print.PrintServiceApplication</start-class>
+        <service.prefix>print</service.prefix>
+        <escpos-coffee.version>4.1.0</escpos-coffee.version>
+        <freemarker.version>2.3.31</freemarker.version>
     </properties>
 
     <groupId>com.teenthofabud.restaurant.solution</groupId>
-    <artifactId>restaurant-solution-menu-service</artifactId>
+    <artifactId>restaurant-solution-print-service</artifactId>
     <version>2021.4-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>${service.prefix}-service</name>
-    <description>manage entity definition for menu service</description>
+    <description>manage entity definition for print service</description>
 
     <build>
         <finalName>${service.prefix}-app</finalName>
@@ -123,8 +125,14 @@
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-openfeign</artifactId>
+            <groupId>com.github.anastaciocintra</groupId>
+            <artifactId>escpos-coffee</artifactId>
+            <version>${escpos-coffee.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
+            <version>${freemarker.version}</version>
         </dependency>
         <dependency>
             <groupId>io.github.resilience4j</groupId>
