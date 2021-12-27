@@ -87,6 +87,6 @@ public class TableFormValidator implements Validator {
                 return;
             }
         }
-        log.debug("TableForm.name is valid");
+        log.debug("TableForm.floorId is valid");
     }
 }

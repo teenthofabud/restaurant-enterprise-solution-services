@@ -26,6 +26,11 @@ public class KitchenEntitySelfMapper implements SingleChannelMapper<KitchenEntit
             changeSW = true;
             log.debug("Source KitchenEntity.kitchenName is valid");
         }
+        if(source.getFloor() != null && source.getFloor().compareTo(target.getFloor()) != 0) {
+            target.setFloor(source.getFloor());
+            changeSW = true;
+            log.debug("Source TableEntity.floor is valid");
+        }
         if(changeSW) {
             log.debug("All provided KitchenEntity attributes are valid");
             return Optional.of(target);

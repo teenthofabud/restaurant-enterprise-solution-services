@@ -17,4 +17,7 @@ public class KitchenForm {
     @ToString.Include
     private String description;
 
+    @ToString.Include
+    private String floorId;
+
 }

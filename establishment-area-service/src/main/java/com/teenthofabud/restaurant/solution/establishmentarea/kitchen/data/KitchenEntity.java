@@ -5,6 +5,7 @@ import javax.persistence.*;
 import com.teenthofabud.core.common.data.entity.TOABBaseEntity;
 
 import com.teenthofabud.restaurant.solution.establishmentarea.floor.data.FloorEntity;
+import com.teenthofabud.restaurant.solution.establishmentarea.table.data.TableEntity;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -13,10 +14,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "kitchen")
+@Table(name = "res_kitchen")
 @EntityListeners(AuditingEntityListener.class)
 @ToString(onlyExplicitlyIncluded = true)
-public class KitchenEntity extends TOABBaseEntity {
+public class KitchenEntity extends TOABBaseEntity implements Comparable<KitchenEntity>{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,4 +34,8 @@ public class KitchenEntity extends TOABBaseEntity {
 	@JoinColumn(name = "floor_id")
 	private FloorEntity floor;
 
+	@Override
+	public int compareTo(KitchenEntity o) {
+		return this.getKitchenId().compareTo(o.getKitchenId());
+	}
 }

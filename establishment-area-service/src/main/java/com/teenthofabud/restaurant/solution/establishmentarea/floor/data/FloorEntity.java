@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "floor")
+@Table(name = "res_floor")
 @EntityListeners(AuditingEntityListener.class)
 @ToString(onlyExplicitlyIncluded = true)
 public class FloorEntity extends TOABBaseEntity implements Comparable<FloorEntity>{
