@@ -11,10 +11,12 @@ import com.teenthofabud.restaurant.solution.settings.deliverypartner.data.Delive
 import com.teenthofabud.restaurant.solution.settings.discount.converter.DiscountDocument2VoConverter;
 import com.teenthofabud.restaurant.solution.settings.discount.data.DiscountDocument;
 import com.teenthofabud.restaurant.solution.settings.discount.data.DiscountVo;
-import com.teenthofabud.restaurant.solution.settings.error.SettingsErrorCode;
 import com.teenthofabud.restaurant.solution.settings.paymentmethod.converter.PaymentMethodDocument2VoConverter;
 import com.teenthofabud.restaurant.solution.settings.paymentmethod.data.PaymentMethodDocument;
 import com.teenthofabud.restaurant.solution.settings.paymentmethod.data.PaymentMethodVo;
+import com.teenthofabud.restaurant.solution.settings.template.converter.TemplateDocument2VoConverter;
+import com.teenthofabud.restaurant.solution.settings.template.data.TemplateDocument;
+import com.teenthofabud.restaurant.solution.settings.template.data.TemplateVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -29,6 +31,12 @@ public class SettingsServiceHelper {
     private ChargeDocument2VoConverter chargeDocument2VoConverter;
     private DiscountDocument2VoConverter discountDocument2VoConverter;
     private DeliveryPartnerDocument2VoConverter deliveryPartnerDocument2VoConverter;
+    private TemplateDocument2VoConverter templateDocument2VoConverter;
+
+    @Autowired
+    public void setTemplateDocument2VoConverter(TemplateDocument2VoConverter templateDocument2VoConverter) {
+        this.templateDocument2VoConverter = templateDocument2VoConverter;
+    }
 
     @Autowired
     public void setDeliveryPartnerDocument2VoConverter(DeliveryPartnerDocument2VoConverter deliveryPartnerDocument2VoConverter) {
@@ -53,8 +61,8 @@ public class SettingsServiceHelper {
     public List<DeliveryPartnerVo> deliveryPartnerDocument2DetailedVo(List<? extends DeliveryPartnerDocument> deliveryPartnerDocumentList) throws TOABSystemException {
         List<DeliveryPartnerVo> deliveryPartnerDetailsList = new LinkedList<>();
         if(deliveryPartnerDocumentList != null && !deliveryPartnerDocumentList.isEmpty()) {
-            for(DeliveryPartnerDocument entity : deliveryPartnerDocumentList) {
-                DeliveryPartnerVo vo = this.deliveryPartnerDocument2DetailedVo(entity);
+            for(DeliveryPartnerDocument document : deliveryPartnerDocumentList) {
+                DeliveryPartnerVo vo = this.deliveryPartnerDocument2DetailedVo(document);
                 deliveryPartnerDetailsList.add(vo);
             }
         }
@@ -67,14 +75,14 @@ public class SettingsServiceHelper {
             log.debug("Converting {} to {}", deliveryPartnerDocument, vo);
             return vo;
         }
-        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "deliveryPartner entity is null" });
+        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "deliveryPartner document is null" });
     }
 
     public List<PaymentMethodVo> paymentMethodDocument2DetailedVo(List<? extends PaymentMethodDocument> paymentMethodDocumentList) throws TOABSystemException {
         List<PaymentMethodVo> paymentMethodDetailsList = new LinkedList<>();
         if(paymentMethodDocumentList != null && !paymentMethodDocumentList.isEmpty()) {
-            for(PaymentMethodDocument entity : paymentMethodDocumentList) {
-                PaymentMethodVo vo = this.paymentMethodDocument2DetailedVo(entity);
+            for(PaymentMethodDocument document : paymentMethodDocumentList) {
+                PaymentMethodVo vo = this.paymentMethodDocument2DetailedVo(document);
                 paymentMethodDetailsList.add(vo);
             }
         }
@@ -87,14 +95,14 @@ public class SettingsServiceHelper {
             log.debug("Converting {} to {}", paymentMethodDocument, vo);
             return vo;
         }
-        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "paymentMethod entity is null" });
+        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "paymentMethod document is null" });
     }
 
     public List<ChargeVo> chargeDocument2DetailedVo(List<? extends ChargeDocument> chargeDocumentList) throws TOABSystemException {
         List<ChargeVo> chargeDetailsList = new LinkedList<>();
         if(chargeDocumentList != null && !chargeDocumentList.isEmpty()) {
-            for(ChargeDocument entity : chargeDocumentList) {
-                ChargeVo vo = this.chargeDocument2DetailedVo(entity);
+            for(ChargeDocument document : chargeDocumentList) {
+                ChargeVo vo = this.chargeDocument2DetailedVo(document);
                 chargeDetailsList.add(vo);
             }
         }
@@ -107,14 +115,14 @@ public class SettingsServiceHelper {
             log.debug("Converting {} to {}", chargeDocument, vo);
             return vo;
         }
-        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "charge entity is null" });
+        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "charge document is null" });
     }
 
     public List<DiscountVo> discountDocument2DetailedVo(List<DiscountDocument> discountDocumentList) throws TOABSystemException {
         List<DiscountVo> discountDetailsList = new LinkedList<>();
         if(discountDocumentList != null && !discountDocumentList.isEmpty()) {
-            for(DiscountDocument entity : discountDocumentList) {
-                DiscountVo vo = this.discountDocument2DetailedVo(entity);
+            for(DiscountDocument document : discountDocumentList) {
+                DiscountVo vo = this.discountDocument2DetailedVo(document);
                 discountDetailsList.add(vo);
             }
         }
@@ -127,6 +135,26 @@ public class SettingsServiceHelper {
             log.debug("Converting {} to {}", discountDocument, vo);
             return vo;
         }
-        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "discount entity is null" });
+        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "discount document is null" });
+    }
+
+    public List<TemplateVo> templateDocument2DetailedVo(List<? extends TemplateDocument> templateDocumentList) {
+        List<TemplateVo> templateDetailsList = new LinkedList<>();
+        if(templateDocumentList != null && !templateDocumentList.isEmpty()) {
+            for(TemplateDocument document : templateDocumentList) {
+                TemplateVo vo = this.templateDocument2DetailedVo(document);
+                templateDetailsList.add(vo);
+            }
+        }
+        return templateDetailsList;
+    }
+
+    public TemplateVo templateDocument2DetailedVo(TemplateDocument templateDocument) {
+        if(templateDocument != null) {
+            TemplateVo vo = templateDocument2VoConverter.convert(templateDocument);
+            log.debug("Converting {} to {}", templateDocument, vo);
+            return vo;
+        }
+        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "template document is null" });
     }
 }
