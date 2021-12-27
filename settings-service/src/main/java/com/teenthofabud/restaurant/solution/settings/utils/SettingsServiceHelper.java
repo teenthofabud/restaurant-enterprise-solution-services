@@ -8,6 +8,9 @@ import com.teenthofabud.restaurant.solution.settings.charge.data.ChargeVo;
 import com.teenthofabud.restaurant.solution.settings.deliverypartner.converter.DeliveryPartnerDocument2VoConverter;
 import com.teenthofabud.restaurant.solution.settings.deliverypartner.data.DeliveryPartnerDocument;
 import com.teenthofabud.restaurant.solution.settings.deliverypartner.data.DeliveryPartnerVo;
+import com.teenthofabud.restaurant.solution.settings.device.converter.DeviceDocument2VoConverter;
+import com.teenthofabud.restaurant.solution.settings.device.data.DeviceDocument;
+import com.teenthofabud.restaurant.solution.settings.device.data.DeviceVo;
 import com.teenthofabud.restaurant.solution.settings.discount.converter.DiscountDocument2VoConverter;
 import com.teenthofabud.restaurant.solution.settings.discount.data.DiscountDocument;
 import com.teenthofabud.restaurant.solution.settings.discount.data.DiscountVo;
@@ -32,6 +35,12 @@ public class SettingsServiceHelper {
     private DiscountDocument2VoConverter discountDocument2VoConverter;
     private DeliveryPartnerDocument2VoConverter deliveryPartnerDocument2VoConverter;
     private TemplateDocument2VoConverter templateDocument2VoConverter;
+    private DeviceDocument2VoConverter deviceDocument2VoConverter;
+
+    @Autowired
+    public void setDeviceDocument2VoConverter(DeviceDocument2VoConverter deviceDocument2VoConverter) {
+        this.deviceDocument2VoConverter = deviceDocument2VoConverter;
+    }
 
     @Autowired
     public void setTemplateDocument2VoConverter(TemplateDocument2VoConverter templateDocument2VoConverter) {
@@ -156,5 +165,25 @@ public class SettingsServiceHelper {
             return vo;
         }
         throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "template document is null" });
+    }
+
+    public List<DeviceVo> deviceDocument2DetailedVo(List<? extends DeviceDocument> deviceDocumentList) {
+        List<DeviceVo> deviceDetailsList = new LinkedList<>();
+        if(deviceDocumentList != null && !deviceDocumentList.isEmpty()) {
+            for(DeviceDocument document : deviceDocumentList) {
+                DeviceVo vo = this.deviceDocument2DetailedVo(document);
+                deviceDetailsList.add(vo);
+            }
+        }
+        return deviceDetailsList;
+    }
+
+    public DeviceVo deviceDocument2DetailedVo(DeviceDocument deviceDocument) {
+        if(deviceDocument != null) {
+            DeviceVo vo = deviceDocument2VoConverter.convert(deviceDocument);
+            log.debug("Converting {} to {}", deviceDocument, vo);
+            return vo;
+        }
+        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "device document is null" });
     }
 }

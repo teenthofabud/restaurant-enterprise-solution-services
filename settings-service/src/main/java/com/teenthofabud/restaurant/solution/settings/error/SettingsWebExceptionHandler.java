@@ -5,6 +5,7 @@ import com.teenthofabud.core.common.error.TOABBaseException;
 import com.teenthofabud.core.common.handler.TOABBaseWebExceptionHandler;
 import com.teenthofabud.restaurant.solution.settings.charge.data.ChargeException;
 import com.teenthofabud.restaurant.solution.settings.deliverypartner.data.DeliveryPartnerException;
+import com.teenthofabud.restaurant.solution.settings.device.data.DeviceException;
 import com.teenthofabud.restaurant.solution.settings.discount.data.DiscountException;
 import com.teenthofabud.restaurant.solution.settings.paymentmethod.data.PaymentMethodException;
 import com.teenthofabud.restaurant.solution.settings.template.data.TemplateException;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class SettingsWebExceptionHandler extends TOABBaseWebExceptionHandler {
 
     @ExceptionHandler(value = { PaymentMethodException.class, ChargeException.class, DiscountException.class,
-            DeliveryPartnerException.class, TemplateException.class })
+            DeliveryPartnerException.class, TemplateException.class, DeviceException.class })
     public ResponseEntity<ErrorVo> handleCategorySubDomainExceptions(TOABBaseException e) {
         ResponseEntity<ErrorVo>  response = super.parseExceptionToResponse(e);
         return response;

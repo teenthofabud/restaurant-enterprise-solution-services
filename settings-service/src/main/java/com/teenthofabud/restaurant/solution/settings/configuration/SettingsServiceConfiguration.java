@@ -18,7 +18,8 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
         "com.teenthofabud.restaurant.solution.settings.charge.repository",
         "com.teenthofabud.restaurant.solution.settings.discount.repository",
         "com.teenthofabud.restaurant.solution.settings.deliverypartner.repository",
-        "com.teenthofabud.restaurant.solution.settings.template.repository"},
+        "com.teenthofabud.restaurant.solution.settings.template.repository",
+        "com.teenthofabud.restaurant.solution.settings.device.repository" },
         repositoryBaseClass = TOABBaseMongoRepositoryImpl.class)
 public class SettingsServiceConfiguration {
 
