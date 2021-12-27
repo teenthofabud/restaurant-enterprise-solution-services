@@ -13,6 +13,7 @@
     <properties>
         <start-class>com.teenthofabud.restaurant.solution.settings.SettingsServiceApplication</start-class>
         <service.prefix>settings</service.prefix>
+        <freemarker.version>2.3.31</freemarker.version>
         <flapdoodle.version>2.2.0</flapdoodle.version>
     </properties>
 
@@ -118,6 +119,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-mongodb</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
+            <version>${freemarker.version}</version>
         </dependency>
         <dependency>
             <groupId>de.flapdoodle.embed</groupId>
