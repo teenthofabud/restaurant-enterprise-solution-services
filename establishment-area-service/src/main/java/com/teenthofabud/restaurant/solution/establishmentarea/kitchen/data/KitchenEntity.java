@@ -14,7 +14,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "res_kitchen")
+@Table(name = "area_kitchen")
 @EntityListeners(AuditingEntityListener.class)
 @ToString(onlyExplicitlyIncluded = true)
 public class KitchenEntity extends TOABBaseEntity implements Comparable<KitchenEntity>{
