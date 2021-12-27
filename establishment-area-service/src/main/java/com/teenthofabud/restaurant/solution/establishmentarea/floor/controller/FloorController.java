@@ -97,7 +97,7 @@ public class FloorController {
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping({"id"})
+    @GetMapping("{id}")
     public FloorVo getFloorDetailsById(@PathVariable String id, @RequestParam(required = false)
             @Parameter(in = ParameterIn.QUERY, description = "levels of nested fields to be unfolded within the response body")
             String cascadeUntilLevel) throws FloorException {

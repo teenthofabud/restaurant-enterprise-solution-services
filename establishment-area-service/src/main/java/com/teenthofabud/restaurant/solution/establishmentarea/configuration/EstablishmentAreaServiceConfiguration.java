@@ -10,7 +10,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableEurekaClient
 @EnableJpaAuditing
 @EnableJpaRepositories(basePackages = { "com.teenthofabud.restaurant.solution.establishmentarea.floor.repository",
-        "com.teenthofabud.restaurant.solution.establishmentarea.kitchen.repository" })
+        "com.teenthofabud.restaurant.solution.establishmentarea.kitchen.repository",
+        "com.teenthofabud.restaurant.solution.establishmentarea.table.repository" })
 @EnableTransactionManagement
 public class EstablishmentAreaServiceConfiguration {
 }

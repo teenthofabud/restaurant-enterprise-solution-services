@@ -18,7 +18,7 @@ import java.util.List;
 @Table(name = "floor")
 @EntityListeners(AuditingEntityListener.class)
 @ToString(onlyExplicitlyIncluded = true)
-public class FloorEntity extends TOABBaseEntity{
+public class FloorEntity extends TOABBaseEntity implements Comparable<FloorEntity>{
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,4 +34,9 @@ public class FloorEntity extends TOABBaseEntity{
 	
 	@OneToMany(mappedBy = "floor",fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
 	private List<TableEntity> table = new ArrayList<TableEntity>();
+
+	@Override
+	public int compareTo(FloorEntity o) {
+		return this.getFlrId().compareTo(o.getFlrId());
+	}
 }

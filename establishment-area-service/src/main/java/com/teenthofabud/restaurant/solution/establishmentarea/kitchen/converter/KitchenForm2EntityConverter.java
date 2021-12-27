@@ -15,7 +15,7 @@ public class KitchenForm2EntityConverter implements Converter<KitchenForm, Kitch
 
     private List<String> fieldsToEscape;
 
-    @Value("#{'${res.establishment.area.floor.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.establishment.area.kitchen.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }

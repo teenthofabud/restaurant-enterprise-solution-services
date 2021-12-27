@@ -2,6 +2,7 @@ package com.teenthofabud.restaurant.solution.establishmentarea.floor.service.imp
 
 import com.teenthofabud.core.common.constant.TOABBaseMessageTemplate;
 import com.teenthofabud.core.common.constant.TOABCascadeLevel;
+import com.teenthofabud.core.common.data.dto.TOABRequestContextHolder;
 import com.teenthofabud.core.common.data.form.PatchOperationForm;
 import com.teenthofabud.restaurant.solution.establishmentarea.error.EstablishmentAreaErrorCode;
 import com.teenthofabud.restaurant.solution.establishmentarea.floor.converter.FloorDto2EntityConverter;
@@ -14,6 +15,7 @@ import com.teenthofabud.restaurant.solution.establishmentarea.floor.repository.F
 import com.teenthofabud.restaurant.solution.establishmentarea.floor.service.FloorService;
 import com.teenthofabud.restaurant.solution.establishmentarea.floor.validator.FloorFormRelaxedValidator;
 import com.teenthofabud.restaurant.solution.establishmentarea.floor.validator.FloorFormValidator;
+import com.teenthofabud.restaurant.solution.establishmentarea.utils.EstablishmentAreaServiceHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -51,6 +53,7 @@ public class FloorServiceImpl implements FloorService {
     
     private FloorForm2EntityMapper form2EntityMapper;
     private FloorEntitySelfMapper entitySelfMapper;
+    private EstablishmentAreaServiceHelper establishmentAreaServiceHelper;
 
     @Autowired
     public void setForm2EntityMapper(FloorForm2EntityMapper form2EntityMapper) {
@@ -90,6 +93,11 @@ public class FloorServiceImpl implements FloorService {
     @Autowired
     public void setFloorRepository(FloorRepository floorRepository) {
         this.floorRepository = floorRepository;
+    }
+
+    @Autowired
+    public void setEstablishmentAreaServiceHelper(EstablishmentAreaServiceHelper establishmentAreaServiceHelper) {
+        this.establishmentAreaServiceHelper = establishmentAreaServiceHelper;
     }
 
     @Transactional
@@ -152,8 +160,11 @@ public class FloorServiceImpl implements FloorService {
                     new Object[] { "id", String.valueOf(id) });
         }
         FloorEntity entity = optEntity.get();
-        FloorVo vo = entity2VoConverter.convert(entity);
-        log.info("Found FloorVo by id: {}", id);
+        TOABCascadeLevel cascadeLevel = optionalCascadeLevel.isPresent() ? optionalCascadeLevel.get() : TOABCascadeLevel.ZERO;
+        TOABRequestContextHolder.setCascadeLevelContext(cascadeLevel);
+        FloorVo vo = establishmentAreaServiceHelper.floorEntity2DetailedVo(entity);
+        log.debug("AccountVo populated with fields cascaded to level: {}", cascadeLevel);
+        TOABRequestContextHolder.clearCascadeLevelContext();
         return vo;
     }
 

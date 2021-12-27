@@ -1,48 +1,43 @@
 package com.teenthofabud.restaurant.solution.establishmentarea.table.data;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import com.teenthofabud.core.common.data.entity.TOABBaseEntity;
 
 import com.teenthofabud.restaurant.solution.establishmentarea.floor.data.FloorEntity;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "table")
-public class TableEntity extends TOABBaseEntity{
+@Table(name = "res_table")
+@EntityListeners(AuditingEntityListener.class)
+@ToString(onlyExplicitlyIncluded = true)
+public class TableEntity extends TOABBaseEntity implements Comparable<TableEntity>{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
-	private int tableId;
+	private Long tableId;
 	
 	@Column(name = "name")
 	private String tableName;
 	
 	@Column(name = "description")
 	private String description;
+
+	@Column(name = "capacity")
+	private String capacity;
 	
 	@ManyToOne(targetEntity = FloorEntity.class, fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
 	@JoinColumn(name = "floor_id")
 	private FloorEntity floor;
-	
-	@Column(name = "capacity")
-	private String capacity;
 
+	@Override
+	public int compareTo(TableEntity o) {
+		return this.getTableId().compareTo(o.getTableId());
+	}
 }

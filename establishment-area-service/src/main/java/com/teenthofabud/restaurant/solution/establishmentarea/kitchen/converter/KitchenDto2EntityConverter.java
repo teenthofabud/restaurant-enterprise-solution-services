@@ -18,7 +18,7 @@ public class KitchenDto2EntityConverter implements ComparativePatchConverter<Kit
 
     private List<String> fieldsToEscape;
 
-    @Value("#{'${res.establishment.area.floor.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.establishment.area.kitchen.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }
