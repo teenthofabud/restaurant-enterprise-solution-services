@@ -284,7 +284,7 @@ public class PriceServiceImpl implements PriceService {
 
         PriceEntity expectedEntity = form2EntityConverter.convert(form);
 
-        log.debug(PriceMessageTemplate.MSG_TEMPLATE_PRICE_EXISTENCE_BY_ITEM_ID_AND_CURRENCY_ID.getValue(), form.getItemId(), form.getCurrencyId());
+        /*log.debug(PriceMessageTemplate.MSG_TEMPLATE_PRICE_EXISTENCE_BY_ITEM_ID_AND_CURRENCY_ID.getValue(), form.getItemId(), form.getCurrencyId());
         if(repository.existsByItemIdAndCurrencyId(expectedEntity.getItem().getId(), expectedEntity.getCurrencyId())) {
             log.debug(PriceMessageTemplate.MSG_TEMPLATE_PRICE_EXISTS_BY_ITEM_ID_AND_CURRENCY_ID.getValue(), expectedEntity.getItem().getId(),
                     expectedEntity.getCurrencyId());
@@ -292,7 +292,7 @@ public class PriceServiceImpl implements PriceService {
                     new Object[]{ "itemId: " + form.getItemId(), ", currencyId: " + form.getCurrencyId() });
         }
         log.debug(PriceMessageTemplate.MSG_TEMPLATE_PRICE_NON_EXISTENCE_BY_ITEM_ID_AND_CURRENCY_ID.getValue(), expectedEntity.getItem().getId(),
-                expectedEntity.getCurrencyId());
+                expectedEntity.getCurrencyId());*/
 
         log.debug("Saving {}", expectedEntity);
         PriceEntity actualEntity = repository.save(expectedEntity);
@@ -357,7 +357,7 @@ public class PriceServiceImpl implements PriceService {
 
         PriceEntity expectedEntity = optExpectedEntity.get();
 
-        checkUniquenessOfPrice(form, actualEntity);
+        //checkUniquenessOfPrice(form, actualEntity);
 
         entitySelfMapper.compareAndMap(expectedEntity, actualEntity);
         log.debug("Compared and copied attributes from PriceEntity to PriceForm");
@@ -481,7 +481,7 @@ public class PriceServiceImpl implements PriceService {
         }
         log.debug("All attributes of patched PriceDto are valid");
 
-        checkUniquenessOfPrice(patchedPriceForm, actualEntity);
+        //checkUniquenessOfPrice(patchedPriceForm, actualEntity);
 
         log.debug("Comparatively copying patched attributes from PriceDto to PriceEntity");
         try {
@@ -502,7 +502,7 @@ public class PriceServiceImpl implements PriceService {
         log.info("Patched PriceEntity with id:{}", id);
     }
 
-    private void checkUniquenessOfPrice(PriceDto patchedPriceForm, PriceEntity actualEntity) throws PriceException {
+    /*private void checkUniquenessOfPrice(PriceDto patchedPriceForm, PriceEntity actualEntity) throws PriceException {
         // itemId = true, currencyId = false
         if(patchedPriceForm.getItemId().isPresent() && patchedPriceForm.getCurrencyId().isEmpty()) {
             log.debug(PriceMessageTemplate.MSG_TEMPLATE_PRICE_EXISTENCE_BY_ITEM_ID_AND_CURRENCY_ID.getValue(),
@@ -611,6 +611,6 @@ public class PriceServiceImpl implements PriceService {
             log.debug(PriceMessageTemplate.MSG_TEMPLATE_PRICE_NON_EXISTENCE_BY_ITEM_ID_AND_CURRENCY_ID.getValue(),
                     actualEntity.getItem().getId().toString(),  priceForm.getCurrencyId());
         }
-    }
+    }*/
 
 }

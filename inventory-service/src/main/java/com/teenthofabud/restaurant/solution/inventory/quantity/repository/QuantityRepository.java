@@ -17,6 +17,4 @@ public interface QuantityRepository extends TOABSimpleEntityBaseRepository<Quant
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     public QuantityEntity save(QuantityEntity entity);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    Boolean existsByProductIdAndWeightId(Long productId, String weightId);
 }

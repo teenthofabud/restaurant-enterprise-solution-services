@@ -529,32 +529,6 @@ public class PriceIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Price_Post_ShouldReturn_409Response_And_ErrorCode_RES_MENU_004_WhenRequested_WithDuplicatePrice() throws Exception {
-        MvcResult mvcResult = null;
-        String errorCode = MenuErrorCode.MENU_EXISTS.getErrorCode();
-        String field1Name = "itemId";
-        String field2Name = "currencyId";
-        String field1Value = priceEntity1.getItem().getId().toString();
-        String field2Value = priceEntity1.getCurrencyId();
-        priceForm.setCurrencyId(field2Value);
-        priceForm.setItemId(field1Value);
-
-        mvcResult = mockMvc.perform(post(PRICE_URI)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(priceForm)))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.CONFLICT.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field1Name));
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field1Value));
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field2Name));
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field2Value));
-    }
-
-    @Test
     public void test_Price_Post_ShouldReturn_422Response_And_ErrorCode_RES_MENU_003_WhenPosted_WithNoPriceForm() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = MenuErrorCode.MENU_ATTRIBUTE_UNEXPECTED.getErrorCode();
@@ -1237,33 +1211,6 @@ public class PriceIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Price_Put_ShouldReturn_409Response_And_ErrorCode_RES_MENU_004_WhenUpdated_ById_AndDuplicatePriceDetails() throws Exception {
-        String id = priceEntity1.getId().toString();
-        MvcResult mvcResult = null;
-        String errorCode = MenuErrorCode.MENU_EXISTS.getErrorCode();
-        String field1Name = "itemId";
-        String field2Name = "currencyId";
-        String field1Value = priceEntity1.getItem().getId().toString();
-        String field2Value = priceEntity1.getCurrencyId();
-        priceForm.setCurrencyId(field2Value);
-        priceForm.setItemId(field1Value);
-
-        mvcResult = mockMvc.perform(put(PRICE_URI_BY_ID, id)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(priceForm)))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.CONFLICT.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field1Name));
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field1Value));
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field2Name));
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field2Value));
-    }
-
-    @Test
     public void test_Price_Patch_ShouldReturn_204Response_And_NoResponseBody_WhenUpdated_ById_AndPriceDetails() throws Exception {
         String id = priceEntity1.getId().toString();
         MvcResult mvcResult = null;
@@ -1335,34 +1282,6 @@ public class PriceIntegrationTest extends MenuIntegrationBaseTest {
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(id.toString()));
-    }
-
-    @Test
-    public void test_Price_Patch_ShouldReturn_409Response_And_ErrorCode_RES_MENU_002_WhenUpdated_ById_AndDuplicatePriceDetails() throws Exception {
-        String id = priceEntity1.getId().toString();
-        MvcResult mvcResult = null;
-        String errorCode = MenuErrorCode.MENU_EXISTS.getErrorCode();
-        String field1Name = "itemId";
-        String field2Name = "currencyId";
-        String field1Value = priceEntity1.getItem().getId().toString();
-        String field2Value = priceEntity1.getCurrencyId();
-        patches = Arrays.asList(
-                new PatchOperationForm("replace", "/" + field1Name, field1Value),
-                new PatchOperationForm("replace", "/" + field2Name, field2Value));
-
-
-        mvcResult = this.mockMvc.perform(patch(PRICE_URI_BY_ID, id)
-                .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
-                .content(om.writeValueAsString(patches)))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);Assertions.assertEquals(HttpStatus.CONFLICT.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field1Name));
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field1Value));
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field2Name));
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field2Value));
     }
 
     @Test
