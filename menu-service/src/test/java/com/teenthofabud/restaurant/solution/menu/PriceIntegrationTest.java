@@ -719,22 +719,6 @@ public class PriceIntegrationTest extends MenuIntegrationBaseTest {
     }
 
     @Test
-    public void test_Price_Get_ShouldReturn_400Response_And_ErrorCode_RES_MENU_001_WhenRequestedBy_InvalidItemId() throws Exception {
-        MvcResult mvcResult = null;
-        String errorCode = MenuErrorCode.MENU_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "itemId";
-
-        mvcResult = this.mockMvc.perform(get(PRICE_URI_FILTER).queryParam("itemId", "r1"))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-    }
-
-    @Test
     public void test_Price_Get_ShouldReturn_200Response_And_PriceListNaturallyOrdered_WhenRequested_ForPrices_WithCurrencyId() throws Exception {
         MvcResult mvcResult = null;
         priceVo3.setItem(null);
@@ -746,45 +730,6 @@ public class PriceIntegrationTest extends MenuIntegrationBaseTest {
 
         mvcResult = this.mockMvc.perform(get(PRICE_URI_FILTER)
                         .queryParam("currencyId", "INR"))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(priceList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo[].class).length);
-        Assertions.assertEquals(om.writeValueAsString(priceList), mvcResult.getResponse().getContentAsString());
-    }
-
-    @Test
-    public void test_Price_Get_ShouldReturn_200Response_And_PriceListNaturallyOrdered_WhenRequested_ForPrices_WithItemId() throws Exception {
-        MvcResult mvcResult = null;
-        priceVo1.setItem(null);
-        priceVo1.setCurrency(null);
-
-        List<PriceVo> priceList = new ArrayList<>(Arrays.asList(priceVo1));
-
-        mvcResult = this.mockMvc.perform(get(PRICE_URI_FILTER)
-                        .queryParam("itemId", itemEntity1.getId().toString()))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(priceList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo[].class).length);
-        Assertions.assertEquals(om.writeValueAsString(priceList), mvcResult.getResponse().getContentAsString());
-    }
-
-    @Test
-    public void test_Price_Get_ShouldReturn_200Response_And_PriceListNaturallyOrdered_WhenRequested_ForPrices_WithItemIdAndCurrencyId() throws Exception {
-        MvcResult mvcResult = null;
-        priceVo2.setItem(null);
-        priceVo2.setCurrency(null);
-
-        List<PriceVo> priceList = Arrays.asList(priceVo2);
-
-        mvcResult = this.mockMvc.perform(get(PRICE_URI_FILTER)
-                        .queryParam("itemId", itemEntity2.getId().toString())
-                        .queryParam("currencyId", "EUR"))
                 .andDo(print())
                 .andReturn();
 

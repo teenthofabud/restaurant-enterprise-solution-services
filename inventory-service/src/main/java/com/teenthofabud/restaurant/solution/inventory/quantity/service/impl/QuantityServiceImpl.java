@@ -184,6 +184,7 @@ public class QuantityServiceImpl implements QuantityService {
         return vo;
     }
 
+    @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
     public List<QuantityVo> retrieveAllMatchingDetailsByProductId(String productId, Optional<TOABCascadeLevel> optionalCascadeLevel) throws QuantityException {
         log.info("Requesting QuantityEntity that match with productId: {}", productId);
@@ -210,6 +211,7 @@ public class QuantityServiceImpl implements QuantityService {
         return matchedQuantityList;
     }
 
+    @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
     public List<QuantityVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalProductId, Optional<String> optionalWeightId) throws QuantityException {
         if(optionalProductId.isEmpty() && optionalWeightId.isEmpty()) {
@@ -237,6 +239,42 @@ public class QuantityServiceImpl implements QuantityService {
             entity.setProduct(optionalProductEntity.get());
             matcherCriteria = matcherCriteria.withMatcher("productId", match -> match.exact());
         }
+        if(StringUtils.hasText(StringUtils.trimWhitespace(weightId))) {
+            if(!inventoryServiceHelper.isWeightCodeValid(weightId)) {
+                log.error("weightId parameter is invalid");
+                throw new QuantityException(InventoryErrorCode.INVENTORY_ATTRIBUTE_INVALID, new Object[] { "weightId", weightId });
+            }
+            log.debug("weightId {} is valid", weightId);
+            providedFilters.put("weightId", weightId);
+            entity.setWeightId(weightId);
+            matcherCriteria = matcherCriteria.withMatcher("weightId", match -> match.contains());
+        }
+        if(providedFilters.isEmpty()) {
+            log.debug("search parameters are not valid");
+        } else {
+            log.debug("search parameters {} are valid", providedFilters);
+        }
+        Example<QuantityEntity> quantityEntityExample = Example.of(entity, matcherCriteria);
+        List<QuantityEntity> quantityEntityList = repository.findAll(quantityEntityExample);
+        matchedQuantityList = inventoryServiceHelper.quantityEntity2DetailedVo(quantityEntityList);
+        log.info("Found {} QuantityVo matching with provided parameters : {}", matchedQuantityList.size(), providedFilters);
+        return matchedQuantityList;
+    }
+
+    @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+    @Override
+    public List<QuantityVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalWeightId) throws QuantityException {
+        if(optionalWeightId.isEmpty()) {
+            log.debug("No search parameters provided");
+        }
+        String weightId = optionalWeightId.isPresent() ? optionalWeightId.get() : "";
+        if(StringUtils.isEmpty(StringUtils.trimWhitespace(weightId))) {
+            log.debug("All search parameters are empty");
+        }
+        List<QuantityVo> matchedQuantityList = new LinkedList<>();
+        Map<String, String> providedFilters = new LinkedHashMap<>();
+        QuantityEntity entity = new QuantityEntity();
+        ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll();
         if(StringUtils.hasText(StringUtils.trimWhitespace(weightId))) {
             if(!inventoryServiceHelper.isWeightCodeValid(weightId)) {
                 log.error("weightId parameter is invalid");

@@ -29,7 +29,7 @@ public class QuantityVo extends TOABBaseVo implements Comparable<QuantityVo> {
     @ToString.Include
     private ProductVo product;
     @ToString.Include
-    private Unit<Mass> weight;
+    private UnitVo weight;
 
     @Override
     public int compareTo(QuantityVo o) {

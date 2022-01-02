@@ -176,6 +176,7 @@ public class ItemServiceImpl implements ItemService {
         return vo;
     }
 
+    @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
     public List<ItemVo> retrieveAllMatchingDetailsByCategoryId(String categoryId, Optional<TOABCascadeLevel> optionalCascadeLevel) throws ItemException {
         log.info("Requesting ItemEntity that match with categoryId: {}", categoryId);
@@ -202,6 +203,7 @@ public class ItemServiceImpl implements ItemService {
         return matchedItemList;
     }
 
+    @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
     public List<ItemVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalName, Optional<String> optionalDescription, Optional<String> optionalIsVegeterian) throws ItemException {
         if(optionalName.isEmpty() && optionalDescription.isEmpty() && optionalIsVegeterian.isEmpty()) {

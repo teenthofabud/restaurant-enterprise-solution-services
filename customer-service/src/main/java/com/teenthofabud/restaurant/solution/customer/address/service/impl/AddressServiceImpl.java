@@ -354,6 +354,7 @@ public class AddressServiceImpl implements AddressService {
         return matchedAddressList;
     }
 
+    @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
     public List<AddressVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalName, Optional<String> optionalAddressLine1,
                                                                 Optional<String> optionalAddressLine2, Optional<String> optionalPincode,

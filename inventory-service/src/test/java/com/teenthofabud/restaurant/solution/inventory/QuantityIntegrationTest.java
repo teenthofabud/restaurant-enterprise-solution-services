@@ -14,6 +14,7 @@ import com.teenthofabud.restaurant.solution.inventory.product.repository.Product
 import com.teenthofabud.restaurant.solution.inventory.quantity.data.QuantityEntity;
 import com.teenthofabud.restaurant.solution.inventory.quantity.data.QuantityForm;
 import com.teenthofabud.restaurant.solution.inventory.quantity.data.QuantityVo;
+import com.teenthofabud.restaurant.solution.inventory.quantity.data.UnitVo;
 import com.teenthofabud.restaurant.solution.inventory.quantity.repository.QuantityRepository;
 import com.teenthofabud.restaurant.solution.inventory.utils.InventoryServiceHelper;
 import org.junit.jupiter.api.*;
@@ -253,7 +254,7 @@ public class QuantityIntegrationTest extends InventoryIntegrationBaseTest {
         quantityVo1 = new QuantityVo();
         quantityVo1.setId(quantityEntity1.getId().toString());
         quantityVo1.setAmount(quantityEntity1.getAmount());
-        quantityVo1.setWeight(inventoryServiceHelper.parseWeightCode(quantityEntity1.getWeightId()).get());
+        quantityVo1.setWeight(new UnitVo(inventoryServiceHelper.parseWeightCode(quantityEntity1.getWeightId()).get().getName()));
         quantityVo1.setWeightId(quantityEntity1.getWeightId());
         quantityVo1.setProductId(quantityEntity1.getProduct().getId().toString());
         quantityVo1.setProduct(productVo1);
@@ -269,7 +270,7 @@ public class QuantityIntegrationTest extends InventoryIntegrationBaseTest {
         quantityVo2 = new QuantityVo();
         quantityVo2.setId(quantityEntity2.getId().toString());
         quantityVo2.setAmount(quantityEntity2.getAmount());
-        quantityVo2.setWeight(inventoryServiceHelper.parseWeightCode(quantityEntity2.getWeightId()).get());
+        quantityVo2.setWeight(new UnitVo(inventoryServiceHelper.parseWeightCode(quantityEntity2.getWeightId()).get().getName()));
         quantityVo2.setWeightId(quantityEntity2.getWeightId());
         quantityVo2.setProductId(quantityEntity2.getProduct().getId().toString());
         quantityVo2.setProduct(productVo2);
@@ -285,7 +286,7 @@ public class QuantityIntegrationTest extends InventoryIntegrationBaseTest {
         quantityVo3 = new QuantityVo();
         quantityVo3.setId(quantityEntity3.getId().toString());
         quantityVo3.setAmount(quantityEntity3.getAmount());
-        quantityVo3.setWeight(inventoryServiceHelper.parseWeightCode(quantityEntity3.getWeightId()).get());
+        quantityVo3.setWeight(new UnitVo(inventoryServiceHelper.parseWeightCode(quantityEntity3.getWeightId()).get().getName()));
         quantityVo3.setWeightId(quantityEntity3.getWeightId());
         quantityVo3.setProductId(quantityEntity3.getProduct().getId().toString());
         quantityVo3.setProduct(productVo3);
@@ -301,7 +302,7 @@ public class QuantityIntegrationTest extends InventoryIntegrationBaseTest {
         quantityVo4 = new QuantityVo();
         quantityVo4.setId(quantityEntity4.getId().toString());
         quantityVo4.setAmount(quantityEntity4.getAmount());
-        quantityVo4.setWeight(inventoryServiceHelper.parseWeightCode(quantityEntity4.getWeightId()).get());
+        quantityVo4.setWeight(new UnitVo(inventoryServiceHelper.parseWeightCode(quantityEntity4.getWeightId()).get().getName()));
         quantityVo4.setWeightId(quantityEntity4.getWeightId());
         quantityVo4.setProductId(quantityEntity4.getProduct().getId().toString());
         quantityVo4.setProduct(productVo4);
@@ -317,7 +318,7 @@ public class QuantityIntegrationTest extends InventoryIntegrationBaseTest {
         quantityVo5 = new QuantityVo();
         quantityVo5.setId(quantityEntity5.getId().toString());
         quantityVo5.setAmount(quantityEntity5.getAmount());
-        quantityVo5.setWeight(inventoryServiceHelper.parseWeightCode(quantityEntity5.getWeightId()).get());
+        quantityVo5.setWeight(new UnitVo(inventoryServiceHelper.parseWeightCode(quantityEntity5.getWeightId()).get().getName()));
         quantityVo5.setWeightId(quantityEntity5.getWeightId());
         quantityVo5.setProductId(quantityEntity5.getProduct().getId().toString());
         quantityVo5.setProduct(productVo4);
@@ -325,7 +326,7 @@ public class QuantityIntegrationTest extends InventoryIntegrationBaseTest {
         quantityVo6 = new QuantityVo();
         quantityVo6.setId(UUID.randomUUID().toString());
         quantityVo6.setAmount(quantityForm.getAmount());
-        quantityVo6.setWeight(inventoryServiceHelper.parseWeightCode(quantityForm.getWeightId()).get());
+        quantityVo6.setWeight(new UnitVo(inventoryServiceHelper.parseWeightCode(quantityForm.getWeightId()).get().getName()));
         quantityVo6.setWeightId(quantityForm.getWeightId());
         quantityVo6.setProductId(quantityForm.getProductId());
         quantityVo6.setProduct(productVo3);
@@ -718,22 +719,6 @@ public class QuantityIntegrationTest extends InventoryIntegrationBaseTest {
     }
 
     @Test
-    public void test_Quantity_Get_ShouldReturn_400Response_And_ErrorCode_RES_INVENTORY_001_WhenRequestedBy_InvalidProductId() throws Exception {
-        MvcResult mvcResult = null;
-        String errorCode = InventoryErrorCode.INVENTORY_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "productId";
-
-        mvcResult = this.mockMvc.perform(get(QUANTITY_URI_FILTER).queryParam("productId", "r1"))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-    }
-
-    @Test
     public void test_Quantity_Get_ShouldReturn_200Response_And_QuantityListNaturallyOrdered_WhenRequested_ForQuantities_WithWeightId() throws Exception {
         MvcResult mvcResult = null;
         quantityVo1.setProduct(null);
@@ -750,45 +735,6 @@ public class QuantityIntegrationTest extends InventoryIntegrationBaseTest {
         List<QuantityVo> quantityList = new ArrayList<>(Arrays.asList(quantityVo1, quantityVo2, quantityVo3, quantityVo4, quantityVo5));
 
         mvcResult = this.mockMvc.perform(get(QUANTITY_URI_FILTER)
-                        .queryParam("weightId", Units.KILOGRAM.getSymbol()))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(quantityList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), QuantityVo[].class).length);
-        Assertions.assertEquals(om.writeValueAsString(quantityList), mvcResult.getResponse().getContentAsString());
-    }
-
-    @Test
-    public void test_Quantity_Get_ShouldReturn_200Response_And_QuantityListNaturallyOrdered_WhenRequested_ForQuantities_WithProductId() throws Exception {
-        MvcResult mvcResult = null;
-        quantityVo1.setProduct(null);
-        quantityVo1.setWeight(null);
-
-        List<QuantityVo> quantityList = new ArrayList<>(Arrays.asList(quantityVo1));
-
-        mvcResult = this.mockMvc.perform(get(QUANTITY_URI_FILTER)
-                        .queryParam("productId", productEntity1.getId().toString()))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(quantityList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), QuantityVo[].class).length);
-        Assertions.assertEquals(om.writeValueAsString(quantityList), mvcResult.getResponse().getContentAsString());
-    }
-
-    @Test
-    public void test_Quantity_Get_ShouldReturn_200Response_And_QuantityListNaturallyOrdered_WhenRequested_ForQuantities_WithProductIdAndWeightId() throws Exception {
-        MvcResult mvcResult = null;
-        quantityVo2.setProduct(null);
-        quantityVo2.setWeight(null);
-
-        List<QuantityVo> quantityList = Arrays.asList(quantityVo2);
-
-        mvcResult = this.mockMvc.perform(get(QUANTITY_URI_FILTER)
-                        .queryParam("productId", productEntity2.getId().toString())
                         .queryParam("weightId", Units.KILOGRAM.getSymbol()))
                 .andDo(print())
                 .andReturn();
@@ -902,7 +848,7 @@ public class QuantityIntegrationTest extends InventoryIntegrationBaseTest {
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), QuantityVo.class).getProduct() != null);
         Assertions.assertEquals(quantityVo1.getProduct().getId(), om.readValue(mvcResult.getResponse().getContentAsString(), QuantityVo.class).getProduct().getId());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), QuantityVo.class).getWeight() != null);
-        Assertions.assertEquals(quantityVo1.getWeightId(), om.readValue(mvcResult.getResponse().getContentAsString(), QuantityVo.class).getWeightId());
+        Assertions.assertEquals(quantityVo1.getWeightId(), om.readValue(mvcResult.getResponse().getContentAsString(), QuantityVo.class).getWeight().getSymbol());
         Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), QuantityVo.class).getCreatedBy()));
         Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), QuantityVo.class).getModifiedBy()));
         Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), QuantityVo.class).getCreatedOn()));

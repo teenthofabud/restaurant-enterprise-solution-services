@@ -218,7 +218,8 @@ public class PriceController {
         throw new PriceException(MenuErrorCode.MENU_ATTRIBUTE_INVALID, new Object[] { "itemId", itemId });
     }
 
-    @Operation(summary = "Get all Price details by name, description")
+    @Deprecated
+    @Operation(summary = "Get all Price details by name, description", deprecated = true, hidden = true)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Retrieve all available Prices and their details that match the provided name, description",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = PriceVo.class))) }),
@@ -228,7 +229,7 @@ public class PriceController {
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("filter")
+    @GetMapping("deprecated.filter")
     public List<PriceVo> getAllPricesByFilters(@RequestParam(required = false) String itemId,
                                                    @RequestParam(required = false) String currencyId) throws PriceException {
         log.debug("Requesting all available prices with given filters");
@@ -238,6 +239,30 @@ public class PriceController {
             Optional<String> optItemId = emptyItemId ? Optional.empty() : Optional.of(itemId);
             Optional<String> optCurrencyId = emptyCurrencyId ? Optional.empty() : Optional.of(currencyId);
             List<PriceVo> matchedByFilter = service.retrieveAllMatchingDetailsByCriteria(optItemId, optCurrencyId);
+            log.debug("Responding with all available prices with given filters");
+            return matchedByFilter;
+        }
+        log.debug("price filters are empty");
+        throw new PriceException(MenuErrorCode.MENU_ATTRIBUTE_INVALID, new Object[] { "filters" });
+    }
+
+    @Operation(summary = "Get all Price details by currencyId")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Retrieve all available Prices and their details that match the provided currencyId",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = PriceVo.class))) }),
+            @ApiResponse(responseCode = "400", description = "Price search filters are invalid",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) }),
+            @ApiResponse(responseCode = "404", description = "No Prices available by the given filters",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
+    })
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("filter")
+    public List<PriceVo> getAllPricesByFilters(@RequestParam(required = false) String currencyId) throws PriceException {
+        log.debug("Requesting all available prices with given filters");
+        boolean emptyCurrencyId = !StringUtils.hasText(StringUtils.trimWhitespace(currencyId));
+        if(!emptyCurrencyId) {
+            Optional<String> optCurrencyId = emptyCurrencyId ? Optional.empty() : Optional.of(currencyId);
+            List<PriceVo> matchedByFilter = service.retrieveAllMatchingDetailsByCriteria(optCurrencyId);
             log.debug("Responding with all available prices with given filters");
             return matchedByFilter;
         }
