@@ -8,6 +8,7 @@ import com.teenthofabud.core.common.error.TOABSystemException;
 import com.teenthofabud.restaurant.solution.inventory.product.data.ProductVo;
 import com.teenthofabud.restaurant.solution.inventory.quantity.data.QuantityEntity;
 import com.teenthofabud.restaurant.solution.inventory.quantity.data.QuantityVo;
+import com.teenthofabud.restaurant.solution.inventory.quantity.data.UnitVo;
 import com.teenthofabud.restaurant.solution.inventory.utils.InventoryServiceHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,7 +87,10 @@ public class QuantityEntity2VoConverter extends TOABBaseEntity2VoConverter<Quant
                 if(!fieldsToEscape.contains("weightId") && fieldName.compareTo("weightId") == 0) {
                     if(inventoryServiceHelper.isWeightCodeValid(entity.getWeightId())) {
                         Optional<Unit<Mass>> optionalWeight = inventoryServiceHelper.parseWeightCode(entity.getWeightId());
-                        vo.setWeight(optionalWeight.get());
+                        UnitVo unitVo = new UnitVo();
+                        unitVo.setSymbol(optionalWeight.get().getSymbol());
+                        unitVo.setName(optionalWeight.get().getName());
+                        vo.setWeight(unitVo);
                     } else {
                         log.error("Unable to parse weight id");
                         throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, "Unable to parse weight id", new Object[]{"Unable to parse weight id"});

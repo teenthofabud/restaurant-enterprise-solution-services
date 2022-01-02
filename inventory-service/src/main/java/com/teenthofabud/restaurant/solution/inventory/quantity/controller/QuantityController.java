@@ -218,7 +218,8 @@ public class QuantityController {
         throw new QuantityException(InventoryErrorCode.INVENTORY_ATTRIBUTE_INVALID, new Object[] { "productId", productId });
     }
 
-    @Operation(summary = "Get all Quantity details by name, description")
+    @Deprecated
+    @Operation(summary = "Get all Quantity details by name, description", hidden = true, deprecated = true)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Retrieve all available Quantities and their details that match the provided name, description",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = QuantityVo.class))) }),
@@ -228,7 +229,7 @@ public class QuantityController {
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("filter")
+    @GetMapping("deprecated.filter")
     public List<QuantityVo> getAllQuantitiesByFilters(@RequestParam(required = false) String productId,
                                                    @RequestParam(required = false) String weightId) throws QuantityException {
         log.debug("Requesting all available quantities with given filters");
@@ -238,6 +239,30 @@ public class QuantityController {
             Optional<String> optProductId = emptyProductId ? Optional.empty() : Optional.of(productId);
             Optional<String> optWeightId = emptyWeightId ? Optional.empty() : Optional.of(weightId);
             List<QuantityVo> matchedByFilter = service.retrieveAllMatchingDetailsByCriteria(optProductId, optWeightId);
+            log.debug("Responding with all available quantities with given filters");
+            return matchedByFilter;
+        }
+        log.debug("quantity filters are empty");
+        throw new QuantityException(InventoryErrorCode.INVENTORY_ATTRIBUTE_INVALID, new Object[] { "filters" });
+    }
+
+    @Operation(summary = "Get all Quantity details by weightId")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Retrieve all available Quantities and their details that match the provided weightId",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = QuantityVo.class))) }),
+            @ApiResponse(responseCode = "400", description = "Quantity search filters are invalid",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) }),
+            @ApiResponse(responseCode = "404", description = "No Quantities available by the given filters",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
+    })
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("filter")
+    public List<QuantityVo> getAllQuantitiesByFilters(@RequestParam(required = false) String weightId) throws QuantityException {
+        log.debug("Requesting all available quantities with given filters");
+        boolean emptyWeightId = !StringUtils.hasText(StringUtils.trimWhitespace(weightId));
+        if(!emptyWeightId) {
+            Optional<String> optWeightId = emptyWeightId ? Optional.empty() : Optional.of(weightId);
+            List<QuantityVo> matchedByFilter = service.retrieveAllMatchingDetailsByCriteria(optWeightId);
             log.debug("Responding with all available quantities with given filters");
             return matchedByFilter;
         }

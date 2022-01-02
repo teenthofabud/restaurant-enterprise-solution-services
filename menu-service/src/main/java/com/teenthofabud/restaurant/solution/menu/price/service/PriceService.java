@@ -20,7 +20,10 @@ public interface PriceService {
 
     public List<PriceVo> retrieveAllMatchingDetailsByItemId(String itemId, Optional<TOABCascadeLevel> optionalCascadeLevel) throws PriceException;
 
+    @Deprecated
     public List<PriceVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalItemId, Optional<String> optionalCurrencyId) throws PriceException;
+
+    public List<PriceVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalCurrencyId) throws PriceException;
 
     public String createPrice(PriceForm form) throws PriceException;
 

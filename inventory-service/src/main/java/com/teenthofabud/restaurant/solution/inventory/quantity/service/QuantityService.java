@@ -20,7 +20,10 @@ public interface QuantityService {
 
     public List<QuantityVo> retrieveAllMatchingDetailsByProductId(String productId, Optional<TOABCascadeLevel> optionalCascadeLevel) throws QuantityException;
 
-    public List<QuantityVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalProductId, Optional<String> optionalCurrencyId) throws QuantityException;
+    @Deprecated
+    public List<QuantityVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalProductId, Optional<String> optionalWeightId) throws QuantityException;
+
+    public List<QuantityVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalWeightId) throws QuantityException;
 
     public String createQuantity(QuantityForm form) throws QuantityException;
 

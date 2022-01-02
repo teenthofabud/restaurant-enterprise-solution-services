@@ -184,6 +184,7 @@ public class PriceServiceImpl implements PriceService {
         return vo;
     }
 
+    @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
     public List<PriceVo> retrieveAllMatchingDetailsByItemId(String itemId, Optional<TOABCascadeLevel> optionalCascadeLevel) throws PriceException {
         log.info("Requesting PriceEntity that match with itemId: {}", itemId);
@@ -210,6 +211,7 @@ public class PriceServiceImpl implements PriceService {
         return matchedPriceList;
     }
 
+    @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
     public List<PriceVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalItemId, Optional<String> optionalCurrencyId) throws PriceException {
         if(optionalItemId.isEmpty() && optionalCurrencyId.isEmpty()) {
@@ -259,6 +261,42 @@ public class PriceServiceImpl implements PriceService {
         return matchedPriceList;
     }
 
+    @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+    @Override
+    public List<PriceVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalCurrencyId) throws PriceException {
+        if(optionalCurrencyId.isEmpty()) {
+            log.debug("No search parameters provided");
+        }
+        String currencyId = optionalCurrencyId.isPresent() ? optionalCurrencyId.get() : "";
+        if(StringUtils.isEmpty(StringUtils.trimWhitespace(currencyId))) {
+            log.debug("All search parameters are empty");
+        }
+        List<PriceVo> matchedPriceList = new LinkedList<>();
+        Map<String, String> providedFilters = new LinkedHashMap<>();
+        PriceEntity entity = new PriceEntity();
+        ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll();
+        if(StringUtils.hasText(StringUtils.trimWhitespace(currencyId))) {
+            if(!menuServiceHelper.isCurrencyCodeValid(currencyId)) {
+                log.error("currencyId parameter is invalid");
+                throw new PriceException(MenuErrorCode.MENU_ATTRIBUTE_INVALID, new Object[] { "currencyId", currencyId });
+            }
+            log.debug("currencyId {} is valid", currencyId);
+            providedFilters.put("currencyId", currencyId);
+            entity.setCurrencyId(currencyId);
+            matcherCriteria = matcherCriteria.withMatcher("currencyId", match -> match.contains());
+        }
+        if(providedFilters.isEmpty()) {
+            log.debug("search parameters are not valid");
+        } else {
+            log.debug("search parameters {} are valid", providedFilters);
+        }
+        Example<PriceEntity> priceEntityExample = Example.of(entity, matcherCriteria);
+        List<PriceEntity> priceEntityList = repository.findAll(priceEntityExample);
+        matchedPriceList = menuServiceHelper.priceEntity2DetailedVo(priceEntityList);
+        log.info("Found {} PriceVo matching with provided parameters : {}", matchedPriceList.size(), providedFilters);
+        return matchedPriceList;
+    }
+
     @Transactional
     @Override
     public String createPrice(PriceForm form) throws PriceException {
@@ -283,16 +321,6 @@ public class PriceServiceImpl implements PriceService {
         log.debug("All attributes of PriceForm are valid");
 
         PriceEntity expectedEntity = form2EntityConverter.convert(form);
-
-        /*log.debug(PriceMessageTemplate.MSG_TEMPLATE_PRICE_EXISTENCE_BY_ITEM_ID_AND_CURRENCY_ID.getValue(), form.getItemId(), form.getCurrencyId());
-        if(repository.existsByItemIdAndCurrencyId(expectedEntity.getItem().getId(), expectedEntity.getCurrencyId())) {
-            log.debug(PriceMessageTemplate.MSG_TEMPLATE_PRICE_EXISTS_BY_ITEM_ID_AND_CURRENCY_ID.getValue(), expectedEntity.getItem().getId(),
-                    expectedEntity.getCurrencyId());
-            throw new PriceException(MenuErrorCode.MENU_EXISTS,
-                    new Object[]{ "itemId: " + form.getItemId(), ", currencyId: " + form.getCurrencyId() });
-        }
-        log.debug(PriceMessageTemplate.MSG_TEMPLATE_PRICE_NON_EXISTENCE_BY_ITEM_ID_AND_CURRENCY_ID.getValue(), expectedEntity.getItem().getId(),
-                expectedEntity.getCurrencyId());*/
 
         log.debug("Saving {}", expectedEntity);
         PriceEntity actualEntity = repository.save(expectedEntity);
@@ -356,8 +384,6 @@ public class PriceServiceImpl implements PriceService {
         log.debug("Successfully compared and copied attributes from PriceForm to PriceEntity");
 
         PriceEntity expectedEntity = optExpectedEntity.get();
-
-        //checkUniquenessOfPrice(form, actualEntity);
 
         entitySelfMapper.compareAndMap(expectedEntity, actualEntity);
         log.debug("Compared and copied attributes from PriceEntity to PriceForm");
@@ -481,8 +507,6 @@ public class PriceServiceImpl implements PriceService {
         }
         log.debug("All attributes of patched PriceDto are valid");
 
-        //checkUniquenessOfPrice(patchedPriceForm, actualEntity);
-
         log.debug("Comparatively copying patched attributes from PriceDto to PriceEntity");
         try {
             dto2EntityConverter.compareAndMap(patchedPriceForm, actualEntity);
@@ -501,116 +525,5 @@ public class PriceServiceImpl implements PriceService {
         }
         log.info("Patched PriceEntity with id:{}", id);
     }
-
-    /*private void checkUniquenessOfPrice(PriceDto patchedPriceForm, PriceEntity actualEntity) throws PriceException {
-        // itemId = true, currencyId = false
-        if(patchedPriceForm.getItemId().isPresent() && patchedPriceForm.getCurrencyId().isEmpty()) {
-            log.debug(PriceMessageTemplate.MSG_TEMPLATE_PRICE_EXISTENCE_BY_ITEM_ID_AND_CURRENCY_ID.getValue(),
-                    patchedPriceForm.getItemId().get(), actualEntity.getCurrencyId());
-            boolean sameEntitySw = patchedPriceForm.getItemId().get().compareTo(actualEntity.getItem().getId().toString()) == 0;
-            boolean duplicateEntitySw =  repository.existsByItemIdAndCurrencyId(Long.parseLong(patchedPriceForm.getItemId().get()), actualEntity.getCurrencyId());
-            if(sameEntitySw || duplicateEntitySw) {
-                log.debug(PriceMessageTemplate.MSG_TEMPLATE_PRICE_EXISTS_BY_ITEM_ID_AND_CURRENCY_ID.getValue(),
-                        patchedPriceForm.getItemId().get(), actualEntity.getCurrencyId());
-                throw new PriceException(MenuErrorCode.MENU_EXISTS,
-                        new Object[]{ "itemId: " + patchedPriceForm.getItemId().get(), ", currencyId: " + actualEntity.getCurrencyId() });
-            }
-            log.debug(PriceMessageTemplate.MSG_TEMPLATE_PRICE_NON_EXISTENCE_BY_ITEM_ID_AND_CURRENCY_ID.getValue(),
-                    patchedPriceForm.getItemId().get(), actualEntity.getCurrencyId());
-        }
-
-        // itemId = true, currencyId = true
-        if(patchedPriceForm.getItemId().isPresent() && patchedPriceForm.getCurrencyId().isPresent()) {
-            log.debug(PriceMessageTemplate.MSG_TEMPLATE_PRICE_EXISTENCE_BY_ITEM_ID_AND_CURRENCY_ID.getValue(),
-                    patchedPriceForm.getItemId().get(), patchedPriceForm.getCurrencyId().get());
-            boolean sameEntitySw = patchedPriceForm.getItemId().get().compareTo(actualEntity.getItem().getId().toString()) == 0
-                    && patchedPriceForm.getCurrencyId().get().compareTo(actualEntity.getCurrencyId()) == 0;
-            boolean duplicateEntitySw =  repository.existsByItemIdAndCurrencyId(Long.parseLong(patchedPriceForm.getItemId().get()),
-                    patchedPriceForm.getCurrencyId().get());
-            if(sameEntitySw || duplicateEntitySw) {
-                log.debug(PriceMessageTemplate.MSG_TEMPLATE_PRICE_EXISTS_BY_ITEM_ID_AND_CURRENCY_ID.getValue(),
-                        patchedPriceForm.getItemId().get(), patchedPriceForm.getCurrencyId().get());
-                throw new PriceException(MenuErrorCode.MENU_EXISTS,
-                        new Object[]{ "itemId: " + patchedPriceForm.getItemId().get(), ", currencyId: " + patchedPriceForm.getCurrencyId().get() });
-            }
-            log.debug(PriceMessageTemplate.MSG_TEMPLATE_PRICE_NON_EXISTENCE_BY_ITEM_ID_AND_CURRENCY_ID.getValue(),
-                    patchedPriceForm.getItemId().get(), patchedPriceForm.getCurrencyId().get());
-        }
-
-        // itemId = false, currencyId = true
-        if(patchedPriceForm.getItemId().isEmpty() && patchedPriceForm.getCurrencyId().isPresent()) {
-            log.debug(PriceMessageTemplate.MSG_TEMPLATE_PRICE_EXISTENCE_BY_ITEM_ID_AND_CURRENCY_ID.getValue(),
-                    actualEntity.getItem().getId().toString(),  patchedPriceForm.getCurrencyId().get());
-            boolean sameEntitySw = patchedPriceForm.getCurrencyId().get().compareTo(actualEntity.getCurrencyId()) == 0;
-            boolean duplicateEntitySw =  repository.existsByItemIdAndCurrencyId(
-                    actualEntity.getItem().getId(), patchedPriceForm.getCurrencyId().get());
-            if(sameEntitySw || duplicateEntitySw) {
-                log.debug(PriceMessageTemplate.MSG_TEMPLATE_PRICE_EXISTS_BY_ITEM_ID_AND_CURRENCY_ID.getValue(),
-                        actualEntity.getItem().getId().toString(), patchedPriceForm.getCurrencyId().get());
-                throw new PriceException(MenuErrorCode.MENU_EXISTS, new Object[]{ "itemId " + actualEntity.getItem().getId().toString(),
-                        ", currencyId: " + patchedPriceForm.getCurrencyId().get() });
-            }
-            log.debug(PriceMessageTemplate.MSG_TEMPLATE_PRICE_NON_EXISTENCE_BY_ITEM_ID_AND_CURRENCY_ID.getValue(),
-                    actualEntity.getItem().getId().toString(),  patchedPriceForm.getCurrencyId().get());
-        }
-    }
-
-    private void checkUniquenessOfPrice(PriceForm priceForm, PriceEntity actualEntity) throws PriceException {
-        // itemId = true, currencyId = false
-        if(StringUtils.hasText(StringUtils.trimWhitespace(priceForm.getItemId()))
-                && StringUtils.isEmpty(StringUtils.trimWhitespace(priceForm.getCurrencyId()))) {
-            log.debug(PriceMessageTemplate.MSG_TEMPLATE_PRICE_EXISTENCE_BY_ITEM_ID_AND_CURRENCY_ID.getValue(),
-                    priceForm.getItemId(), actualEntity.getCurrencyId());
-            boolean sameEntitySw = priceForm.getItemId().compareTo(actualEntity.getItem().getId().toString()) == 0;
-            boolean duplicateEntitySw =  repository.existsByItemIdAndCurrencyId(
-                    Long.parseLong(priceForm.getItemId()), actualEntity.getCurrencyId());
-            if(sameEntitySw || duplicateEntitySw) {
-                log.debug(PriceMessageTemplate.MSG_TEMPLATE_PRICE_EXISTS_BY_ITEM_ID_AND_CURRENCY_ID.getValue(),
-                        priceForm.getItemId(), actualEntity.getCurrencyId());
-                throw new PriceException(MenuErrorCode.MENU_EXISTS,
-                        new Object[]{ "itemId: " + priceForm.getItemId(), ", currencyId: " + actualEntity.getCurrencyId() });
-            }
-            log.debug(PriceMessageTemplate.MSG_TEMPLATE_PRICE_NON_EXISTENCE_BY_ITEM_ID_AND_CURRENCY_ID.getValue(),
-                    priceForm.getItemId(), actualEntity.getCurrencyId());
-        }
-
-        // itemId = true, currencyId = true
-        if(StringUtils.hasText(StringUtils.trimWhitespace(priceForm.getItemId()))
-                && StringUtils.hasText(StringUtils.trimWhitespace(priceForm.getCurrencyId()))) {
-            log.debug(PriceMessageTemplate.MSG_TEMPLATE_PRICE_EXISTENCE_BY_ITEM_ID_AND_CURRENCY_ID.getValue(),
-                    priceForm.getItemId(), priceForm.getCurrencyId());
-            boolean sameEntitySw = priceForm.getItemId().compareTo(actualEntity.getItem().getId().toString()) == 0
-                    && priceForm.getCurrencyId().compareTo(actualEntity.getCurrencyId()) == 0;
-            boolean duplicateEntitySw =  repository.existsByItemIdAndCurrencyId(Long.parseLong(priceForm.getItemId()),
-                    priceForm.getCurrencyId());
-            if(sameEntitySw || duplicateEntitySw) {
-                log.debug(PriceMessageTemplate.MSG_TEMPLATE_PRICE_EXISTS_BY_ITEM_ID_AND_CURRENCY_ID.getValue(),
-                        priceForm.getItemId(), priceForm.getCurrencyId());
-                throw new PriceException(MenuErrorCode.MENU_EXISTS,
-                        new Object[]{ "itemId: " + priceForm.getItemId(), ", currencyId: " + priceForm.getCurrencyId() });
-            }
-            log.debug(PriceMessageTemplate.MSG_TEMPLATE_PRICE_NON_EXISTENCE_BY_ITEM_ID_AND_CURRENCY_ID.getValue(),
-                    priceForm.getItemId(), priceForm.getCurrencyId());
-        }
-
-        // itemId = false, currencyId = true
-        if(StringUtils.isEmpty(StringUtils.trimWhitespace(priceForm.getItemId()))
-                && StringUtils.hasText(StringUtils.trimWhitespace(priceForm.getCurrencyId()))) {
-            log.debug(PriceMessageTemplate.MSG_TEMPLATE_PRICE_EXISTENCE_BY_ITEM_ID_AND_CURRENCY_ID.getValue(),
-                    actualEntity.getItem().getId().toString(),  priceForm.getCurrencyId());
-            boolean sameEntitySw = priceForm.getItemId().compareTo(actualEntity.getItem().getId().toString()) == 0
-                    && priceForm.getCurrencyId().compareTo(actualEntity.getCurrencyId()) == 0;
-            boolean duplicateEntitySw =  repository.existsByItemIdAndCurrencyId(actualEntity.getItem().getId(),
-                    priceForm.getCurrencyId());
-            if(sameEntitySw || duplicateEntitySw) {
-                log.debug(PriceMessageTemplate.MSG_TEMPLATE_PRICE_EXISTS_BY_ITEM_ID_AND_CURRENCY_ID.getValue(),
-                        actualEntity.getItem().getId().toString(),  priceForm.getCurrencyId());
-                throw new PriceException(MenuErrorCode.MENU_EXISTS, new Object[]{ "itemId: " + actualEntity.getItem().getId().toString(),
-                        ", currencyId: " + priceForm.getCurrencyId() });
-            }
-            log.debug(PriceMessageTemplate.MSG_TEMPLATE_PRICE_NON_EXISTENCE_BY_ITEM_ID_AND_CURRENCY_ID.getValue(),
-                    actualEntity.getItem().getId().toString(),  priceForm.getCurrencyId());
-        }
-    }*/
 
 }
