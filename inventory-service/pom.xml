@@ -11,16 +11,18 @@
     </parent>
 
     <properties>
-        <start-class>com.teenthofabud.restaurant.solution.establishmentarea.EstablishmentAreaServiceApplication</start-class>
-        <service.prefix>establishment-area</service.prefix>
+        <start-class>com.teenthofabud.restaurant.solution.inventory.InventoryServiceApplication</start-class>
+        <service.prefix>inventory</service.prefix>
+        <javax-unit-api.version>2.1.3</javax-unit-api.version>
+        <indriya.version>2.1.2</indriya.version>
     </properties>
 
     <groupId>com.teenthofabud.restaurant.solution</groupId>
-    <artifactId>restaurant-solution-establishment-area-service</artifactId>
+    <artifactId>restaurant-solution-inventory-service</artifactId>
     <version>2021.5-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>${service.prefix}-service</name>
-    <description>manage entity definition attributes for establishment area service</description>
+    <description>manage entity definition for inventory service</description>
 
     <build>
         <finalName>${service.prefix}-app</finalName>
@@ -118,10 +120,39 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
-
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+        <!--<dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-spring-boot2</artifactId>
+            <version>${resilience4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-feign</artifactId>
+            <version>${resilience4j.version}</version>
+        </dependency>-->
+        <!--<dependency>
+            <groupId>javax.measure</groupId>
+            <artifactId>unit-api</artifactId>
+            <version>${javax-unit-api.version}</version>
+        </dependency>-->
+        <dependency>
+            <groupId>tech.units</groupId>
+            <artifactId>indriya</artifactId>
+            <version>${indriya.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
