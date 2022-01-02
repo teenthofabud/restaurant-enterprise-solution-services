@@ -17,6 +17,4 @@ public interface PriceRepository extends TOABSimpleEntityBaseRepository<PriceEnt
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     public PriceEntity save(PriceEntity entity);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    Boolean existsByItemIdAndCurrencyId(Long itemId, String currencyId);
 }
