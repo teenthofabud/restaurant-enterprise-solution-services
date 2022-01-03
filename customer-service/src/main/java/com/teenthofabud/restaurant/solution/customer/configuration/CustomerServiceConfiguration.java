@@ -3,6 +3,9 @@ package com.teenthofabud.restaurant.solution.customer.configuration;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +20,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableJpaRepositories(basePackages = { "com.teenthofabud.restaurant.solution.customer.account.repository",
         "com.teenthofabud.restaurant.solution.customer.address.repository" })
 @EnableTransactionManagement
+@EnableCaching
 public class CustomerServiceConfiguration {
 
     @Profile("!test")
@@ -28,6 +32,11 @@ public class CustomerServiceConfiguration {
                 .info(new Info().title(applicationName)
                         .description(applicationDescription)
                         .version(applicationVersion));
+    }
+
+    @Bean
+    public CacheManager cacheManager() {
+        return new ConcurrentMapCacheManager("countries", "states", "cities");
     }
 
 }

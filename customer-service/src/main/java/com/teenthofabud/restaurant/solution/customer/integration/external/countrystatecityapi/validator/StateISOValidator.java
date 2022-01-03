@@ -5,7 +5,7 @@ import com.teenthofabud.core.common.error.TOABErrorCode;
 import com.teenthofabud.core.common.error.TOABSystemException;
 import com.teenthofabud.restaurant.solution.customer.error.CustomerErrorCode;
 import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.data.StateVo;
-import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.proxy.CountryStateCityApiClient;
+import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.service.CountryStateCityApiService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,17 +13,18 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 @Component("stateIdValidator")
 @Slf4j
 public class StateISOValidator implements Validator {
 
-    private CountryStateCityApiClient countryStateCityApiClient;
+    private CountryStateCityApiService countryStateCityApiService;
 
     @Autowired
-    public void setCountryStateCityApiClient(CountryStateCityApiClient countryStateCityApiClient) {
-        this.countryStateCityApiClient = countryStateCityApiClient;
+    public void setCountryStateCityApiService(CountryStateCityApiService countryStateCityApiService) {
+        this.countryStateCityApiService = countryStateCityApiService;
     }
 
     @Override
@@ -43,7 +44,8 @@ public class StateISOValidator implements Validator {
         log.debug("Validating state iso: {}", stateIso);
         StateVo stateVo = null;
         log.info("Requesting details of state with iso: {} for country with iso: {}", stateIso, countryIso);
-        stateVo = countryStateCityApiClient.getTheStateDetailsFromISO2Code(countryIso, stateIso);
+        String countryIdStateId = String.join("-", Arrays.asList(countryIso, stateIso));
+        stateVo = countryStateCityApiService.getTheStateDetailsFromISO2Code(countryIdStateId, countryIso, stateIso);
         log.info("Retrieved state: {} by iso for country with iso: {}", stateVo, countryIso);
         if(stateVo == null) {
             errors.reject(CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());

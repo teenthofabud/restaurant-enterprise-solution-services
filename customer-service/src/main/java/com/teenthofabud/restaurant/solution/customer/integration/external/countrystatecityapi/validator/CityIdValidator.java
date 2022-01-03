@@ -5,7 +5,7 @@ import com.teenthofabud.core.common.error.TOABErrorCode;
 import com.teenthofabud.core.common.error.TOABSystemException;
 import com.teenthofabud.restaurant.solution.customer.error.CustomerErrorCode;
 import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.data.CityVo;
-import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.proxy.CountryStateCityApiClient;
+import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.service.CountryStateCityApiService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,11 +21,11 @@ import java.util.Optional;
 @Slf4j
 public class CityIdValidator implements Validator {
 
-    private CountryStateCityApiClient countryStateCityApiClient;
+    private CountryStateCityApiService countryStateCityApiService;
 
     @Autowired
-    public void setCountryStateCityApiClient(CountryStateCityApiClient countryStateCityApiClient) {
-        this.countryStateCityApiClient = countryStateCityApiClient;
+    public void setCountryStateCityApiService(CountryStateCityApiService countryStateCityApiService) {
+        this.countryStateCityApiService = countryStateCityApiService;
     }
 
     @Override
@@ -53,7 +53,7 @@ public class CityIdValidator implements Validator {
         log.debug("Validating city id: {}", cityId);
         List<CityVo> cities = new LinkedList<>();
         log.info("Requesting details of city with id: {} for country with iso: {}", cityId, countryIso);
-        cities = countryStateCityApiClient.getTheListOfCitiesInACountry(countryIso);
+        cities = countryStateCityApiService.getTheListOfCitiesInACountry(countryIso, countryIso);
         log.info("Retrieved cities: {} by iso for country with iso: {}", cities, countryIso);
         if(cities == null || cities.isEmpty()) {
             errors.reject(CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());

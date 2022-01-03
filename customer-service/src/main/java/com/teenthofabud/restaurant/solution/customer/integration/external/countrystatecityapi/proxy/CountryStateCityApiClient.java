@@ -7,6 +7,7 @@ import com.teenthofabud.restaurant.solution.customer.integration.external.countr
 import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.data.StateVo;
 import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.error.CountryStateCityApiClientExceptionHandler;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,17 +22,20 @@ public interface CountryStateCityApiClient {
     @GetMapping("/{ciso}")
     @TOABFeignErrorHandler(CountryStateCityApiClientExceptionHandler.class)
     @CircuitBreaker(name = SERVICE_CLIENT_NAME)
+    @CachePut(cacheNames = "countries", key = "#ciso", cacheManager = "cacheManager")
     public CountryVo getCountryDetailsFromISO2Code(@PathVariable(required = true) String ciso);
 
 
     @GetMapping("/{ciso}/states/{siso}")
     @TOABFeignErrorHandler(CountryStateCityApiClientExceptionHandler.class)
     @CircuitBreaker(name = SERVICE_CLIENT_NAME)
+    @CachePut(cacheNames = "states", key = "#siso", cacheManager = "cacheManager")
     public StateVo getTheStateDetailsFromISO2Code(@PathVariable(required = true) String ciso, @PathVariable(required = true) String siso);
 
     @GetMapping("/{ciso}/cities")
     @TOABFeignErrorHandler(CountryStateCityApiClientExceptionHandler.class)
     @CircuitBreaker(name = SERVICE_CLIENT_NAME)
+    @CachePut(cacheNames = "cities", key = "#ciso", cacheManager = "cacheManager")
     public List<CityVo> getTheListOfCitiesInACountry(@PathVariable(required = true) String ciso);
 
 }
