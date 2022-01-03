@@ -2,7 +2,7 @@ package com.teenthofabud.restaurant.solution.customer.integration.external.count
 
 import com.teenthofabud.restaurant.solution.customer.error.CustomerErrorCode;
 import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.data.CountryVo;
-import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.proxy.CountryStateCityApiClient;
+import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.service.CountryStateCityApiService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,11 +14,11 @@ import org.springframework.validation.Validator;
 @Slf4j
 public class CountryISOValidator implements Validator {
 
-    private CountryStateCityApiClient countryStateCityApiClient;
+    private CountryStateCityApiService countryStateCityApiService;
 
     @Autowired
-    public void setGenderServiceClient(CountryStateCityApiClient countryStateCityApiClient) {
-        this.countryStateCityApiClient = countryStateCityApiClient;
+    public void setGenderServiceClient(CountryStateCityApiService countryStateCityApiService) {
+        this.countryStateCityApiService = countryStateCityApiService;
     }
 
     @Override
@@ -33,7 +33,7 @@ public class CountryISOValidator implements Validator {
         log.debug("Validating country iso: {}", countryIso);
         CountryVo countryVo = null;
         log.info("Requesting details of country with iso: {}", countryIso);
-        countryVo = countryStateCityApiClient.getCountryDetailsFromISO2Code(countryIso);
+        countryVo = countryStateCityApiService.getCountryDetailsFromISO2Code(countryIso, countryIso);
         log.info("Retrieved country: {} by iso", countryVo);
         if(countryVo == null) {
             errors.reject(CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());

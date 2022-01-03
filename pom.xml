@@ -11,16 +11,16 @@
 
     <groupId>com.teenthofabud.restaurant.solution</groupId>
     <artifactId>restaurant-enterprise-solution-services</artifactId>
-    <version>2021.5-SNAPSHOT</version>
+    <version>2022.1-SNAPSHOT</version>
     <name>restaurant-enterprise-solution-services</name>
     <packaging>pom</packaging>
 
     <modules>
-        <module>establishment-area-service</module>
         <module>customer-service</module>
+        <module>establishment-area-service</module>
+        <module>inventory-service</module>
         <module>menu-service</module>
         <module>settings-service</module>
-        <module>inventory-service</module>
     </modules>
 
     <properties>
