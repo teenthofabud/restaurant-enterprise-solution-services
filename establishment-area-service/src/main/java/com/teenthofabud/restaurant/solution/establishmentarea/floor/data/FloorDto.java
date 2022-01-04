@@ -15,9 +15,12 @@ public class FloorDto {
 
     @ToString.Include
     private Optional<String> flrName;
+    @ToString.Include
+    private Optional<String> active;
 
     public FloorDto() {
         this.flrName = Optional.ofNullable(null);
+        this.active = Optional.ofNullable(null);
     }
 
 }

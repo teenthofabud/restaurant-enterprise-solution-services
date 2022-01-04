@@ -1,9 +1,16 @@
 package com.teenthofabud.restaurant.solution.establishmentarea.floor.service.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.fge.jsonpatch.JsonPatch;
+import com.github.fge.jsonpatch.JsonPatchException;
 import com.teenthofabud.core.common.constant.TOABBaseMessageTemplate;
 import com.teenthofabud.core.common.constant.TOABCascadeLevel;
 import com.teenthofabud.core.common.data.dto.TOABRequestContextHolder;
 import com.teenthofabud.core.common.data.form.PatchOperationForm;
+import com.teenthofabud.core.common.error.TOABBaseException;
+import com.teenthofabud.core.common.error.TOABSystemException;
+import com.teenthofabud.core.common.service.TOABBaseService;
 import com.teenthofabud.restaurant.solution.establishmentarea.error.EstablishmentAreaErrorCode;
 import com.teenthofabud.restaurant.solution.establishmentarea.floor.converter.FloorDto2EntityConverter;
 import com.teenthofabud.restaurant.solution.establishmentarea.floor.converter.FloorEntity2VoConverter;
@@ -13,6 +20,7 @@ import com.teenthofabud.restaurant.solution.establishmentarea.floor.mapper.Floor
 import com.teenthofabud.restaurant.solution.establishmentarea.floor.mapper.FloorForm2EntityMapper;
 import com.teenthofabud.restaurant.solution.establishmentarea.floor.repository.FloorRepository;
 import com.teenthofabud.restaurant.solution.establishmentarea.floor.service.FloorService;
+import com.teenthofabud.restaurant.solution.establishmentarea.floor.validator.FloorDtoValidator;
 import com.teenthofabud.restaurant.solution.establishmentarea.floor.validator.FloorFormRelaxedValidator;
 import com.teenthofabud.restaurant.solution.establishmentarea.floor.validator.FloorFormValidator;
 import com.teenthofabud.restaurant.solution.establishmentarea.utils.EstablishmentAreaServiceHelper;
@@ -27,6 +35,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -50,10 +59,19 @@ public class FloorServiceImpl implements FloorService {
     
     private FloorFormValidator formValidator;
     private FloorFormRelaxedValidator floorFormRelaxedValidator;
+    private FloorDtoValidator floorDtoValidator;
     
     private FloorForm2EntityMapper form2EntityMapper;
     private FloorEntitySelfMapper entitySelfMapper;
     private EstablishmentAreaServiceHelper establishmentAreaServiceHelper;
+
+    private TOABBaseService toabBaseService;
+    private ObjectMapper om;
+
+    @Autowired
+    public void setFloorDtoValidator(FloorDtoValidator floorDtoValidator) {
+        this.floorDtoValidator = floorDtoValidator;
+    }
 
     @Autowired
     public void setForm2EntityMapper(FloorForm2EntityMapper form2EntityMapper) {
@@ -98,6 +116,16 @@ public class FloorServiceImpl implements FloorService {
     @Autowired
     public void setEstablishmentAreaServiceHelper(EstablishmentAreaServiceHelper establishmentAreaServiceHelper) {
         this.establishmentAreaServiceHelper = establishmentAreaServiceHelper;
+    }
+    
+    @Autowired
+    public void setToabBaseService(TOABBaseService toabBaseService) {
+        this.toabBaseService = toabBaseService;
+    }
+
+    @Autowired
+    public void setOm(ObjectMapper om) {
+        this.om = om;
     }
 
     @Transactional
@@ -163,7 +191,7 @@ public class FloorServiceImpl implements FloorService {
         TOABCascadeLevel cascadeLevel = optionalCascadeLevel.isPresent() ? optionalCascadeLevel.get() : TOABCascadeLevel.ZERO;
         TOABRequestContextHolder.setCascadeLevelContext(cascadeLevel);
         FloorVo vo = establishmentAreaServiceHelper.floorEntity2DetailedVo(entity);
-        log.debug("AccountVo populated with fields cascaded to level: {}", cascadeLevel);
+        log.debug("FloorVo populated with fields cascaded to level: {}", cascadeLevel);
         TOABRequestContextHolder.clearCascadeLevelContext();
         return vo;
     }
@@ -202,7 +230,7 @@ public class FloorServiceImpl implements FloorService {
         String floorName = optionalFloorName.get();
         log.info("Requesting FloorEntity by floor name: {}", floorName);
 
-        List<FloorVo> matchedAccountList = new LinkedList<>();
+        List<FloorVo> matchedFloorList = new LinkedList<>();
         Map<String, String> providedFilters = new LinkedHashMap<>();
         FloorEntity entity = new FloorEntity();
         ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll();
@@ -212,14 +240,14 @@ public class FloorServiceImpl implements FloorService {
             entity.setFlrName(floorName);
             matcherCriteria = matcherCriteria.withMatcher("flrName", ExampleMatcher.GenericPropertyMatchers.contains());
         }
-        Example<FloorEntity> accountEntityExample = Example.of(entity, matcherCriteria);
-        List<FloorEntity> accountEntityList = floorRepository.findAll(accountEntityExample);
-        if(accountEntityList != null && !accountEntityList.isEmpty()) {
-            matchedAccountList = entity2DetailedVoList(accountEntityList);
-            log.info("Found {} FloorVo matching with provided parameters : {}", matchedAccountList.size(), providedFilters);
+        Example<FloorEntity> floorEntityExample = Example.of(entity, matcherCriteria);
+        List<FloorEntity> floorEntityList = floorRepository.findAll(floorEntityExample);
+        if(floorEntityList != null && !floorEntityList.isEmpty()) {
+            matchedFloorList = entity2DetailedVoList(floorEntityList);
+            log.info("Found {} FloorVo matching with provided parameters : {}", matchedFloorList.size(), providedFilters);
         } else
             log.info("Found no FloorVo available matching with provided parameters : {}", providedFilters);
-        return matchedAccountList;
+        return matchedFloorList;
     }
 
     @Transactional
@@ -284,7 +312,7 @@ public class FloorServiceImpl implements FloorService {
         if(actualEntity == null) {
             log.debug("Unable to update {}", actualEntity);
             throw new FloorException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ACTION_FAILURE,
-                    new Object[]{ "update", "unable to persist currency account details" });
+                    new Object[]{ "update", "unable to persist currency floor details" });
         }
         log.info("Updated existing FloorEntity with id: {}", actualEntity.getFlrId());
     }
@@ -295,8 +323,8 @@ public class FloorServiceImpl implements FloorService {
         log.info("Soft deleting FloorEntity by id: {}", id);
 
         log.debug(FloorMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_FLOOR_ENTITY_ID.getValue(), id);
-        Long accountId = parseFloorId(id);
-        Optional<FloorEntity> optEntity = floorRepository.findById(accountId);
+        Long floorId = parseFloorId(id);
+        Optional<FloorEntity> optEntity = floorRepository.findById(floorId);
         if(optEntity.isEmpty()) {
             log.debug(FloorMessageTemplate.MSG_TEMPLATE_FLOOR_ID_INVALID.getValue(), id);
             throw new FloorException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
@@ -318,15 +346,97 @@ public class FloorServiceImpl implements FloorService {
         if(expectedEntity == null) {
             log.debug("Unable to soft delete {}", actualEntity);
             throw new FloorException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ACTION_FAILURE,
-                    new Object[]{ "deletion", "unable to soft delete current account details with id:" + id });
+                    new Object[]{ "deletion", "unable to soft delete current floor details with id:" + id });
         }
 
         log.info("Soft deleted existing FloorEntity with id: {}", actualEntity.getFlrId());
     }
 
+    @Transactional
     @Override
     public void applyPatchOnFloor(String id, List<PatchOperationForm> patches) throws FloorException {
-        throw new UnsupportedOperationException("Not declared");
+        log.info("Patching FloorEntity by id: {}", id);
+
+        log.debug(FloorMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_FLOOR_ENTITY_ID.getValue(), id);
+        Long floorId = parseFloorId(id);
+        Optional<FloorEntity> optActualEntity = floorRepository.findById(floorId);
+        if(optActualEntity.isEmpty()) {
+            log.debug(FloorMessageTemplate.MSG_TEMPLATE_NO_FLOOR_ENTITY_ID_AVAILABLE.getValue(), id);
+            throw new FloorException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
+        }
+        log.debug(FloorMessageTemplate.MSG_TEMPLATE_FOUND_FLOOR_ENTITY_ID.getValue(), id);
+
+        FloorEntity actualEntity = optActualEntity.get();
+        if(patches == null || (patches != null && patches.isEmpty())) {
+            log.debug("Floor patch list not provided");
+            throw new FloorException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_UNEXPECTED, new Object[]{ "patch", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
+        }
+        log.debug("Floor patch list has {} items", patches.size());
+        log.debug("Validating patch list items for Floor");
+        try {
+            toabBaseService.validatePatches(patches, EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_EXISTS.getDomain() + ":LOV");
+            log.debug("All Floor patch list items are valid");
+        } catch (TOABSystemException e) {
+            log.debug("Some of the Floor patch item are invalid");
+            throw new FloorException(e.getError(), e.getParameters());
+        }
+        log.debug("Validated patch list items for Floor");
+        log.debug("Patching list items to FloorDto");
+        FloorDto patchedFloorForm = new FloorDto();
+        try {
+            log.debug("Preparing patch list items for Floor");
+            JsonNode floorDtoTree = om.convertValue(patches, JsonNode.class);
+            JsonPatch floorPatch = JsonPatch.fromJson(floorDtoTree);
+            log.debug("Prepared patch list items for Floor");
+            log.debug("Applying patch list items to FloorDto");
+            JsonNode blankFloorDtoTree = om.convertValue(new FloorDto(), JsonNode.class);
+            JsonNode patchedFloorFormTree = floorPatch.apply(blankFloorDtoTree);
+            patchedFloorForm = om.treeToValue(patchedFloorFormTree, FloorDto.class);
+            log.debug("Applied patch list items to FloorDto");
+        } catch (JsonPatchException e) {
+            log.debug("Failed to patch list items to FloorDto: {}", e);
+            FloorException ex = null;
+            if(e.getMessage().contains("no such path in target")) {
+                log.debug("Invalid patch attribute in FloorDto");
+                ex = new FloorException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID, new Object[]{ "path" });
+            } else {
+                ex = new FloorException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ACTION_FAILURE, new Object[]{ "patching", "internal error: " + e.getMessage() });
+            }
+            throw ex;
+        } catch (IOException e) {
+            log.debug("Failed to patch list items to FloorDto: {}", e);
+            throw new FloorException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ACTION_FAILURE, new Object[]{ "patching", "internal error: " + e.getMessage() });
+        }
+        log.debug("Successfully to patch list items to FloorDto");
+
+        log.debug("Validating patched FloorDto");
+        Errors err = new DirectFieldBindingResult(patchedFloorForm, patchedFloorForm.getClass().getSimpleName());
+        floorDtoValidator.validate(patchedFloorForm, err);
+        if(err.hasErrors()) {
+            log.debug("Patched FloorDto has {} errors", err.getErrorCount());
+            EstablishmentAreaErrorCode ec = EstablishmentAreaErrorCode.valueOf(err.getFieldError().getCode());
+            log.debug("Patched FloorDto error detail: {}", ec);
+            throw new FloorException(ec, new Object[] { err.getFieldError().getField() });
+        }
+        log.debug("All attributes of patched FloorDto are valid");
+
+        log.debug("Comparatively copying patched attributes from FloorDto to FloorEntity");
+        try {
+            dto2EntityConverter.compareAndMap(patchedFloorForm, actualEntity);
+        } catch (TOABBaseException e) {
+            throw (FloorException) e;
+        }
+        log.debug("Comparatively copied patched attributes from FloorDto to FloorEntity");
+
+        log.debug("Saving patched FloorEntity: {}", actualEntity);
+        actualEntity = floorRepository.save(actualEntity);
+        log.debug("Saved patched FloorEntity: {}", actualEntity);
+        if(actualEntity == null) {
+            log.debug("Unable to patch delete FloorEntity with id:{}", id);
+            throw new FloorException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ACTION_FAILURE,
+                    new Object[]{ "patching", "unable to patch floor details with id:" + id });
+        }
+        log.info("Patched FloorEntity with id:{}", id);
     }
 
 
