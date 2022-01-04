@@ -1,8 +1,15 @@
 package com.teenthofabud.restaurant.solution.establishmentarea.kitchen.service.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.fge.jsonpatch.JsonPatch;
+import com.github.fge.jsonpatch.JsonPatchException;
 import com.teenthofabud.core.common.constant.TOABBaseMessageTemplate;
 import com.teenthofabud.core.common.constant.TOABCascadeLevel;
 import com.teenthofabud.core.common.data.form.PatchOperationForm;
+import com.teenthofabud.core.common.error.TOABBaseException;
+import com.teenthofabud.core.common.error.TOABSystemException;
+import com.teenthofabud.core.common.service.TOABBaseService;
 import com.teenthofabud.restaurant.solution.establishmentarea.error.EstablishmentAreaErrorCode;
 import com.teenthofabud.restaurant.solution.establishmentarea.kitchen.converter.KitchenDto2EntityConverter;
 import com.teenthofabud.restaurant.solution.establishmentarea.kitchen.converter.KitchenEntity2VoConverter;
@@ -12,6 +19,7 @@ import com.teenthofabud.restaurant.solution.establishmentarea.kitchen.mapper.Kit
 import com.teenthofabud.restaurant.solution.establishmentarea.kitchen.mapper.KitchenForm2EntityMapper;
 import com.teenthofabud.restaurant.solution.establishmentarea.kitchen.repository.KitchenRepository;
 import com.teenthofabud.restaurant.solution.establishmentarea.kitchen.service.KitchenService;
+import com.teenthofabud.restaurant.solution.establishmentarea.kitchen.validator.KitchenDtoValidator;
 import com.teenthofabud.restaurant.solution.establishmentarea.kitchen.validator.KitchenFormRelaxedValidator;
 import com.teenthofabud.restaurant.solution.establishmentarea.kitchen.validator.KitchenFormValidator;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +33,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -46,9 +55,28 @@ public class KitchenServiceImpl implements KitchenService {
     
     private KitchenFormValidator formValidator;
     private KitchenFormRelaxedValidator kitchenFormRelaxedValidator;
-    
+    private KitchenDtoValidator kitchenDtoValidator;
+
     private KitchenForm2EntityMapper form2EntityMapper;
     private KitchenEntitySelfMapper entitySelfMapper;
+
+    private TOABBaseService toabBaseService;
+    private ObjectMapper om;
+
+    @Autowired
+    public void setKitchenDtoValidator(KitchenDtoValidator kitchenDtoValidator) {
+        this.kitchenDtoValidator = kitchenDtoValidator;
+    }
+
+    @Autowired
+    public void setOm(ObjectMapper om) {
+        this.om = om;
+    }
+
+    @Autowired
+    public void setToabBaseService(TOABBaseService toabBaseService) {
+        this.toabBaseService = toabBaseService;
+    }
 
     @Autowired
     public void setForm2EntityMapper(KitchenForm2EntityMapper form2EntityMapper) {
@@ -311,9 +339,91 @@ public class KitchenServiceImpl implements KitchenService {
         log.info("Soft deleted existing KitchenEntity with id: {}", actualEntity.getKitchenId());
     }
 
+    @Transactional
     @Override
     public void applyPatchOnKitchen(String id, List<PatchOperationForm> patches) throws KitchenException {
-        throw new UnsupportedOperationException("Not declared");
+        log.info("Patching KitchenEntity by id: {}", id);
+
+        log.debug(KitchenMessageTemplate.MSG_TEMPLATE_FOUND_KITCHEN_ENTITY_ID.getValue(), id);
+        Long kitchenId = parseKitchenId(id);
+        Optional<KitchenEntity> optActualEntity = kitchenRepository.findById(kitchenId);
+        if(optActualEntity.isEmpty()) {
+            log.debug(KitchenMessageTemplate.MSG_TEMPLATE_FOUND_KITCHEN_ENTITY_ID.getValue(), id);
+            throw new KitchenException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
+        }
+        log.debug(KitchenMessageTemplate.MSG_TEMPLATE_FOUND_KITCHEN_ENTITY_ID.getValue(), id);
+
+        KitchenEntity actualEntity = optActualEntity.get();
+        if(patches == null || (patches != null && patches.isEmpty())) {
+            log.debug("Kitchen patch list not provided");
+            throw new KitchenException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_UNEXPECTED, new Object[]{ "patch", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
+        }
+        log.debug("Kitchen patch list has {} items", patches.size());
+        log.debug("Validating patch list items for Kitchen");
+        try {
+            toabBaseService.validatePatches(patches, EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_EXISTS.getDomain() + ":LOV");
+            log.debug("All Kitchen patch list items are valid");
+        } catch (TOABSystemException e) {
+            log.debug("Some of the Kitchen patch item are invalid");
+            throw new KitchenException(e.getError(), e.getParameters());
+        }
+        log.debug("Validated patch list items for Kitchen");
+        log.debug("Patching list items to KitchenDto");
+        KitchenDto patchedKitchenForm = new KitchenDto();
+        try {
+            log.debug("Preparing patch list items for Kitchen");
+            JsonNode kitchenDtoTree = om.convertValue(patches, JsonNode.class);
+            JsonPatch kitchenPatch = JsonPatch.fromJson(kitchenDtoTree);
+            log.debug("Prepared patch list items for Kitchen");
+            log.debug("Applying patch list items to KitchenDto");
+            JsonNode blankKitchenDtoTree = om.convertValue(new KitchenDto(), JsonNode.class);
+            JsonNode patchedKitchenFormTree = kitchenPatch.apply(blankKitchenDtoTree);
+            patchedKitchenForm = om.treeToValue(patchedKitchenFormTree, KitchenDto.class);
+            log.debug("Applied patch list items to KitchenDto");
+        } catch (JsonPatchException e) {
+            log.debug("Failed to patch list items to KitchenDto: {}", e);
+            KitchenException ex = null;
+            if(e.getMessage().contains("no such path in target")) {
+                log.debug("Invalid patch attribute in KitchenDto");
+                ex = new KitchenException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID, new Object[]{ "path" });
+            } else {
+                ex = new KitchenException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ACTION_FAILURE, new Object[]{ "patching", "internal error: " + e.getMessage() });
+            }
+            throw ex;
+        } catch (IOException e) {
+            log.debug("Failed to patch list items to KitchenDto: {}", e);
+            throw new KitchenException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ACTION_FAILURE, new Object[]{ "patching", "internal error: " + e.getMessage() });
+        }
+        log.debug("Successfully to patch list items to KitchenDto");
+
+        log.debug("Validating patched KitchenDto");
+        Errors err = new DirectFieldBindingResult(patchedKitchenForm, patchedKitchenForm.getClass().getSimpleName());
+        kitchenDtoValidator.validate(patchedKitchenForm, err);
+        if(err.hasErrors()) {
+            log.debug("Patched KitchenDto has {} errors", err.getErrorCount());
+            EstablishmentAreaErrorCode ec = EstablishmentAreaErrorCode.valueOf(err.getFieldError().getCode());
+            log.debug("Patched KitchenDto error detail: {}", ec);
+            throw new KitchenException(ec, new Object[] { err.getFieldError().getField() });
+        }
+        log.debug("All attributes of patched KitchenDto are valid");
+
+        log.debug("Comparatively copying patched attributes from KitchenDto to KitchenEntity");
+        try {
+            dto2EntityConverter.compareAndMap(patchedKitchenForm, actualEntity);
+        } catch (TOABBaseException e) {
+            throw (KitchenException) e;
+        }
+        log.debug("Comparatively copied patched attributes from KitchenDto to KitchenEntity");
+
+        log.debug("Saving patched KitchenEntity: {}", actualEntity);
+        actualEntity = kitchenRepository.save(actualEntity);
+        log.debug("Saved patched KitchenEntity: {}", actualEntity);
+        if(actualEntity == null) {
+            log.debug("Unable to patch delete KitchenEntity with id:{}", id);
+            throw new KitchenException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ACTION_FAILURE,
+                    new Object[]{ "patching", "unable to patch kitchen details with id:" + id });
+        }
+        log.info("Patched KitchenEntity with id:{}", id);
     }
 
 

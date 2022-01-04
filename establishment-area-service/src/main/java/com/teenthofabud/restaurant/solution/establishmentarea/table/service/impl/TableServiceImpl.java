@@ -1,8 +1,15 @@
 package com.teenthofabud.restaurant.solution.establishmentarea.table.service.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.fge.jsonpatch.JsonPatch;
+import com.github.fge.jsonpatch.JsonPatchException;
 import com.teenthofabud.core.common.constant.TOABBaseMessageTemplate;
 import com.teenthofabud.core.common.constant.TOABCascadeLevel;
 import com.teenthofabud.core.common.data.form.PatchOperationForm;
+import com.teenthofabud.core.common.error.TOABBaseException;
+import com.teenthofabud.core.common.error.TOABSystemException;
+import com.teenthofabud.core.common.service.TOABBaseService;
 import com.teenthofabud.restaurant.solution.establishmentarea.error.EstablishmentAreaErrorCode;
 import com.teenthofabud.restaurant.solution.establishmentarea.table.converter.TableDto2EntityConverter;
 import com.teenthofabud.restaurant.solution.establishmentarea.table.converter.TableEntity2VoConverter;
@@ -12,6 +19,7 @@ import com.teenthofabud.restaurant.solution.establishmentarea.table.mapper.Table
 import com.teenthofabud.restaurant.solution.establishmentarea.table.mapper.TableForm2EntityMapper;
 import com.teenthofabud.restaurant.solution.establishmentarea.table.repository.TableRepository;
 import com.teenthofabud.restaurant.solution.establishmentarea.table.service.TableService;
+import com.teenthofabud.restaurant.solution.establishmentarea.table.validator.TableDtoValidator;
 import com.teenthofabud.restaurant.solution.establishmentarea.table.validator.TableFormRelaxedValidator;
 import com.teenthofabud.restaurant.solution.establishmentarea.table.validator.TableFormValidator;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +33,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -46,9 +55,28 @@ public class TableServiceImpl implements TableService {
     
     private TableFormValidator formValidator;
     private TableFormRelaxedValidator tableFormRelaxedValidator;
-    
+    private TableDtoValidator tableDtoValidator;
+
     private TableForm2EntityMapper form2EntityMapper;
     private TableEntitySelfMapper entitySelfMapper;
+
+    private TOABBaseService toabBaseService;
+    private ObjectMapper om;
+
+    @Autowired
+    public void setTableDtoValidator(TableDtoValidator tableDtoValidator) {
+        this.tableDtoValidator = tableDtoValidator;
+    }
+
+    @Autowired
+    public void setOm(ObjectMapper om) {
+        this.om = om;
+    }
+
+    @Autowired
+    public void setToabBaseService(TOABBaseService toabBaseService) {
+        this.toabBaseService = toabBaseService;
+    }
 
     @Autowired
     public void setForm2EntityMapper(TableForm2EntityMapper form2EntityMapper) {
@@ -282,8 +310,8 @@ public class TableServiceImpl implements TableService {
         log.info("Soft deleting TableEntity by id: {}", id);
 
         log.debug(TableMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_TABLE_ENTITY_ID.getValue(), id);
-        Long accountId = parseTableId(id);
-        Optional<TableEntity> optEntity = tableRepository.findById(accountId);
+        Long tableId = parseTableId(id);
+        Optional<TableEntity> optEntity = tableRepository.findById(tableId);
         if(optEntity.isEmpty()) {
             log.debug(TableMessageTemplate.MSG_TEMPLATE_TABLE_ID_INVALID.getValue(), id);
             throw new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
@@ -311,10 +339,91 @@ public class TableServiceImpl implements TableService {
         log.info("Soft deleted existing TableEntity with id: {}", actualEntity.getTableId());
     }
 
+    @Transactional
     @Override
     public void applyPatchOnTable(String id, List<PatchOperationForm> patches) throws TableException {
-        throw new UnsupportedOperationException("Not declared");
-    }
+        log.info("Patching TableEntity by id: {}", id);
 
+        log.debug(TableMessageTemplate.MSG_TEMPLATE_FOUND_TABLE_ENTITY_ID.getValue(), id);
+        Long tableId = parseTableId(id);
+        Optional<TableEntity> optActualEntity = tableRepository.findById(tableId);
+        if(optActualEntity.isEmpty()) {
+            log.debug(TableMessageTemplate.MSG_TEMPLATE_FOUND_TABLE_ENTITY_ID.getValue(), id);
+            throw new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
+        }
+        log.debug(TableMessageTemplate.MSG_TEMPLATE_FOUND_TABLE_ENTITY_ID.getValue(), id);
+
+        TableEntity actualEntity = optActualEntity.get();
+        if(patches == null || (patches != null && patches.isEmpty())) {
+            log.debug("Table patch list not provided");
+            throw new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_UNEXPECTED, new Object[]{ "patch", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
+        }
+        log.debug("Table patch list has {} items", patches.size());
+        log.debug("Validating patch list items for Table");
+        try {
+            toabBaseService.validatePatches(patches, EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_EXISTS.getDomain() + ":LOV");
+            log.debug("All Table patch list items are valid");
+        } catch (TOABSystemException e) {
+            log.debug("Some of the Table patch item are invalid");
+            throw new TableException(e.getError(), e.getParameters());
+        }
+        log.debug("Validated patch list items for Table");
+        log.debug("Patching list items to TableDto");
+        TableDto patchedTableForm = new TableDto();
+        try {
+            log.debug("Preparing patch list items for Table");
+            JsonNode tableDtoTree = om.convertValue(patches, JsonNode.class);
+            JsonPatch tablePatch = JsonPatch.fromJson(tableDtoTree);
+            log.debug("Prepared patch list items for Table");
+            log.debug("Applying patch list items to TableDto");
+            JsonNode blankTableDtoTree = om.convertValue(new TableDto(), JsonNode.class);
+            JsonNode patchedTableFormTree = tablePatch.apply(blankTableDtoTree);
+            patchedTableForm = om.treeToValue(patchedTableFormTree, TableDto.class);
+            log.debug("Applied patch list items to TableDto");
+        } catch (JsonPatchException e) {
+            log.debug("Failed to patch list items to TableDto: {}", e);
+            TableException ex = null;
+            if(e.getMessage().contains("no such path in target")) {
+                log.debug("Invalid patch attribute in TableDto");
+                ex = new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID, new Object[]{ "path" });
+            } else {
+                ex = new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ACTION_FAILURE, new Object[]{ "patching", "internal error: " + e.getMessage() });
+            }
+            throw ex;
+        } catch (IOException e) {
+            log.debug("Failed to patch list items to TableDto: {}", e);
+            throw new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ACTION_FAILURE, new Object[]{ "patching", "internal error: " + e.getMessage() });
+        }
+        log.debug("Successfully to patch list items to TableDto");
+
+        log.debug("Validating patched TableDto");
+        Errors err = new DirectFieldBindingResult(patchedTableForm, patchedTableForm.getClass().getSimpleName());
+        tableDtoValidator.validate(patchedTableForm, err);
+        if(err.hasErrors()) {
+            log.debug("Patched TableDto has {} errors", err.getErrorCount());
+            EstablishmentAreaErrorCode ec = EstablishmentAreaErrorCode.valueOf(err.getFieldError().getCode());
+            log.debug("Patched TableDto error detail: {}", ec);
+            throw new TableException(ec, new Object[] { err.getFieldError().getField() });
+        }
+        log.debug("All attributes of patched TableDto are valid");
+
+        log.debug("Comparatively copying patched attributes from TableDto to TableEntity");
+        try {
+            dto2EntityConverter.compareAndMap(patchedTableForm, actualEntity);
+        } catch (TOABBaseException e) {
+            throw (TableException) e;
+        }
+        log.debug("Comparatively copied patched attributes from TableDto to TableEntity");
+
+        log.debug("Saving patched TableEntity: {}", actualEntity);
+        actualEntity = tableRepository.save(actualEntity);
+        log.debug("Saved patched TableEntity: {}", actualEntity);
+        if(actualEntity == null) {
+            log.debug("Unable to patch delete TableEntity with id:{}", id);
+            throw new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ACTION_FAILURE,
+                    new Object[]{ "patching", "unable to patch table details with id:" + id });
+        }
+        log.info("Patched TableEntity with id:{}", id);
+    }
 
 }

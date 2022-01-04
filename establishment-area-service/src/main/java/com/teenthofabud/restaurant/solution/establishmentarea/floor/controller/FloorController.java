@@ -2,6 +2,7 @@ package com.teenthofabud.restaurant.solution.establishmentarea.floor.controller;
 
 import com.teenthofabud.core.common.constant.TOABBaseMessageTemplate;
 import com.teenthofabud.core.common.constant.TOABCascadeLevel;
+import com.teenthofabud.core.common.data.form.PatchOperationForm;
 import com.teenthofabud.core.common.data.vo.CreatedVo;
 import com.teenthofabud.core.common.data.vo.ErrorVo;
 import com.teenthofabud.restaurant.solution.establishmentarea.error.EstablishmentAreaErrorCode;
@@ -83,7 +84,7 @@ public class FloorController {
     public List<FloorVo> getAllFloorNaturallyOrdered() {
         log.debug("Requesting all available floors by their natural orders");
         List<FloorVo> naturallyOrderedFloors = service.retrieveListOfAllFloors();
-        log.debug("Responding with all available accounts by their natural orders");
+        log.debug("Responding with all available floors by their natural orders");
         return naturallyOrderedFloors;
     }
 
@@ -174,7 +175,7 @@ public class FloorController {
         if(StringUtils.hasText(StringUtils.trimWhitespace(id))) {
             if(form != null) {
                 service.updateFloor(id, form);
-                log.debug("Responding with successful updation of attributes for existing account");
+                log.debug("Responding with successful updation of attributes for existing floor");
                 return;
             }
             log.debug("FloorForm is null");
@@ -201,14 +202,45 @@ public class FloorController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("{id}")
     public void deleteExistingFloor(@PathVariable String id) throws FloorException {
-        log.debug("Requesting to soft delete account");
+        log.debug("Requesting to soft delete floor");
         if(StringUtils.hasText(StringUtils.trimWhitespace(id))) {
             service.deleteFloor(id);
-            log.debug("Responding with successful deletion of existing account");
+            log.debug("Responding with successful deletion of existing floor");
             return;
         }
         log.debug(FloorMessageTemplate.MSG_TEMPLATE_FLOOR_ID_EMPTY.getValue());
         throw new FloorException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID, new Object[] { "id", id });
     }
 
+    @Operation(summary = "Patch Floor attributes by id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Patched each provided attribute of Floor with the given value",
+                    content = { @Content(schema = @Schema(implementation = Void.class)) }),
+            @ApiResponse(responseCode = "400", description = "Floor attribute/value is invalid",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) }),
+            @ApiResponse(responseCode = "404", description = "No Floor found with the given id",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) }),
+            @ApiResponse(responseCode = "422", description = "No Floor attribute patches provided",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) }),
+            @ApiResponse(responseCode = "500", description = "Internal system error while trying to patch provided attributes of Floor with the given values",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
+    })
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PatchMapping(path = "{id}", consumes = MEDIA_FLOOR_APPLICATION_JSON_PATCH)
+    public void patchExistingFloor(@PathVariable String id, @RequestBody(required = false) List<PatchOperationForm> dtoList)
+            throws FloorException {
+        log.debug("Requesting to patch of floor attributes");
+        if(StringUtils.hasText(StringUtils.trimWhitespace(id))) {
+            if(dtoList != null) {
+                service.applyPatchOnFloor(id, dtoList);
+                log.debug("Responding with successful patch of attributes for existing floor");
+                return;
+            }
+            log.debug("floor patch document is null");
+            throw new FloorException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_UNEXPECTED,
+                    new Object[]{ "patch", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
+        }
+        log.debug(FloorMessageTemplate.MSG_TEMPLATE_FLOOR_ID_EMPTY.getValue());
+        throw new FloorException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID, new Object[] { "id", id });
+    }
 }

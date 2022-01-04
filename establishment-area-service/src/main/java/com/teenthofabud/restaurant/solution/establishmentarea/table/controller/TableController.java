@@ -2,6 +2,7 @@ package com.teenthofabud.restaurant.solution.establishmentarea.table.controller;
 
 import com.teenthofabud.core.common.constant.TOABBaseMessageTemplate;
 import com.teenthofabud.core.common.constant.TOABCascadeLevel;
+import com.teenthofabud.core.common.data.form.PatchOperationForm;
 import com.teenthofabud.core.common.data.vo.CreatedVo;
 import com.teenthofabud.core.common.data.vo.ErrorVo;
 import com.teenthofabud.restaurant.solution.establishmentarea.error.EstablishmentAreaErrorCode;
@@ -35,7 +36,7 @@ import java.util.Optional;
 @Tag(name = "Table API", description = "Manage Table and their details")
 public class TableController {
 
-    private static final String MEDIA_FLOOR_APPLICATION_JSON_PATCH = "application/json-patch+json";
+    private static final String MEDIA_TABLE_APPLICATION_JSON_PATCH = "application/json-patch+json";
 
     private TableService service;
 
@@ -208,6 +209,38 @@ public class TableController {
             service.deleteTable(id);
             log.debug("Responding with successful deletion of existing account");
             return;
+        }
+        log.debug(TableMessageTemplate.MSG_TEMPLATE_TABLE_ID_EMPTY.getValue());
+        throw new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID, new Object[] { "id", id });
+    }
+
+    @Operation(summary = "Patch Table attributes by id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Patched each provided attribute of Table with the given value",
+                    content = { @Content(schema = @Schema(implementation = Void.class)) }),
+            @ApiResponse(responseCode = "400", description = "Table attribute/value is invalid",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) }),
+            @ApiResponse(responseCode = "404", description = "No Table found with the given id",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) }),
+            @ApiResponse(responseCode = "422", description = "No Table attribute patches provided",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) }),
+            @ApiResponse(responseCode = "500", description = "Internal system error while trying to patch provided attributes of Table with the given values",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
+    })
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PatchMapping(path = "{id}", consumes = MEDIA_TABLE_APPLICATION_JSON_PATCH)
+    public void patchExistingTable(@PathVariable String id, @RequestBody(required = false) List<PatchOperationForm> dtoList)
+            throws TableException {
+        log.debug("Requesting to patch of table attributes");
+        if(StringUtils.hasText(StringUtils.trimWhitespace(id))) {
+            if(dtoList != null) {
+                service.applyPatchOnTable(id, dtoList);
+                log.debug("Responding with successful patch of attributes for existing table");
+                return;
+            }
+            log.debug("table patch document is null");
+            throw new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_UNEXPECTED,
+                    new Object[]{ "patch", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
         }
         log.debug(TableMessageTemplate.MSG_TEMPLATE_TABLE_ID_EMPTY.getValue());
         throw new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID, new Object[] { "id", id });
