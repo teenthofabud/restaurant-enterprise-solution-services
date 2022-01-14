@@ -203,11 +203,6 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         addressForm.setStateId("MH");
         addressForm.setCountryId("IN");
 
-        /*patches = Arrays.asList(
-                new PatchOperationForm("replace", "/addressLine1", "patched first name"),
-                new PatchOperationForm("replace", "/addressLine2", "patched last name"),
-                new PatchOperationForm("replace", "/name", "patched name"));*/
-
         addressEntity1 = new AddressEntity();
         addressEntity1.setName("default");
         addressEntity1.setAddressLine1("Address 1 First Name");

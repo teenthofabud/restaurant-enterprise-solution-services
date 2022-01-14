@@ -19,7 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 @ToString(onlyExplicitlyIncluded = true)
 @Entity
-@Table(name = "customer_account")
+@Table(name = "account")
 @EntityListeners(AuditingEntityListener.class)
 public class AccountEntity extends TOABBaseEntity implements Comparable<AccountEntity> {
 

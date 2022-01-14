@@ -1,4 +1,4 @@
-create table if not exists customer_account (
+create table if not exists account (
     id identity not null,
     first_name varchar(50) not null,
     last_name varchar(50) not null,
@@ -16,14 +16,14 @@ create table if not exists customer_account (
     constraint pk_customer_account primary key (id),
     constraint uq_customer_account_phone_number unique (phone_number)
 );
-create index if not exists idx_customer_account_name on customer_account(first_name, last_name);
-create index if not exists idx_customer_account_gender_id on customer_account(gender_id);
-create index if not exists idx_customer_account_phone_number on customer_account(phone_number);
-create index if not exists idx_customer_account_country_code on customer_account(country_code);
-create index if not exists idx_customer_account_email_id on customer_account(email_id);
-alter table customer_account alter column id restart with 1;
+create index if not exists idx_customer_account_name on account(first_name, last_name);
+create index if not exists idx_customer_account_gender_id on account(gender_id);
+create index if not exists idx_customer_account_phone_number on account(phone_number);
+create index if not exists idx_customer_account_country_code on account(country_code);
+create index if not exists idx_customer_account_email_id on account(email_id);
+alter table account alter column id restart with 1;
 
-create table if not exists customer_address (
+create table if not exists address (
     id identity not null,
     name varchar(50) default 'default',
     customer_account_id int not null,
@@ -40,12 +40,12 @@ create table if not exists customer_address (
     active_sw boolean default true,
     version int default 0,
     constraint pk_customer_address primary key (id),
-    constraint fk_customer_address_customer_account_id foreign key (customer_account_id) references customer_account(id),
+    constraint fk_customer_address_customer_account_id foreign key (customer_account_id) references account(id),
     constraint uq_customer_address_name_customer_account_id unique (name, customer_account_id)
 );
-create index if not exists idx_customer_address_pincode on customer_address(pincode);
-create index if not exists idx_customer_address_city_id on customer_address(city_id);
-create index if not exists idx_customer_address_state_id on customer_address(state_id);
-create index if not exists idx_customer_address_country_id on customer_address(country_id);
-create index if not exists idx_customer_address_name on customer_address(name);
-alter table customer_address alter column id restart with 1;
+create index if not exists idx_customer_address_pincode on address(pincode);
+create index if not exists idx_customer_address_city_id on address(city_id);
+create index if not exists idx_customer_address_state_id on address(state_id);
+create index if not exists idx_customer_address_country_id on address(country_id);
+create index if not exists idx_customer_address_name on address(name);
+alter table address alter column id restart with 1;

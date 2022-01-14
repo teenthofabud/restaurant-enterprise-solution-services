@@ -95,19 +95,12 @@ public class InventoryServiceHelper {
     }
 
     public Optional<Unit<Mass>> parseWeightCode(String weightCode) {
-        /*Set<Unit<?>> units = Units.getInstance().getUnits();
-        if(units == null || units.isEmpty()) {
-            log.debug("no units available in the system");
-            throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object [] { "no units available in the system" });
-        }*/
         if(StringUtils.isEmpty(StringUtils.trimWhitespace(weightCode))) {
             log.debug("weight code is empty");
             throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object [] { "weight code is empty" });
         }
         Optional<Unit<Mass>> optionalWeight = KG.getSymbol().compareTo(weightCode.toLowerCase()) == 0 ? Optional.of(KG)
                 : G.getSymbol().compareTo(weightCode.toLowerCase()) == 0 ? Optional.of(G) :Optional.empty();
-        /*optionalWeight = units.stream().filter(c -> (c.isCompatible(KG)
-                && c.getSymbol().compareTo(weightCode.toLowerCase()) == 0)).findAny();*/
         return optionalWeight;
     }
 
