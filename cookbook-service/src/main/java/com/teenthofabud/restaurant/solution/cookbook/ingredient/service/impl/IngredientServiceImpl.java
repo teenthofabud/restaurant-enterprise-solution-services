@@ -17,6 +17,7 @@ import com.teenthofabud.restaurant.solution.cookbook.ingredient.data.IngredientE
 import com.teenthofabud.restaurant.solution.cookbook.ingredient.data.IngredientForm;
 import com.teenthofabud.restaurant.solution.cookbook.ingredient.data.IngredientMessageTemplate;
 import com.teenthofabud.restaurant.solution.cookbook.ingredient.data.IngredientVo;
+import com.teenthofabud.restaurant.solution.cookbook.integration.inventory.product.validator.ProductIdValidator;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeException;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeVo;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.service.RecipeService;
@@ -41,7 +42,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
-import org.springframework.validation.Validator;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -76,7 +76,7 @@ public class IngredientServiceImpl implements IngredientService {
     private TOABBaseService toabBaseService;
     private ObjectMapper om;
     private RecipeService recipeService;
-    private Validator productIdValidator;
+    private ProductIdValidator productIdValidator;
     private CookbookServiceHelper cookbookServiceHelper;
 
     @Autowired
@@ -85,7 +85,7 @@ public class IngredientServiceImpl implements IngredientService {
     }
 
     @Autowired
-    public void setProductIdValidator(Validator productIdValidator) {
+    public void setProductIdValidator(ProductIdValidator productIdValidator) {
         this.productIdValidator = productIdValidator;
     }
 
@@ -279,20 +279,29 @@ public class IngredientServiceImpl implements IngredientService {
             matcherCriteria = matcherCriteria.withMatcher("productId", match -> match.exact());
         }
         if(StringUtils.hasText(StringUtils.trimWhitespace(quantityAmount))) {
-            Double psa = null;
+            Double qa = null;
             try {
-                psa = Double.parseDouble(quantityAmount);
+                qa = Double.parseDouble(quantityAmount);
+                if(qa <= 0) {
+                    throw new NumberFormatException("invalid quantity amount: " + qa);
+                }
             } catch (NumberFormatException e) {
                 log.error("quantityAmount is invalid: {}", e);
-                log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_COOKING_TIME_DURATION_INVALID.getValue(), quantityAmount);
+                log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_QUANTITY_AMOUNT_INVALID.getValue(), quantityAmount);
                 throw new IngredientException(CookbookErrorCode.COOK_ATTRIBUTE_INVALID, new Object[] { "quantityAmount", quantityAmount });
             }
             log.debug("quantityAmount {} is valid", quantityAmount);
             providedFilters.put("quantityAmount", quantityAmount);
-            entity.setQuantityAmount(psa);
+            entity.setQuantityAmount(qa);
             matcherCriteria = matcherCriteria.withMatcher("quantityAmount", match -> match.exact());
         }
         if(StringUtils.hasText(StringUtils.trimWhitespace(quantityUnitId))) {
+            if(!cookbookServiceHelper.isWeightCodeValid(quantityUnitId)) {
+                log.error("quantityUnitId is invalid");
+                log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_QUANTITY_UNIT_ID_INVALID.getValue(), quantityUnitId);
+                throw new IngredientException(CookbookErrorCode.COOK_ATTRIBUTE_INVALID, new Object[] { "quantityUnitId", quantityUnitId });
+
+            }
             log.debug("quantityAmount {} is valid", quantityAmount);
             providedFilters.put("quantityUnitId", quantityUnitId);
             entity.setQuantityUnitId(quantityUnitId);
@@ -580,20 +589,6 @@ public class IngredientServiceImpl implements IngredientService {
             log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_NON_EXISTENCE_BY_NAME_AND_RECIPE_ID_AND_PRODUCT_ID.getValue(), name, recipeId, productId);
 
         }
-        /*if(!similaritySwitchesCollection.isEmpty()) {
-            String name = patchedIngredientForm.getName().isPresent() ? patchedIngredientForm.getName().get() : actualEntity.getName();
-            String recipeId = patchedIngredientForm.getRecipeId().isPresent() ? patchedIngredientForm.getRecipeId().get() : actualEntity.getRecipe().getId().toString();
-            String productId = patchedIngredientForm.getProductId().isPresent() ? patchedIngredientForm.getProductId().get() : actualEntity.getProductId();
-            log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_EXISTENCE_BY_NAME_AND_INGREDIENT_ID_AND_PRODUCT_ID.getValue(), name, recipeId, productId);
-            boolean sameEntitySw = similaritySwitchesCollection.stream().allMatch(Boolean::valueOf);
-            boolean duplicateEntitySw =  repository.existsByNameAndRecipeIdAndProductId(name, Long.parseLong(recipeId), productId);
-            if(sameEntitySw || duplicateEntitySw) {
-                log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_EXISTS_BY_NAME_AND_INGREDIENT_ID_AND_PRODUCT_ID.getValue(), name, recipeId, productId);
-                throw new IngredientException(CookbookErrorCode.COOK_EXISTS, new Object[]{ "name: " + name, ", recipeId: " + recipeId + ", productId: " + productId });
-            }
-            log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_NON_EXISTENCE_BY_NAME_AND_INGREDIENT_ID_AND_PRODUCT_ID.getValue(), name, recipeId, productId);
-
-        }*/
     }
 
     private void checkUniquenessOfIngredient(IngredientForm ingredientForm, IngredientEntity actualEntity) throws IngredientException {
@@ -622,175 +617,4 @@ public class IngredientServiceImpl implements IngredientService {
 
         }
     }
-
-    /*private void checkUniquenessOfIngredient(IngredientDto patchedIngredientForm, IngredientEntity actualEntity) throws IngredientException {
-        // name = true, recipeId = true, productId = true
-        if(patchedIngredientForm.getName().isPresent() && patchedIngredientForm.getRecipeId().isPresent() && patchedIngredientForm.getProductId().isPresent()) {
-            log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_EXISTENCE_BY_NAME_AND_INGREDIENT_ID_AND_PRODUCT_ID.getValue(),
-                    patchedIngredientForm.getName().get(), patchedIngredientForm.getRecipeId().get(), patchedIngredientForm.getProductId().get());
-            boolean sameEntitySw = patchedIngredientForm.getName().get().compareTo(actualEntity.getName()) == 0
-                    && patchedIngredientForm.getRecipeId().get().compareTo(actualEntity.getRecipe().getId().toString()) == 0
-                    && patchedIngredientForm.getProductId().get().compareTo(actualEntity.getProductId()) == 0;
-            boolean duplicateEntitySw =  repository.existsByNameAndRecipeIdAndProductId(patchedIngredientForm.getName().get(),
-                    Long.parseLong(patchedIngredientForm.getRecipeId().get()), patchedIngredientForm.getProductId().get());
-            if(sameEntitySw || duplicateEntitySw) {
-                log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_EXISTS_BY_NAME_AND_INGREDIENT_ID_AND_PRODUCT_ID.getValue(),
-                        patchedIngredientForm.getName().get(), patchedIngredientForm.getRecipeId().get(), patchedIngredientForm.getProductId().get());
-                throw new IngredientException(CookbookErrorCode.COOK_EXISTS,
-                        new Object[]{ "name: " + patchedIngredientForm.getName().get(),
-                                ", recipeId: " + patchedIngredientForm.getRecipeId().get() + ", productId: " + patchedIngredientForm.getProductId().get() });
-            }
-            log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_NON_EXISTENCE_BY_NAME_AND_INGREDIENT_ID_AND_PRODUCT_ID.getValue(),
-                    patchedIngredientForm.getName().get(), patchedIngredientForm.getRecipeId().get(), patchedIngredientForm.getProductId().get());
-        }
-
-        // name = true, recipeId = true, productId = false
-        if(patchedIngredientForm.getName().isPresent() && patchedIngredientForm.getRecipeId().isPresent() && patchedIngredientForm.getProductId().isEmpty()) {
-            log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_EXISTENCE_BY_NAME_AND_INGREDIENT_ID_AND_PRODUCT_ID.getValue(),
-                    patchedIngredientForm.getName().get(), patchedIngredientForm.getRecipeId().get(), patchedIngredientForm.getProductId().get());
-            boolean sameEntitySw = patchedIngredientForm.getName().get().compareTo(actualEntity.getName()) == 0
-                    && patchedIngredientForm.getRecipeId().get().compareTo(actualEntity.getRecipe().getId().toString()) == 0
-                    && patchedIngredientForm.getProductId().get().compareTo(actualEntity.getProductId()) == 0;
-            boolean duplicateEntitySw =  repository.existsByNameAndRecipeIdAndProductId(patchedIngredientForm.getName().get(),
-                    Long.parseLong(patchedIngredientForm.getRecipeId().get()), patchedIngredientForm.getProductId().get());
-            if(sameEntitySw || duplicateEntitySw) {
-                log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_EXISTS_BY_NAME_AND_INGREDIENT_ID_AND_PRODUCT_ID.getValue(),
-                        patchedIngredientForm.getName().get(), patchedIngredientForm.getRecipeId().get(), patchedIngredientForm.getProductId().get());
-                throw new IngredientException(CookbookErrorCode.COOK_EXISTS,
-                        new Object[]{ "name: " + patchedIngredientForm.getName().get(),
-                                ", recipeId: " + patchedIngredientForm.getRecipeId().get() + ", productId: " + patchedIngredientForm.getProductId().get() });
-            }
-            log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_NON_EXISTENCE_BY_NAME_AND_INGREDIENT_ID_AND_PRODUCT_ID.getValue(),
-                    patchedIngredientForm.getName().get(), patchedIngredientForm.getRecipeId().get(), patchedIngredientForm.getProductId().get());
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        // name = true, recipeId = false, productId = false
-        if(patchedIngredientForm.getName().isPresent() && patchedIngredientForm.getRecipeId().isEmpty()) {
-            log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_EXISTENCE_BY_NAME_AND_INGREDIENT_ID_AND_PRODUCT_ID.getValue(),
-                    patchedIngredientForm.getName().get(), actualEntity.getRecipe().getId());
-            boolean sameEntitySw = patchedIngredientForm.getName().get().compareTo(actualEntity.getName()) == 0;
-            boolean duplicateEntitySw =  repository.existsByNameAndRecipeId(patchedIngredientForm.getName().get(), actualEntity.getRecipe().getId());
-            if(sameEntitySw || duplicateEntitySw) {
-                log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_EXISTS_BY_NAME_AND_INGREDIENT_ID_AND_PRODUCT_ID.getValue(),
-                        patchedIngredientForm.getName().get(), actualEntity.getRecipe().getId());
-                throw new IngredientException(CookbookErrorCode.COOK_EXISTS,
-                        new Object[]{ "name: " + patchedIngredientForm.getName().get(), ", recipeId: " + actualEntity.getRecipe().getId() });
-            }
-            log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_NON_EXISTENCE_BY_NAME_AND_INGREDIENT_ID_AND_PRODUCT_ID.getValue(),
-                    patchedIngredientForm.getName().get(), actualEntity.getRecipe().getId());
-        }
-
-        // name = true, recipeId = true, productId = false
-        if(patchedIngredientForm.getName().isPresent() && patchedIngredientForm.getRecipeId().isPresent()) {
-            log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_EXISTENCE_BY_NAME_AND_INGREDIENT_ID_AND_PRODUCT_ID.getValue(),
-                    patchedIngredientForm.getName().get(), patchedIngredientForm.getRecipeId().get());
-            boolean sameEntitySw = patchedIngredientForm.getName().get().compareTo(actualEntity.getName().toString()) == 0
-                    && patchedIngredientForm.getRecipeId().get().compareTo(actualEntity.getRecipe().getId().toString()) == 0;
-            boolean duplicateEntitySw =  repository.existsByNameAndRecipeId(patchedIngredientForm.getName().get(),
-                    Long.parseLong(patchedIngredientForm.getRecipeId().get()));
-            if(sameEntitySw || duplicateEntitySw) {
-                log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_EXISTS_BY_NAME_AND_INGREDIENT_ID_AND_PRODUCT_ID.getValue(),
-                        patchedIngredientForm.getName().get(), patchedIngredientForm.getRecipeId().get());
-                throw new IngredientException(CookbookErrorCode.COOK_EXISTS,
-                        new Object[]{ "name: " + patchedIngredientForm.getName().get(), ", recipeId: " + patchedIngredientForm.getRecipeId().get() });
-            }
-            log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_NON_EXISTENCE_BY_NAME_AND_INGREDIENT_ID_AND_PRODUCT_ID.getValue(),
-                    patchedIngredientForm.getName().get(), patchedIngredientForm.getRecipeId().get());
-        }
-
-        // name = false, recipeId = true, productId = true
-        if(patchedIngredientForm.getName().isEmpty() && patchedIngredientForm.getRecipeId().isPresent()) {
-            log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_EXISTENCE_BY_NAME_AND_INGREDIENT_ID_AND_PRODUCT_ID.getValue(),
-                    actualEntity.getName(),  patchedIngredientForm.getRecipeId().get());
-            boolean sameEntitySw = patchedIngredientForm.getRecipeId().get().compareTo(actualEntity.getRecipe().getId().toString()) == 0;
-            boolean duplicateEntitySw =  repository.existsByNameAndRecipeId(
-                    actualEntity.getName(), Long.parseLong(patchedIngredientForm.getRecipeId().get()));
-            if(sameEntitySw || duplicateEntitySw) {
-                log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_EXISTS_BY_NAME_AND_INGREDIENT_ID_AND_PRODUCT_ID.getValue(),
-                        actualEntity.getName(), patchedIngredientForm.getRecipeId().get());
-                throw new IngredientException(CookbookErrorCode.COOK_EXISTS, new Object[]{ "name " + actualEntity.getName(),
-                        ", recipeId: " + patchedIngredientForm.getRecipeId().get() });
-            }
-            log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_NON_EXISTENCE_BY_NAME_AND_INGREDIENT_ID_AND_PRODUCT_ID.getValue(),
-                    actualEntity.getName(),  patchedIngredientForm.getRecipeId().get());
-        }
-    }*/
-
-    /*private void checkUniquenessOfIngredient(IngredientForm ingredientForm, IngredientEntity actualEntity) throws IngredientException {
-        // name = true, recipeId = false
-        if(StringUtils.hasText(StringUtils.trimWhitespace(ingredientForm.getName()))
-                && StringUtils.isEmpty(StringUtils.trimWhitespace(ingredientForm.getRecipeId()))) {
-            log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_EXISTENCE_BY_NAME_AND_INGREDIENT_ID_AND_PRODUCT_ID.getValue(),
-                    ingredientForm.getName(), actualEntity.getRecipe().getId());
-            boolean sameEntitySw = ingredientForm.getName().compareTo(actualEntity.getName()) == 0;
-            boolean duplicateEntitySw =  repository.existsByNameAndRecipeId(
-                    ingredientForm.getName(), actualEntity.getRecipe().getId());
-            if(sameEntitySw || duplicateEntitySw) {
-                log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_EXISTS_BY_NAME_AND_INGREDIENT_ID_AND_PRODUCT_ID.getValue(),
-                        ingredientForm.getName(), actualEntity.getRecipe().getId());
-                throw new IngredientException(CookbookErrorCode.COOK_EXISTS,
-                        new Object[]{ "name: " + ingredientForm.getName(), ", recipeId: " + actualEntity.getRecipe().getId() });
-            }
-            log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_NON_EXISTENCE_BY_NAME_AND_INGREDIENT_ID_AND_PRODUCT_ID.getValue(),
-                    ingredientForm.getName(), actualEntity.getRecipe().getId());
-        }
-
-        // name = true, recipeId = true
-        if(StringUtils.hasText(StringUtils.trimWhitespace(ingredientForm.getName()))
-                && StringUtils.hasText(StringUtils.trimWhitespace(ingredientForm.getRecipeId()))) {
-            log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_EXISTENCE_BY_NAME_AND_INGREDIENT_ID_AND_PRODUCT_ID.getValue(),
-                    ingredientForm.getName(), ingredientForm.getRecipeId());
-            boolean sameEntitySw = ingredientForm.getName().compareTo(actualEntity.getName()) == 0
-                    && ingredientForm.getRecipeId().compareTo(actualEntity.getRecipe().getId().toString()) == 0;
-            boolean duplicateEntitySw =  repository.existsByNameAndRecipeId(ingredientForm.getName(), Long.parseLong(ingredientForm.getRecipeId()));
-            if(sameEntitySw || duplicateEntitySw) {
-                log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_EXISTS_BY_NAME_AND_INGREDIENT_ID_AND_PRODUCT_ID.getValue(),
-                        ingredientForm.getName(), ingredientForm.getRecipeId());
-                throw new IngredientException(CookbookErrorCode.COOK_EXISTS,
-                        new Object[]{ "recipeId: " + ingredientForm.getRecipeId(), ", name: " + ingredientForm.getName() });
-            }
-            log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_NON_EXISTENCE_BY_NAME_AND_INGREDIENT_ID_AND_PRODUCT_ID.getValue(),
-                    ingredientForm.getName(), ingredientForm.getRecipeId());
-        }
-
-        // name = false, recipeId = true
-        if(StringUtils.isEmpty(StringUtils.trimWhitespace(ingredientForm.getName()))
-                && StringUtils.hasText(StringUtils.trimWhitespace(ingredientForm.getRecipeId()))) {
-            log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_EXISTENCE_BY_NAME_AND_INGREDIENT_ID_AND_PRODUCT_ID.getValue(),
-                    actualEntity.getName(),  ingredientForm.getRecipeId());
-            boolean sameEntitySw = ingredientForm.getName().compareTo(actualEntity.getName()) == 0
-                    && ingredientForm.getRecipeId().compareTo(actualEntity.getRecipe().getId().toString()) == 0;
-            boolean duplicateEntitySw =  repository.existsByNameAndRecipeId(actualEntity.getName(), Long.parseLong(ingredientForm.getRecipeId()));
-            if(sameEntitySw || duplicateEntitySw) {
-                log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_EXISTS_BY_NAME_AND_INGREDIENT_ID_AND_PRODUCT_ID.getValue(),
-                        actualEntity.getName(),  ingredientForm.getRecipeId());
-                throw new IngredientException(CookbookErrorCode.COOK_EXISTS, new Object[]{ "name: " + actualEntity.getName(),
-                        ", recipeId: " + ingredientForm.getRecipeId() });
-            }
-            log.debug(IngredientMessageTemplate.MSG_TEMPLATE_INGREDIENT_NON_EXISTENCE_BY_NAME_AND_INGREDIENT_ID_AND_PRODUCT_ID.getValue(),
-                    actualEntity.getName(),  ingredientForm.getRecipeId());
-        }
-    }*/
-
 }

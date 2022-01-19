@@ -57,12 +57,12 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
 
     private CuisineRepository cuisineRepository;
 
-    private int menuServicePort;
+    private int integrationServicePort;
     private RecipeRepository recipeRepository;
 
-    @Value("${cookbook.menu.service.port}")
-    public void setMenuServicePort(int menuServicePort) {
-        this.menuServicePort = menuServicePort;
+    @Value("${cookbook.integration.service.port}")
+    public void setIntegrationServicePort(int integrationServicePort) {
+        this.integrationServicePort = integrationServicePort;
     }
 
     @Autowired
@@ -1055,7 +1055,7 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
 
     @Override
     public Integer getServicePort() {
-        return this.menuServicePort;
+        return this.integrationServicePort;
     }
 
     @Override

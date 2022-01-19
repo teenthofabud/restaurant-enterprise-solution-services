@@ -20,14 +20,11 @@ public enum IngredientMessageTemplate {
     MSG_TEMPLATE_INGREDIENT_EXISTENCE_BY_PRODUCT_ID ("Checking existence of Ingredient Entity with product id: {}"),
     MSG_TEMPLATE_INGREDIENT_EXISTS_BY_PRODUCT_ID ("Ingredient Entity already exists with product id: {}"),
     MSG_TEMPLATE_INGREDIENT_NON_EXISTENCE_BY_PRODUCT_ID ("No Ingredient Entity exists with product id: {}"),
-
     MSG_TEMPLATE_INGREDIENT_EXISTENCE_BY_NAME_AND_RECIPE_ID_AND_PRODUCT_ID ("Checking existence of Ingredient Entity with name: {} and recipe id: {} and product id: {}"),
     MSG_TEMPLATE_INGREDIENT_EXISTS_BY_NAME_AND_RECIPE_ID_AND_PRODUCT_ID ("Ingredient Entity already exists with name: {} and recipe id: {} and product id: {}"),
     MSG_TEMPLATE_INGREDIENT_NON_EXISTENCE_BY_NAME_AND_RECIPE_ID_AND_PRODUCT_ID ("No Ingredient Entity exists with name: {} and recipe id: {} and product id: {}"),
-
-    MSG_TEMPLATE_INGREDIENT_PREPARATION_TIME_DURATION_INVALID("ingredient preparationTimeDuration: {} is invalid"),
-    MSG_TEMPLATE_INGREDIENT_COOKING_TIME_DURATION_INVALID("ingredient cookingTimeDuration: {} is invalid"),
-    MSG_TEMPLATE_INGREDIENT_PORTION_SIZE_AMOUNT_INVALID("ingredient portionSizeAmount: {} is invalid");
+    MSG_TEMPLATE_INGREDIENT_QUANTITY_AMOUNT_INVALID("ingredient quantity Amount: {} is invalid"),
+    MSG_TEMPLATE_INGREDIENT_QUANTITY_UNIT_ID_INVALID("ingredient quantity unit id: {} is invalid");
     private String value;
 
     private IngredientMessageTemplate(String value) {

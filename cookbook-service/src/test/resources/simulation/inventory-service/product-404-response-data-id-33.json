@@ -1,6 +1,6 @@
 {
-  "code":"TOAB-META-002",
+  "code":"RES-INVENTORY-002",
   "message":"resource unavailable with id 33",
-  "domain":"Metadata - Gender",
+  "domain":"Inventory - Product",
   "trace":"d4e3f6"
 }

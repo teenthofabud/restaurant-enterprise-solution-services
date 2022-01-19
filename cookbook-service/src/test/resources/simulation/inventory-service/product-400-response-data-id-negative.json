@@ -1,6 +1,6 @@
 {
-  "code":"TOAB-META-001",
+  "code":"RES-INVENTORY-001",
   "message":"resource attribute id is invalid",
-  "domain":"Metadata - Gender",
+  "domain":"Inventory - Product",
   "trace":"v5b6n7"
 }

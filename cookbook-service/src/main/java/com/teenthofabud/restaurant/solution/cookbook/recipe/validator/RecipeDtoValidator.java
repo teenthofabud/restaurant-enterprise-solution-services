@@ -124,11 +124,11 @@ public class RecipeDtoValidator implements Validator {
         }
 
         Optional<String> optPreparationTimeUnitId = dto.getPreparationTimeUnitId();
-        if(!fieldsToEscape.contains("preparationTimeUnitId") && optPreparationTimeDuration.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optPreparationTimeDuration.get()))) {
+        if(!fieldsToEscape.contains("preparationTimeUnitId") && optPreparationTimeUnitId.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optPreparationTimeUnitId.get()))) {
             errors.rejectValue("preparationTimeUnitId", CookbookErrorCode.COOK_ATTRIBUTE_INVALID.name());
             log.debug("RecipeDto.preparationTimeUnitId is empty");
             return;
-        } else if(!fieldsToEscape.contains("preparationTimeUnitId") && optPreparationTimeDuration.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optPreparationTimeDuration.get()))) {
+        } else if(!fieldsToEscape.contains("preparationTimeUnitId") && optPreparationTimeUnitId.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optPreparationTimeUnitId.get()))) {
             if(!cookbookServiceHelper.isTimeIdValid(optPreparationTimeUnitId.get())) {
                 log.debug("RecipeDto.preparationTimeUnitId is invalid");
                 errors.rejectValue("preparationTimeUnitId", CookbookErrorCode.COOK_ATTRIBUTE_INVALID.name());

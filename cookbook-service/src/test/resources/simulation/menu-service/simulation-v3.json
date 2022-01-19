@@ -117,6 +117,43 @@
           "path": [
             {
               "matcher": "exact",
+              "value": "/menu/item/22"
+            }
+          ],
+          "method": [
+            {
+              "matcher": "exact",
+              "value": "GET"
+            }
+          ],
+          "destination": [
+            {
+              "matcher": "exact",
+              "value": "*"
+            }
+          ],
+          "scheme": [
+            {
+              "matcher": "exact",
+              "value": "http"
+            }
+          ]
+        },
+        "response": {
+          "status": 200,
+          "bodyFile": "item-200-response-data-id-22.json",
+          "encodedBody": false,
+          "headers": {
+            "Content-Type": ["application/json"]
+          },
+          "templated": false
+        }
+      },
+      {
+        "request": {
+          "path": [
+            {
+              "matcher": "exact",
               "value": "/menu/item/(\\s)+"
             }
           ],

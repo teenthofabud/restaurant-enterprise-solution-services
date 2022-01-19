@@ -254,12 +254,18 @@ public class RecipeServiceImpl implements RecipeService {
         String cookingTimeUnitId = optionalCookingTimeUnitId.isPresent() ? optionalCookingTimeUnitId.get() : "";
         String portionSizeAmount = optionalPortionSizeAmount.isPresent() ? optionalPortionSizeAmount.get() : "";
         String portionSizeUnitId = optionalPortionSizeUnitId.isPresent() ? optionalPortionSizeUnitId.get() : "";
-        if(StringUtils.isEmpty(StringUtils.trimWhitespace(name)) && StringUtils.isEmpty(StringUtils.trimWhitespace(description))
-                && StringUtils.isEmpty(StringUtils.trimWhitespace(instructions)) && StringUtils.isEmpty(StringUtils.trimWhitespace(cookingMethod))
-                && StringUtils.isEmpty(StringUtils.trimWhitespace(itemId)) && StringUtils.isEmpty(StringUtils.trimWhitespace(preparationTimeDuration))
-                && StringUtils.isEmpty(StringUtils.trimWhitespace(preparationTimeUnitId)) && StringUtils.isEmpty(StringUtils.trimWhitespace(cookingTimeDuration))
-                && StringUtils.isEmpty(StringUtils.trimWhitespace(cookingTimeUnitId)) && StringUtils.isEmpty(StringUtils.trimWhitespace(portionSizeAmount))
-                && StringUtils.isEmpty(StringUtils.trimWhitespace(portionSizeUnitId)) && StringUtils.isEmpty(StringUtils.trimWhitespace(numberOfServings))) {
+        if(StringUtils.isEmpty(StringUtils.trimWhitespace(name))
+                && StringUtils.isEmpty(StringUtils.trimWhitespace(description))
+                && StringUtils.isEmpty(StringUtils.trimWhitespace(instructions))
+                && StringUtils.isEmpty(StringUtils.trimWhitespace(cookingMethod))
+                && StringUtils.isEmpty(StringUtils.trimWhitespace(numberOfServings))
+                && StringUtils.isEmpty(StringUtils.trimWhitespace(itemId))
+                && StringUtils.isEmpty(StringUtils.trimWhitespace(preparationTimeDuration))
+                && StringUtils.isEmpty(StringUtils.trimWhitespace(preparationTimeUnitId))
+                && StringUtils.isEmpty(StringUtils.trimWhitespace(cookingTimeDuration))
+                && StringUtils.isEmpty(StringUtils.trimWhitespace(cookingTimeUnitId))
+                && StringUtils.isEmpty(StringUtils.trimWhitespace(portionSizeAmount))
+                && StringUtils.isEmpty(StringUtils.trimWhitespace(portionSizeUnitId))) {
             log.debug("All search parameters are empty");
         }
         List<RecipeVo> matchedRecipeList = new LinkedList<>();
@@ -307,6 +313,9 @@ public class RecipeServiceImpl implements RecipeService {
             Integer nos = null;
             try {
                 nos = Integer.parseInt(numberOfServings);
+                if(nos <= 0) {
+                    throw new NumberFormatException("invalid numberOfServings: " + nos);
+                }
             } catch (NumberFormatException e) {
                 log.error("numberOfServings is invalid: {}", e);
                 log.debug(RecipeMessageTemplate.MSG_TEMPLATE_RECIPE_PREPARATION_TIME_DURATION_INVALID.getValue(), numberOfServings);
@@ -321,6 +330,9 @@ public class RecipeServiceImpl implements RecipeService {
             Double ptd = null;
             try {
                 ptd = Double.parseDouble(preparationTimeDuration);
+                if(ptd <= 0) {
+                    throw new NumberFormatException("invalid preparationTimeDuration: " + ptd);
+                }
             } catch (NumberFormatException e) {
                 log.error("preparationTimeDuration is invalid: {}", e);
                 log.debug(RecipeMessageTemplate.MSG_TEMPLATE_RECIPE_PREPARATION_TIME_DURATION_INVALID.getValue(), preparationTimeDuration);
@@ -346,8 +358,11 @@ public class RecipeServiceImpl implements RecipeService {
             Double ctd = null;
             try {
                 ctd = Double.parseDouble(cookingTimeDuration);
+                if(ctd <= 0) {
+                    throw new NumberFormatException("invalid cookingTimeDuration: " + ctd);
+                }
             } catch (NumberFormatException e) {
-                log.error("preparationTimeDuration is invalid: {}", e);
+                log.error("cookingTimeDuration is invalid: {}", e);
                 log.debug(RecipeMessageTemplate.MSG_TEMPLATE_RECIPE_COOKING_TIME_DURATION_INVALID.getValue(), cookingTimeDuration);
                 throw new RecipeException(CookbookErrorCode.COOK_ATTRIBUTE_INVALID, new Object[] { "cookingTimeDuration", cookingTimeDuration });
             }
@@ -371,6 +386,9 @@ public class RecipeServiceImpl implements RecipeService {
             Double psa = null;
             try {
                 psa = Double.parseDouble(portionSizeAmount);
+                if(psa <= 0) {
+                    throw new NumberFormatException("invalid portionSizeAmount: " + psa);
+                }
             } catch (NumberFormatException e) {
                 log.error("portionSizeAmount is invalid: {}", e);
                 log.debug(RecipeMessageTemplate.MSG_TEMPLATE_RECIPE_COOKING_TIME_DURATION_INVALID.getValue(), portionSizeAmount);
@@ -382,7 +400,7 @@ public class RecipeServiceImpl implements RecipeService {
             matcherCriteria = matcherCriteria.withMatcher("portionSizeAmount", match -> match.exact());
         }
         if(StringUtils.hasText(StringUtils.trimWhitespace(portionSizeUnitId))) {
-            if(!cookbookServiceHelper.isTimeIdValid(portionSizeUnitId)) {
+            if(!cookbookServiceHelper.isWeightCodeValid(portionSizeUnitId)) {
                 log.error("portionSizeUnitId is invalid");
                 log.debug(RecipeMessageTemplate.MSG_TEMPLATE_RECIPE_PREPARATION_TIME_UNIT_ID_INVALID.getValue(), portionSizeUnitId);
                 throw new RecipeException(CookbookErrorCode.COOK_ATTRIBUTE_INVALID, new Object[] { "portionSizeUnitId", portionSizeUnitId });

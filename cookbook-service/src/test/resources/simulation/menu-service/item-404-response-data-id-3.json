@@ -1,6 +1,6 @@
 {
-  "code":"TOAB-META-002",
+  "code":"RES-MENU-002",
   "message":"resource unavailable with id 3",
-  "domain":"Metadata - Gender",
+  "domain":"Menu - Item",
   "trace":"b2c3d4"
 }
