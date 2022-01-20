@@ -16,6 +16,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>cookbook-service</module>
         <module>customer-service</module>
         <module>establishment-area-service</module>
         <module>inventory-service</module>

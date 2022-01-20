@@ -1,0 +1,274 @@
+{
+  "data": {
+    "pairs": [
+      {
+        "request": {
+          "path": [
+            {
+              "matcher": "exact",
+              "value": "/inventory/product/1"
+            }
+          ],
+          "method": [
+            {
+              "matcher": "exact",
+              "value": "GET"
+            }
+          ],
+          "destination": [
+            {
+              "matcher": "exact",
+              "value": "*"
+            }
+          ],
+          "scheme": [
+            {
+              "matcher": "exact",
+              "value": "http"
+            }
+          ]
+        },
+        "response": {
+          "status": 200,
+          "bodyFile": "product-200-response-data-id-1.json",
+          "encodedBody": false,
+          "headers": {
+            "Content-Type": ["application/json"]
+          },
+          "templated": false
+        }
+      },
+      {
+        "request": {
+          "path": [
+            {
+              "matcher": "exact",
+              "value": "/inventory/product/2"
+            }
+          ],
+          "method": [
+            {
+              "matcher": "exact",
+              "value": "GET"
+            }
+          ],
+          "destination": [
+            {
+              "matcher": "exact",
+              "value": "*"
+            }
+          ],
+          "scheme": [
+            {
+              "matcher": "exact",
+              "value": "http"
+            }
+          ]
+        },
+        "response": {
+          "status": 200,
+          "bodyFile": "product-200-response-data-id-2.json",
+          "encodedBody": false,
+          "headers": {
+            "Content-Type": ["application/json"]
+          },
+          "templated": false
+        }
+      },
+      {
+        "request": {
+          "path": [
+            {
+              "matcher": "exact",
+              "value": "/inventory/product/4"
+            }
+          ],
+          "method": [
+            {
+              "matcher": "exact",
+              "value": "GET"
+            }
+          ],
+          "destination": [
+            {
+              "matcher": "exact",
+              "value": "*"
+            }
+          ],
+          "scheme": [
+            {
+              "matcher": "exact",
+              "value": "http"
+            }
+          ]
+        },
+        "response": {
+          "status": 200,
+          "bodyFile": "product-200-response-data-id-4.json",
+          "encodedBody": false,
+          "headers": {
+            "Content-Type": ["application/json"]
+          },
+          "templated": false
+        }
+      },
+      {
+        "request": {
+          "path": [
+            {
+              "matcher": "exact",
+              "value": "/inventory/product/(\\s)+"
+            }
+          ],
+          "method": [
+            {
+              "matcher": "exact",
+              "value": "GET"
+            }
+          ],
+          "destination": [
+            {
+              "matcher": "exact",
+              "value": "*"
+            }
+          ],
+          "scheme": [
+            {
+              "matcher": "exact",
+              "value": "http"
+            }
+          ]
+        },
+        "response": {
+          "status": 400,
+          "bodyFile": "product-400-response-data-id-whitespace.json",
+          "encodedBody": false,
+          "headers": {
+            "Content-Type": ["application/problem+json"]
+          },
+          "templated": false
+        }
+      },
+      {
+        "request": {
+          "path": [
+            {
+              "matcher": "exact",
+              "value": "/inventory/product/3"
+            }
+          ],
+          "method": [
+            {
+              "matcher": "exact",
+              "value": "GET"
+            }
+          ],
+          "destination": [
+            {
+              "matcher": "exact",
+              "value": "*"
+            }
+          ],
+          "scheme": [
+            {
+              "matcher": "exact",
+              "value": "http"
+            }
+          ]
+        },
+        "response": {
+          "status": 404,
+          "bodyFile": "product-404-response-data-id-3.json",
+          "encodedBody": false,
+          "headers": {
+            "Content-Type": ["application/problem+json"]
+          },
+          "templated": false
+        }
+      },
+      {
+        "request": {
+          "path": [
+            {
+              "matcher": "exact",
+              "value": "/inventory/product/r"
+            }
+          ],
+          "method": [
+            {
+              "matcher": "exact",
+              "value": "GET"
+            }
+          ],
+          "destination": [
+            {
+              "matcher": "exact",
+              "value": "*"
+            }
+          ],
+          "scheme": [
+            {
+              "matcher": "exact",
+              "value": "http"
+            }
+          ]
+        },
+        "response": {
+          "status": 400,
+          "bodyFile": "product-400-response-data-id-alphanumeric.json",
+          "encodedBody": false,
+          "headers": {
+            "Content-Type": ["application/problem+json"]
+          },
+          "templated": false
+        }
+      },
+      {
+        "request": {
+          "path": [
+            {
+              "matcher": "exact",
+              "value": "/inventory/product/33"
+            }
+          ],
+          "method": [
+            {
+              "matcher": "exact",
+              "value": "GET"
+            }
+          ],
+          "destination": [
+            {
+              "matcher": "exact",
+              "value": "*"
+            }
+          ],
+          "scheme": [
+            {
+              "matcher": "exact",
+              "value": "http"
+            }
+          ]
+        },
+        "response": {
+          "status": 404,
+          "bodyFile": "product-404-response-data-id-33.json",
+          "encodedBody": false,
+          "headers": {
+            "Content-Type": ["application/problem+json"]
+          },
+          "templated": false
+        }
+      }
+    ],
+    "globalActions": {
+      "delays": [],
+      "delaysLogNormal": []
+    }
+  },
+  "meta": {
+    "schemaVersion": "v5",
+    "hoverflyVersion": "v1.3.1",
+    "timeExported": "2019-05-30T22:14:24+01:00"
+  }
+}

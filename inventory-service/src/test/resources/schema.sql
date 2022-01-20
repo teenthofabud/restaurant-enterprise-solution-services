@@ -12,6 +12,7 @@ create table if not exists category (
     constraint uq_inventory_category_name unique (name)
 );
 create index if not exists idx_inventory_category_name on category(name);
+alter table category alter column id restart with 1;
 
 create table if not exists product (
     id identity not null,
@@ -30,6 +31,7 @@ create table if not exists product (
     constraint uq_inventory_product_inventory_category_id_name unique (inventory_category_id, name)
 );
 create index if not exists idx_inventory_product_name on product(name);
+alter table product alter column id restart with 1;
 
 create table if not exists quantity (
     id identity not null,
@@ -42,7 +44,8 @@ create table if not exists quantity (
     modified_by int,
     active_sw boolean default true,
     version int default 0,
-    constraint pk_inventory_product_quantity primary key (id),
-    constraint fk_inventory_product_quantity_inventory_product foreign key (inventory_product_id) references product(id)
+    constraint pk_inventory_quantity primary key (id),
+    constraint fk_inventory_quantity_inventory_product foreign key (inventory_product_id) references product(id)
 );
-create index if not exists idx_inventory_product_quantity_weight_id on quantity(weight_id);
+create index if not exists idx_inventory_quantity_weight_id on quantity(weight_id);
+alter table quantity alter column id restart with 1;

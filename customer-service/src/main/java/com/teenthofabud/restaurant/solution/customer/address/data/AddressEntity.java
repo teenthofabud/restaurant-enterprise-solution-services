@@ -13,7 +13,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @ToString(onlyExplicitlyIncluded = true)
 @Entity
-@Table(name = "customer_address")
+@Table(name = "address")
 @EntityListeners(AuditingEntityListener.class)
 public class AddressEntity extends TOABBaseEntity implements Comparable<AddressEntity> {
 

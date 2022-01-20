@@ -1,4 +1,4 @@
-create table if not exists menu_category (
+create table if not exists category (
     id identity not null,
     name varchar(50) not null,
     description varchar(200),
@@ -11,9 +11,10 @@ create table if not exists menu_category (
     constraint pk_menu_category primary key (id),
     constraint uq_menu_category_name unique (name)
 );
-create index if not exists idx_menu_category_name on menu_category(name);
+create index if not exists idx_menu_category_name on category(name);
+alter table category alter column id restart with 1;
 
-create table if not exists menu_item (
+create table if not exists item (
     id identity not null,
     menu_category_id int not null,
     name varchar(50) not null,
@@ -27,12 +28,13 @@ create table if not exists menu_item (
     active_sw boolean default true,
     version int default 0,
     constraint pk_menu_item primary key (id),
-    constraint fk_menu_item_menu_category foreign key (menu_category_id) references menu_category(id),
+    constraint fk_menu_item_menu_category foreign key (menu_category_id) references category(id),
     constraint uq_menu_item_menu_category_id_name unique (menu_category_id, name)
 );
-create index if not exists idx_menu_item_name on menu_item(name);
+create index if not exists idx_menu_item_name on item(name);
+alter table item alter column id restart with 1;
 
-create table if not exists menu_item_price (
+create table if not exists price (
     id identity not null,
     menu_item_id int not null,
     currency_id varchar(50) not null,
@@ -43,7 +45,8 @@ create table if not exists menu_item_price (
     modified_by int,
     active_sw boolean default true,
     version int default 0,
-    constraint pk_menu_item_price primary key (id),
-    constraint fk_menu_item_price_menu_item foreign key (menu_item_id) references menu_item(id)
+    constraint pk_menu_price primary key (id),
+    constraint fk_menu_price_menu_item foreign key (menu_item_id) references item(id)
 );
-create index if not exists idx_menu_item_price_currency_id on menu_item_price(currency_id);
+create index if not exists idx_menu_price_currency_id on price(currency_id);
+alter table price alter column id restart with 1;
