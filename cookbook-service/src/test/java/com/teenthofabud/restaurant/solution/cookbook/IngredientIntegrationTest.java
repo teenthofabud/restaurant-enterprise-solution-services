@@ -1,5 +1,6 @@
 package com.teenthofabud.restaurant.solution.cookbook;
 
+import com.teenthofabud.core.common.constant.TOABCascadeLevel;
 import com.teenthofabud.core.common.data.form.PatchOperationForm;
 import com.teenthofabud.core.common.data.vo.ErrorVo;
 import com.teenthofabud.core.common.error.TOABErrorCode;
@@ -31,6 +32,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -1607,6 +1609,108 @@ public class IngredientIntegrationTest extends CookbookIntegrationBaseTest {
      */
 
     @Test
+    public void test_Ingredient_Get_ShouldReturn_200Response_And_IngredientDetails_WhenRequested_ById() throws Exception {
+        String id = ingredientEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        ingredientVo1.setRecipe(null);
+
+        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_BY_ID, id))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(om.writeValueAsString(ingredientVo1), mvcResult.getResponse().getContentAsString());
+        Assertions.assertEquals(ingredientVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getId());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { " ", "r" })
+    public void test_Ingredient_Get_ShouldReturn_400Response_And_ErrorCode_RES_COOK_001_WhenRequestedBy_EmptyInvalidId(String id) throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = CookbookErrorCode.COOK_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "id";
+
+        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_BY_ID, id))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+    }
+
+    @Test
+    public void test_Ingredient_Get_ShouldReturn_400Response_And_ErrorCode_RES_COOK_002_WhenRequested_ByAbsentId() throws Exception {
+        String id = "55";
+        MvcResult mvcResult = null;
+        String errorCode = CookbookErrorCode.COOK_NOT_FOUND.getErrorCode();
+        String fieldName = "id";
+
+        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_BY_ID, id))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+    }
+
+    @Test
+    public void test_Ingredient_Get_ShouldReturn_200Response_And_DomainDetails_WhenRequested_ById_AndFirstLevel_Cascade() throws Exception {
+        String id = ingredientEntity1.getId().toString();
+        MvcResult mvcResult = null;
+
+        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_BY_ID, id)
+                        .queryParam("cascadeUntilLevel", TOABCascadeLevel.ONE.getLevelCode()))
+                .andDo(print())
+                .andReturn();
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(ingredientVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getId());
+        Assertions.assertEquals(ingredientVo1.getName(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getName());
+        Assertions.assertEquals(ingredientVo1.getDescription(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getDescription());
+        Assertions.assertEquals(ingredientVo1.getProductId(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getProductId());
+        Assertions.assertEquals(ingredientVo1.getRecipeId(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getRecipeId());
+        Assertions.assertEquals(ingredientVo1.getQuantity(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getQuantity());
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getCreatedBy()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getModifiedBy()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getCreatedOn()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getModifiedOn()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getActive()));
+    }
+
+    @Test
+    public void test_Ingredient_Get_ShouldReturn_200Response_And_DomainDetails_WhenRequested_ById_AndSecondLevel_Cascade() throws Exception {
+        String id = ingredientEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        ingredientVo1.setProduct(productVo1);
+        ingredientVo1.setRecipe(recipeVo1);
+
+        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_BY_ID, id)
+                        .queryParam("cascadeUntilLevel", TOABCascadeLevel.TWO.getLevelCode()))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(ingredientVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getId());
+        Assertions.assertEquals(ingredientVo1.getName(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getName());
+        Assertions.assertEquals(ingredientVo1.getDescription(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getDescription());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getProduct() != null);
+        Assertions.assertEquals(ingredientVo1.getProduct().getId(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getProduct().getId());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getRecipe() != null);
+        Assertions.assertEquals(ingredientVo1.getRecipe().getId(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getRecipe().getId());
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getCreatedBy()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getModifiedBy()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getCreatedOn()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getModifiedOn()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getActive()));
+    }
+
+    @Test
     public void test_Ingredient_Get_ShouldReturn_200Response_And_IngredientListNaturallyOrdered_WhenRequested_ForIngredients_ByRecipeId() throws Exception {
         MvcResult mvcResult = null;
 
@@ -1933,71 +2037,7 @@ public class IngredientIntegrationTest extends CookbookIntegrationBaseTest {
 
     // 00000000000000000000000000000000000
 
-    /*@Test
-    public void test_Ingredient_Get_ShouldReturn_200Response_And_EmptyIngredientList_WhenRequestedBy_AbsentDescriptionName() throws Exception {
-        MvcResult mvcResult = null;
-
-        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_FILTER).queryParam("description", "Hey"))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(0, om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo[].class).length);
-    }
-
-    @Test
-    public void test_Ingredient_Get_ShouldReturn_200Response_And_EmptyIngredientList_WhenRequestedBy_AbsentInstructions() throws Exception {
-        MvcResult mvcResult = null;
-
-        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_FILTER).queryParam("instructions", "Hey"))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(0, om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo[].class).length);
-    }
-
-    @Test
-    public void test_Ingredient_Get_ShouldReturn_200Response_And_EmptyIngredientList_WhenRequestedBy_AbsentProductId() throws Exception {
-        MvcResult mvcResult = null;
-
-        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_FILTER).queryParam("productId", "Hey"))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(0, om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo[].class).length);
-    }
-
-    @Test
-    public void test_Ingredient_Get_ShouldReturn_200Response_And_EmptyIngredientList_WhenRequestedBy_AbsentCuisineId() throws Exception {
-        MvcResult mvcResult = null;
-
-        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_FILTER).queryParam("cuisineId", "Hey"))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(0, om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo[].class).length);
-    }
-
-    @Test
-    public void test_Ingredient_Get_ShouldReturn_200Response_And_EmptyIngredientList_WhenRequestedBy_AbsentCookingMethod() throws Exception {
-        MvcResult mvcResult = null;
-
-        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_FILTER).queryParam("cookingMethod", "Hey"))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(0, om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo[].class).length);
-    }
-
+    /*
 
     @Test
     public void test_Ingredient_Get_ShouldReturn_200Response_And_IngredientListNaturallyOrdered_WhenRequested_ForIngredients_WithDescription() throws Exception {
@@ -2235,116 +2275,6 @@ public class IngredientIntegrationTest extends CookbookIntegrationBaseTest {
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(ingredientList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo[].class).length);
-    }
-
-    @Test
-    public void test_Ingredient_Get_ShouldReturn_200Response_And_IngredientDetails_WhenRequested_ById() throws Exception {
-        String id = ingredientEntity1.getId().toString();
-        MvcResult mvcResult = null;
-        ingredientVo1.setCuisine(null);
-
-        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_BY_ID, id))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(om.writeValueAsString(ingredientVo1), mvcResult.getResponse().getContentAsString());
-        Assertions.assertEquals(ingredientVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getId());
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = { " ", "r" })
-    public void test_Ingredient_Get_ShouldReturn_400Response_And_ErrorCode_RES_COOK_001_WhenRequestedBy_EmptyInvalidId(String id) throws Exception {
-        MvcResult mvcResult = null;
-        String errorCode = CookbookErrorCode.COOK_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "id";
-
-        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_BY_ID, id))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-    }
-
-    @Test
-    public void test_Ingredient_Get_ShouldReturn_400Response_And_ErrorCode_RES_COOK_002_WhenRequested_ByAbsentId() throws Exception {
-        String id = "55";
-        MvcResult mvcResult = null;
-        String errorCode = CookbookErrorCode.COOK_NOT_FOUND.getErrorCode();
-        String fieldName = "id";
-
-        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_BY_ID, id))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-    }
-
-    @Test
-    public void test_Ingredient_Get_ShouldReturn_200Response_And_DomainDetails_WhenRequested_ById_AndFirstLevel_Cascade() throws Exception {
-        String id = ingredientEntity1.getId().toString();
-        MvcResult mvcResult = null;
-
-        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_BY_ID, id)
-                        .queryParam("cascadeUntilLevel", TOABCascadeLevel.ONE.getLevelCode()))
-                .andDo(print())
-                .andReturn();
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(ingredientVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getId());
-        Assertions.assertEquals(ingredientVo1.getDescription(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getDescription());
-        Assertions.assertEquals(ingredientVo1.getInstructions(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getInstructions());
-        Assertions.assertEquals(ingredientVo1.getInstructions(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getInstructions());
-        Assertions.assertEquals(ingredientVo1.getProductId(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getProductId());
-        Assertions.assertEquals(ingredientVo1.getCuisineId(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getCuisineId());
-        Assertions.assertEquals(ingredientVo1.getCookingMethod(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getCookingMethod());
-        Assertions.assertEquals(ingredientVo1.getCuisineId(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getCuisineId());
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getCreatedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getModifiedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getCreatedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getModifiedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getActive()));
-    }
-
-    @Test
-    public void test_Ingredient_Get_ShouldReturn_200Response_And_DomainDetails_WhenRequested_ById_AndSecondLevel_Cascade() throws Exception {
-        String id = ingredientEntity1.getId().toString();
-        MvcResult mvcResult = null;
-        ingredientVo1.setCity(cityVo);
-        ingredientVo1.setState(stateVo);
-        ingredientVo1.setCountry(countryVo);
-
-        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_BY_ID, id)
-                        .queryParam("cascadeUntilLevel", TOABCascadeLevel.TWO.getLevelCode()))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(ingredientVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getId());
-        Assertions.assertEquals(ingredientVo1.getDescription(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getDescription());
-        Assertions.assertEquals(ingredientVo1.getInstructions(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getInstructions());
-        Assertions.assertEquals(ingredientVo1.getInstructions(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getInstructions());
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getCity() != null);
-        Assertions.assertEquals(ingredientVo1.getCity().getId(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getCity().getId());
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getState() != null);
-        Assertions.assertEquals(ingredientVo1.getState().getId(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getState().getId());
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getCountry() != null);
-        Assertions.assertEquals(ingredientVo1.getCountry().getId(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getCountry().getId());
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getCuisine() != null);
-        Assertions.assertEquals(ingredientVo1.getCuisine().getId(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getCuisine().getId());
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getCreatedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getModifiedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getCreatedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getModifiedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getActive()));
     }
 
     */
