@@ -2151,7 +2151,7 @@ public class RecipeIntegrationTest extends CookbookIntegrationBaseTest {
      */
 
     @Test
-    public void test_Recipe_Get_ShouldReturn_200Response_And_IngredientDetails_WhenRequested_ById() throws Exception {
+    public void test_Recipe_Get_ShouldReturn_200Response_And_RecipeDetails_WhenRequested_ById() throws Exception {
         String id = recipeEntity1.getId().toString();
         MvcResult mvcResult = null;
         recipeVo1.setCuisine(null);
@@ -2163,7 +2163,7 @@ public class RecipeIntegrationTest extends CookbookIntegrationBaseTest {
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(om.writeValueAsString(recipeVo1), mvcResult.getResponse().getContentAsString());
-        Assertions.assertEquals(recipeVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getId());
+        Assertions.assertEquals(recipeVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), RecipeVo.class).getId());
     }
 
     @ParameterizedTest
