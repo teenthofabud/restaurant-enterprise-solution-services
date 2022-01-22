@@ -22,6 +22,7 @@
         <module>inventory-service</module>
         <module>menu-service</module>
         <module>settings-service</module>
+        <module>session-service</module>
     </modules>
 
     <properties>

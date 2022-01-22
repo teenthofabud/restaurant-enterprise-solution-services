@@ -33,7 +33,7 @@ import java.util.Set;
 @RestController
 @RequestMapping("discount")
 @Slf4j
-@Tag(name = "Discount API", description = "Manage Payment Methods and their details")
+@Tag(name = "Discount API", description = "Manage Discounts and their details")
 public class DiscountController {
 
     private static final String MEDIA_SETTINGS_APPLICATION_JSON_PATCH = "application/json-patch+json";
@@ -165,39 +165,39 @@ public class DiscountController {
 
     @Operation(summary = "Get all Discount details")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Retrieve all available Payment Methods and their details ordered by first name, last name",
+            @ApiResponse(responseCode = "200", description = "Retrieve all available Discounts and their details ordered by first name, last name",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = DiscountVo.class))) })
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
     public Set<DiscountVo> getAllDiscountNaturallyOrdered() {
-        log.debug("Requesting all available payment methods by their natural orders");
+        log.debug("Requesting all available discounts by their natural orders");
         Set<DiscountVo> naturallyOrderedDiscounts = service.retrieveAllByNaturalOrdering();
-        log.debug("Responding with all available payment methods by their natural orders");
+        log.debug("Responding with all available discounts by their natural orders");
         return naturallyOrderedDiscounts;
     }
 
     @Operation(summary = "Get all Discount details by name, description")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Retrieve all available Payment Methods and their details that match the provided name, description",
+            @ApiResponse(responseCode = "200", description = "Retrieve all available Discounts and their details that match the provided name, description",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = DiscountVo.class))) }),
             @ApiResponse(responseCode = "400", description = "Discount search filters are invalid",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) }),
-            @ApiResponse(responseCode = "404", description = "No Payment Methods available by the given filters",
+            @ApiResponse(responseCode = "404", description = "No Discounts available by the given filters",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("filter")
     public List<DiscountVo> getAllDiscountsByFilters(@RequestParam(required = false) String name,
                                                    @RequestParam(required = false) String description) throws DiscountException {
-        log.debug("Requesting all available payment methods with given filters");
+        log.debug("Requesting all available discounts with given filters");
         boolean emptyName = !StringUtils.hasText(StringUtils.trimWhitespace(name));
         boolean emptyDescription = !StringUtils.hasText(StringUtils.trimWhitespace(description));
         if(!emptyName || !emptyDescription) {
             Optional<String> optName = emptyName ? Optional.empty() : Optional.of(name);
             Optional<String> optDescription = emptyDescription ? Optional.empty() : Optional.of(description);
             List<DiscountVo> matchedByFilter = service.retrieveAllMatchingDetailsByCriteria(optName, optDescription);
-            log.debug("Responding with all available payment methods with given filters");
+            log.debug("Responding with all available discounts with given filters");
             return matchedByFilter;
         }
         log.debug("discount filters are empty");
