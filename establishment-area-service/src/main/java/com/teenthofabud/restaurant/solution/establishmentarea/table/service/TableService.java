@@ -15,11 +15,13 @@ public interface TableService {
 
     public String createTable(TableForm form) throws TableException;
 
-    public List<TableVo> retrieveListOfAllTables();
+    public List<TableVo> retrieveListOfAllTables() throws TableException;
 
     public TableVo retrieveDetailsById(String id, Optional<TOABCascadeLevel> optionalCascadeLevel) throws TableException;
 
-    public List<TableVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalTableName) throws TableException;
+    public List<TableVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalTableName,
+                                                              Optional<String> description,
+                                                              Optional<String> capacity) throws TableException;
 
     public void updateTable(String id, TableForm form) throws TableException;
 
@@ -27,4 +29,5 @@ public interface TableService {
 
     public void applyPatchOnTable(String id, List<PatchOperationForm> patches) throws TableException;
 
+    public List<TableVo> retrieveAllMatchingDetailsByFloorId(String floorId, Optional<TOABCascadeLevel> optionalCascadeLevel) throws TableException;
 }

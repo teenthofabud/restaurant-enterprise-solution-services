@@ -145,6 +145,13 @@ public class FloorServiceImpl implements FloorService {
         log.debug("All attributes of FloorForm are valid");
 
         FloorEntity expectedEntity = form2EntityConverter.convert(form);
+        log.debug(FloorMessageTemplate.MSG_TEMPLATE_FLOOR_EXISTENCE_BY_NAME.getValue(), form.getFlrName());
+        if(floorRepository.existsByFlrName(expectedEntity.getFlrName())) {
+            log.debug(FloorMessageTemplate.MSG_TEMPLATE_FLOOR_EXISTS_BY_NAME.getValue(), expectedEntity.getFlrName());
+            throw new FloorException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_EXISTS,
+                    new Object[]{ "flrName", form.getFlrName() });
+        }
+        log.debug(FloorMessageTemplate.MSG_TEMPLATE_FLOOR_NON_EXISTENCE_BY_NAME.getValue(), expectedEntity.getFlrName());
 
         log.debug("Saving {}", expectedEntity);
         FloorEntity actualEntity = floorRepository.save(expectedEntity);
@@ -161,15 +168,17 @@ public class FloorServiceImpl implements FloorService {
 
     @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
-    public List<FloorVo> retrieveListOfAllFloors() {
+    public List<FloorVo> retrieveListOfAllFloors() throws FloorException {
         log.info("Retrieving all the FloorEntities");
         List<FloorEntity> floorEntities = floorRepository.findAll();
-        List<FloorVo> naturallyOrderedList = new ArrayList<>();
-        for(FloorEntity entity : floorEntities) {
+        List<FloorVo> naturallyOrderedList = establishmentAreaServiceHelper.floorEntity2DetailedVo(floorEntities);
+                //new ArrayList<>();
+        /*for(FloorEntity entity : floorEntities) {
             FloorVo dto = entity2VoConverter.convert(entity);
             log.debug("Converting {} to {}", entity, dto);
             naturallyOrderedList.add(dto);
-        }
+        }*/
+
         return naturallyOrderedList.stream()
                 .sorted(CMP_BY_FLOOR_NAME)
                 .collect(Collectors.toList());
@@ -213,7 +222,7 @@ public class FloorServiceImpl implements FloorService {
         return floorId;
     }
 
-    private List<FloorVo> entity2DetailedVoList(List<FloorEntity> floorEntityList) {
+    /*private List<FloorVo> entity2DetailedVoList(List<FloorEntity> floorEntityList) {
         List<FloorVo> floorDetailsList = new ArrayList<>(floorEntityList.size());
         for(FloorEntity entity : floorEntityList) {
             FloorVo vo = entity2VoConverter.convert(entity);
@@ -221,13 +230,13 @@ public class FloorServiceImpl implements FloorService {
             floorDetailsList.add(vo);
         }
         return floorDetailsList;
-    }
+    }*/
 
-    @Transactional
+    @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
     public List<FloorVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalFloorName) throws FloorException {
 
-        String floorName = optionalFloorName.get();
+        String floorName = optionalFloorName.isPresent() ? optionalFloorName.get() : "";
         log.info("Requesting FloorEntity by floor name: {}", floorName);
 
         List<FloorVo> matchedFloorList = new LinkedList<>();
@@ -242,11 +251,10 @@ public class FloorServiceImpl implements FloorService {
         }
         Example<FloorEntity> floorEntityExample = Example.of(entity, matcherCriteria);
         List<FloorEntity> floorEntityList = floorRepository.findAll(floorEntityExample);
-        if(floorEntityList != null && !floorEntityList.isEmpty()) {
-            matchedFloorList = entity2DetailedVoList(floorEntityList);
-            log.info("Found {} FloorVo matching with provided parameters : {}", matchedFloorList.size(), providedFilters);
-        } else
-            log.info("Found no FloorVo available matching with provided parameters : {}", providedFilters);
+        matchedFloorList = establishmentAreaServiceHelper.floorEntity2DetailedVo(floorEntityList);
+        log.info("Found {} FloorVo matching with provided parameters : {}", matchedFloorList.size(), providedFilters);
+        /*} else
+            log.info("Found no FloorVo available matching with provided parameters : {}", providedFilters);*/
         return matchedFloorList;
     }
 
@@ -301,6 +309,14 @@ public class FloorServiceImpl implements FloorService {
         log.debug("Successfully compared and copied attributes from FloorForm to FloorEntity");
 
         FloorEntity expectedEntity = optExpectedEntity.get();
+
+        log.debug(FloorMessageTemplate.MSG_TEMPLATE_FLOOR_EXISTENCE_BY_NAME.getValue(), form.getFlrName());
+        if(floorRepository.existsByFlrName(expectedEntity.getFlrName())) {
+            log.debug(FloorMessageTemplate.MSG_TEMPLATE_FLOOR_EXISTS_BY_NAME.getValue(), expectedEntity.getFlrName());
+            throw new FloorException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_EXISTS,
+                    new Object[]{ "flrName", form.getFlrName() });
+        }
+        log.debug(FloorMessageTemplate.MSG_TEMPLATE_FLOOR_NON_EXISTENCE_BY_NAME.getValue(), expectedEntity.getFlrName());
 
         entitySelfMapper.compareAndMap(expectedEntity, actualEntity);
         log.debug("Compared and copied attributes from FloorEntity to FloorForm");
@@ -419,6 +435,14 @@ public class FloorServiceImpl implements FloorService {
             throw new FloorException(ec, new Object[] { err.getFieldError().getField() });
         }
         log.debug("All attributes of patched FloorDto are valid");
+
+        log.debug(FloorMessageTemplate.MSG_TEMPLATE_FLOOR_EXISTENCE_BY_NAME.getValue(), patchedFloorForm.getFlrName());
+        if(floorRepository.existsByFlrName(patchedFloorForm.getFlrName().get())) {
+            log.debug(FloorMessageTemplate.MSG_TEMPLATE_FLOOR_EXISTS_BY_NAME.getValue(), patchedFloorForm.getFlrName());
+            throw new FloorException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_EXISTS,
+                    new Object[]{ "flrName", patchedFloorForm.getFlrName().get() });
+        }
+        log.debug(FloorMessageTemplate.MSG_TEMPLATE_FLOOR_NON_EXISTENCE_BY_NAME.getValue(), patchedFloorForm.getFlrName());
 
         log.debug("Comparatively copying patched attributes from FloorDto to FloorEntity");
         try {

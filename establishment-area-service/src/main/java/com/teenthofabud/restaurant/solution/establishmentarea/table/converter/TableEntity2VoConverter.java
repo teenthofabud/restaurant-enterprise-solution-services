@@ -8,8 +8,6 @@ import com.teenthofabud.core.common.error.TOABSystemException;
 import com.teenthofabud.restaurant.solution.establishmentarea.floor.data.FloorVo;
 import com.teenthofabud.restaurant.solution.establishmentarea.table.data.TableEntity;
 import com.teenthofabud.restaurant.solution.establishmentarea.table.data.TableVo;
-import com.teenthofabud.restaurant.solution.establishmentarea.table.data.TableEntity;
-import com.teenthofabud.restaurant.solution.establishmentarea.table.data.TableVo;
 import com.teenthofabud.restaurant.solution.establishmentarea.utils.EstablishmentAreaServiceHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,31 +49,44 @@ public class TableEntity2VoConverter extends TOABBaseEntity2VoConverter<TableEnt
             vo.setDescription(entity.getDescription());
         }
         if(!fieldsToEscape.contains("capacity")) {
-            vo.setDescription(entity.getCapacity());
+            vo.setCapacity(entity.getCapacity());
         }
         if(!fieldsToEscape.contains("floorId")) {
-            if(!fieldsToEscape.contains("floorId")) {
-                Callable<FloorVo> floorEntity2VoConversion = () -> {
-                    TOABRequestContextHolder.setCascadeLevelContext(TOABCascadeLevel.ZERO);
-                    FloorVo floorVo = establishmentAreaServiceHelper.floorEntity2DetailedVo(entity.getFloor());
-                    TOABRequestContextHolder.clearCascadeLevelContext();
-                    return floorVo;
-                };
-                ExecutorService executorService = Executors.newFixedThreadPool(1, new CustomizableThreadFactory("floorEntity2VoConversion-"));
-                Future<FloorVo> floorEntity2VoConversionResult = executorService.submit(floorEntity2VoConversion);
-                try {
-                    FloorVo floorVo = floorEntity2VoConversionResult.get();
-                    vo.setFloorVo(floorVo);
-                    log.debug("Retrieved {} for floorId: {}", floorVo, entity.getFloor().getFlrId());
-                } catch (InterruptedException | ExecutionException e) {
-                    log.error("Unable to perform floorEntity2VoConversion", e);
-                    throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, "Unable to perform floorEntity2VoConversion",
-                            new Object[] { "floorEntity2VoConversion failure: " + e.getMessage() });
-                }
-            }
+            this.expandSecondLevelFields(entity, vo, "floorId");
         }
         super.expandAuditFields(entity, vo);
         log.debug("Converted {} to {} ", entity, vo);
         return vo;
+    }
+
+    private void expandSecondLevelFields(TableEntity entity, TableVo vo, String fieldName) {
+        TOABCascadeLevel cascadeLevel = TOABRequestContextHolder.getCascadeLevelContext();
+        switch(cascadeLevel) {
+            case TWO:
+                if(!fieldsToEscape.contains("floorId") && fieldName.compareTo("floorId") == 0) {
+                    Callable<FloorVo> floorEntity2VoConversion = () -> {
+                        TOABRequestContextHolder.setCascadeLevelContext(TOABCascadeLevel.ZERO);
+                        FloorVo floorVo = establishmentAreaServiceHelper.floorEntity2DetailedVo(entity.getFloor());
+                        TOABRequestContextHolder.clearCascadeLevelContext();
+                        return floorVo;
+                    };
+                    ExecutorService executorService = Executors.newFixedThreadPool(1, new CustomizableThreadFactory("floorEntity2VoConversion-"));
+                    Future<FloorVo> floorEntity2VoConversionResult = executorService.submit(floorEntity2VoConversion);
+                    try {
+                        FloorVo floorVo = floorEntity2VoConversionResult.get();
+                        vo.setFloorVo(floorVo);
+                        log.debug("Retrieved {} for floorId: {}", floorVo, entity.getFloor().getFlrId());
+                    } catch (InterruptedException | ExecutionException e) {
+                        log.error("Unable to perform floorEntity2VoConversion", e);
+                        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, "Unable to perform floorEntity2VoConversion",
+                                new Object[] { "floorEntity2VoConversion failure: " + e.getMessage() });
+                    }
+                }
+                break;
+            default:
+                vo.setFloorId(entity.getFloor().getFlrId().toString());
+                log.debug("only first level cascaded for floorId");
+                break;
+        }
     }
 }

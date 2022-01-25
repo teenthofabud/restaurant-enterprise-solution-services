@@ -17,7 +17,11 @@ public enum TableMessageTemplate {
     MSG_TEMPLATE_TABLE_NON_EXISTENCE_BY_NAME ("No TableEntity exists with name: {}"),
     MSG_TEMPLATE_TABLE_EXISTENCE_BY_FLOOR_ID ("Checking existence of TableEntity with floor id: {}"),
     MSG_TEMPLATE_TABLE_EXISTS_BY_FLOOR_ID ("TableEntity already exists with floor id: {}"),
-    MSG_TEMPLATE_TABLE_NON_EXISTENCE_BY_FLOOR_ID ("No TableEntity exists with floor id: {}");
+    MSG_TEMPLATE_TABLE_NON_EXISTENCE_BY_FLOOR_ID ("No TableEntity exists with floor id: {}"),
+
+    MSG_TEMPLATE_TABLE_EXISTENCE_BY_NAME_AND_FLOOR_ID ("Checking existence of TableEntity with name: {} and floor id: {}"),
+    MSG_TEMPLATE_TABLE_EXISTS_BY_NAME_AND_FLOOR_ID ("TableEntity already exists with name: {} and floor id: {}"),
+    MSG_TEMPLATE_TABLE_NON_EXISTENCE_BY_NAME_AND_FLOOR_ID ("No TableEntity exists with name: {} and floor id: {}");
 
     private String value;
 

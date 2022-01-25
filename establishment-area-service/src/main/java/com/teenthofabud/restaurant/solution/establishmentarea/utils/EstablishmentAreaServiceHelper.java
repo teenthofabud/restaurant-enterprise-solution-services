@@ -65,10 +65,10 @@ public class EstablishmentAreaServiceHelper {
         throw new FloorException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ACTION_FAILURE, new Object[] { "floor entity is null" });
     }
 
-    public List<TableVo> tableEntity2DetailedVo(List<? extends TableEntity> tableEntityList) {
+    public List<TableVo> tableEntity2DetailedVo(List<? extends TableEntity> tableEntityList) throws TableException {
         List<TableVo> tableDetailsList = new ArrayList<>(tableEntityList.size());
         for(TableEntity entity : tableEntityList) {
-            TableVo vo = tableEntity2VoConverter.convert(entity);
+            TableVo vo = this.tableEntity2DetailedVo(entity);
             log.debug("Converting {} to {}", entity, vo);
             tableDetailsList.add(vo);
         }
@@ -84,10 +84,10 @@ public class EstablishmentAreaServiceHelper {
         throw new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ACTION_FAILURE, new Object[] { "table entity is null" });
     }
 
-    public List<KitchenVo> kitchenEntity2DetailedVo(List<? extends KitchenEntity> kitchenEntityList) {
+    public List<KitchenVo> kitchenEntity2DetailedVo(List<? extends KitchenEntity> kitchenEntityList) throws KitchenException {
         List<KitchenVo> kitchenDetailsList = new ArrayList<>(kitchenEntityList.size());
         for(KitchenEntity entity : kitchenEntityList) {
-            KitchenVo vo = kitchenEntity2VoConverter.convert(entity);
+            KitchenVo vo = this.kitchenEntity2DetailedVo(entity);
             log.debug("Converting {} to {}", entity, vo);
             kitchenDetailsList.add(vo);
         }

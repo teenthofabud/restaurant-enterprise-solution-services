@@ -27,6 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -70,7 +71,7 @@ public class TableController {
             return createdVo;
         }
         log.debug("TableForm is null");
-        throw new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID,
+        throw new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_UNEXPECTED,
                 new Object[]{ "form", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
     }
 
@@ -81,10 +82,10 @@ public class TableController {
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public List<TableVo> getAllTableNaturallyOrdered() {
+    public List<TableVo> getAllTableNaturallyOrdered() throws TableException {
         log.debug("Requesting all available tables by their natural orders");
         List<TableVo> naturallyOrderedTables = service.retrieveListOfAllTables();
-        log.debug("Responding with all available accounts by their natural orders");
+        log.debug("Responding with all available tables by their natural orders");
         return naturallyOrderedTables;
     }
 
@@ -133,7 +134,7 @@ public class TableController {
         }
     }
 
-    @Operation(summary = "Get all Table details by provided criteria")
+    @Operation(summary = "Get all Table details by provided criteria i.e. name, description, capacity")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Retrieve all available Tables and their details that match the provided criteria",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = TableVo.class))) }),
@@ -143,18 +144,65 @@ public class TableController {
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(value = "/criteria/{name}")
-    public List<TableVo> getTableDetailsByCriteria(@PathVariable String name) throws TableException {
+    @GetMapping(value = "filter")
+    public List<TableVo> getTableDetailsByCriteria(@RequestParam(required = false) String tableName,
+                                                   @RequestParam(required = false) String description,
+                                                   @RequestParam(required = false) String capacity) throws TableException {
         log.debug("Requesting all details of table based on filter");
         List<TableVo> tableVo = null;
-        boolean isEmptyName = !StringUtils.hasText(StringUtils.trimWhitespace(name));
-        if (!isEmptyName) {
-            tableVo = service.retrieveAllMatchingDetailsByCriteria(Optional.of(name));
+        boolean isEmptyName = !StringUtils.hasText(StringUtils.trimWhitespace(tableName));
+        boolean isEmptyDescription = !StringUtils.hasText(StringUtils.trimWhitespace(description));
+        boolean isEmptyCapacity = !StringUtils.hasText(StringUtils.trimWhitespace(capacity));
+        if (!isEmptyName || !isEmptyDescription || !isEmptyCapacity) {
+            Optional<String> optName = isEmptyName ? Optional.empty() : Optional.of(tableName);
+            Optional<String> optDesc = isEmptyDescription ? Optional.empty() : Optional.of(description);
+            Optional<String> optCapacity = isEmptyCapacity ? Optional.empty() : Optional.of(capacity);
+            tableVo = service.retrieveAllMatchingDetailsByCriteria(optName,optDesc,optCapacity);
             log.debug("Responding with successful retrieval of existing table based on filter");
             return tableVo;
         }
         log.debug("table filters are empty");
         throw new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID, new Object[] { "filters" });
+    }
+
+    @Operation(summary = "Get all Table details by floor id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Retrieve all available Tables and their details that match the given floor id",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = TableVo.class))) }),
+            @ApiResponse(responseCode = "400", description = "Table id is invalid",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) }),
+            @ApiResponse(responseCode = "404", description = "No Tablees available with the given floor id",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
+    })
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("floorid/{floorId}")
+    public List<TableVo> getAllTablesByFloorId(@PathVariable String floorId, @RequestParam(required = false)
+    @io.swagger.v3.oas.annotations.Parameter(in = ParameterIn.QUERY, description = "levels of nested fields to be unfolded within the response body")
+            String cascadeUntilLevel) throws TableException {
+        List<TableVo> matchedByFloorIds = new ArrayList<>();
+        log.debug("Requesting all available addresses with given floorId");
+        if(StringUtils.hasText(StringUtils.trimWhitespace(floorId)) && StringUtils.isEmpty(StringUtils.trimWhitespace(cascadeUntilLevel))) {
+            matchedByFloorIds = service.retrieveAllMatchingDetailsByFloorId(floorId, Optional.empty());
+            log.debug("Responding with all available addresses with given floorId");
+            return matchedByFloorIds;
+        } else if(StringUtils.hasText(StringUtils.trimWhitespace(floorId)) && StringUtils.hasText(StringUtils.trimWhitespace(cascadeUntilLevel))) {
+            try {
+                Integer cascadeLevelCode = Integer.parseInt(cascadeUntilLevel);
+                if(cascadeLevelCode < 0) {
+                    throw new NumberFormatException();
+                }
+                log.debug("Requested with cascade level code: {}", cascadeLevelCode);
+                Optional<TOABCascadeLevel> optCascadeLevel = TOABCascadeLevel.findByLevelCode(cascadeUntilLevel);
+                matchedByFloorIds = service.retrieveAllMatchingDetailsByFloorId(floorId, optCascadeLevel);
+                log.debug("Responding with successful retrieval of existing address details with given floorId having fields cascaded to given level");
+                return matchedByFloorIds;
+            } catch (NumberFormatException e) {
+                log.debug(TableMessageTemplate.MSG_TEMPLATE_TABLE_CASCADE_LEVEL_EMPTY.getValue());
+                throw new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID, new Object[] { "cascadeUntilLevel", cascadeUntilLevel });
+            }
+        }
+        log.debug("address floorId is empty");
+        throw new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID, new Object[] { "floorId", floorId });
     }
 
     @Operation(summary = "Update Table details by id")
@@ -170,14 +218,14 @@ public class TableController {
             @ApiResponse(responseCode = "500", description = "Internal system error while trying to update Table details",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
-    @ResponseStatus(HttpStatus.ACCEPTED)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping(path = "{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void updateExistingTable(@PathVariable String id, @RequestBody(required = false) TableForm form) throws TableException {
         log.debug("Requesting to update all attributes of existing table");
         if(StringUtils.hasText(StringUtils.trimWhitespace(id))) {
             if(form != null) {
                 service.updateTable(id, form);
-                log.debug("Responding with successful updation of attributes for existing account");
+                log.debug("Responding with successful updation of attributes for existing table");
                 return;
             }
             log.debug("TableForm is null");
@@ -204,10 +252,10 @@ public class TableController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("{id}")
     public void deleteExistingTable(@PathVariable String id) throws TableException {
-        log.debug("Requesting to soft delete account");
+        log.debug("Requesting to soft delete table");
         if(StringUtils.hasText(StringUtils.trimWhitespace(id))) {
             service.deleteTable(id);
-            log.debug("Responding with successful deletion of existing account");
+            log.debug("Responding with successful deletion of existing table");
             return;
         }
         log.debug(TableMessageTemplate.MSG_TEMPLATE_TABLE_ID_EMPTY.getValue());

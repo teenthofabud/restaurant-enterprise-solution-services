@@ -17,7 +17,11 @@ public enum KitchenMessageTemplate {
     MSG_TEMPLATE_KITCHEN_NON_EXISTENCE_BY_NAME ("No KitchenEntity exists with name: {}"),
     MSG_TEMPLATE_KITCHEN_EXISTENCE_BY_FLOOR_ID ("Checking existence of KitchenEntity with floor id: {}"),
     MSG_TEMPLATE_KITCHEN_EXISTS_BY_FLOOR_ID ("KitchenEntity already exists with floor id: {}"),
-    MSG_TEMPLATE_KITCHEN_NON_EXISTENCE_BY_FLOOR_ID ("No KitchenEntity exists with floor id: {}");
+    MSG_TEMPLATE_KITCHEN_NON_EXISTENCE_BY_FLOOR_ID ("No KitchenEntity exists with floor id: {}"),
+
+    MSG_TEMPLATE_KITCHEN_EXISTENCE_BY_NAME_AND_FLOOR_ID ("Checking existence of KitchenEntity with name: {} and floor id: {}"),
+    MSG_TEMPLATE_KITCHEN_EXISTS_BY_NAME_AND_FLOOR_ID ("KitchenEntity already exists with name: {} and floor id: {}"),
+    MSG_TEMPLATE_KITCHEN_NON_EXISTENCE_BY_NAME_AND_FLOOR_ID ("No KitchenEntity exists with name: {} and floor id: {}");
 
     private String value;
 

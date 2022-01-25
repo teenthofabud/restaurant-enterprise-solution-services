@@ -43,9 +43,9 @@ public class TableDtoValidator implements Validator {
     public void validate(Object target, Errors errors) {
         TableDto dto = (TableDto) target;
         Optional<String> optTableName = dto.getTableName();
-        if(!fieldsToEscape.contains("name") && optTableName.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optTableName.get()))) {
-            errors.rejectValue("name", EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID.name());
-            log.debug("TableDto.name is invalid");
+        if(!fieldsToEscape.contains("tableName") && optTableName.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optTableName.get()))) {
+            errors.rejectValue("tableName", EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID.name());
+            log.debug("TableDto.tableName is invalid");
             return;
         }
         Optional<String> optDesc = dto.getDescription();
@@ -55,16 +55,27 @@ public class TableDtoValidator implements Validator {
             return;
         }
         Optional<String> optCapacity = dto.getCapacity();
-        if(!fieldsToEscape.contains("capacity") && optCapacity.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optCapacity.get()))) {
-            errors.rejectValue("capacity", EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID.name());
-            log.debug("TableDto.capacity is invalid");
-            return;
+        if(!fieldsToEscape.contains("capacity") && optCapacity.isPresent()) {
+            if(StringUtils.hasText(StringUtils.trimWhitespace(optCapacity.get()))){
+                try{
+                    Long.valueOf(optCapacity.get());
+                } catch (NumberFormatException e){
+                    log.debug("TableForm.capacity is not a number");
+                    errors.rejectValue("capacity", EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID.name());
+                    return;
+                }
+            }else{
+                log.debug("TableDto.capacity is invalid");
+                errors.rejectValue("capacity", EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID.name());
+                return;
+            }
         }
+
         Optional<String> optFloorId = dto.getFloorId();
         if(!fieldsToEscape.contains("floorId") && optFloorId.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optFloorId.get()))) {
-            String tableId = optFloorId.get();
+            String floorId = optFloorId.get();
             try {
-                FloorVo floorVo = floorService.retrieveDetailsById(tableId, Optional.of(TOABCascadeLevel.ONE));
+                FloorVo floorVo = floorService.retrieveDetailsById(floorId, Optional.of(TOABCascadeLevel.ONE));
                 if(!floorVo.getActive()) {
                     log.debug("TableDto.floorId is inactive");
                     errors.rejectValue("floorId", EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID.name());
