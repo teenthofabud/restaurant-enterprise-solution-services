@@ -6,11 +6,15 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.teenthofabud.core.common.constant.TOABBaseMessageTemplate;
 import com.teenthofabud.core.common.constant.TOABCascadeLevel;
+import com.teenthofabud.core.common.data.dto.TOABRequestContextHolder;
 import com.teenthofabud.core.common.data.form.PatchOperationForm;
 import com.teenthofabud.core.common.error.TOABBaseException;
 import com.teenthofabud.core.common.error.TOABSystemException;
 import com.teenthofabud.core.common.service.TOABBaseService;
 import com.teenthofabud.restaurant.solution.establishmentarea.error.EstablishmentAreaErrorCode;
+import com.teenthofabud.restaurant.solution.establishmentarea.floor.data.FloorException;
+import com.teenthofabud.restaurant.solution.establishmentarea.floor.data.FloorVo;
+import com.teenthofabud.restaurant.solution.establishmentarea.floor.service.FloorService;
 import com.teenthofabud.restaurant.solution.establishmentarea.table.converter.TableDto2EntityConverter;
 import com.teenthofabud.restaurant.solution.establishmentarea.table.converter.TableEntity2VoConverter;
 import com.teenthofabud.restaurant.solution.establishmentarea.table.converter.TableForm2EntityConverter;
@@ -22,6 +26,7 @@ import com.teenthofabud.restaurant.solution.establishmentarea.table.service.Tabl
 import com.teenthofabud.restaurant.solution.establishmentarea.table.validator.TableDtoValidator;
 import com.teenthofabud.restaurant.solution.establishmentarea.table.validator.TableFormRelaxedValidator;
 import com.teenthofabud.restaurant.solution.establishmentarea.table.validator.TableFormValidator;
+import com.teenthofabud.restaurant.solution.establishmentarea.utils.EstablishmentAreaServiceHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -62,6 +67,9 @@ public class TableServiceImpl implements TableService {
 
     private TOABBaseService toabBaseService;
     private ObjectMapper om;
+
+    private FloorService floorService;
+    private EstablishmentAreaServiceHelper establishmentAreaServiceHelper;
 
     @Autowired
     public void setTableDtoValidator(TableDtoValidator tableDtoValidator) {
@@ -118,6 +126,16 @@ public class TableServiceImpl implements TableService {
         this.tableRepository = tableRepository;
     }
 
+    @Autowired
+    public void setFloorService(FloorService floorService) {
+        this.floorService = floorService;
+    }
+
+    @Autowired
+    public void setEstablishmentAreaServiceHelper(EstablishmentAreaServiceHelper establishmentAreaServiceHelper) {
+        this.establishmentAreaServiceHelper = establishmentAreaServiceHelper;
+    }
+
     @Transactional
     @Override
     public String createTable(TableForm form) throws TableException {
@@ -133,6 +151,15 @@ public class TableServiceImpl implements TableService {
             throw new TableException(ec, new Object[] { err.getFieldError().getField() });
         }
         log.debug("All attributes of TableForm are valid");
+
+        log.debug(TableMessageTemplate.MSG_TEMPLATE_TABLE_EXISTENCE_BY_NAME_AND_FLOOR_ID.getValue(), form.getTableName(), form.getFloorId());
+        if(tableRepository.existsByTableNameAndFloorFlrId(form.getTableName(), Long.parseLong(form.getFloorId()))) {
+            log.debug(TableMessageTemplate.MSG_TEMPLATE_TABLE_EXISTS_BY_NAME_AND_FLOOR_ID.getValue(), form.getTableName(), form.getFloorId());
+            throw new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_EXISTS,
+                    new Object[]{ "tableName: " + form.getTableName(), "floorId: " + form.getFloorId() });
+        }
+        log.debug(TableMessageTemplate.MSG_TEMPLATE_TABLE_NON_EXISTENCE_BY_NAME_AND_FLOOR_ID.getValue(),
+                form.getTableName(), form.getFloorId());
 
         TableEntity expectedEntity = form2EntityConverter.convert(form);
 
@@ -151,15 +178,10 @@ public class TableServiceImpl implements TableService {
 
     @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
-    public List<TableVo> retrieveListOfAllTables() {
+    public List<TableVo> retrieveListOfAllTables() throws TableException {
         log.info("Retrieving all the TableEntities");
         List<TableEntity> tableEntities = tableRepository.findAll();
-        List<TableVo> naturallyOrderedList = new ArrayList<>();
-        for(TableEntity entity : tableEntities) {
-            TableVo dto = entity2VoConverter.convert(entity);
-            log.debug("Converting {} to {}", entity, dto);
-            naturallyOrderedList.add(dto);
-        }
+        List<TableVo> naturallyOrderedList = establishmentAreaServiceHelper.tableEntity2DetailedVo(tableEntities);
         return naturallyOrderedList.stream()
                 .sorted(CMP_BY_TABLE_NAME)
                 .collect(Collectors.toList());
@@ -178,8 +200,11 @@ public class TableServiceImpl implements TableService {
                     new Object[] { "id", String.valueOf(id) });
         }
         TableEntity entity = optEntity.get();
-        TableVo vo = entity2VoConverter.convert(entity);
-        log.info("Found TableVo by id: {}", id);
+        TOABCascadeLevel cascadeLevel = optionalCascadeLevel.isPresent() ? optionalCascadeLevel.get() : TOABCascadeLevel.ZERO;
+        TOABRequestContextHolder.setCascadeLevelContext(cascadeLevel);
+        TableVo vo = establishmentAreaServiceHelper.tableEntity2DetailedVo(entity);
+        log.debug("KitchenVo populated with fields cascaded to level: {}", cascadeLevel);
+        TOABRequestContextHolder.clearCascadeLevelContext();
         return vo;
     }
 
@@ -200,7 +225,7 @@ public class TableServiceImpl implements TableService {
         return tableId;
     }
 
-    private List<TableVo> entity2DetailedVoList(List<TableEntity> tableEntityList) {
+    /*private List<TableVo> entity2DetailedVoList(List<TableEntity> tableEntityList) {
         List<TableVo> tableDetailsList = new ArrayList<>(tableEntityList.size());
         for(TableEntity entity : tableEntityList) {
             TableVo vo = entity2VoConverter.convert(entity);
@@ -208,14 +233,17 @@ public class TableServiceImpl implements TableService {
             tableDetailsList.add(vo);
         }
         return tableDetailsList;
-    }
+    }*/
 
-    @Transactional
+    @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
-    public List<TableVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalTableName) throws TableException {
+    public List<TableVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalTableName,
+                                                              Optional<String> optionalDescription,
+                                                              Optional<String> optionalCapacity) throws TableException {
 
-        String tableName = optionalTableName.get();
-        log.info("Requesting TableEntity by table name: {}", tableName);
+        String tableName = optionalTableName.isPresent() ? optionalTableName.get() : "";
+        String description = optionalDescription.isPresent() ? optionalDescription.get() : "";
+        String capacity = optionalCapacity.isPresent() ? optionalCapacity.get() : "";
 
         List<TableVo> matchedAccountList = new LinkedList<>();
         Map<String, String> providedFilters = new LinkedHashMap<>();
@@ -223,18 +251,57 @@ public class TableServiceImpl implements TableService {
         ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll();
         if(StringUtils.hasText(StringUtils.trimWhitespace(tableName))) {
             log.debug("tableName {} is valid", tableName);
-            providedFilters.put("flrName", tableName);
+            providedFilters.put("tableName", tableName);
             entity.setTableName(tableName);
-            matcherCriteria = matcherCriteria.withMatcher("flrName", ExampleMatcher.GenericPropertyMatchers.contains());
+            matcherCriteria = matcherCriteria.withMatcher("tableName", ExampleMatcher.GenericPropertyMatchers.contains());
+        }
+        if(StringUtils.hasText(StringUtils.trimWhitespace(description))) {
+            log.debug("description {} is valid", description);
+            providedFilters.put("description", description);
+            entity.setDescription(description);
+            matcherCriteria = matcherCriteria.withMatcher("description", ExampleMatcher.GenericPropertyMatchers.contains());
+        }
+        if(StringUtils.hasText(StringUtils.trimWhitespace(capacity))) {
+            log.debug("capacity {} is valid", capacity);
+            providedFilters.put("capacity", capacity);
+            entity.setCapacity(capacity);
+            matcherCriteria = matcherCriteria.withMatcher("capacity", ExampleMatcher.GenericPropertyMatchers.contains());
         }
         Example<TableEntity> accountEntityExample = Example.of(entity, matcherCriteria);
         List<TableEntity> accountEntityList = tableRepository.findAll(accountEntityExample);
         if(accountEntityList != null && !accountEntityList.isEmpty()) {
-            matchedAccountList = entity2DetailedVoList(accountEntityList);
+            matchedAccountList = establishmentAreaServiceHelper.tableEntity2DetailedVo(accountEntityList);
             log.info("Found {} TableVo matching with provided parameters : {}", matchedAccountList.size(), providedFilters);
         } else
             log.info("Found no TableVo available matching with provided parameters : {}", providedFilters);
         return matchedAccountList;
+    }
+
+    @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+    @Override
+    public List<TableVo> retrieveAllMatchingDetailsByFloorId(String floorId, Optional<TOABCascadeLevel> optionalCascadeLevel) throws TableException {
+        log.info("Requesting TableEntity that match with floorId: {}", floorId);
+        Errors err = new DirectFieldBindingResult(floorId, "TableForm");
+        try {
+            FloorVo floorVo = floorService.retrieveDetailsById(floorId, Optional.of(TOABCascadeLevel.ONE));
+            if(!floorVo.getActive()) {
+                throw new FloorException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_INACTIVE, new Object [] { floorId });
+            }
+        } catch (FloorException e) {
+            log.error("floorId is invalid", e);
+            throw new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID, new Object [] { "floorId: " + floorId });
+        }
+        List<TableEntity> tableEntityList = tableRepository.findByFloorFlrId(Long.parseLong(floorId));
+        TOABCascadeLevel cascadeLevel = optionalCascadeLevel.isPresent() ? optionalCascadeLevel.get() : TOABCascadeLevel.ZERO;
+        TOABRequestContextHolder.setCascadeLevelContext(cascadeLevel);
+        List<TableVo> matchedTableList = establishmentAreaServiceHelper.tableEntity2DetailedVo(tableEntityList);
+        log.info("Found {} TableVo matching with floorId: {}", matchedTableList.size(),floorId);
+        TOABRequestContextHolder.clearCascadeLevelContext();
+        if(matchedTableList.isEmpty()) {
+            log.debug("No TableVo found matching with floorId: {}", floorId);
+            throw new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_NOT_FOUND, new Object[] { "floorId", floorId });
+        }
+        return matchedTableList;
     }
 
     @Transactional
@@ -289,6 +356,8 @@ public class TableServiceImpl implements TableService {
 
         TableEntity expectedEntity = optExpectedEntity.get();
 
+        checkUniquenessOfTable(form, actualEntity);
+
         entitySelfMapper.compareAndMap(expectedEntity, actualEntity);
         log.debug("Compared and copied attributes from TableEntity to TableForm");
         actualEntity.setModifiedOn(LocalDateTime.now(ZoneOffset.UTC));
@@ -299,7 +368,7 @@ public class TableServiceImpl implements TableService {
         if(actualEntity == null) {
             log.debug("Unable to update {}", actualEntity);
             throw new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ACTION_FAILURE,
-                    new Object[]{ "update", "unable to persist currency account details" });
+                    new Object[]{ "update", "unable to persist floor details" });
         }
         log.info("Updated existing TableEntity with id: {}", actualEntity.getTableId());
     }
@@ -333,7 +402,7 @@ public class TableServiceImpl implements TableService {
         if(expectedEntity == null) {
             log.debug("Unable to soft delete {}", actualEntity);
             throw new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ACTION_FAILURE,
-                    new Object[]{ "deletion", "unable to soft delete current account details with id:" + id });
+                    new Object[]{ "deletion", "unable to soft delete current floor details with id:" + id });
         }
 
         log.info("Soft deleted existing TableEntity with id: {}", actualEntity.getTableId());
@@ -406,6 +475,8 @@ public class TableServiceImpl implements TableService {
             throw new TableException(ec, new Object[] { err.getFieldError().getField() });
         }
         log.debug("All attributes of patched TableDto are valid");
+        
+        checkUniquenessOfTable(patchedTableForm,actualEntity);
 
         log.debug("Comparatively copying patched attributes from TableDto to TableEntity");
         try {
@@ -424,6 +495,53 @@ public class TableServiceImpl implements TableService {
                     new Object[]{ "patching", "unable to patch table details with id:" + id });
         }
         log.info("Patched TableEntity with id:{}", id);
+    }
+
+    private void checkUniquenessOfTable(TableForm tableForm, TableEntity actualEntity) throws TableException {
+        List<Boolean> similaritySwitchesCollection = new ArrayList<>(3);
+        if(StringUtils.hasText(StringUtils.trimWhitespace(tableForm.getTableName()))) {
+            similaritySwitchesCollection.add(tableForm.getTableName().compareTo(actualEntity.getTableName()) == 0);
+        }
+        if(StringUtils.hasText(StringUtils.trimWhitespace(tableForm.getFloorId()))) {
+            similaritySwitchesCollection.add(tableForm.getFloorId().compareTo(actualEntity.getFloor().getFlrId().toString()) == 0);
+        }
+        if(!similaritySwitchesCollection.isEmpty()) {
+            String tableName = StringUtils.hasText(StringUtils.trimWhitespace(tableForm.getTableName())) ? tableForm.getTableName() : actualEntity.getTableName();
+            String floorId = StringUtils.hasText(StringUtils.trimWhitespace(tableForm.getFloorId())) ?
+                    tableForm.getFloorId() : actualEntity.getFloor().getFlrId().toString();
+            log.debug(TableMessageTemplate.MSG_TEMPLATE_TABLE_EXISTENCE_BY_NAME_AND_FLOOR_ID.getValue(), tableName, floorId);
+            boolean sameEntitySw = similaritySwitchesCollection.stream().allMatch(Boolean::valueOf);
+            boolean duplicateEntitySw =  tableRepository.existsByTableNameAndFloorFlrId(tableName, Long.parseLong(floorId));
+            if(sameEntitySw || duplicateEntitySw) {
+                log.debug(TableMessageTemplate.MSG_TEMPLATE_TABLE_EXISTS_BY_NAME_AND_FLOOR_ID.getValue(), tableName, floorId);
+                throw new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_EXISTS, new Object[]{ "tableName: " + tableName, ", floorId: " + floorId});
+            }
+            log.debug(TableMessageTemplate.MSG_TEMPLATE_TABLE_NON_EXISTENCE_BY_NAME_AND_FLOOR_ID.getValue(), tableName, floorId);
+
+        }
+    }
+
+    private void checkUniquenessOfTable(TableDto patchedTableForm, TableEntity actualEntity) throws TableException {
+        List<Boolean> similaritySwitchesCollection = new ArrayList<>(3);
+        if(patchedTableForm.getTableName().isPresent()) {
+            similaritySwitchesCollection.add(patchedTableForm.getTableName().get().compareTo(actualEntity.getTableName()) == 0);
+        }
+        if(patchedTableForm.getFloorId().isPresent()) {
+            similaritySwitchesCollection.add(patchedTableForm.getFloorId().get().compareTo(actualEntity.getFloor().getFlrId().toString()) == 0);
+        }
+        if(!similaritySwitchesCollection.isEmpty()) {
+            String tableName = patchedTableForm.getTableName().isPresent() ? patchedTableForm.getTableName().get() : actualEntity.getTableName();
+            String floorId = patchedTableForm.getFloorId().isPresent() ? patchedTableForm.getFloorId().get() : actualEntity.getFloor().getFlrId().toString();
+            log.debug(TableMessageTemplate.MSG_TEMPLATE_TABLE_EXISTENCE_BY_NAME_AND_FLOOR_ID.getValue(), tableName, floorId);
+            boolean sameEntitySw = similaritySwitchesCollection.stream().allMatch(Boolean::valueOf);
+            boolean duplicateEntitySw =  tableRepository.existsByTableNameAndFloorFlrId(tableName, Long.parseLong(floorId));
+            if(sameEntitySw || duplicateEntitySw) {
+                log.debug(TableMessageTemplate.MSG_TEMPLATE_TABLE_EXISTS_BY_NAME_AND_FLOOR_ID.getValue(), tableName, floorId);
+                throw new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_EXISTS, new Object[]{ "tableName: " + tableName, ", floorId: " + floorId });
+            }
+            log.debug(TableMessageTemplate.MSG_TEMPLATE_TABLE_NON_EXISTENCE_BY_NAME_AND_FLOOR_ID.getValue(), tableName, floorId);
+
+        }
     }
 
 }

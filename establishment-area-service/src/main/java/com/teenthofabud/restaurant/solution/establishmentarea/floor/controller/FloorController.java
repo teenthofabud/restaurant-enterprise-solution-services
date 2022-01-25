@@ -70,7 +70,7 @@ public class FloorController {
             return createdVo;
         }
         log.debug("FloorForm is null");
-        throw new FloorException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID,
+        throw new FloorException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_UNEXPECTED,
                 new Object[]{ "form", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
     }
 
@@ -81,7 +81,7 @@ public class FloorController {
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public List<FloorVo> getAllFloorNaturallyOrdered() {
+    public List<FloorVo> getAllFloorNaturallyOrdered() throws FloorException {
         log.debug("Requesting all available floors by their natural orders");
         List<FloorVo> naturallyOrderedFloors = service.retrieveListOfAllFloors();
         log.debug("Responding with all available floors by their natural orders");
@@ -141,13 +141,14 @@ public class FloorController {
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(value = "/criteria/{name}")
-    public List<FloorVo> getFloorDetailsByCriteria(@PathVariable String name) throws FloorException {
+    @GetMapping("filter")
+    public List<FloorVo> getFloorDetailsByFilter(@RequestParam(required = false) String name) throws FloorException {
         log.debug("Requesting all details of floor based on filter");
         List<FloorVo> floorVo = null;
         boolean isEmptyName = !StringUtils.hasText(StringUtils.trimWhitespace(name));
         if (!isEmptyName) {
-            floorVo = service.retrieveAllMatchingDetailsByCriteria(Optional.of(name));
+            Optional<String> optName = isEmptyName ? Optional.empty() : Optional.of(name);
+            floorVo = service.retrieveAllMatchingDetailsByCriteria(optName);
             log.debug("Responding with successful retrieval of existing floor based on filter");
             return floorVo;
         }
@@ -168,7 +169,7 @@ public class FloorController {
             @ApiResponse(responseCode = "500", description = "Internal system error while trying to update Floor details",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
-    @ResponseStatus(HttpStatus.ACCEPTED)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping(path = "{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void updateExistingFloor(@PathVariable String id, @RequestBody(required = false) FloorForm form) throws FloorException {
         log.debug("Requesting to update all attributes of existing floor");

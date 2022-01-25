@@ -16,7 +16,7 @@ public interface FloorService {
 
     public String createFloor(FloorForm form) throws FloorException;
 
-    public List<FloorVo> retrieveListOfAllFloors();
+    public List<FloorVo> retrieveListOfAllFloors() throws FloorException;
 
     public FloorVo retrieveDetailsById(String id, Optional<TOABCascadeLevel> optionalCascadeLevel) throws FloorException;
 

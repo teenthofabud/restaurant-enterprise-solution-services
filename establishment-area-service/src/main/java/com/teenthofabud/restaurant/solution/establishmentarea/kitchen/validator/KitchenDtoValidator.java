@@ -43,9 +43,9 @@ public class KitchenDtoValidator implements Validator {
     public void validate(Object target, Errors errors) {
         KitchenDto dto = (KitchenDto) target;
         Optional<String> optKitchenName = dto.getKitchenName();
-        if(!fieldsToEscape.contains("name") && optKitchenName.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optKitchenName.get()))) {
-            errors.rejectValue("name", EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID.name());
-            log.debug("KitchenDto.name is invalid");
+        if(!fieldsToEscape.contains("kitchenName") && optKitchenName.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optKitchenName.get()))) {
+            errors.rejectValue("kitchenName", EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID.name());
+            log.debug("KitchenDto.kitchenName is invalid");
             return;
         }
         Optional<String> optDesc = dto.getDescription();

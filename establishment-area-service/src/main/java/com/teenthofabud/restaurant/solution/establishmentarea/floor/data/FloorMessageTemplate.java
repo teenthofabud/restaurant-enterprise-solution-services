@@ -11,7 +11,11 @@ public enum FloorMessageTemplate {
     MSG_TEMPLATE_FLOOR_ID_VALID("Floor id: {} is semantically valid"),
     MSG_TEMPLATE_FLOOR_ID_INVALID("Floor id: {} is invalid"),
     MSG_TEMPLATE_FLOOR_ID_EMPTY("Floor id is empty"),
-    MSG_TEMPLATE_FLOOR_CASCADE_LEVEL_EMPTY("Floor cascadeLevel is empty");
+    MSG_TEMPLATE_FLOOR_CASCADE_LEVEL_EMPTY("Floor cascadeLevel is empty"),
+
+    MSG_TEMPLATE_FLOOR_EXISTENCE_BY_NAME ("Checking existence of FloorEntity with name: {}"),
+    MSG_TEMPLATE_FLOOR_EXISTS_BY_NAME ("FloorEntity already exists with name: {}"),
+    MSG_TEMPLATE_FLOOR_NON_EXISTENCE_BY_NAME ("No FloorEntity exists with name: {}");
 
     private String value;
 

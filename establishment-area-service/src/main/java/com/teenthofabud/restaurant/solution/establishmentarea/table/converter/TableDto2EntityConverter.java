@@ -35,7 +35,7 @@ public class TableDto2EntityConverter implements ComparativePatchConverter<Table
     private FloorRepository floorRepository;
 
     @Autowired
-    public void setAccountRepository(FloorRepository floorRepository) {
+    public void setFloorRepository(FloorRepository floorRepository) {
         this.floorRepository = floorRepository;
     }
 
@@ -81,7 +81,7 @@ public class TableDto2EntityConverter implements ComparativePatchConverter<Table
             log.debug("TableDto.active is valid");
         }
 
-        if(Collections.frequency(Arrays.asList(changeSW), Boolean.TRUE) == 5) {
+        if(Collections.frequency(Arrays.asList(changeSW), Boolean.TRUE) >= 1) {
             log.debug("All provided TableDto attributes are valid");
             actualEntity.setModifiedOn(LocalDateTime.now(ZoneOffset.UTC));
             return;

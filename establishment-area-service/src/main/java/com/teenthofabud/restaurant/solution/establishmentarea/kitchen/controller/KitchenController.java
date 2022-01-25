@@ -27,6 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -70,7 +71,7 @@ public class KitchenController {
             return createdVo;
         }
         log.debug("KitchenForm is null");
-        throw new KitchenException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID,
+        throw new KitchenException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_UNEXPECTED,
                 new Object[]{ "form", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
     }
 
@@ -81,10 +82,10 @@ public class KitchenController {
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public List<KitchenVo> getAllKitchenNaturallyOrdered() {
+    public List<KitchenVo> getAllKitchenNaturallyOrdered() throws KitchenException {
         log.debug("Requesting all available kitchens by their natural orders");
         List<KitchenVo> naturallyOrderedKitchens = service.retrieveListOfAllKitchens();
-        log.debug("Responding with all available accounts by their natural orders");
+        log.debug("Responding with all available floors by their natural orders");
         return naturallyOrderedKitchens;
     }
 
@@ -133,7 +134,7 @@ public class KitchenController {
         }
     }
 
-    @Operation(summary = "Get all Kitchen details by provided criteria")
+    @Operation(summary = "Get all Kitchen details by provided criteria i.e. name, description")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Retrieve all available Kitchens and their details that match the provided criteria",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = KitchenVo.class))) }),
@@ -143,18 +144,63 @@ public class KitchenController {
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(value = "/criteria/{name}")
-    public List<KitchenVo> getKitchenDetailsByCriteria(@PathVariable String name) throws KitchenException {
+    @GetMapping("filter")
+    public List<KitchenVo> getKitchenDetailsByFilter(@RequestParam(required = false) String kitchenName,
+                                                     @RequestParam(required = false) String description) throws KitchenException {
         log.debug("Requesting all details of kitchen based on filter");
         List<KitchenVo> kitchenVo = null;
-        boolean isEmptyName = !StringUtils.hasText(StringUtils.trimWhitespace(name));
-        if (!isEmptyName) {
-            kitchenVo = service.retrieveAllMatchingDetailsByCriteria(Optional.of(name));
+        boolean isEmptyName = !StringUtils.hasText(StringUtils.trimWhitespace(kitchenName));
+        boolean isEmptyDescription = !StringUtils.hasText(StringUtils.trimWhitespace(description));
+
+        if (!isEmptyName || !isEmptyDescription) {
+            Optional<String> optName = isEmptyName ? Optional.empty() : Optional.of(kitchenName);
+            Optional<String> optDesc = isEmptyDescription ? Optional.empty() : Optional.of(description);
+            kitchenVo = service.retrieveAllMatchingDetailsByCriteria(optName,optDesc);
             log.debug("Responding with successful retrieval of existing kitchen based on filter");
             return kitchenVo;
         }
         log.debug("kitchen filters are empty");
         throw new KitchenException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID, new Object[] { "filters" });
+    }
+
+    @Operation(summary = "Get all Kitchen details by floor id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Retrieve all available Kitchens and their details that match the given floor id",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = KitchenVo.class))) }),
+            @ApiResponse(responseCode = "400", description = "Kitchen id is invalid",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) }),
+            @ApiResponse(responseCode = "404", description = "No Kitchens available with the given floor id",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
+    })
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("floorid/{floorId}")
+    public List<KitchenVo> getAllKitchensByFloorId(@PathVariable String floorId, @RequestParam(required = false)
+    @io.swagger.v3.oas.annotations.Parameter(in = ParameterIn.QUERY, description = "levels of nested fields to be unfolded within the response body")
+            String cascadeUntilLevel) throws KitchenException {
+        List<KitchenVo> matchedByFloorIds = new ArrayList<>();
+        log.debug("Requesting all available kitchens with given floorId");
+        if(StringUtils.hasText(StringUtils.trimWhitespace(floorId)) && StringUtils.isEmpty(StringUtils.trimWhitespace(cascadeUntilLevel))) {
+            matchedByFloorIds = service.retrieveAllMatchingDetailsByFloorId(floorId, Optional.empty());
+            log.debug("Responding with all available kitchens with given floorId");
+            return matchedByFloorIds;
+        } else if(StringUtils.hasText(StringUtils.trimWhitespace(floorId)) && StringUtils.hasText(StringUtils.trimWhitespace(cascadeUntilLevel))) {
+            try {
+                Integer cascadeLevelCode = Integer.parseInt(cascadeUntilLevel);
+                if(cascadeLevelCode < 0) {
+                    throw new NumberFormatException();
+                }
+                log.debug("Requested with cascade level code: {}", cascadeLevelCode);
+                Optional<TOABCascadeLevel> optCascadeLevel = TOABCascadeLevel.findByLevelCode(cascadeUntilLevel);
+                matchedByFloorIds = service.retrieveAllMatchingDetailsByFloorId(floorId, optCascadeLevel);
+                log.debug("Responding with successful retrieval of existing kitchen details with given floorId having fields cascaded to given level");
+                return matchedByFloorIds;
+            } catch (NumberFormatException e) {
+                log.debug(KitchenMessageTemplate.MSG_TEMPLATE_KITCHEN_CASCADE_LEVEL_EMPTY.getValue());
+                throw new KitchenException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID, new Object[] { "cascadeUntilLevel", cascadeUntilLevel });
+            }
+        }
+        log.debug("kitchen floorId is empty");
+        throw new KitchenException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID, new Object[] { "floorId", floorId });
     }
 
     @Operation(summary = "Update Kitchen details by id")
@@ -170,14 +216,14 @@ public class KitchenController {
             @ApiResponse(responseCode = "500", description = "Internal system error while trying to update Kitchen details",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
-    @ResponseStatus(HttpStatus.ACCEPTED)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping(path = "{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void updateExistingKitchen(@PathVariable String id, @RequestBody(required = false) KitchenForm form) throws KitchenException {
         log.debug("Requesting to update all attributes of existing kitchen");
         if(StringUtils.hasText(StringUtils.trimWhitespace(id))) {
             if(form != null) {
                 service.updateKitchen(id, form);
-                log.debug("Responding with successful updation of attributes for existing account");
+                log.debug("Responding with successful updation of attributes for existing floor");
                 return;
             }
             log.debug("KitchenForm is null");
@@ -204,10 +250,10 @@ public class KitchenController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("{id}")
     public void deleteExistingKitchen(@PathVariable String id) throws KitchenException {
-        log.debug("Requesting to soft delete account");
+        log.debug("Requesting to soft delete floor");
         if(StringUtils.hasText(StringUtils.trimWhitespace(id))) {
             service.deleteKitchen(id);
-            log.debug("Responding with successful deletion of existing account");
+            log.debug("Responding with successful deletion of existing floor");
             return;
         }
         log.debug(KitchenMessageTemplate.MSG_TEMPLATE_KITCHEN_ID_EMPTY.getValue());

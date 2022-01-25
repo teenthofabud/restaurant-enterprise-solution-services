@@ -6,11 +6,15 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.teenthofabud.core.common.constant.TOABBaseMessageTemplate;
 import com.teenthofabud.core.common.constant.TOABCascadeLevel;
+import com.teenthofabud.core.common.data.dto.TOABRequestContextHolder;
 import com.teenthofabud.core.common.data.form.PatchOperationForm;
 import com.teenthofabud.core.common.error.TOABBaseException;
 import com.teenthofabud.core.common.error.TOABSystemException;
 import com.teenthofabud.core.common.service.TOABBaseService;
 import com.teenthofabud.restaurant.solution.establishmentarea.error.EstablishmentAreaErrorCode;
+import com.teenthofabud.restaurant.solution.establishmentarea.floor.data.FloorException;
+import com.teenthofabud.restaurant.solution.establishmentarea.floor.data.FloorVo;
+import com.teenthofabud.restaurant.solution.establishmentarea.floor.service.FloorService;
 import com.teenthofabud.restaurant.solution.establishmentarea.kitchen.converter.KitchenDto2EntityConverter;
 import com.teenthofabud.restaurant.solution.establishmentarea.kitchen.converter.KitchenEntity2VoConverter;
 import com.teenthofabud.restaurant.solution.establishmentarea.kitchen.converter.KitchenForm2EntityConverter;
@@ -22,6 +26,7 @@ import com.teenthofabud.restaurant.solution.establishmentarea.kitchen.service.Ki
 import com.teenthofabud.restaurant.solution.establishmentarea.kitchen.validator.KitchenDtoValidator;
 import com.teenthofabud.restaurant.solution.establishmentarea.kitchen.validator.KitchenFormRelaxedValidator;
 import com.teenthofabud.restaurant.solution.establishmentarea.kitchen.validator.KitchenFormValidator;
+import com.teenthofabud.restaurant.solution.establishmentarea.utils.EstablishmentAreaServiceHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -62,6 +67,9 @@ public class KitchenServiceImpl implements KitchenService {
 
     private TOABBaseService toabBaseService;
     private ObjectMapper om;
+
+    private FloorService floorService;
+    private EstablishmentAreaServiceHelper establishmentAreaServiceHelper;
 
     @Autowired
     public void setKitchenDtoValidator(KitchenDtoValidator kitchenDtoValidator) {
@@ -118,6 +126,16 @@ public class KitchenServiceImpl implements KitchenService {
         this.kitchenRepository = kitchenRepository;
     }
 
+    @Autowired
+    public void setFloorService(FloorService floorService) {
+        this.floorService = floorService;
+    }
+
+    @Autowired
+    public void setEstablishmentAreaServiceHelper(EstablishmentAreaServiceHelper establishmentAreaServiceHelper) {
+        this.establishmentAreaServiceHelper = establishmentAreaServiceHelper;
+    }
+
     @Transactional
     @Override
     public String createKitchen(KitchenForm form) throws KitchenException{
@@ -133,6 +151,15 @@ public class KitchenServiceImpl implements KitchenService {
             throw new KitchenException(ec, new Object[] { err.getFieldError().getField() });
         }
         log.debug("All attributes of KitchenForm are valid");
+
+        log.debug(KitchenMessageTemplate.MSG_TEMPLATE_KITCHEN_EXISTENCE_BY_NAME_AND_FLOOR_ID.getValue(), form.getKitchenName(), form.getFloorId());
+        if(kitchenRepository.existsByKitchenNameAndFloorFlrId(form.getKitchenName(), Long.parseLong(form.getFloorId()))) {
+            log.debug(KitchenMessageTemplate.MSG_TEMPLATE_KITCHEN_EXISTS_BY_NAME_AND_FLOOR_ID.getValue(), form.getKitchenName(), form.getFloorId());
+            throw new KitchenException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_EXISTS,
+                    new Object[]{ "kitchenName: " + form.getKitchenName(), "floorId: " + form.getFloorId() });
+        }
+        log.debug(KitchenMessageTemplate.MSG_TEMPLATE_KITCHEN_NON_EXISTENCE_BY_NAME_AND_FLOOR_ID.getValue(),
+                form.getKitchenName(), form.getFloorId());
 
         KitchenEntity expectedEntity = form2EntityConverter.convert(form);
 
@@ -151,18 +178,11 @@ public class KitchenServiceImpl implements KitchenService {
 
     @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
-    public List<KitchenVo> retrieveListOfAllKitchens() {
+    public List<KitchenVo> retrieveListOfAllKitchens() throws KitchenException {
         log.info("Retrieving all the KitchenEntities");
         List<KitchenEntity> kitchenEntities = kitchenRepository.findAll();
-        List<KitchenVo> naturallyOrderedList = new ArrayList<>();
-        for(KitchenEntity entity : kitchenEntities) {
-            KitchenVo dto = entity2VoConverter.convert(entity);
-            log.debug("Converting {} to {}", entity, dto);
-            naturallyOrderedList.add(dto);
-        }
-        return naturallyOrderedList.stream()
-                .sorted(CMP_BY_KITCHEN_NAME)
-                .collect(Collectors.toList());
+        List<KitchenVo> naturallyOrderedList = establishmentAreaServiceHelper.kitchenEntity2DetailedVo(kitchenEntities);
+        return naturallyOrderedList.stream().sorted(CMP_BY_KITCHEN_NAME).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
@@ -178,8 +198,11 @@ public class KitchenServiceImpl implements KitchenService {
                     new Object[] { "id", String.valueOf(id) });
         }
         KitchenEntity entity = optEntity.get();
-        KitchenVo vo = entity2VoConverter.convert(entity);
-        log.info("Found KitchenVo by id: {}", id);
+        TOABCascadeLevel cascadeLevel = optionalCascadeLevel.isPresent() ? optionalCascadeLevel.get() : TOABCascadeLevel.ZERO;
+        TOABRequestContextHolder.setCascadeLevelContext(cascadeLevel);
+        KitchenVo vo = establishmentAreaServiceHelper.kitchenEntity2DetailedVo(entity);
+        log.debug("KitchenVo populated with fields cascaded to level: {}", cascadeLevel);
+        TOABRequestContextHolder.clearCascadeLevelContext();
         return vo;
     }
 
@@ -200,7 +223,7 @@ public class KitchenServiceImpl implements KitchenService {
         return kitchenId;
     }
 
-    private List<KitchenVo> entity2DetailedVoList(List<KitchenEntity> kitchenEntityList) {
+    /*private List<KitchenVo> entity2DetailedVoList(List<KitchenEntity> kitchenEntityList) {
         List<KitchenVo> kitchenDetailsList = new ArrayList<>(kitchenEntityList.size());
         for(KitchenEntity entity : kitchenEntityList) {
             KitchenVo vo = entity2VoConverter.convert(entity);
@@ -208,33 +231,96 @@ public class KitchenServiceImpl implements KitchenService {
             kitchenDetailsList.add(vo);
         }
         return kitchenDetailsList;
+    }*/
+
+    @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+    @Override
+    public List<KitchenVo> retrieveAllMatchingDetailsByFloorId(String floorId) throws KitchenException {
+        log.info("Requesting KitchenEntity that match with floorId: {}", floorId);
+        Errors err = new DirectFieldBindingResult(floorId, "KitchenForm");
+        try {
+            FloorVo floorVo = floorService.retrieveDetailsById(floorId, Optional.of(TOABCascadeLevel.ONE));
+            if(!floorVo.getActive()) {
+                throw new FloorException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_INACTIVE, new Object [] { floorId });
+            }
+        } catch (FloorException e) {
+            log.error("floorId is invalid", e);
+            throw new KitchenException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID, new Object [] { "floorId: " + floorId });
+        }
+        List<KitchenEntity> kitchenEntityList = kitchenRepository.findByFloorFlrId(Long.parseLong(floorId));
+        if(kitchenEntityList != null && !kitchenEntityList.isEmpty()) {
+            List<KitchenVo> matchedKitchenList = establishmentAreaServiceHelper.kitchenEntity2DetailedVo(kitchenEntityList);
+            log.info("Found {} KitchenVo matching with floorId: {}", matchedKitchenList.size(),floorId);
+            return matchedKitchenList;
+        }
+        log.debug("No KitchenVo found matching with floorId: {}", floorId);
+        throw new KitchenException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_NOT_FOUND, new Object[] { "floorId", floorId });
     }
 
-    @Transactional
+    @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
-    public List<KitchenVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalKitchenName) throws KitchenException {
+    public List<KitchenVo> retrieveAllMatchingDetailsByFloorId(String floorId, Optional<TOABCascadeLevel> optionalCascadeLevel) throws KitchenException {
+        log.info("Requesting KitchenEntity that match with floorId: {}", floorId);
+        Errors err = new DirectFieldBindingResult(floorId, "KitchenForm");
+        try {
+            FloorVo floorVo = floorService.retrieveDetailsById(floorId, Optional.of(TOABCascadeLevel.ONE));
+            if(!floorVo.getActive()) {
+                throw new FloorException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_INACTIVE, new Object [] { floorId });
+            }
+        } catch (FloorException e) {
+            log.error("floorId is invalid", e);
+            throw new KitchenException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID, new Object [] { "floorId: " + floorId });
+        }
+        List<KitchenEntity> kitchenEntityList = kitchenRepository.findByFloorFlrId(Long.parseLong(floorId));
+        TOABCascadeLevel cascadeLevel = optionalCascadeLevel.isPresent() ? optionalCascadeLevel.get() : TOABCascadeLevel.ZERO;
+        TOABRequestContextHolder.setCascadeLevelContext(cascadeLevel);
+        List<KitchenVo> matchedKitchenList = establishmentAreaServiceHelper.kitchenEntity2DetailedVo(kitchenEntityList);
+        log.info("Found {} KitchenVo matching with floorId: {}", matchedKitchenList.size(),floorId);
+        TOABRequestContextHolder.clearCascadeLevelContext();
+        if(matchedKitchenList.isEmpty()) {
+            log.debug("No KitchenVo found matching with floorId: {}", floorId);
+            throw new KitchenException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_NOT_FOUND, new Object[] { "floorId", floorId });
+        }
+        return matchedKitchenList;
+    }
 
-        String kitchenName = optionalKitchenName.get();
-        log.info("Requesting KitchenEntity by kitchen name: {}", kitchenName);
+    @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+    @Override
+    public List<KitchenVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalKitchenName,
+                                                                Optional<String> optionalDescription) throws KitchenException {
 
-        List<KitchenVo> matchedAccountList = new LinkedList<>();
+        String kitchenName = optionalKitchenName.isPresent() ? optionalKitchenName.get() : "";
+        String description = optionalDescription.isPresent() ? optionalDescription.get() : "";
+
+        List<KitchenVo> matchedFloorList = new LinkedList<>();
         Map<String, String> providedFilters = new LinkedHashMap<>();
         KitchenEntity entity = new KitchenEntity();
         ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll();
         if(StringUtils.hasText(StringUtils.trimWhitespace(kitchenName))) {
             log.debug("kitchenName {} is valid", kitchenName);
-            providedFilters.put("flrName", kitchenName);
+            providedFilters.put("kitchenName", kitchenName);
             entity.setKitchenName(kitchenName);
-            matcherCriteria = matcherCriteria.withMatcher("flrName", ExampleMatcher.GenericPropertyMatchers.contains());
+            matcherCriteria = matcherCriteria.withMatcher("kitchenName", ExampleMatcher.GenericPropertyMatchers.contains());
         }
-        Example<KitchenEntity> accountEntityExample = Example.of(entity, matcherCriteria);
-        List<KitchenEntity> accountEntityList = kitchenRepository.findAll(accountEntityExample);
-        if(accountEntityList != null && !accountEntityList.isEmpty()) {
-            matchedAccountList = entity2DetailedVoList(accountEntityList);
-            log.info("Found {} KitchenVo matching with provided parameters : {}", matchedAccountList.size(), providedFilters);
+        if(StringUtils.hasText(StringUtils.trimWhitespace(description))) {
+            log.debug("description {} is valid", description);
+            providedFilters.put("description", description);
+            entity.setDescription(description);
+            matcherCriteria = matcherCriteria.withMatcher("description", ExampleMatcher.GenericPropertyMatchers.contains());
+        }
+        if(providedFilters.isEmpty()) {
+            log.debug("search parameters are not valid");
+        } else {
+            log.debug("search parameters {} are valid", providedFilters);
+        }
+        Example<KitchenEntity> floorEntityExample = Example.of(entity, matcherCriteria);
+        List<KitchenEntity> floorEntityList = kitchenRepository.findAll(floorEntityExample);
+        if(floorEntityList != null && !floorEntityList.isEmpty()) {
+            matchedFloorList = establishmentAreaServiceHelper.kitchenEntity2DetailedVo(floorEntityList);
+            log.info("Found {} KitchenVo matching with provided parameters : {}", matchedFloorList.size(), providedFilters);
         } else
             log.info("Found no KitchenVo available matching with provided parameters : {}", providedFilters);
-        return matchedAccountList;
+        return matchedFloorList;
     }
 
     @Transactional
@@ -289,6 +375,8 @@ public class KitchenServiceImpl implements KitchenService {
 
         KitchenEntity expectedEntity = optExpectedEntity.get();
 
+        checkUniquenessOfKitchen(form, actualEntity);
+
         entitySelfMapper.compareAndMap(expectedEntity, actualEntity);
         log.debug("Compared and copied attributes from KitchenEntity to KitchenForm");
         actualEntity.setModifiedOn(LocalDateTime.now(ZoneOffset.UTC));
@@ -299,7 +387,7 @@ public class KitchenServiceImpl implements KitchenService {
         if(actualEntity == null) {
             log.debug("Unable to update {}", actualEntity);
             throw new KitchenException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ACTION_FAILURE,
-                    new Object[]{ "update", "unable to persist currency account details" });
+                    new Object[]{ "update", "unable to persist currency floor details" });
         }
         log.info("Updated existing KitchenEntity with id: {}", actualEntity.getKitchenId());
     }
@@ -310,8 +398,8 @@ public class KitchenServiceImpl implements KitchenService {
         log.info("Soft deleting KitchenEntity by id: {}", id);
 
         log.debug(KitchenMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_KITCHEN_ENTITY_ID.getValue(), id);
-        Long accountId = parseKitchenId(id);
-        Optional<KitchenEntity> optEntity = kitchenRepository.findById(accountId);
+        Long floorId = parseKitchenId(id);
+        Optional<KitchenEntity> optEntity = kitchenRepository.findById(floorId);
         if(optEntity.isEmpty()) {
             log.debug(KitchenMessageTemplate.MSG_TEMPLATE_KITCHEN_ID_INVALID.getValue(), id);
             throw new KitchenException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
@@ -333,7 +421,7 @@ public class KitchenServiceImpl implements KitchenService {
         if(expectedEntity == null) {
             log.debug("Unable to soft delete {}", actualEntity);
             throw new KitchenException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ACTION_FAILURE,
-                    new Object[]{ "deletion", "unable to soft delete current account details with id:" + id });
+                    new Object[]{ "deletion", "unable to soft delete current floor details with id:" + id });
         }
 
         log.info("Soft deleted existing KitchenEntity with id: {}", actualEntity.getKitchenId());
@@ -407,6 +495,8 @@ public class KitchenServiceImpl implements KitchenService {
         }
         log.debug("All attributes of patched KitchenDto are valid");
 
+        checkUniquenessOfKitchen(patchedKitchenForm, actualEntity);
+
         log.debug("Comparatively copying patched attributes from KitchenDto to KitchenEntity");
         try {
             dto2EntityConverter.compareAndMap(patchedKitchenForm, actualEntity);
@@ -426,5 +516,50 @@ public class KitchenServiceImpl implements KitchenService {
         log.info("Patched KitchenEntity with id:{}", id);
     }
 
+    private void checkUniquenessOfKitchen(KitchenForm kitchenForm, KitchenEntity actualEntity) throws KitchenException {
+        List<Boolean> similaritySwitchesCollection = new ArrayList<>(2);
+        if(StringUtils.hasText(StringUtils.trimWhitespace(kitchenForm.getKitchenName()))) {
+            similaritySwitchesCollection.add(kitchenForm.getKitchenName().compareTo(actualEntity.getKitchenName()) == 0);
+        }
+        if(StringUtils.hasText(StringUtils.trimWhitespace(kitchenForm.getFloorId()))) {
+            similaritySwitchesCollection.add(kitchenForm.getFloorId().compareTo(actualEntity.getFloor().getFlrId().toString()) == 0);
+        }
+        if(!similaritySwitchesCollection.isEmpty()) {
+            String kitchenName = StringUtils.hasText(StringUtils.trimWhitespace(kitchenForm.getKitchenName())) ? kitchenForm.getKitchenName() : actualEntity.getKitchenName();
+            String floorId = StringUtils.hasText(StringUtils.trimWhitespace(kitchenForm.getFloorId())) ?
+                    kitchenForm.getFloorId() : actualEntity.getFloor().getFlrId().toString();
+            log.debug(KitchenMessageTemplate.MSG_TEMPLATE_KITCHEN_EXISTENCE_BY_NAME_AND_FLOOR_ID.getValue(), kitchenName, floorId);
+            boolean sameEntitySw = similaritySwitchesCollection.stream().allMatch(Boolean::valueOf);
+            boolean duplicateEntitySw =  kitchenRepository.existsByKitchenNameAndFloorFlrId(kitchenName, Long.parseLong(floorId));
+            if(sameEntitySw || duplicateEntitySw) {
+                log.debug(KitchenMessageTemplate.MSG_TEMPLATE_KITCHEN_EXISTS_BY_NAME_AND_FLOOR_ID.getValue(), kitchenName, floorId);
+                throw new KitchenException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_EXISTS, new Object[]{ "kitchenName: " + kitchenName, ", floorId: " + floorId});
+            }
+            log.debug(KitchenMessageTemplate.MSG_TEMPLATE_KITCHEN_NON_EXISTENCE_BY_NAME_AND_FLOOR_ID.getValue(), kitchenName, floorId);
 
+        }
+    }
+
+    private void checkUniquenessOfKitchen(KitchenDto patchedKitchenForm, KitchenEntity actualEntity) throws KitchenException {
+        List<Boolean> similaritySwitchesCollection = new ArrayList<>(2);
+        if(patchedKitchenForm.getKitchenName().isPresent()) {
+            similaritySwitchesCollection.add(patchedKitchenForm.getKitchenName().get().compareTo(actualEntity.getKitchenName()) == 0);
+        }
+        if(patchedKitchenForm.getFloorId().isPresent()) {
+            similaritySwitchesCollection.add(patchedKitchenForm.getFloorId().get().compareTo(actualEntity.getFloor().getFlrId().toString()) == 0);
+        }
+        if(!similaritySwitchesCollection.isEmpty()) {
+            String kitchenName = patchedKitchenForm.getKitchenName().isPresent() ? patchedKitchenForm.getKitchenName().get() : actualEntity.getKitchenName();
+            String floorId = patchedKitchenForm.getFloorId().isPresent() ? patchedKitchenForm.getFloorId().get() : actualEntity.getFloor().getFlrId().toString();
+            log.debug(KitchenMessageTemplate.MSG_TEMPLATE_KITCHEN_EXISTENCE_BY_NAME_AND_FLOOR_ID.getValue(), kitchenName, floorId);
+            boolean sameEntitySw = similaritySwitchesCollection.stream().allMatch(Boolean::valueOf);
+            boolean duplicateEntitySw =  kitchenRepository.existsByKitchenNameAndFloorFlrId(kitchenName, Long.parseLong(floorId));
+            if(sameEntitySw || duplicateEntitySw) {
+                log.debug(KitchenMessageTemplate.MSG_TEMPLATE_KITCHEN_EXISTS_BY_NAME_AND_FLOOR_ID.getValue(), kitchenName, floorId);
+                throw new KitchenException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_EXISTS, new Object[]{ "kitchenName: " + kitchenName, ", floorId: " + floorId });
+            }
+            log.debug(KitchenMessageTemplate.MSG_TEMPLATE_KITCHEN_NON_EXISTENCE_BY_NAME_AND_FLOOR_ID.getValue(), kitchenName, floorId);
+
+        }
+    }
 }

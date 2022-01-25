@@ -58,11 +58,18 @@ public class TableFormValidator implements Validator {
         }
         log.debug("TableForm.description is valid");
         
-        if (!fieldsToEscape.contains("capacity") &&
-                StringUtils.isEmpty(StringUtils.trimWhitespace(form.getCapacity()))) {
+        if (!fieldsToEscape.contains("capacity") && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getCapacity()))) {
             log.debug("TableForm.capacity is empty");
             errors.rejectValue("capacity", EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID.name());
             return;
+        } else if(StringUtils.hasText(StringUtils.trimWhitespace(form.getCapacity()))){
+            try{
+                Long.valueOf(form.getCapacity());
+            } catch (NumberFormatException e){
+                log.debug("TableForm.capacity is not a number");
+                errors.rejectValue("capacity", EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID.name());
+                return;
+            }
         }
         log.debug("TableForm.capacity is valid");
 
