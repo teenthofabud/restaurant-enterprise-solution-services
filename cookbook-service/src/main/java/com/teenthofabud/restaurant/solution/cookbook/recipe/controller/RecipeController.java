@@ -256,31 +256,32 @@ public class RecipeController {
                                                   @RequestParam(required = false) String portionSizeUnitId) throws RecipeException {
         log.debug("Requesting all available recipees with given filters");
         boolean emptyName = StringUtils.isEmpty(StringUtils.trimWhitespace(name));
-        log.debug("filter name is provided: {} as ", emptyName, name);
+        log.debug("filter name is provided: {} as {}", !emptyName, name);
         boolean emptyDescription = StringUtils.isEmpty(StringUtils.trimWhitespace(description));
-        log.debug("filter description name is provided: {} as ", emptyDescription, description);
+        log.debug("filter description name is provided: {} as {}", !emptyDescription, description);
         boolean emptyInstructions = StringUtils.isEmpty(StringUtils.trimWhitespace(instructions));
-        log.debug("filter instructions is provided: {} as ", emptyInstructions, instructions);
+        log.debug("filter instructions is provided: {} as {}", !emptyInstructions, instructions);
         boolean emptyCookingMethod = StringUtils.isEmpty(StringUtils.trimWhitespace(cookingMethod));
-        log.debug("filter cookingMethod is provided: {} as ", emptyCookingMethod, cookingMethod);
+        log.debug("filter cookingMethod is provided: {} as {}", !emptyCookingMethod, cookingMethod);
         boolean emptyNumberOfServings = StringUtils.isEmpty(StringUtils.trimWhitespace(numberOfServings));
-        log.debug("filter numberOfServings is provided: {} as ", emptyNumberOfServings, numberOfServings);
+        log.debug("filter numberOfServings is provided: {} as {}", !emptyNumberOfServings, numberOfServings);
         boolean emptyItemId = StringUtils.isEmpty(StringUtils.trimWhitespace(itemId));
-        log.debug("filter itemId is provided: {} as ", emptyItemId, itemId);
+        log.debug("filter itemId is provided: {} as {}", !emptyItemId, itemId);
         boolean emptyPreparationTimeDuration = StringUtils.isEmpty(StringUtils.trimWhitespace(preparationTimeDuration));
-        log.debug("filter preparationTimeDuration is provided: {} as ", emptyPreparationTimeDuration, preparationTimeDuration);
+        log.debug("filter preparationTimeDuration is provided: {} as {}", !emptyPreparationTimeDuration, preparationTimeDuration);
         boolean emptyPreparationTimeUnitId =  StringUtils.isEmpty(StringUtils.trimWhitespace(preparationTimeUnitId));
-        log.debug("filter preparationTimeUnitId is provided: {} as ", emptyPreparationTimeUnitId, preparationTimeUnitId);
+        log.debug("filter preparationTimeUnitId is provided: {} as {}", !emptyPreparationTimeUnitId, preparationTimeUnitId);
         boolean emptyCookingTimeDuration = StringUtils.isEmpty(StringUtils.trimWhitespace(cookingTimeDuration));
-        log.debug("filter cookingTimeDuration is provided: {} as ", emptyCookingTimeDuration, cookingTimeDuration);
+        log.debug("filter cookingTimeDuration is provided: {} as {}", !emptyCookingTimeDuration, cookingTimeDuration);
         boolean emptyCookingTimeUnitId =  StringUtils.isEmpty(StringUtils.trimWhitespace(cookingTimeUnitId));
-        log.debug("filter cookingTimeUnitId is provided: {} as ", emptyCookingTimeUnitId, cookingTimeUnitId);
+        log.debug("filter cookingTimeUnitId is provided: {} as {}", !emptyCookingTimeUnitId, cookingTimeUnitId);
         boolean emptyPortionSizeAmount = StringUtils.isEmpty(StringUtils.trimWhitespace(portionSizeAmount));
-        log.debug("filter portionSizeAmount is provided: {} as ", emptyPortionSizeAmount, portionSizeAmount);
+        log.debug("filter portionSizeAmount is provided: {} as {}", !emptyPortionSizeAmount, portionSizeAmount);
         boolean emptyPortionSizeUnitId =  StringUtils.isEmpty(StringUtils.trimWhitespace(portionSizeUnitId));
-        log.debug("filter portionSizeUnitId is provided: {} as ", emptyPortionSizeUnitId, portionSizeUnitId);
-        if(!emptyName || !emptyDescription || !emptyInstructions || !emptyCookingMethod || !emptyItemId || !emptyPreparationTimeDuration
-                || !emptyPreparationTimeUnitId || !emptyCookingTimeDuration || !emptyCookingTimeUnitId || !emptyPortionSizeAmount || !emptyPortionSizeUnitId) {
+        log.debug("filter portionSizeUnitId is provided: {} as {}", !emptyPortionSizeUnitId, portionSizeUnitId);
+        if(!emptyName || !emptyDescription || !emptyInstructions || !emptyCookingMethod || !emptyItemId || !emptyNumberOfServings
+                || !emptyPreparationTimeDuration || !emptyPreparationTimeUnitId || !emptyCookingTimeDuration || !emptyCookingTimeUnitId
+                || !emptyPortionSizeAmount || !emptyPortionSizeUnitId) {
             Optional<String> optName = emptyName ? Optional.empty() : Optional.of(name);
             Optional<String> optDescription = emptyDescription ? Optional.empty() : Optional.of(description);
             Optional<String> optInstructions = emptyInstructions ? Optional.empty() : Optional.of(instructions);

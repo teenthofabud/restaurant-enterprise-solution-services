@@ -339,8 +339,8 @@ public class IngredientIntegrationTest extends CookbookIntegrationBaseTest {
         ingredientForm.setQuantityUnitId("g");
 
         ingredientEntity1 = new IngredientEntity();
-        ingredientEntity1.setName("default");
-        ingredientEntity1.setDescription("Ingredient 1 Name");
+        ingredientEntity1.setName("Ingredient 1 Name");
+        ingredientEntity1.setDescription("Ingredient 1 Description");
         ingredientEntity1.setProductId(productVo1.getId());
         ingredientEntity1.setQuantityAmount(988.7d);
         ingredientEntity1.setQuantityUnitId("g");
@@ -359,8 +359,8 @@ public class IngredientIntegrationTest extends CookbookIntegrationBaseTest {
         //ingredientVo1.setCuisine(cuisineVo1);
 
         ingredientEntity2 = new IngredientEntity();
-        ingredientEntity2.setName("default");
-        ingredientEntity2.setDescription("Ingredient 2 Name");
+        ingredientEntity2.setName("Ingredient 2 Name");
+        ingredientEntity2.setDescription("Ingredient 2 Description");
         ingredientEntity2.setProductId(productVo2.getId());
         ingredientEntity2.setQuantityAmount(52.7d);
         ingredientEntity2.setQuantityUnitId("kg");
@@ -379,8 +379,8 @@ public class IngredientIntegrationTest extends CookbookIntegrationBaseTest {
         //ingredientVo2.setCuisine(cuisineVo2);
 
         ingredientEntity3 = new IngredientEntity();
-        ingredientEntity3.setName("default");
-        ingredientEntity3.setDescription("Ingredient 3 Name");
+        ingredientEntity3.setName("Ingredient 3 Name");
+        ingredientEntity3.setDescription("Ingredient 3 Description");
         ingredientEntity3.setProductId(productVo3.getId());
         ingredientEntity3.setQuantityAmount(82.7d);
         ingredientEntity3.setQuantityUnitId("g");
@@ -2029,255 +2029,139 @@ public class IngredientIntegrationTest extends CookbookIntegrationBaseTest {
      * GET all by filter combination - START
      */
 
+    @Test
+    public void test_Ingredient_Get_ShouldReturn_200Response_And_RecipeListNaturallyOrdered_WhenRequested_ForIngredients_WithName() throws Exception {
+        MvcResult mvcResult = null;
+        List<IngredientVo> ingredientList = new ArrayList<>(Arrays.asList(ingredientVo1, ingredientVo2, ingredientVo3));
+        ingredientVo1.setRecipe(null);
 
+        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_FILTER)
+                        .queryParam("name", "Ingredient"))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(ingredientList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo[].class).length);
+        Assertions.assertEquals(om.writeValueAsString(ingredientList), mvcResult.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void test_Ingredient_Get_ShouldReturn_200Response_And_RecipeListNaturallyOrdered_WhenRequested_ForIngredients_WithDescription() throws Exception {
+        MvcResult mvcResult = null;
+        List<IngredientVo> ingredientList = new ArrayList<>(Arrays.asList(ingredientVo2));
+        ingredientVo2.setRecipe(null);
+
+        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_FILTER)
+                        .queryParam("description", "Ingredient 2"))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(ingredientList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo[].class).length);
+        Assertions.assertEquals(om.writeValueAsString(ingredientList), mvcResult.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void test_Ingredient_Get_ShouldReturn_200Response_And_RecipeListNaturallyOrdered_WhenRequested_ForIngredients_WithProductId() throws Exception {
+        MvcResult mvcResult = null;
+        recipeVo1.setCuisine(null);
+
+        List<IngredientVo> ingredientList = new ArrayList<>(Arrays.asList(ingredientVo1));
+        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_FILTER)
+                        .queryParam("productId", "1"))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(ingredientList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo[].class).length);
+        Assertions.assertEquals(om.writeValueAsString(ingredientList), mvcResult.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void test_Ingredient_Get_ShouldReturn_200Response_And_RecipeListNaturallyOrdered_WhenRequested_ForIngredients_WithQuantityAmountAndPortionSizeUnitId() throws Exception {
+        MvcResult mvcResult = null;
+        List<IngredientVo> ingredientList = new ArrayList<>(Arrays.asList(ingredientVo3));
+        recipeVo1.setCuisine(null);
+        recipeVo2.setCuisine(null);
+        recipeVo3.setCuisine(null);
+
+
+        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_FILTER)
+                        .queryParam("quantityAmount", "82.7")
+                        .queryParam("quantityUnitId", "g"))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(ingredientList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo[].class).length);
+        Assertions.assertEquals(om.writeValueAsString(ingredientList), mvcResult.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void test_Ingredient_Get_ShouldReturn_200Response_And_RecipeListNaturallyOrdered_WhenRequested_ForIngredients_WithNameAndDescription() throws Exception {
+        MvcResult mvcResult = null;
+        List<IngredientVo> ingredientList = Arrays.asList(ingredientVo1, ingredientVo2, ingredientVo3);
+        ingredientVo1.setRecipe(null);
+        ingredientVo2.setRecipe(null);
+        ingredientVo3.setRecipe(null);
+
+        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_FILTER)
+                        .queryParam("name", "Ingredient")
+                        .queryParam("description", "Ingredient"))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(ingredientList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo[].class).length);
+        Assertions.assertEquals(om.writeValueAsString(ingredientList), mvcResult.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void test_Ingredient_Get_ShouldReturn_200Response_And_RecipeListNaturallyOrdered_WhenRequested_ForIngredients_WithNameAndDescriptionAndProductId() throws Exception {
+        MvcResult mvcResult = null;
+        List<IngredientVo> ingredientList = Arrays.asList(ingredientVo3);
+        ingredientVo3.setRecipe(null);
+
+        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_FILTER)
+                        .queryParam("name", "Ingredient 3")
+                        .queryParam("description", "Ingredient 3")
+                        .queryParam("productId", "4"))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(ingredientList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo[].class).length);
+        Assertions.assertEquals(om.writeValueAsString(ingredientList), mvcResult.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void test_Ingredient_Get_ShouldReturn_200Response_And_EmptyRecipeList_WhenRequested_ForIngredients_WithAbsent_DescriptionAndProductIdAndCookingMethod() throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = "RES-INVENTORY-002";
+        String fieldName = "id";
+        List<IngredientVo> ingredientList = new ArrayList<>();
+
+        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_FILTER)
+                        .queryParam("description", "Recipe 1")
+                        .queryParam("productId", "3"))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+    }
 
     /**
      * GET all by filter combination - END
      */
-
-    // 00000000000000000000000000000000000
-
-    /*
-
-    @Test
-    public void test_Ingredient_Get_ShouldReturn_200Response_And_IngredientListNaturallyOrdered_WhenRequested_ForIngredients_WithDescription() throws Exception {
-        MvcResult mvcResult = null;
-        List<IngredientVo> ingredientList = new ArrayList<>(Arrays.asList(ingredientVo1));
-        ingredientVo1.setCuisine(null);
-
-        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_FILTER)
-                        .queryParam("description", "Ingredient 1"))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(ingredientList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo[].class).length);
-        Assertions.assertEquals(om.writeValueAsString(ingredientList), mvcResult.getResponse().getContentAsString());
-    }
-
-    @Test
-    public void test_Ingredient_Get_ShouldReturn_200Response_And_IngredientListNaturallyOrdered_WhenRequested_ForIngredients_WithInstructions() throws Exception {
-        MvcResult mvcResult = null;
-        List<IngredientVo> ingredientList = new ArrayList<>(Arrays.asList(ingredientVo1));
-        ingredientVo1.setCuisine(null);
-        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_FILTER)
-                        .queryParam("instructions", "Ingredient 1"))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(ingredientList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo[].class).length);
-        Assertions.assertEquals(om.writeValueAsString(ingredientList), mvcResult.getResponse().getContentAsString());
-    }
-
-    @Test
-    public void test_Ingredient_Get_ShouldReturn_200Response_And_IngredientListNaturallyOrdered_WhenRequested_ForIngredients_WithInstructions() throws Exception {
-        MvcResult mvcResult = null;
-        ingredientVo2.setCuisine(null);
-        List<IngredientVo> ingredientList = new ArrayList<>(Arrays.asList(ingredientVo2));
-
-        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_FILTER)
-                        .queryParam("instructions", "200111"))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(ingredientList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo[].class).length);
-        Assertions.assertEquals(om.writeValueAsString(ingredientList), mvcResult.getResponse().getContentAsString());
-    }
-
-    @Test
-    public void test_Ingredient_Get_ShouldReturn_200Response_And_IngredientListNaturallyOrdered_WhenRequested_ForIngredients_WithProductId() throws Exception {
-        MvcResult mvcResult = null;
-        ingredientVo1.setCuisine(null);
-        ingredientVo2.setCuisine(null);
-        ingredientVo3.setCuisine(null);
-        List<IngredientVo> ingredientList = new ArrayList<>(Arrays.asList(ingredientVo1, ingredientVo2, ingredientVo3));
-        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_FILTER)
-                        .queryParam("productId", "133024"))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(ingredientList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo[].class).length);
-        Assertions.assertEquals(om.writeValueAsString(ingredientList), mvcResult.getResponse().getContentAsString());
-    }
-
-    @Test
-    public void test_Ingredient_Get_ShouldReturn_200Response_And_IngredientListNaturallyOrdered_WhenRequested_ForIngredients_WithCuisineId() throws Exception {
-        MvcResult mvcResult = null;
-        List<IngredientVo> ingredientList = new ArrayList<>(Arrays.asList(ingredientVo1, ingredientVo2, ingredientVo3));
-        ingredientVo1.setCuisine(null);
-        ingredientVo2.setCuisine(null);
-        ingredientVo3.setCuisine(null);
-
-
-        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_FILTER)
-                        .queryParam("cuisineId", "MH"))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(ingredientList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo[].class).length);
-        Assertions.assertEquals(om.writeValueAsString(ingredientList), mvcResult.getResponse().getContentAsString());
-    }
-
-    @Test
-    public void test_Ingredient_Get_ShouldReturn_200Response_And_IngredientListNaturallyOrdered_WhenRequested_ForIngredients_WithCookingMethod() throws Exception {
-        MvcResult mvcResult = null;
-        List<IngredientVo> ingredientList = new ArrayList<>(Arrays.asList(ingredientVo1, ingredientVo2, ingredientVo3));
-        ingredientVo1.setCuisine(null);
-        ingredientVo2.setCuisine(null);
-        ingredientVo3.setCuisine(null);
-
-        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_FILTER)
-                        .queryParam("cookingMethod", "IN"))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(ingredientList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo[].class).length);
-        Assertions.assertEquals(om.writeValueAsString(ingredientList), mvcResult.getResponse().getContentAsString());
-    }
-
-    @Test
-    public void test_Ingredient_Get_ShouldReturn_200Response_And_IngredientListNaturallyOrdered_WhenRequested_ForIngredients_WithCuisineIdAndProductId() throws Exception {
-        MvcResult mvcResult = null;
-        List<IngredientVo> ingredientList = Arrays.asList(ingredientVo1, ingredientVo2, ingredientVo3);
-        ingredientVo1.setCuisine(null);
-        ingredientVo2.setCuisine(null);
-        ingredientVo3.setCuisine(null);
-
-        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_FILTER)
-                        .queryParam("productId", "133024")
-                        .queryParam("cuisineId", "MH"))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(ingredientList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo[].class).length);
-        Assertions.assertEquals(om.writeValueAsString(ingredientList), mvcResult.getResponse().getContentAsString());
-    }
-
-    @Test
-    public void test_Ingredient_Get_ShouldReturn_200Response_And_IngredientListNaturallyOrdered_WhenRequested_ForIngredients_WithCookingMethodAndCuisineId() throws Exception {
-        MvcResult mvcResult = null;
-        List<IngredientVo> ingredientList = Arrays.asList(ingredientVo1, ingredientVo2, ingredientVo3);
-        ingredientVo1.setCuisine(null);
-        ingredientVo2.setCuisine(null);
-        ingredientVo3.setCuisine(null);
-
-        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_FILTER)
-                        .queryParam("cookingMethod", "IN")
-                        .queryParam("cuisineId", "MH"))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(ingredientList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo[].class).length);
-        Assertions.assertEquals(om.writeValueAsString(ingredientList), mvcResult.getResponse().getContentAsString());
-    }
-
-    @Test
-    public void test_Ingredient_Get_ShouldReturn_200Response_And_IngredientListNaturallyOrdered_WhenRequested_ForIngredients_WithCookingMethodAndProductId() throws Exception {
-        MvcResult mvcResult = null;
-        List<IngredientVo> ingredientList = Arrays.asList(ingredientVo1, ingredientVo2, ingredientVo3);
-        ingredientVo1.setCuisine(null);
-        ingredientVo2.setCuisine(null);
-        ingredientVo3.setCuisine(null);
-
-        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_FILTER)
-                        .queryParam("cookingMethod", "IN")
-                        .queryParam("productId", "133024"))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(ingredientList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo[].class).length);
-        Assertions.assertEquals(om.writeValueAsString(ingredientList), mvcResult.getResponse().getContentAsString());
-    }
-
-    @Test
-    public void test_Ingredient_Get_ShouldReturn_200Response_And_IngredientListNaturallyOrdered_WhenRequested_ForIngredients_WithProductIdAndInstructions() throws Exception {
-        MvcResult mvcResult = null;
-        List<IngredientVo> ingredientList = Arrays.asList(ingredientVo2);
-        ingredientVo2.setCuisine(null);
-
-        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_FILTER)
-                        .queryParam("productId", "133024")
-                        .queryParam("instructions", "200111"))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(ingredientList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo[].class).length);
-        Assertions.assertEquals(om.writeValueAsString(ingredientList), mvcResult.getResponse().getContentAsString());
-    }
-
-    @Test
-    public void test_Ingredient_Get_ShouldReturn_200Response_And_IngredientListNaturallyOrdered_WhenRequested_ForIngredients_WithDescriptionAndInstructionsAndCookingMethod() throws Exception {
-        MvcResult mvcResult = null;
-        List<IngredientVo> ingredientList = Arrays.asList(ingredientVo2);
-        ingredientVo2.setCuisine(null);
-
-        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_FILTER)
-                        .queryParam("description", "Ingredient 2")
-                        .queryParam("instructions", "200111")
-                        .queryParam("cookingMethod", "IN"))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(ingredientList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo[].class).length);
-        Assertions.assertEquals(om.writeValueAsString(ingredientList), mvcResult.getResponse().getContentAsString());
-    }
-
-    @Test
-    public void test_Ingredient_Get_ShouldReturn_200Response_And_EmptyIngredientList_WhenRequested_ForIngredients_WithAbsent_DescriptionAndProductIdAndCookingMethod() throws Exception {
-        MvcResult mvcResult = null;
-        List<IngredientVo> ingredientList = new ArrayList<>();
-
-        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_FILTER)
-                        .queryParam("description", "Ingredient 1")
-                        .queryParam("productId", UUID.randomUUID().toString())
-                        .queryParam("cookingMethod", UUID.randomUUID().toString()))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(ingredientList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo[].class).length);
-    }
-
-    @Test
-    public void test_Ingredient_Get_ShouldReturn_200Response_And_EmptyIngredientList_WhenRequested_ForIngredients_WithAbsent_ProductIdAndCuisineIdAndCookingMethod() throws Exception {
-        MvcResult mvcResult = null;
-        List<IngredientVo> ingredientList = new ArrayList<>();
-
-        mvcResult = this.mockMvc.perform(get(INGREDIENT_URI_FILTER)
-                        .queryParam("productId", UUID.randomUUID().toString())
-                        .queryParam("cuisineId", UUID.randomUUID().toString())
-                        .queryParam("cookingMethod", UUID.randomUUID().toString()))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(ingredientList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo[].class).length);
-    }
-
-    */
 
     @Override
     public String getSimulationBaseLocation() {
