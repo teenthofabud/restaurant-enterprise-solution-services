@@ -12,6 +12,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @Component
@@ -19,10 +22,16 @@ import java.util.List;
 public class AccountFormRelaxedValidator implements RelaxedValidator<AccountForm>  {
 
     private List<String> fieldsToEscape;
+    private String dobFormat;
 
     @Value("#{'${res.customer.account.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
+    }
+
+    @Value("${res.customer.dob.format}")
+    public void setDobFormat(String dobFormat) {
+        this.dobFormat = dobFormat;
     }
 
     private GenderIdValidator genderIdValidator;
@@ -68,13 +77,7 @@ public class AccountFormRelaxedValidator implements RelaxedValidator<AccountForm
             errors.rejectValue("genderId", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
             log.debug("AccountForm.genderId is empty");
             return false;
-        }
-        log.debug("AccountForm.genderId is valid");
-        if(!fieldsToEscape.contains("dateOfBirth") && form.getDateOfBirth() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getGenderId()))) {
-            errors.rejectValue("dateOfBirth", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
-            log.debug("AccountForm.dateOfBirth is empty");
-            return false;
-        } else if(!fieldsToEscape.contains("dateOfBirth") && form.getDateOfBirth() != null && StringUtils.hasText(StringUtils.trimWhitespace(form.getGenderId()))) {
+        } else if(!fieldsToEscape.contains("genderId") && form.getGenderId() != null && StringUtils.hasText(StringUtils.trimWhitespace(form.getGenderId()))) {
             Errors err = new DirectFieldBindingResult(form.getGenderId(), "AccountForm");
             genderIdValidator.validate(form.getGenderId(), err);
             if(err.hasErrors()) {
@@ -82,6 +85,21 @@ public class AccountFormRelaxedValidator implements RelaxedValidator<AccountForm
                 CustomerErrorCode ec = CustomerErrorCode.valueOf(err.getGlobalError().getCode());
                 log.debug("AccountForm error detail: {}", ec);
                 errors.rejectValue("genderId", ec.name());
+                return false;
+            }
+        }
+        log.debug("AccountForm.genderId is valid");
+        if(!fieldsToEscape.contains("dateOfBirth") && form.getDateOfBirth() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getDateOfBirth()))) {
+            errors.rejectValue("dateOfBirth", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
+            log.debug("AccountForm.dateOfBirth is empty");
+            return false;
+        } else if(!fieldsToEscape.contains("dateOfBirth") && form.getDateOfBirth() != null && StringUtils.hasText(StringUtils.trimWhitespace(form.getDateOfBirth()))) {
+            try {
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dobFormat);
+                LocalDate.parse(form.getDateOfBirth(), dtf);
+            } catch (DateTimeParseException e) {
+                errors.rejectValue("dateOfBirth", CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
+                log.debug("AccountForm.dateOfBirth is invalid");
                 return false;
             }
         }

@@ -22,6 +22,7 @@
         <module>inventory-service</module>
         <module>menu-service</module>
         <module>settings-service</module>
+        <module>session-service</module>
     </modules>
 
     <properties>
@@ -181,17 +182,12 @@
                     </execution>
                 </executions>
             </plugin>
-        </plugins>
-    </build>
-
-    <reporting>
-        <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire.version}</version>
             </plugin>
         </plugins>
-    </reporting>
+    </build>
 
 </project>

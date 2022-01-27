@@ -137,8 +137,8 @@ public class DiscountServiceImpl implements DiscountService {
     @Override
     public Set<DiscountVo> retrieveAllByNaturalOrdering() {
         log.info("Requesting all DiscountDocument by their natural ordering");
-        List<DiscountDocument> discountDocumentList = repository.findAll();
-        List<DiscountVo> discountVoList = settingsServiceHelper.discountDocument2DetailedVo(discountDocumentList);
+        List<DiscountDocument> engagementDocumentList = repository.findAll();
+        List<DiscountVo> discountVoList = settingsServiceHelper.discountDocument2DetailedVo(engagementDocumentList);
         Set<DiscountVo> naturallyOrderedSet = new TreeSet<>(CMP_BY_NAME);
         naturallyOrderedSet.addAll(discountVoList);
         log.info("{} DiscountVo available", naturallyOrderedSet.size());
@@ -196,8 +196,8 @@ public class DiscountServiceImpl implements DiscountService {
             log.debug("search parameters {} are valid", providedFilters);
         }
         Example<DiscountDocument> discountDocumentExample = Example.of(entity, matcherCriteria);
-        List<DiscountDocument> discountDocumentList = repository.findAll(discountDocumentExample);
-        matchedDiscountList = settingsServiceHelper.discountDocument2DetailedVo(discountDocumentList);
+        List<DiscountDocument> engagementDocumentList = repository.findAll(discountDocumentExample);
+        matchedDiscountList = settingsServiceHelper.discountDocument2DetailedVo(engagementDocumentList);
         log.info("Found {} DiscountVo matching with provided parameters : {}", matchedDiscountList.size(), providedFilters);
         log.info("No DiscountVo available matching with provided parameters : {}", matchedDiscountList.size(), providedFilters);
         return matchedDiscountList;
