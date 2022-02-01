@@ -43,6 +43,17 @@
                 <reconnectionDelay>1 second</reconnectionDelay>
                 <encoder class="net.logstash.logback.encoder.LogstashEncoder">
                     <includeCallerData>true</includeCallerData>
+                    <providers>
+                        <pattern>
+                            {
+                            "logger": "%logger",
+                            "level": "%level",
+                            "thread": "%thread",
+                            "message": "%message",
+                            "traceId": "%mdc"
+                            }
+                        </pattern>
+                    </providers>
                 </encoder>
             </appender>
         </then>

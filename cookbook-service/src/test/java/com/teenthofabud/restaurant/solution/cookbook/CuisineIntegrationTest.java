@@ -9,7 +9,7 @@ import com.teenthofabud.restaurant.solution.cookbook.cuisine.data.CuisineForm;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.data.CuisineVo;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.repository.CuisineRepository;
 import com.teenthofabud.restaurant.solution.cookbook.error.CookbookErrorCode;
-import com.teenthofabud.restaurant.solution.cookbook.integration.menu.item.data.ItemVo;
+import com.teenthofabud.restaurant.solution.cookbook.integration.menu.data.ItemVo;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeEntity;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeForm;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeVo;

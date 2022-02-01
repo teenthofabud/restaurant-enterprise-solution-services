@@ -6,6 +6,88 @@
           "path": [
             {
               "matcher": "exact",
+              "value": "/actuator/health"
+            }
+          ],
+          "method": [
+            {
+              "matcher": "exact",
+              "value": "GET"
+            }
+          ],
+          "destination": [
+            {
+              "matcher": "exact",
+              "value": "*"
+            }
+          ],
+          "query": {
+            "status": [
+              {
+                "matcher": "exact",
+                "value": "DOWN"
+              }
+            ]
+          },
+          "scheme": [
+            {
+              "matcher": "exact",
+              "value": "http"
+            }
+          ]
+        },
+        "response": {
+          "status": 200,
+          "bodyFile": "gender-200-response-data-status-DOWN.json",
+          "encodedBody": false,
+          "headers": {
+            "Content-Type": ["application/json"]
+          },
+          "templated": false
+        }
+      },
+      {
+        "request": {
+          "path": [
+            {
+              "matcher": "exact",
+              "value": "/actuator/health"
+            }
+          ],
+          "method": [
+            {
+              "matcher": "exact",
+              "value": "GET"
+            }
+          ],
+          "destination": [
+            {
+              "matcher": "exact",
+              "value": "*"
+            }
+          ],
+          "scheme": [
+            {
+              "matcher": "exact",
+              "value": "http"
+            }
+          ]
+        },
+        "response": {
+          "status": 200,
+          "bodyFile": "gender-200-response-data-status-UP.json",
+          "encodedBody": false,
+          "headers": {
+            "Content-Type": ["application/json"]
+          },
+          "templated": false
+        }
+      },
+      {
+        "request": {
+          "path": [
+            {
+              "matcher": "exact",
               "value": "/metadata/gender/1"
             }
           ],

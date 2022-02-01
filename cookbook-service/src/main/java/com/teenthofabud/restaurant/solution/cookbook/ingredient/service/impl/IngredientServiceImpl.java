@@ -17,7 +17,7 @@ import com.teenthofabud.restaurant.solution.cookbook.ingredient.data.IngredientE
 import com.teenthofabud.restaurant.solution.cookbook.ingredient.data.IngredientForm;
 import com.teenthofabud.restaurant.solution.cookbook.ingredient.data.IngredientMessageTemplate;
 import com.teenthofabud.restaurant.solution.cookbook.ingredient.data.IngredientVo;
-import com.teenthofabud.restaurant.solution.cookbook.integration.inventory.product.validator.ProductIdValidator;
+import com.teenthofabud.restaurant.solution.cookbook.integration.inventory.validator.ProductIdValidator;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeException;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeVo;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.service.RecipeService;

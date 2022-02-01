@@ -29,7 +29,6 @@ import java.util.concurrent.Future;
 @Slf4j
 public class CuisineEntity2VoConverter extends TOABBaseEntity2VoConverter<CuisineEntity, CuisineVo> implements Converter<CuisineEntity, CuisineVo> {
 
-    private RecipeService recipeService;
     private List<String> fieldsToEscape;
     private CookbookServiceHelper cookbookServiceHelper;
 
@@ -41,11 +40,6 @@ public class CuisineEntity2VoConverter extends TOABBaseEntity2VoConverter<Cuisin
     @Autowired
     public void setCuisineServiceHelper(CookbookServiceHelper cookbookServiceHelper) {
         this.cookbookServiceHelper = cookbookServiceHelper;
-    }
-
-    @Autowired
-    public void setRecipeService(RecipeService recipeService) {
-        this.recipeService = recipeService;
     }
 
     @Override

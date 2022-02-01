@@ -2,7 +2,7 @@ package com.teenthofabud.restaurant.solution.customer.account.validator;
 
 import com.teenthofabud.restaurant.solution.customer.account.data.AccountForm;
 import com.teenthofabud.restaurant.solution.customer.error.CustomerErrorCode;
-import com.teenthofabud.restaurant.solution.customer.integration.metadata.gender.validator.GenderIdValidator;
+import com.teenthofabud.restaurant.solution.customer.integration.metadata.validator.GenderIdValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
