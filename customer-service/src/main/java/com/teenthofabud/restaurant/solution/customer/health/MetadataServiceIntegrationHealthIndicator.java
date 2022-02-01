@@ -2,6 +2,7 @@ package com.teenthofabud.restaurant.solution.customer.health;
 
 import com.teenthofabud.restaurant.solution.customer.integration.metadata.data.HealthVo;
 import com.teenthofabud.restaurant.solution.customer.integration.metadata.proxy.MetadataServiceClient;
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Health;
@@ -34,16 +35,17 @@ public class MetadataServiceIntegrationHealthIndicator implements HealthIndicato
 
     @Override
     public Health health() {
-        HealthVo inventoryHealth = this.metadataServiceClient.health(this.selectStatus());
         String key = MetadataServiceClient.SERVICE_CLIENT_NAME;
-        Status status = null;
-        String value = "";
-        if(inventoryHealth.getStatus().toUpperCase().equals(Status.UP.getCode())) {
-            status = Status.UP;
-            value = "Available";
-        } else {
-            status = Status.DOWN;
-            value = "Unavailable";
+        Status status = Status.DOWN;
+        String value = "Unavailable";
+        try {
+            HealthVo inventoryHealth = this.metadataServiceClient.health(this.selectStatus());
+            if(inventoryHealth.getStatus().toUpperCase().equals(Status.UP.getCode())) {
+                status = Status.UP;
+                value = "Available";
+            }
+        } catch (FeignException e) {
+            log.error("Unable to query health of " + key, e);
         }
         Health health = Health.status(status).withDetail(key, value).build();
         return health;
