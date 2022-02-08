@@ -18,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @ToString(onlyExplicitlyIncluded = true)
 @Entity
-@Table(name = "menu_category")
+@Table(name = "category")
 @EntityListeners(AuditingEntityListener.class)
 public class CategoryEntity extends TOABBaseEntity implements Comparable<CategoryEntity> {
 

@@ -13,7 +13,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @ToString(onlyExplicitlyIncluded = true)
 @Entity
-@Table(name = "menu_item")
+@Table(name = "item")
 @EntityListeners(AuditingEntityListener.class)
 public class ItemEntity extends TOABBaseEntity implements Comparable<ItemEntity> {
 

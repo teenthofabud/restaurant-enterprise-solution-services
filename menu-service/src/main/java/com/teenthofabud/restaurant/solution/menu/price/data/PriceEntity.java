@@ -14,7 +14,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @ToString(onlyExplicitlyIncluded = true)
 @Entity
-@Table(name = "menu_item_price")
+@Table(name = "price")
 @EntityListeners(AuditingEntityListener.class)
 public class PriceEntity extends TOABBaseEntity implements Comparable<PriceEntity> {
 

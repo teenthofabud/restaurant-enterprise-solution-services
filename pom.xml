@@ -22,7 +22,7 @@
         <module>inventory-service</module>
         <module>menu-service</module>
         <module>settings-service</module>
-        <module>session-service</module>
+        <module>booking-service</module>
     </modules>
 
     <properties>
@@ -32,7 +32,7 @@
         <sonar.organization>teenthofabud</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
-        <toab-chassis-sdk.version>1.7.4-SNAPSHOT</toab-chassis-sdk.version>
+        <toab-chassis-sdk.version>1.7.6-SNAPSHOT</toab-chassis-sdk.version>
         <json-patch.version>1.13</json-patch.version>
         <jackson-datatype-jdk8.version>2.12.3</jackson-datatype-jdk8.version>
         <javax.json-api.version>1.1.4</javax.json-api.version>
@@ -186,6 +186,20 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
             </plugin>
         </plugins>
     </build>
