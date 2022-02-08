@@ -7,12 +7,12 @@ import com.teenthofabud.core.common.error.TOABErrorCode;
 import com.teenthofabud.core.common.error.TOABSystemException;
 import com.teenthofabud.restaurant.solution.customer.account.data.AccountEntity;
 import com.teenthofabud.restaurant.solution.customer.account.data.AccountVo;
+import com.teenthofabud.restaurant.solution.customer.integration.metadata.proxy.MetadataServiceClient;
 import com.teenthofabud.restaurant.solution.customer.utils.CustomerServiceHelper;
 import com.teenthofabud.restaurant.solution.customer.address.data.AddressEntity;
 import com.teenthofabud.restaurant.solution.customer.address.data.AddressVo;
 import com.teenthofabud.restaurant.solution.customer.address.service.AddressService;
-import com.teenthofabud.restaurant.solution.customer.integration.metadata.gender.data.GenderVo;
-import com.teenthofabud.restaurant.solution.customer.integration.metadata.gender.proxy.GenderServiceClient;
+import com.teenthofabud.restaurant.solution.customer.integration.metadata.data.GenderVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +27,7 @@ import java.util.concurrent.*;
 @Slf4j
 public class AccountEntity2VoConverter extends TOABBaseEntity2VoConverter<AccountEntity, AccountVo> implements Converter<AccountEntity, AccountVo> {
 
-    private GenderServiceClient genderServiceClient;
+    private MetadataServiceClient metadataServiceClient;
     private AddressService addressService;
     private List<String> fieldsToEscape;
     private CustomerServiceHelper customerServiceHelper;
@@ -48,8 +48,8 @@ public class AccountEntity2VoConverter extends TOABBaseEntity2VoConverter<Accoun
     }
 
     @Autowired
-    public void setGenderServiceClient(GenderServiceClient genderServiceClient) {
-        this.genderServiceClient = genderServiceClient;
+    public void setMetadataServiceClient(MetadataServiceClient metadataServiceClient) {
+        this.metadataServiceClient = metadataServiceClient;
     }
 
     @Override
@@ -93,7 +93,7 @@ public class AccountEntity2VoConverter extends TOABBaseEntity2VoConverter<Accoun
         switch(cascadeLevel) {
             case TWO:
                 if(!fieldsToEscape.contains("genderId")) {
-                    GenderVo genderVo = genderServiceClient.getGenderDetailsById(entity.getGenderId());
+                    GenderVo genderVo = metadataServiceClient.getGenderDetailsById(entity.getGenderId());
                     vo.setGender(genderVo);
                     log.debug("Retrieved {} for genderId: {}", vo, entity.getGenderId());
                 }
@@ -116,7 +116,7 @@ public class AccountEntity2VoConverter extends TOABBaseEntity2VoConverter<Accoun
         switch(cascadeLevel) {
             case TWO:
                 if(!fieldsToEscape.contains("genderId") && fieldName.compareTo("genderId") == 0) {
-                    GenderVo genderVo = genderServiceClient.getGenderDetailsById(entity.getGenderId());
+                    GenderVo genderVo = metadataServiceClient.getGenderDetailsById(entity.getGenderId());
                     vo.setGender(genderVo);
                     log.debug("Retrieved {} for genderId: {}", vo, entity.getGenderId());
                 }

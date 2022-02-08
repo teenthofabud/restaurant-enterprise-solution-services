@@ -6,8 +6,8 @@ import com.teenthofabud.core.common.data.dto.TOABRequestContextHolder;
 import com.teenthofabud.core.common.error.TOABErrorCode;
 import com.teenthofabud.core.common.error.TOABSystemException;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.data.CuisineVo;
-import com.teenthofabud.restaurant.solution.cookbook.integration.menu.item.data.ItemVo;
-import com.teenthofabud.restaurant.solution.cookbook.integration.menu.item.proxy.ItemServiceClient;
+import com.teenthofabud.restaurant.solution.cookbook.integration.menu.data.ItemVo;
+import com.teenthofabud.restaurant.solution.cookbook.integration.menu.proxy.MenuServiceClient;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeEntity;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeVo;
 import com.teenthofabud.restaurant.solution.cookbook.utils.CookbookServiceHelper;
@@ -37,7 +37,7 @@ public class RecipeEntity2VoConverter extends TOABBaseEntity2VoConverter<RecipeE
     }
 
     private CookbookServiceHelper cookbookServiceHelper;
-    private ItemServiceClient itemServiceClient;
+    private MenuServiceClient menuServiceClient;
 
     @Autowired
     public void setCookbookServiceHelper(CookbookServiceHelper cookbookServiceHelper) {
@@ -45,8 +45,8 @@ public class RecipeEntity2VoConverter extends TOABBaseEntity2VoConverter<RecipeE
     }
 
     @Autowired
-    public void setItemServiceClient(ItemServiceClient itemServiceClient) {
-        this.itemServiceClient = itemServiceClient;
+    public void setItemServiceClient(MenuServiceClient menuServiceClient) {
+        this.menuServiceClient = menuServiceClient;
     }
 
     @Override
@@ -133,7 +133,7 @@ public class RecipeEntity2VoConverter extends TOABBaseEntity2VoConverter<RecipeE
                     }
                 }
                 if(!fieldsToEscape.contains("itemId") && fieldName.compareTo("itemId") == 0) {
-                    ItemVo item = itemServiceClient.getItemDetailsById(entity.getItemId());
+                    ItemVo item = menuServiceClient.getItemDetailsById(entity.getItemId());
                     log.debug("Retrieved {} for item is: {}", item, entity.getItemId());
                     vo.setItem(item);
                 }

@@ -10,10 +10,10 @@ import com.teenthofabud.restaurant.solution.customer.account.converter.AccountEn
 import com.teenthofabud.restaurant.solution.customer.account.data.AccountVo;
 import com.teenthofabud.restaurant.solution.customer.address.data.AddressEntity;
 import com.teenthofabud.restaurant.solution.customer.address.data.AddressVo;
-import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.data.CityVo;
-import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.data.CountryVo;
-import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.data.StateVo;
-import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.proxy.CountryStateCityApiClient;
+import com.teenthofabud.restaurant.solution.customer.integration.countrystatecityapi.data.CityVo;
+import com.teenthofabud.restaurant.solution.customer.integration.countrystatecityapi.data.CountryVo;
+import com.teenthofabud.restaurant.solution.customer.integration.countrystatecityapi.data.StateVo;
+import com.teenthofabud.restaurant.solution.customer.integration.countrystatecityapi.proxy.CountryStateCityApiServiceClient;
 import com.teenthofabud.restaurant.solution.customer.utils.CustomerServiceHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +38,7 @@ public class AddressEntity2VoConverter extends TOABBaseEntity2VoConverter<Addres
     }
 
     private CustomerServiceHelper customerServiceHelper;
-    private CountryStateCityApiClient countryStateCityApiClient;
+    private CountryStateCityApiServiceClient countryStateCityApiServiceClient;
 
     @Autowired
     public void setCustomerServiceHelper(CustomerServiceHelper customerServiceHelper) {
@@ -46,8 +46,8 @@ public class AddressEntity2VoConverter extends TOABBaseEntity2VoConverter<Addres
     }
 
     @Autowired
-    public void setCountryStateCityApiClient(CountryStateCityApiClient countryStateCityApiClient) {
-        this.countryStateCityApiClient = countryStateCityApiClient;
+    public void setCountryStateCityApiServiceClient(CountryStateCityApiServiceClient countryStateCityApiServiceClient) {
+        this.countryStateCityApiServiceClient = countryStateCityApiServiceClient;
     }
 
     @Override
@@ -109,17 +109,17 @@ public class AddressEntity2VoConverter extends TOABBaseEntity2VoConverter<Addres
                     }
                 }
                 if(!fieldsToEscape.contains("countryId") && fieldName.compareTo("countryId") == 0) {
-                    CountryVo country = countryStateCityApiClient.getCountryDetailsFromISO2Code(entity.getCountryId());
+                    CountryVo country = countryStateCityApiServiceClient.getCountryDetailsFromISO2Code(entity.getCountryId());
                     log.debug("Retrieved {} for country is: {}", country, entity.getCountryId());
                     vo.setCountry(country);
                 }
                 if(!fieldsToEscape.contains("stateId") && fieldName.compareTo("stateId") == 0) {
-                    StateVo state = countryStateCityApiClient.getTheStateDetailsFromISO2Code(entity.getCountryId(), entity.getStateId());
+                    StateVo state = countryStateCityApiServiceClient.getTheStateDetailsFromISO2Code(entity.getCountryId(), entity.getStateId());
                     log.debug("Retrieved {} for state id: {}", state, entity.getStateId());
                     vo.setState(state);
                 }
                 if(!fieldsToEscape.contains("cityId") && fieldName.compareTo("cityId") == 0) {
-                    List<CityVo> cities = countryStateCityApiClient.getTheListOfCitiesInACountry(entity.getCountryId());
+                    List<CityVo> cities = countryStateCityApiServiceClient.getTheListOfCitiesInACountry(entity.getCountryId());
                     Optional<CityVo> optionalCity = cities.stream().filter(c -> c.getId().toString().compareTo(entity.getCityId()) == 0).findFirst();
                     log.debug("Retrieved {} for city id: {}", optionalCity.get(), entity.getCityId());
                     vo.setCity(optionalCity.get());

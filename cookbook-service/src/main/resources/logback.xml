@@ -43,6 +43,7 @@
                 <reconnectionDelay>1 second</reconnectionDelay>
                 <encoder class="net.logstash.logback.encoder.LogstashEncoder">
                     <includeCallerData>true</includeCallerData>
+                    <customFields>{"serviceName":"${LOG_FILE_NAME}"}</customFields>
                 </encoder>
             </appender>
         </then>

@@ -11,8 +11,8 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @Slf4j
-@EnableFeignClients(basePackages = { "com.teenthofabud.restaurant.solution.customer.integration.metadata.gender.proxy",
-        "com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.proxy" })
+@EnableFeignClients(basePackages = { "com.teenthofabud.restaurant.solution.customer.integration.metadata.proxy",
+        "com.teenthofabud.restaurant.solution.customer.integration.countrystatecityapi.proxy" })
 public class CustomerIntegrationConfiguration {
 
     private ApplicationContext applicationContext;
@@ -24,8 +24,8 @@ public class CustomerIntegrationConfiguration {
 
     @Bean
     public ErrorDecoder errorDecoder() {
-        String[] feignBasePackages = { "com.teenthofabud.restaurant.solution.customer.integration.metadata.gender.proxy",
-                "com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.proxy" };
+        String[] feignBasePackages = { "com.teenthofabud.restaurant.solution.customer.integration.metadata.proxy",
+                "com.teenthofabud.restaurant.solution.customer.integration.countrystatecityapi.proxy" };
         return new TOABFeignErrorDecoderFactory(applicationContext, feignBasePackages);
     }
 }

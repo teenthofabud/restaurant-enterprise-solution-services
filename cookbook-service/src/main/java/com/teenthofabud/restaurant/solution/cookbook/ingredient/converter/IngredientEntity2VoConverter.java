@@ -8,8 +8,8 @@ import com.teenthofabud.core.common.error.TOABSystemException;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeVo;
 import com.teenthofabud.restaurant.solution.cookbook.ingredient.data.IngredientEntity;
 import com.teenthofabud.restaurant.solution.cookbook.ingredient.data.IngredientVo;
-import com.teenthofabud.restaurant.solution.cookbook.integration.inventory.product.data.ProductVo;
-import com.teenthofabud.restaurant.solution.cookbook.integration.inventory.product.proxy.ProductServiceClient;
+import com.teenthofabud.restaurant.solution.cookbook.integration.inventory.data.ProductVo;
+import com.teenthofabud.restaurant.solution.cookbook.integration.inventory.proxy.InventoryServiceClient;
 import com.teenthofabud.restaurant.solution.cookbook.utils.CookbookServiceHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +37,7 @@ public class IngredientEntity2VoConverter extends TOABBaseEntity2VoConverter<Ing
     }
 
     private CookbookServiceHelper cookbookServiceHelper;
-    private ProductServiceClient productServiceClient;
+    private InventoryServiceClient inventoryServiceClient;
 
     @Autowired
     public void setCookbookServiceHelper(CookbookServiceHelper cookbookServiceHelper) {
@@ -45,8 +45,8 @@ public class IngredientEntity2VoConverter extends TOABBaseEntity2VoConverter<Ing
     }
 
     @Autowired
-    public void setProductServiceClient(ProductServiceClient productServiceClient) {
-        this.productServiceClient = productServiceClient;
+    public void setProductServiceClient(InventoryServiceClient inventoryServiceClient) {
+        this.inventoryServiceClient = inventoryServiceClient;
     }
 
     @Override
@@ -116,7 +116,7 @@ public class IngredientEntity2VoConverter extends TOABBaseEntity2VoConverter<Ing
                     }
                 }
                 if(!fieldsToEscape.contains("productId") && fieldName.compareTo("productId") == 0) {
-                    ProductVo product = productServiceClient.getProductDetailsById(entity.getProductId());
+                    ProductVo product = inventoryServiceClient.getProductDetailsById(entity.getProductId());
                     log.debug("Retrieved {} for product is: {}", product, entity.getProductId());
                     vo.setProduct(product);
                 }

@@ -1,12 +1,11 @@
 package com.teenthofabud.restaurant.solution.customer.address.data;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.teenthofabud.core.common.data.vo.TOABBaseVo;
 import com.teenthofabud.restaurant.solution.customer.account.data.AccountVo;
-import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.data.CityVo;
-import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.data.CountryVo;
-import com.teenthofabud.restaurant.solution.customer.integration.external.countrystatecityapi.data.StateVo;
+import com.teenthofabud.restaurant.solution.customer.integration.countrystatecityapi.data.CityVo;
+import com.teenthofabud.restaurant.solution.customer.integration.countrystatecityapi.data.CountryVo;
+import com.teenthofabud.restaurant.solution.customer.integration.countrystatecityapi.data.StateVo;
 import lombok.*;
 
 @Getter

@@ -11,8 +11,8 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @Slf4j
-@EnableFeignClients(basePackages = { "com.teenthofabud.restaurant.solution.cookbook.integration.menu.item.proxy",
-        "com.teenthofabud.restaurant.solution.cookbook.integration.inventory.product.proxy" })
+@EnableFeignClients(basePackages = { "com.teenthofabud.restaurant.solution.cookbook.integration.menu.proxy",
+        "com.teenthofabud.restaurant.solution.cookbook.integration.inventory.proxy" })
 public class CookbookIntegrationConfiguration {
 
     private ApplicationContext applicationContext;
@@ -24,8 +24,8 @@ public class CookbookIntegrationConfiguration {
 
     @Bean
     public ErrorDecoder errorDecoder() {
-        String[] feignBasePackages = { "com.teenthofabud.restaurant.solution.cookbook.integration.menu.item.proxy",
-                "com.teenthofabud.restaurant.solution.cookbook.integration.inventory.product.proxy" };
+        String[] feignBasePackages = { "com.teenthofabud.restaurant.solution.cookbook.integration.menu.proxy",
+                "com.teenthofabud.restaurant.solution.cookbook.integration.inventory.proxy" };
         return new TOABFeignErrorDecoderFactory(applicationContext, feignBasePackages);
     }
 }

@@ -13,7 +13,7 @@ import com.teenthofabud.restaurant.solution.customer.address.data.AddressForm;
 import com.teenthofabud.restaurant.solution.customer.address.data.AddressVo;
 import com.teenthofabud.restaurant.solution.customer.address.repository.AddressRepository;
 import com.teenthofabud.restaurant.solution.customer.error.CustomerErrorCode;
-import com.teenthofabud.restaurant.solution.customer.integration.metadata.gender.data.GenderVo;
+import com.teenthofabud.restaurant.solution.customer.integration.metadata.data.GenderVo;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
