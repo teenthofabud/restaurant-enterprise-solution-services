@@ -11,7 +11,7 @@
 
     <groupId>com.teenthofabud.restaurant.solution</groupId>
     <artifactId>restaurant-enterprise-solution-services</artifactId>
-    <version>2022.1-SNAPSHOT</version>
+    <version>2022.2-SNAPSHOT</version>
     <name>restaurant-enterprise-solution-services</name>
     <packaging>pom</packaging>
 
@@ -44,10 +44,12 @@
         <lombok.version>1.18.20</lombok.version>
         <spring-cloud-zipkin.version>2.2.8.RELEASE</spring-cloud-zipkin.version>
         <hoverfly.version>0.14.0</hoverfly.version>
-        <docker.host>unix:///var/run/docker.sock</docker.host>
+        <!--<docker.host>unix:///var/run/docker.sock</docker.host>-->
+        <docker.host>tcp://localhost:2375</docker.host>
         <docker.registry>docker.io</docker.registry>
         <docker.username>teenthofabud</docker.username>
         <docker.password>Razor1911.</docker.password>
+        <docker.skip>true</docker.skip>
         <resilience4j.version>1.7.0</resilience4j.version>
     </properties>
 

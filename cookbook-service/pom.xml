@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.teenthofabud.restaurant.solution</groupId>
         <artifactId>restaurant-enterprise-solution-services</artifactId>
-        <version>2022.1-SNAPSHOT</version>
+        <version>2022.2-SNAPSHOT</version>
         <!--<relativePath/>-->
     </parent>
 
@@ -19,7 +19,7 @@
 
     <groupId>com.teenthofabud.restaurant.solution</groupId>
     <artifactId>restaurant-solution-cookbook-service</artifactId>
-    <version>2022.1-SNAPSHOT</version>
+    <version>2022.2-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>${service.prefix}-service</name>
     <description>manage entity definition for cookbook service</description>
