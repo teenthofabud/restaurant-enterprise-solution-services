@@ -22,17 +22,11 @@ public class AssociationDto2DocumentConverter implements ComparativePatchConvert
     private static final Integer NO_OF_COMPARABLE_AND_MAPPABLE_FIELDS = 4;
 
     private List<String> fieldsToEscape;
-    //private String endedOnFormat;
 
-    @Value("#{'${res.settings.discount.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.booking.association.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }
-
-    /*@Value("${res.booking.association.endedon.format}")
-    public void setEndedOnFormat(String endedOnFormat) {
-        this.endedOnFormat = endedOnFormat;
-    }*/
 
     @Override
     public void compareAndMap(AssociationDto dto, AssociationDocument actualDocument) throws TOABBaseException {

@@ -29,14 +29,9 @@ public class AssociationFormValidator implements Validator {
     private Validator accountIdValidator;
     private ExperienceService experienceService;
 
-    @Value("#{'${res.session.association.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.booking.association.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
-    }
-
-    @Value("${res.booking.association.endednon.format}")
-    public void setEndedOnFormat(String endedOnFormat) {
-        this.endedOnFormat = endedOnFormat;
     }
 
     @Autowired
@@ -119,23 +114,6 @@ public class AssociationFormValidator implements Validator {
             }
         }
         log.debug("AssociationForm.accountId is valid");
-
-        /*if(!fieldsToEscape.contains("endedOn") && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getEndedOn()))) {
-            errors.rejectValue("endedOn", SessionErrorCode.BOOKING_ATTRIBUTE_INVALID.name());
-            log.debug("AssociationForm.endedOn is empty");
-            return;
-        } else if(!fieldsToEscape.contains("endedOn") && StringUtils.hasText(StringUtils.trimWhitespace(form.getEndedOn()))) {
-            try {
-                DateTimeFormatter dtf = DateTimeFormatter.ofPattern(endedOnFormat);
-                LocalDate.parse(form.getEndedOn(), dtf);
-            } catch (DateTimeParseException e) {
-                errors.rejectValue("endedOn", SessionErrorCode.BOOKING_ATTRIBUTE_INVALID.name());
-                log.debug("AssociationForm.endedOn is invalid");
-                return;
-            }
-        }
-        log.debug("AssociationForm.endedOn is valid");*/
-
     }
 
 }

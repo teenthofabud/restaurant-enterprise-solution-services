@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(value = InventoryServiceClient.SERVICE_CLIENT_NAME, url = "${cookbook.inventory.service.url}", configuration = InventoryServiceIntegrationConfiguration.class)
 public interface InventoryServiceClient {
 
-    public static final String SERVICE_CLIENT_NAME = "inventory-service";
+    public static final String SERVICE_CLIENT_NAME = "customer-service";
 
     @GetMapping("/inventory/product/{id}")
     @TOABFeignErrorHandler(InventoryServiceClientExceptionHandler.class)

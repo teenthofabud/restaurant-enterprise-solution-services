@@ -17,7 +17,5 @@ public class AssociationForm {
     private String tableId;
     @ToString.Include
     private String accountId;
-    /*@ToString.Include
-    private String endedOn;*/
 
 }

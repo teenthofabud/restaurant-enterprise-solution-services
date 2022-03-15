@@ -22,7 +22,6 @@ public class AssociationDocument extends TOABBaseDocument implements Comparable<
     private String tableId;
     @Indexed
     private String accountId;
-    //private LocalDateTime endedOn;
 
     @Override
     public int compareTo(AssociationDocument o) {

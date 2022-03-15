@@ -32,7 +32,7 @@ public class EngagementDtoValidator implements Validator {
     private String timeFormat;
     private String timestampFormat;
 
-    @Value("#{'${res.session.engagement.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.booking.engagement.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }

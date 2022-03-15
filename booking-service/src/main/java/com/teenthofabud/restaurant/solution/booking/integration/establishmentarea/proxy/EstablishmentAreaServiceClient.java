@@ -16,7 +16,7 @@ public interface EstablishmentAreaServiceClient {
 
     public static final String SERVICE_CLIENT_NAME = "establishmentarea-service";
 
-    @GetMapping("/establishmentarea/{id}")
+    @GetMapping("/establishmentarea/table/{id}")
     @TOABFeignErrorHandler(EstablishmentAreaServiceClientExceptionHandler.class)
     @CircuitBreaker(name = SERVICE_CLIENT_NAME)
     public TableVo getTableDetailsById(@PathVariable(required = true) String id);

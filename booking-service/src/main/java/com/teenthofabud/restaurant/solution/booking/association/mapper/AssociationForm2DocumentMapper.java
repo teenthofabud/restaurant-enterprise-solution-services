@@ -16,17 +16,11 @@ import java.util.Optional;
 public class AssociationForm2DocumentMapper implements DualChannelMapper<AssociationDocument, AssociationForm> {
 
     private List<String> fieldsToEscape;
-    //private String endedOnFormat;
 
-    @Value("#{'${res.settings.discount.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.booking.association.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }
-
-    /*@Value("${res.booking.association.endednon.format}")
-    public void setEndedOnFormat(String endedOnFormat) {
-        this.endedOnFormat = endedOnFormat;
-    }*/
 
     @Override
     public Optional<AssociationDocument> compareAndMap(AssociationDocument actualDocument, AssociationForm form) {
@@ -70,21 +64,6 @@ public class AssociationForm2DocumentMapper implements DualChannelMapper<Associa
             expectedDocument.setAccountId(actualDocument.getAccountId());
             log.debug("AssociationForm.accountId: is unchanged");
         }
-
-        /*if(!fieldsToEscape.contains("endedOn") && form.getEndedOn() != null) {
-            LocalDateTime localDate = LocalDateTime.parse(form.getEndedOn(), DateTimeFormatter.ofPattern(endedOnFormat));
-            if(actualDocument.getEndedOn().compareTo(localDate) != 0) {
-                expectedDocument.setEndedOn(localDate);
-                changeSW = true;
-                log.debug("AssociationForm.endedOn: {} is different as AssociationForm.endedOn: {}", form.getEndedOn(), actualDocument.getEndedOn());
-            } else {
-                expectedDocument.setEndedOn(actualDocument.getEndedOn());
-                log.debug("AssociationForm.endedOn: is unchanged");
-            }
-        } else {
-            expectedDocument.setEndedOn(actualDocument.getEndedOn());
-            log.debug("AssociationForm.endedOn: is unchanged");
-        }*/
 
         return changeSW ? Optional.of(expectedDocument) : Optional.empty();
     }

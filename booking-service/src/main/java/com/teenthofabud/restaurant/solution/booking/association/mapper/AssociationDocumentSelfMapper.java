@@ -35,11 +35,6 @@ public class AssociationDocumentSelfMapper implements SingleChannelMapper<Associ
             changeSW = true;
             log.debug("Source AssociationDocument.accountId is valid");
         }
-        /*if(source.getEndedOn() != null && source.getEndedOn() != null && source.getEndedOn().compareTo(target.getEndedOn()) != 0) {
-            target.setEndedOn(source.getEndedOn());
-            changeSW = true;
-            log.debug("Source AssociationDocument.endedOn is valid");
-        }*/
         if(changeSW) {
             log.debug("All provided AssociationDocument attributes are valid");
             return Optional.of(target);

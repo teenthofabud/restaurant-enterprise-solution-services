@@ -14,17 +14,12 @@ import java.util.List;
 public class AssociationForm2DocumentConverter implements Converter<AssociationForm, AssociationDocument> {
 
     private List<String> fieldsToEscape;
-    //private String endedOnFormat;
 
-    @Value("#{'${res.session.association.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.booking.association.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }
 
-    /*@Value("${res.booking.association.endedon.format}")
-    public void setEndedOnFormat(String endedOnFormat) {
-        this.endedOnFormat = endedOnFormat;
-    }*/
 
     @Override
     public AssociationDocument convert(AssociationForm form) {
@@ -38,10 +33,6 @@ public class AssociationForm2DocumentConverter implements Converter<AssociationF
         if(!fieldsToEscape.contains("accountId")) {
             entity.setAccountId(form.getAccountId());
         }
-        /*if(!fieldsToEscape.contains("endedOn")) {
-            LocalDateTime endedOn = LocalDateTime.parse(form.getEndedOn(), DateTimeFormatter.ofPattern(endedOnFormat));
-            entity.setEndedOn(endedOn);
-        }*/
         entity.setActive(Boolean.TRUE);
         log.debug("Converting {} to {}", form, entity);
         return entity;

@@ -15,7 +15,8 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 @EnableEurekaClient
 @EnableMongoAuditing
 @EnableMongoRepositories(basePackages = {"com.teenthofabud.restaurant.solution.booking.experience.repository",
-        "com.teenthofabud.restaurant.solution.booking.association.repository"},
+        "com.teenthofabud.restaurant.solution.booking.association.repository",
+        "com.teenthofabud.restaurant.solution.booking.engagement.repository"},
         repositoryBaseClass = TOABBaseMongoRepositoryImpl.class)
 public class BookingServiceConfiguration {
 

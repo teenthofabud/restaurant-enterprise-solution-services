@@ -19,7 +19,7 @@ public class ExperienceDocument2VoConverter extends TOABBaseDocument2VoConverter
     private List<String> fieldsToEscape;
     private BookingServiceHelper bookingServiceHelper;
 
-    @Value("#{'${res.session.experience.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.booking.experience.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }

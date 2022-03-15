@@ -178,9 +178,9 @@ public class AssociationController {
         return naturallyOrderedAssociations;
     }
 
-    @Operation(summary = "Get all Association details by tableId, experienceId")
+    @Operation(summary = "Get all Association details by accountId, tableId")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Retrieve all available Associations and their details that match the provided tableId, experienceId",
+            @ApiResponse(responseCode = "200", description = "Retrieve all available Associations and their details that match the provided accountId, tableId",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = AssociationVo.class))) }),
             @ApiResponse(responseCode = "400", description = "Association search filters are invalid",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) }),
@@ -189,15 +189,15 @@ public class AssociationController {
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("filter")
-    public List<AssociationVo> getAllAssociationsByFilters(@RequestParam(required = false) String tableId,
-                                                   @RequestParam(required = false) String experienceId) throws AssociationException {
+    public List<AssociationVo> getAllAssociationsByFilters(@RequestParam(required = false) String accountId,
+                                                   @RequestParam(required = false) String tableId) throws AssociationException {
         log.debug("Requesting all available associations with given filters");
+        boolean emptyAccountId = !StringUtils.hasText(StringUtils.trimWhitespace(accountId));
         boolean emptyTableId = !StringUtils.hasText(StringUtils.trimWhitespace(tableId));
-        boolean emptyExperienceId = !StringUtils.hasText(StringUtils.trimWhitespace(experienceId));
-        if(!emptyTableId || !emptyExperienceId) {
+        if(!emptyAccountId || !emptyTableId) {
+            Optional<String> optAccountId = emptyAccountId ? Optional.empty() : Optional.of(accountId);
             Optional<String> optTableId = emptyTableId ? Optional.empty() : Optional.of(tableId);
-            Optional<String> optExperienceId = emptyExperienceId ? Optional.empty() : Optional.of(experienceId);
-            List<AssociationVo> matchedByFilter = service.retrieveAllMatchingDetailsByCriteria(optTableId, optExperienceId);
+            List<AssociationVo> matchedByFilter = service.retrieveAllMatchingDetailsByCriteria(optTableId, optAccountId);
             log.debug("Responding with all available associations with given filters");
             return matchedByFilter;
         }

@@ -28,17 +28,11 @@ public class AssociationFormRelaxedValidator implements RelaxedValidator<Associa
     private Validator tableIdValidator;
     private Validator accountIdValidator;
     private ExperienceService experienceService;
-    //private String endedOnFormat;
 
-    @Value("#{'${res.session.association.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.booking.association.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }
-
-    /*@Value("${res.booking.association.endednon.format}")
-    public void setEndedOnFormat(String endedOnFormat) {
-        this.endedOnFormat = endedOnFormat;
-    }*/
 
     @Autowired
     @Qualifier("tableIdValidator")
@@ -113,22 +107,6 @@ public class AssociationFormRelaxedValidator implements RelaxedValidator<Associa
             }
         }
         log.debug("AssociationForm.accountId is valid");
-
-        /*if(!fieldsToEscape.contains("endedOn") && form.getEndedOn() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getEndedOn()))) {
-            errors.rejectValue("endedOn", SessionErrorCode.BOOKING_ATTRIBUTE_INVALID.name());
-            log.debug("AssociationForm.endedOn is empty");
-            return false;
-        } else if(!fieldsToEscape.contains("endedOn") && form.getEndedOn() != null && StringUtils.hasText(StringUtils.trimWhitespace(form.getEndedOn()))) {
-            try {
-                DateTimeFormatter dtf = DateTimeFormatter.ofPattern(endedOnFormat);
-                LocalDate.parse(form.getEndedOn(), dtf);
-            } catch (DateTimeParseException e) {
-                errors.rejectValue("endedOn", SessionErrorCode.BOOKING_ATTRIBUTE_INVALID.name());
-                log.debug("AssociationForm.endedOn is invalid");
-                return false;
-            }
-        }
-        log.debug("AssociationForm.endedOn is valid");*/
 
         return true;
     }

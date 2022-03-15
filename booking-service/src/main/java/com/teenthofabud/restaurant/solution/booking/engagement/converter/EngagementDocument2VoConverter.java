@@ -29,7 +29,7 @@ public class EngagementDocument2VoConverter extends TOABBaseDocument2VoConverter
     private AssociationService associationService;
 
 
-    @Value("#{'${res.session.engagement.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.booking.engagement.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }

@@ -23,7 +23,7 @@ public class ExperienceDto2DocumentConverter implements ComparativePatchConverte
 
     private List<String> fieldsToEscape;
 
-    @Value("#{'${res.session.experience.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.booking.experience.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }

@@ -29,17 +29,17 @@ public class EngagementDto2DocumentConverter implements ComparativePatchConverte
     private String dateFormat;
     private String timeFormat;
 
-    @Value("#{'${res.settings.discount.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.booking.engagement.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }
 
-    @Value("${res.booking.association.date.format}")
+    @Value("${res.booking.engagement.date.format}")
     public void setDateFormat(String dateFormat) {
         this.dateFormat = dateFormat;
     }
 
-    @Value("${res.booking.association.time.format}")
+    @Value("${res.booking.engagement.time.format}")
     public void setTimeFormat(String timeFormat) {
         this.timeFormat = timeFormat;
     }

@@ -23,7 +23,7 @@ public class EngagementForm2DocumentMapper implements DualChannelMapper<Engageme
     private String dateFormat;
     private String timeFormat;
 
-    @Value("#{'${res.settings.discount.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.booking.engagement.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }
