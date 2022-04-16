@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: naming-service
+  profiles:
+    active: native
+  cloud:
+    failFast: true
+  loadbalancer:
+    ribbon:
+      enabled: false
+  service-registry:
+    auto-registration:
+      enabled: false
+  zipkin:
+    enabled: false
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+  instance:
+    prefer-ip-address: true
+
+logstash:
+  url: ${NAMING_LOGSTASH_HOST}:${NAMING_LOGSTASH_PORT}
+  enabled: ${NAMING_LOGSTASH_ENABLED}
+
+server:
+  port: ${NAMING_SERVER_PORT}
+
+logback:
+    logging:
+      level: ${LOGBACK_LOGGING_LEVEL}
