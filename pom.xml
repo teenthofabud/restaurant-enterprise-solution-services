@@ -23,6 +23,7 @@
         <module>menu-service</module>
         <module>settings-service</module>
         <module>booking-service</module>
+        <module>naming-service</module>
     </modules>
 
     <properties>
