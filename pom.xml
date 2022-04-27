@@ -24,6 +24,7 @@
         <module>settings-service</module>
         <module>booking-service</module>
         <module>naming-service</module>
+        <module>configuration-service</module>
     </modules>
 
     <properties>
