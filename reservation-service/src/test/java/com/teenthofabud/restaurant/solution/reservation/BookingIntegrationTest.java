@@ -231,7 +231,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
          * Booking
          */
 
-        now = LocalDateTime.now().plusHours(1l);
+        now = LocalDateTime.of(2022, 05, 10, 11,30,22).plusHours(1l);
 
         bookingForm = new BookingForm();
         //bookingForm.setTableId("4");
@@ -242,7 +242,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
 
         patches = Arrays.asList(
                 new PatchOperationForm("replace", "/accountId", "2"),
-                new PatchOperationForm("replace", "/categoryId", "1"));
+                new PatchOperationForm("replace", "/categoryId", categoryDocument1.getId()));
 
         bookingDocument1 = new BookingDocument();
         bookingDocument1.setAccountId("1");
@@ -259,7 +259,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         bookingVo1.setCategoryId(categoryDocument1.getId());
         //bookingVo1.setTableId(bookingDocument1.getTableId());
         bookingVo1.setAccountId(bookingDocument1.getAccountId());
-        bookingVo1.setTimestamp(bookingDocument1.getTimestamp());
+        bookingVo1.setTimestamp(bookingDocument1.getTimestamp().format(DateTimeFormatter.ofPattern(bookingTimeFormat)));
 
         bookingDocument2 = new BookingDocument();
         bookingDocument2.setAccountId("1");
@@ -275,7 +275,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         bookingVo2.setCategoryId(categoryDocument3.getId());
         //bookingVo2.setTableId(bookingDocument2.getTableId());
         bookingVo2.setAccountId(bookingDocument2.getAccountId());
-        bookingVo2.setTimestamp(bookingDocument2.getTimestamp());
+        bookingVo2.setTimestamp(bookingDocument2.getTimestamp().format(DateTimeFormatter.ofPattern(bookingTimeFormat)));
 
         bookingDocument3 = new BookingDocument();
         bookingDocument3.setAccountId("1");
@@ -291,7 +291,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         bookingVo3.setCategoryId(categoryDocument1.getId());
         //bookingVo3.setTableId(bookingDocument3.getTableId());
         bookingVo3.setAccountId(bookingDocument3.getAccountId());
-        bookingVo3.setTimestamp(bookingDocument3.getTimestamp());
+        bookingVo3.setTimestamp(bookingDocument3.getTimestamp().format(DateTimeFormatter.ofPattern(bookingTimeFormat)));
 
         bookingDocument4 = new BookingDocument();
         bookingDocument4.setAccountId("1");
@@ -307,7 +307,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         bookingVo4.setCategoryId(categoryDocument4.getId());
         //bookingVo4.setTableId(bookingDocument4.getTableId());
         bookingVo4.setAccountId(bookingDocument4.getAccountId());
-        bookingVo4.setTimestamp(bookingDocument4.getTimestamp());
+        bookingVo4.setTimestamp(bookingDocument4.getTimestamp().format(DateTimeFormatter.ofPattern(bookingTimeFormat)));
 
         bookingDocument5 = new BookingDocument();
         bookingDocument5.setAccountId("2");
@@ -323,7 +323,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         bookingVo5.setCategoryId(categoryDocument4.getId());
         //bookingVo5.setTableId(bookingDocument5.getTableId());
         bookingVo5.setAccountId(bookingDocument5.getAccountId());
-        bookingVo5.setTimestamp(bookingDocument5.getTimestamp());
+        bookingVo5.setTimestamp(bookingDocument5.getTimestamp().format(DateTimeFormatter.ofPattern(bookingTimeFormat)));
 
         bookingDocument6 = new BookingDocument();
         bookingDocument6.setAccountId("2");
@@ -339,7 +339,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         bookingVo6.setCategoryId(categoryDocument3.getId());
         //bookingVo5.setTableId(bookingDocument5.getTableId());
         bookingVo6.setAccountId(bookingDocument6.getAccountId());
-        bookingVo6.setTimestamp(bookingDocument6.getTimestamp());
+        bookingVo6.setTimestamp(bookingDocument6.getTimestamp().format(DateTimeFormatter.ofPattern(bookingTimeFormat)));
 
         bookingDocument7 = new BookingDocument();
         bookingDocument7.setAccountId("22");
@@ -355,7 +355,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         bookingVo7.setCategoryId(categoryDocument4.getId());
         //bookingVo5.setTableId(bookingDocument5.getTableId());
         bookingVo7.setAccountId(bookingDocument7.getAccountId());
-        bookingVo7.setTimestamp(bookingDocument7.getTimestamp());
+        bookingVo7.setTimestamp(bookingDocument7.getTimestamp().format(DateTimeFormatter.ofPattern(bookingTimeFormat)));
 
 
         bookingVo8 = new BookingVo();
@@ -755,7 +755,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
     @Test
     public void test_Booking_Get_ShouldReturn_200Response_And_BookingListNaturallyOrdered_WhenRequested_ForAllBookings() throws Exception {
         MvcResult mvcResult = null;
-        List<BookingVo> bookingList = new ArrayList<>(Arrays.asList(bookingVo6, bookingVo1, bookingVo2, bookingVo3, bookingVo4, bookingVo5, bookingVo6, bookingVo7, bookingVo8));
+        List<BookingVo> bookingList = new ArrayList<>(Arrays.asList(bookingVo1, bookingVo2, bookingVo3, bookingVo4, bookingVo5, bookingVo6, bookingVo7, bookingVo8));
 
         mvcResult = this.mockMvc.perform(get(BOOKING_URI))
                 .andDo(print())
@@ -925,7 +925,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         List<BookingVo> bookingList = new ArrayList<>(Arrays.asList(bookingVo1, bookingVo3));
 
         mvcResult = this.mockMvc.perform(get(BOOKING_URI_FILTER)
-                        .queryParam("categoryId", "1"))
+                        .queryParam("categoryId", categoryDocument1.getId()))
                 .andDo(print())
                 .andReturn();
 
@@ -1037,9 +1037,10 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
     public void test_Booking_Get_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001__WhenRequestedBy_UnsupportedFilterAttribute() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "filters";
+        String fieldName = "timestamp";
+        String message = "invalid";
 
-        mvcResult = this.mockMvc.perform(get(BOOKING_URI_FILTER).queryParam("categoryId", "Hey"))
+        mvcResult = this.mockMvc.perform(get(BOOKING_URI_FILTER).queryParam("timestamp", "Hey"))
                 .andDo(print())
                 .andReturn();
 
@@ -1047,6 +1048,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
     }
 
     /*@Test
@@ -1095,8 +1097,11 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         MvcResult mvcResult = null;
         bookingVo1.setCategory(null);
         bookingVo4.setCategory(null);
-        String timestamp = bookingDocument1.getTimestamp().format(DateTimeFormatter.ofPattern(bookingTimeFormat));
+        //String timestamp = bookingDocument1.getTimestamp().format(DateTimeFormatter.ofPattern(bookingTimeFormat));
+        String timestamp = now.format(DateTimeFormatter.ofPattern(bookingTimeFormat));
         List<BookingVo> bookingList = Arrays.asList(bookingVo1, bookingVo4);
+        //List<BookingVo> bookingList = Arrays.asList(bookingVo1);
+        //List<BookingVo> bookingList = Arrays.asList(bookingVo4);
 
         mvcResult = this.mockMvc.perform(get(BOOKING_URI_FILTER)
                         .queryParam("accountId", "1")
@@ -1119,7 +1124,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         List<BookingVo> bookingList = Arrays.asList(bookingVo4, bookingVo7);
 
         mvcResult = this.mockMvc.perform(get(BOOKING_URI_FILTER)
-                        .queryParam("categoryId", "4")
+                        .queryParam("categoryId", categoryDocument4.getId())
                         .queryParam("timestamp", timestamp))
                 .andDo(print())
                 .andReturn();
@@ -1387,7 +1392,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         String id = bookingDocument1.getId().toString();
         MvcResult mvcResult = null;
         bookingForm.setAccountId("1");
-        bookingForm.setCategoryId(categoryDocument4.getId());
+        bookingForm.setCategoryId(categoryDocument3.getId());
 
         mvcResult = this.mockMvc.perform(put(BOOKING_URI_BY_ID, id)
                         .contentType(MediaType.APPLICATION_JSON)

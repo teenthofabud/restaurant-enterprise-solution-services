@@ -34,6 +34,7 @@ public class BookingDocument2VoConverter extends TOABBaseDocument2VoConverter<Bo
     //private EstablishmentAreaServiceClient establishmentAreaServiceClient;
     private CustomerServiceClient customerServiceClient;
     private CategoryService categoryService;
+    private String bookingTimeFormat;
 
     @Value("#{'${res.reservation.booking.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
@@ -44,6 +45,12 @@ public class BookingDocument2VoConverter extends TOABBaseDocument2VoConverter<Bo
     public void setEstablishmentAreaServiceClient(EstablishmentAreaServiceClient establishmentAreaServiceClient) {
         this.establishmentAreaServiceClient = establishmentAreaServiceClient;
     }*/
+
+    @Value("${res.reservation.booking.timestamp}")
+    public void setBookingTimeFormat(String bookingTimeFormat) {
+        this.bookingTimeFormat = bookingTimeFormat;
+    }
+
 
     @Autowired
     public void setCustomerServiceClient(CustomerServiceClient customerServiceClient) {
@@ -62,7 +69,7 @@ public class BookingDocument2VoConverter extends TOABBaseDocument2VoConverter<Bo
             vo.setId(document.getId().toString());
         }
         if(!fieldsToEscape.contains("timestamp")) {
-            vo.setTimestamp(document.getTimestamp());
+            vo.setTimestamp(document.getTimestamp().format(DateTimeFormatter.ofPattern(bookingTimeFormat)));
         }
         /*if(!fieldsToEscape.contains("noOfPerson")) {
             vo.setNoOfPerson(document.getNoOfPerson());

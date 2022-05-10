@@ -1,13 +1,10 @@
 package com.teenthofabud.restaurant.solution.reservation.booking.data;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.teenthofabud.core.common.data.vo.TOABBaseVo;
 import com.teenthofabud.restaurant.solution.reservation.category.data.CategoryVo;
 import com.teenthofabud.restaurant.solution.reservation.integration.customer.data.AccountVo;
 import lombok.*;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -32,8 +29,7 @@ public class BookingVo extends TOABBaseVo implements Comparable<BookingVo> {
     @ToString.Include
     private AccountVo account;
     @ToString.Include
-    @JsonFormat(pattern = "dd-MM-yyyy~HH:mm:ss")
-    private LocalDateTime timestamp;
+    private String timestamp;
 
     @Override
     public int compareTo(BookingVo o) {

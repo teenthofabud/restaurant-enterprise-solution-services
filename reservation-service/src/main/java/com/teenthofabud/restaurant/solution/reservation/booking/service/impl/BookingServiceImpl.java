@@ -46,6 +46,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 @Component
@@ -291,9 +292,16 @@ public class BookingServiceImpl implements BookingService {
         BookingDocument document = new BookingDocument();
         ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll();
         if(StringUtils.hasText(StringUtils.trimWhitespace(timestamp))) {
+            LocalDateTime ts = null;
+            try {
+                ts = LocalDateTime.parse(timestamp, DateTimeFormatter.ofPattern(bookingTimeFormat));
+            } catch (DateTimeParseException e) {
+                log.error("timestamp is invalid: {}", e);
+                throw new BookingException(ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID, new Object[] { "timestamp", timestamp });
+            }
             log.debug("timestamp {} is valid", timestamp);
             providedFilters.put("timestamp", timestamp);
-            document.setTimestamp(LocalDateTime.parse(timestamp, DateTimeFormatter.ofPattern(bookingTimeFormat)));
+            document.setTimestamp(ts);
             matcherCriteria = matcherCriteria.withMatcher("timestamp", match -> match.exact());
         }
         if(StringUtils.hasText(StringUtils.trimWhitespace(accountId))) {
@@ -569,16 +577,19 @@ public class BookingServiceImpl implements BookingService {
         }
         if(!similaritySwitchesCollection.isEmpty()) {
             String accountId = patchedBookingForm.getAccountId().isPresent() ? patchedBookingForm.getAccountId().get() : actualDocument.getAccountId();
-            String timestamp = patchedBookingForm.getTimestamp().isPresent() ? patchedBookingForm.getTimestamp().get()
-                    : DateTimeFormatter.ofPattern(bookingTimeFormat).format(actualDocument.getTimestamp());
+           /* String timestamp = patchedBookingForm.getTimestamp().isPresent() ? patchedBookingForm.getTimestamp().get()
+                    : DateTimeFormatter.ofPattern(bookingTimeFormat).format(actualDocument.getTimestamp());*/
+            LocalDateTime timestamp = patchedBookingForm.getTimestamp().isPresent()
+                    ? LocalDateTime.parse(patchedBookingForm.getTimestamp().get(), DateTimeFormatter.ofPattern(bookingTimeFormat))
+                    : actualDocument.getTimestamp();
             String categoryId = patchedBookingForm.getCategoryId().isPresent() ? patchedBookingForm.getCategoryId().get() : actualDocument.getCategoryId();
             log.debug(BookingMessageTemplate.MSG_TEMPLATE_BOOKING_EXISTENCE_BY_CATEGORY_ID_AND_TIMESTAMP_AND_ACCOUNT_ID.getValue(), accountId, timestamp, categoryId);
             boolean sameDocumentSw = similaritySwitchesCollection.stream().allMatch(Boolean::valueOf);
-            boolean duplicateDocumentSw =  repository.existsByAccountIdAndTimestampAndCategoryId(accountId,
-                    LocalDateTime.parse(timestamp,DateTimeFormatter.ofPattern(bookingTimeFormat)), categoryId);
+            boolean duplicateDocumentSw =  repository.existsByAccountIdAndTimestampAndCategoryId(accountId, timestamp, categoryId);
             if(sameDocumentSw || duplicateDocumentSw) {
                 log.debug(BookingMessageTemplate.MSG_TEMPLATE_BOOKING_EXISTS_BY_CATEGORY_ID_AND_TIMESTAMP_AND_ACCOUNT_ID.getValue(), timestamp, accountId);
-                throw new BookingException(ReservationErrorCode.RESERVATION_EXISTS, new Object[]{ "accountId: " + accountId, ", timestamp: " + timestamp + ", categoryId: " + categoryId });
+                throw new BookingException(ReservationErrorCode.RESERVATION_EXISTS, new Object[]{ "accountId: " + accountId,
+                        ", timestamp: " + timestamp.format(DateTimeFormatter.ofPattern(bookingTimeFormat)) + ", categoryId: " + categoryId });
             }
             log.debug(BookingMessageTemplate.MSG_TEMPLATE_BOOKING_NON_EXISTENCE_BY_CATEGORY_ID_AND_TIMESTAMP_AND_ACCOUNT_ID.getValue(), accountId, timestamp, categoryId);
 
@@ -608,7 +619,8 @@ public class BookingServiceImpl implements BookingService {
             boolean duplicateDocumentSw =  repository.existsByAccountIdAndTimestampAndCategoryId(accountId, timestamp, categoryId);
             if(sameDocumentSw || duplicateDocumentSw) {
                 log.debug(BookingMessageTemplate.MSG_TEMPLATE_BOOKING_EXISTS_BY_CATEGORY_ID_AND_TIMESTAMP_AND_ACCOUNT_ID.getValue(), accountId, timestamp, categoryId);
-                throw new BookingException(ReservationErrorCode.RESERVATION_EXISTS, new Object[]{ "accountId: " + accountId, ", timestamp: " + timestamp + ", categoryId: " + categoryId });
+                throw new BookingException(ReservationErrorCode.RESERVATION_EXISTS, new Object[]{ "accountId: " + accountId,
+                        ", timestamp: " + timestamp.format(DateTimeFormatter.ofPattern(bookingTimeFormat)) + ", categoryId: " + categoryId });
             }
             log.debug(BookingMessageTemplate.MSG_TEMPLATE_BOOKING_NON_EXISTENCE_BY_CATEGORY_ID_AND_TIMESTAMP_AND_ACCOUNT_ID.getValue(), accountId, timestamp, categoryId);
 
