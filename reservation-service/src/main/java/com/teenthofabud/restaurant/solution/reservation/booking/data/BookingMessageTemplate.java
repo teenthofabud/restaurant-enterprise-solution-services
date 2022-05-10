@@ -12,9 +12,9 @@ public enum BookingMessageTemplate {
     MSG_TEMPLATE_BOOKING_ID_INVALID("BOOKING  id: {} is invalid"),
     MSG_TEMPLATE_BOOKING_ID_EMPTY("BOOKING  id is empty"),
     MSG_TEMPLATE_BOOKING_CASCADE_LEVEL_EMPTY("BOOKING  cascadeLevel is empty"),
-    MSG_TEMPLATE_BOOKING_EXISTENCE_BY_TIMESTAMP_AND_ACCOUNT_ID("Checking Booking existence by timestamp: {} and accountId: {}"),
-    MSG_TEMPLATE_BOOKING_EXISTS_BY_TIMESTAMP_AND_ACCOUNT_ID("Booking exists between timestamp: {} and accountId: {}"),
-    MSG_TEMPLATE_BOOKING_NON_EXISTENCE_BY_TIMESTAMP_AND_ACCOUNT_ID("No Booking exists between timestamp: {} and accountId: {}");
+    MSG_TEMPLATE_BOOKING_EXISTENCE_BY_CATEGORY_ID_AND_TIMESTAMP_AND_ACCOUNT_ID("Checking Booking existence by category id: {}, timestamp: {} and accountId: {}"),
+    MSG_TEMPLATE_BOOKING_EXISTS_BY_CATEGORY_ID_AND_TIMESTAMP_AND_ACCOUNT_ID("Booking exists between category id: {}, timestamp: {} and accountId: {}"),
+    MSG_TEMPLATE_BOOKING_NON_EXISTENCE_BY_CATEGORY_ID_AND_TIMESTAMP_AND_ACCOUNT_ID("No Booking exists between category id: {}, timestamp: {} and accountId: {}");
 
     private String value;
 

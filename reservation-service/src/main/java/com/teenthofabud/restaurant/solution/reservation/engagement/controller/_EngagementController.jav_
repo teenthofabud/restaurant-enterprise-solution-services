@@ -37,7 +37,7 @@ import java.util.Set;
 @Tag(name = "Engagement API", description = "Manage Engagements and their details")
 public class EngagementController {
 
-    private static final String MEDIA_BOOKING_APPLICATION_JSON_PATCH = "application/json-patch+json";
+    private static final String MEDIA_RESERVATION_APPLICATION_JSON_PATCH = "application/json-patch+json";
 
     @Autowired
     public void setService(EngagementService service) {
@@ -71,7 +71,7 @@ public class EngagementController {
             return createdVo;
         }
         log.debug("EngagementForm is null");
-        throw new EngagementException(ReservationErrorCode.BOOKING_ATTRIBUTE_UNEXPECTED,
+        throw new EngagementException(ReservationErrorCode.RESERVATION_ATTRIBUTE_UNEXPECTED,
                 new Object[]{ "form", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
     }
 
@@ -99,11 +99,11 @@ public class EngagementController {
                 return;
             }
             log.debug("EngagementForm is null");
-            throw new EngagementException(ReservationErrorCode.BOOKING_ATTRIBUTE_UNEXPECTED,
+            throw new EngagementException(ReservationErrorCode.RESERVATION_ATTRIBUTE_UNEXPECTED,
                     new Object[]{ "form", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
         }
         log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_ID_EMPTY.getValue());
-        throw new EngagementException(ReservationErrorCode.BOOKING_ATTRIBUTE_INVALID, new Object[] { "id", id });
+        throw new EngagementException(ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID, new Object[] { "id", id });
     }
 
     @Operation(summary = "Soft delete Engagement by id and all associated Type Models")
@@ -129,7 +129,7 @@ public class EngagementController {
             return;
         }
         log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_ID_EMPTY.getValue());
-        throw new EngagementException(ReservationErrorCode.BOOKING_ATTRIBUTE_INVALID, new Object[] { "id", id });
+        throw new EngagementException(ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID, new Object[] { "id", id });
     }
 
     @Operation(summary = "Patch Engagement attributes by id")
@@ -146,7 +146,7 @@ public class EngagementController {
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PatchMapping(path = "{id}", consumes = MEDIA_BOOKING_APPLICATION_JSON_PATCH)
+    @PatchMapping(path = "{id}", consumes = MEDIA_RESERVATION_APPLICATION_JSON_PATCH)
     public void patchExistingEngagement(@PathVariable String id, @RequestBody(required = false) List<PatchOperationForm> dtoList)
             throws EngagementException {
         log.debug("Requesting to patch of engagement attributes");
@@ -157,11 +157,11 @@ public class EngagementController {
                 return;
             }
             log.debug("engagement patch document is null");
-            throw new EngagementException(ReservationErrorCode.BOOKING_ATTRIBUTE_UNEXPECTED,
+            throw new EngagementException(ReservationErrorCode.RESERVATION_ATTRIBUTE_UNEXPECTED,
                     new Object[]{ "patch", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
         }
         log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_ID_EMPTY.getValue());
-        throw new EngagementException(ReservationErrorCode.BOOKING_ATTRIBUTE_INVALID, new Object[] { "id", id });
+        throw new EngagementException(ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID, new Object[] { "id", id });
     }
 
     @Operation(summary = "Get all Engagement details")
@@ -205,7 +205,7 @@ public class EngagementController {
             return matchedByFilter;
         }
         log.debug("engagement filters are empty");
-        throw new EngagementException(ReservationErrorCode.BOOKING_ATTRIBUTE_INVALID, new Object[] { "filters" });
+        throw new EngagementException(ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID, new Object[] { "filters" });
     }
 
     @Operation(summary = "Get all Engagement details by booking id", hidden = true)
@@ -241,11 +241,11 @@ public class EngagementController {
                 return matchedByAssociationIds;
             } catch (NumberFormatException e) {
                 log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_CASCADE_LEVEL_EMPTY.getValue());
-                throw new EngagementException(ReservationErrorCode.BOOKING_ATTRIBUTE_INVALID, new Object[] { "cascadeUntilLevel", cascadeUntilLevel });
+                throw new EngagementException(ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID, new Object[] { "cascadeUntilLevel", cascadeUntilLevel });
             }
         }
         log.debug("engagement associationId is empty");
-        throw new EngagementException(ReservationErrorCode.BOOKING_ATTRIBUTE_INVALID, new Object[] { "associationId", associationId });
+        throw new EngagementException(ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID, new Object[] { "associationId", associationId });
     }
 
     @Operation(summary = "Get Engagement details by id")
@@ -281,11 +281,11 @@ public class EngagementController {
                 return engagementDetails;
             } catch (NumberFormatException e) {
                 log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_CASCADE_LEVEL_EMPTY.getValue());
-                throw new EngagementException(ReservationErrorCode.BOOKING_ATTRIBUTE_INVALID, new Object[] { "cascadeUntilLevel", cascadeUntilLevel });
+                throw new EngagementException(ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID, new Object[] { "cascadeUntilLevel", cascadeUntilLevel });
             }
         }
         log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_ID_EMPTY.getValue());
-        throw new EngagementException(ReservationErrorCode.BOOKING_ATTRIBUTE_INVALID, new Object[] { "id", id });
+        throw new EngagementException(ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID, new Object[] { "id", id });
     }
 
 }

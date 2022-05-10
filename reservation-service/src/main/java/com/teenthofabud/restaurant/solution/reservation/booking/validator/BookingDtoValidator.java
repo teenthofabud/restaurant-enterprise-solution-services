@@ -16,6 +16,7 @@ import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -68,12 +69,12 @@ public class BookingDtoValidator implements Validator {
     public void validate(Object target, Errors errors) {
         BookingDto dto = (BookingDto) target;
 
-        Optional<String> optName = dto.getCategoryId();
+        /*Optional<String> optName = dto.getCategoryId();
         if(!fieldsToEscape.contains("name") && optName.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optName.get()))) {
             errors.rejectValue("name", ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.name());
             log.debug("BookingDto.name is invalid");
             return;
-        }
+        }*/
 
         Optional<String> optTimestamp = dto.getTimestamp();
         if(!fieldsToEscape.contains("timestamp") && optTimestamp.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optTimestamp.get()))) {
@@ -82,8 +83,12 @@ public class BookingDtoValidator implements Validator {
             return;
         } else if(!fieldsToEscape.contains("timestamp") && optTimestamp.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optTimestamp.get()))) {
             try {
-                DateTimeFormatter dtf = DateTimeFormatter.ofPattern(bookingTimeFormat);
-                dtf.parse(optTimestamp.get());
+                LocalDateTime dt = LocalDateTime.parse(optTimestamp.get(),DateTimeFormatter.ofPattern(bookingTimeFormat));
+                if(dt.isBefore(LocalDateTime.now())) {
+                    log.debug("BookingDto.timestamp is in past");
+                    errors.rejectValue("timestamp", ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.name());
+                    return;
+                }
             } catch (DateTimeParseException e) {
                 log.debug("BookingDto.timestamp is invalid");
                 errors.rejectValue("timestamp", ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.name());
@@ -91,7 +96,7 @@ public class BookingDtoValidator implements Validator {
             }
         }
 
-        Optional<String> optNoOfPerson = dto.getTimestamp();
+        /*Optional<String> optNoOfPerson = dto.getTimestamp();
         if(!fieldsToEscape.contains("noOfPerson") && optNoOfPerson.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optNoOfPerson.get()))) {
             errors.rejectValue("noOfPerson", ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.name());
             log.debug("BookingDto.noOfPerson is invalid");
@@ -104,7 +109,7 @@ public class BookingDtoValidator implements Validator {
                 errors.rejectValue("noOfPerson", ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.name());
                 return;
             }
-        }
+        }*/
 
         Optional<String> optCategoryId = dto.getCategoryId();
         if(!fieldsToEscape.contains("categoryId") && optCategoryId.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optCategoryId.get()))) {
@@ -113,13 +118,13 @@ public class BookingDtoValidator implements Validator {
             return;
         } else if(!fieldsToEscape.contains("categoryId") && optCategoryId.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optCategoryId.get()))) {
             String categoryId = optCategoryId.get();
-            try {
+            /*try {
                 Long.parseLong(categoryId);
             } catch (NumberFormatException e) {
                 log.debug("BookingDto.categoryId is invalid");
                 errors.rejectValue("categoryId", ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.name());
                 return;
-            }
+            }*/
             try {
                 CategoryVo categoryVo = categoryService.retrieveDetailsById(categoryId, Optional.of(TOABCascadeLevel.ONE));
                 if(!categoryVo.getActive()) {

@@ -23,7 +23,7 @@ public class CategoryDto2DocumentConverter implements ComparativePatchConverter<
 
     private List<String> fieldsToEscape;
 
-    @Value("#{'${res.booking.category.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.reservation.category.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }

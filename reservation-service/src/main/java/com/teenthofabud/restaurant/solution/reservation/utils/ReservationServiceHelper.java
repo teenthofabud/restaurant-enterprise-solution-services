@@ -6,7 +6,7 @@ import com.teenthofabud.restaurant.solution.reservation.engagement.data.Engageme
 import com.teenthofabud.restaurant.solution.reservation.booking.converter.BookingDocument2VoConverter;
 import com.teenthofabud.restaurant.solution.reservation.booking.data.BookingDocument;
 import com.teenthofabud.restaurant.solution.reservation.booking.data.BookingVo;
-import com.teenthofabud.restaurant.solution.reservation.engagement.converter.EngagementDocument2VoConverter;
+//import com.teenthofabud.restaurant.solution.reservation.engagement.converter.EngagementDocument2VoConverter;
 import com.teenthofabud.restaurant.solution.reservation.engagement.data.EngagementDocument;
 import com.teenthofabud.restaurant.solution.reservation.category.converter.CategoryDocument2VoConverter;
 import com.teenthofabud.restaurant.solution.reservation.category.data.CategoryDocument;
@@ -24,7 +24,7 @@ public class ReservationServiceHelper {
 
     private CategoryDocument2VoConverter categoryDocument2VoConverter;
     private BookingDocument2VoConverter bookingDocument2VoConverter;
-    private EngagementDocument2VoConverter engagementDocument2VoConverter;
+    //private EngagementDocument2VoConverter engagementDocument2VoConverter;
 
 
     @Autowired
@@ -37,10 +37,10 @@ public class ReservationServiceHelper {
         this.categoryDocument2VoConverter = categoryDocument2VoConverter;
     }
 
-    @Autowired
+    /*@Autowired
     public void setEngagementDocument2VoConverter(EngagementDocument2VoConverter engagementDocument2VoConverter) {
         this.engagementDocument2VoConverter = engagementDocument2VoConverter;
-    }
+    }*/
 
     public List<CategoryVo> categoryDocument2DetailedVo(List<? extends CategoryDocument> categoryDocumentList) throws TOABSystemException {
         List<CategoryVo> categoryDetailsList = new LinkedList<>();
@@ -82,7 +82,7 @@ public class ReservationServiceHelper {
         throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "booking document is null" });
     }
 
-    public List<EngagementVo> engagementDocument2DetailedVo(List<? extends EngagementDocument> engagementDocumentList) {
+    /*public List<EngagementVo> engagementDocument2DetailedVo(List<? extends EngagementDocument> engagementDocumentList) {
         List<EngagementVo> engagementDetailsList = new LinkedList<>();
         if(engagementDocumentList != null && !engagementDocumentList.isEmpty()) {
             for(EngagementDocument document : engagementDocumentList) {
@@ -91,14 +91,14 @@ public class ReservationServiceHelper {
             }
         }
         return engagementDetailsList;
-    }
+    }*/
 
-    public EngagementVo engagementDocument2DetailedVo(EngagementDocument engagementDocument) {
+    /*public EngagementVo engagementDocument2DetailedVo(EngagementDocument engagementDocument) {
         if(engagementDocument != null) {
             EngagementVo vo = engagementDocument2VoConverter.convert(engagementDocument);
             log.debug("Converting {} to {}", engagementDocument, vo);
             return vo;
         }
         throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "engagement document is null" });
-    }
+    }*/
 }

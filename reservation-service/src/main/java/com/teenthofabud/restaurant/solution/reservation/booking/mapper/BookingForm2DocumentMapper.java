@@ -65,7 +65,7 @@ public class BookingForm2DocumentMapper implements DualChannelMapper<BookingDocu
 
         if(!fieldsToEscape.contains("timestamp") && StringUtils.hasText(StringUtils.trimWhitespace(form.getTimestamp()))) {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern(bookingTimeFormat);
-            if(form.getTimestamp().compareTo(dtf.format(expectedDocument.getTimestamp())) != 0) {
+            if(form.getTimestamp().compareTo(dtf.format(actualDocument.getTimestamp())) != 0) {
                 expectedDocument.setTimestamp(LocalDateTime.parse(form.getTimestamp(), dtf));
                 changeSW = true;
                 log.debug("BookingForm.timestamp: {} is different as BookingDocument.timestamp: {}", form.getTimestamp(), actualDocument.getTimestamp());
@@ -78,14 +78,14 @@ public class BookingForm2DocumentMapper implements DualChannelMapper<BookingDocu
             log.debug("BookingForm.timestamp: is unchanged");
         }
 
-        if(!fieldsToEscape.contains("noOfPerson") && form.getNoOfPerson() != null && form.getNoOfPerson().compareTo(actualDocument.getNoOfPerson()) != 0) {
+        /*if(!fieldsToEscape.contains("noOfPerson") && form.getNoOfPerson() != null && form.getNoOfPerson().compareTo(actualDocument.getNoOfPerson()) != 0) {
             expectedDocument.setNoOfPerson(form.getNoOfPerson());
             changeSW = true;
             log.debug("BookingForm.noOfPerson: {} is different as BookingDocument.noOfPerson: {}", form.getNoOfPerson(), actualDocument.getNoOfPerson());
         } else {
             expectedDocument.setNoOfPerson(actualDocument.getNoOfPerson());
             log.debug("BookingForm.noOfPerson: is unchanged");
-        }
+        }*/
 
         if(!fieldsToEscape.contains("accountId") && StringUtils.hasText(StringUtils.trimWhitespace(form.getAccountId()))
                 && form.getAccountId().compareTo(actualDocument.getAccountId()) != 0) {

@@ -190,14 +190,17 @@ public class BookingController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("filter")
     public List<BookingVo> getAllBookingsByFilters(@RequestParam(required = false) String accountId,
+                                                   @RequestParam(required = false) String categoryId,
                                                        @RequestParam(required = false) String timestamp) throws BookingException {
         log.debug("Requesting all available bookings with given filters");
         boolean emptyAccountId = !StringUtils.hasText(StringUtils.trimWhitespace(accountId));
+        boolean emptyCategoryId = !StringUtils.hasText(StringUtils.trimWhitespace(categoryId));
         boolean emptyTimestamp = !StringUtils.hasText(StringUtils.trimWhitespace(timestamp));
-        if(!emptyAccountId || !emptyTimestamp) {
+        if(!emptyAccountId || !emptyCategoryId || !emptyTimestamp) {
             Optional<String> optAccountId = emptyAccountId ? Optional.empty() : Optional.of(accountId);
-            Optional<String> optTableId = emptyTimestamp ? Optional.empty() : Optional.of(timestamp);
-            List<BookingVo> matchedByFilter = service.retrieveAllMatchingDetailsByCriteria(optTableId, optAccountId);
+            Optional<String> optCategoryId = emptyCategoryId ? Optional.empty() : Optional.of(categoryId);
+            Optional<String> optTimestamp = emptyTimestamp ? Optional.empty() : Optional.of(timestamp);
+            List<BookingVo> matchedByFilter = service.retrieveAllMatchingDetailsByCriteria(optTimestamp, optAccountId, optCategoryId);
             log.debug("Responding with all available bookings with given filters");
             return matchedByFilter;
         }

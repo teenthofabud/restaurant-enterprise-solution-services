@@ -68,7 +68,7 @@ public class EngagementDtoValidator implements Validator {
 
         Optional<String> optAssociationId = dto.getAssociationId();
         if(!fieldsToEscape.contains("associationId") && optAssociationId.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optAssociationId.get()))) {
-            errors.rejectValue("associationId", ReservationErrorCode.BOOKING_ATTRIBUTE_INVALID.name());
+            errors.rejectValue("associationId", ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.name());
             log.debug("EngagementDto.associationId is invalid");
             return;
         } else if(!fieldsToEscape.contains("associationId") && optAssociationId.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optAssociationId.get()))) {
@@ -77,19 +77,19 @@ public class EngagementDtoValidator implements Validator {
                 BookingVo bookingVo = bookingService.retrieveDetailsById(associationId, Optional.of(TOABCascadeLevel.ONE));
                 if(!bookingVo.getActive()) {
                     log.debug("EngagementDto.associationId is inactive");
-                    errors.rejectValue("associationId", ReservationErrorCode.BOOKING_ATTRIBUTE_INVALID.name());
+                    errors.rejectValue("associationId", ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.name());
                     return;
                 }
             } catch (BookingException e) {
                 log.debug("EngagementDto.associationId is invalid");
-                errors.rejectValue("associationId", ReservationErrorCode.BOOKING_ATTRIBUTE_INVALID.name());
+                errors.rejectValue("associationId", ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.name());
                 return;
             }
         }
 
         Optional<String> optEvent = dto.getEvent();
         if(!fieldsToEscape.contains("event") && optEvent.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optEvent.get()))) {
-            errors.rejectValue("event", ReservationErrorCode.BOOKING_ATTRIBUTE_INVALID.name());
+            errors.rejectValue("event", ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.name());
             log.debug("EngagementDto.event is invalid");
             return;
         } else if(!fieldsToEscape.contains("event") && optEvent.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optEvent.get()))) {
@@ -98,14 +98,14 @@ public class EngagementDtoValidator implements Validator {
                 EngagementEvent.valueOf(event);
             } catch (IllegalArgumentException e) {
                 log.debug("EngagementDto.associationId is invalid");
-                errors.rejectValue("associationId", ReservationErrorCode.BOOKING_ATTRIBUTE_INVALID.name());
+                errors.rejectValue("associationId", ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.name());
                 return;
             }
         }
 
         Optional<String> optDate = dto.getDate();
         if(!fieldsToEscape.contains("date") && optDate.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optDate.get()))) {
-            errors.rejectValue("date", ReservationErrorCode.BOOKING_ATTRIBUTE_INVALID.name());
+            errors.rejectValue("date", ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.name());
             log.debug("EngagementDto.date is invalid");
             return;
         } else if(!fieldsToEscape.contains("date") && optDate.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optDate.get()))) {
@@ -113,7 +113,7 @@ public class EngagementDtoValidator implements Validator {
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateFormat);
                 LocalDate.parse(optDate.get(), dtf);
             } catch (DateTimeParseException e) {
-                errors.rejectValue("date", ReservationErrorCode.BOOKING_ATTRIBUTE_INVALID.name());
+                errors.rejectValue("date", ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.name());
                 log.debug("EngagementDto.date is invalid");
                 return;
             }
@@ -121,7 +121,7 @@ public class EngagementDtoValidator implements Validator {
 
         Optional<String> optTime = dto.getTime();
         if(!fieldsToEscape.contains("time") && optTime.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optTime.get()))) {
-            errors.rejectValue("time", ReservationErrorCode.BOOKING_ATTRIBUTE_INVALID.name());
+            errors.rejectValue("time", ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.name());
             log.debug("EngagementDto.time is invalid");
             return;
         } else if(!fieldsToEscape.contains("time") && optTime.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optTime.get()))) {
@@ -129,7 +129,7 @@ public class EngagementDtoValidator implements Validator {
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateFormat);
                 LocalTime.parse(optTime.get(), dtf);
             } catch (DateTimeParseException e) {
-                errors.rejectValue("time", ReservationErrorCode.BOOKING_ATTRIBUTE_INVALID.name());
+                errors.rejectValue("time", ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.name());
                 log.debug("EngagementDto.time is invalid");
                 return;
             }
@@ -140,7 +140,7 @@ public class EngagementDtoValidator implements Validator {
             Boolean trueSW = optActive.get().equalsIgnoreCase(Boolean.TRUE.toString());
             Boolean falseSW = optActive.get().equalsIgnoreCase(Boolean.FALSE.toString());
             if(!trueSW && !falseSW) {
-                errors.rejectValue("active", ReservationErrorCode.BOOKING_ATTRIBUTE_INVALID.name());
+                errors.rejectValue("active", ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.name());
                 log.debug("EngagementDto.active is invalid");
                 return;
             }

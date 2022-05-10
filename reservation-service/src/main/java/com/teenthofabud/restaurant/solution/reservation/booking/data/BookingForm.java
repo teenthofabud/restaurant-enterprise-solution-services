@@ -17,8 +17,8 @@ public class BookingForm {
     private String categoryId;
     @ToString.Include
     private String timestamp;
-    @ToString.Include
-    private Integer noOfPerson;
+   /* @ToString.Include
+    private Integer noOfPerson;*/
     @ToString.Include
     private String accountId;
 

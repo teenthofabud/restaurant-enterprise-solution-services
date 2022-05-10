@@ -30,6 +30,7 @@ import com.teenthofabud.restaurant.solution.reservation.error.ReservationErrorCo
 import com.teenthofabud.restaurant.solution.reservation.category.data.CategoryException;
 import com.teenthofabud.restaurant.solution.reservation.category.data.CategoryVo;
 import com.teenthofabud.restaurant.solution.reservation.category.service.CategoryService;
+import com.teenthofabud.restaurant.solution.reservation.integration.customer.validator.AccountIdValidator;
 import com.teenthofabud.restaurant.solution.reservation.utils.ReservationServiceHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,11 +79,22 @@ public class BookingServiceImpl implements BookingService {
     private ObjectMapper om;
     private ReservationServiceHelper reservationServiceHelper;
     private CategoryService categoryService;
+    private AccountIdValidator accountIdValidator;
     private String bookingTimeFormat;
 
     @Value("${res.reservation.booking.timestamp}")
     public void setBookingTimeFormat(String bookingTimeFormat) {
         this.bookingTimeFormat = bookingTimeFormat;
+    }
+
+    @Autowired
+    public void setAccountIdValidator(AccountIdValidator accountIdValidator) {
+        this.accountIdValidator = accountIdValidator;
+    }
+
+    @Autowired
+    public void setReservationServiceHelper(ReservationServiceHelper reservationServiceHelper) {
+        this.reservationServiceHelper = reservationServiceHelper;
     }
 
     @Autowired
@@ -222,6 +234,7 @@ public class BookingServiceImpl implements BookingService {
         return matchedBookingList;
     }
 
+    @Deprecated
     @Override
     public List<BookingVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalTimestamp, Optional<String> optionalAccountId) throws BookingException {
         if(optionalTimestamp.isEmpty() && optionalAccountId.isEmpty()) {
@@ -262,6 +275,53 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    public List<BookingVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalTimestamp, Optional<String> optionalAccountId, Optional<String> optionalCategoryId) throws BookingException {
+        if(optionalTimestamp.isEmpty() && optionalAccountId.isEmpty() && optionalCategoryId.isEmpty()) {
+            log.debug("No search parameters provided");
+        }
+        String timestamp = optionalTimestamp.isPresent() ? optionalTimestamp.get() : "";
+        String accountId = optionalAccountId.isPresent() ? optionalAccountId.get() : "";
+        String categoryId = optionalCategoryId.isPresent() ? optionalCategoryId.get() : "";
+        if(StringUtils.isEmpty(StringUtils.trimWhitespace(timestamp)) && StringUtils.isEmpty(StringUtils.trimWhitespace(accountId))
+            && StringUtils.isEmpty(StringUtils.trimWhitespace(categoryId))) {
+            log.debug("All search parameters are empty");
+        }
+        List<BookingVo> matchedBookingList = new LinkedList<>();
+        Map<String, String> providedFilters = new LinkedHashMap<>();
+        BookingDocument document = new BookingDocument();
+        ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll();
+        if(StringUtils.hasText(StringUtils.trimWhitespace(timestamp))) {
+            log.debug("timestamp {} is valid", timestamp);
+            providedFilters.put("timestamp", timestamp);
+            document.setTimestamp(LocalDateTime.parse(timestamp, DateTimeFormatter.ofPattern(bookingTimeFormat)));
+            matcherCriteria = matcherCriteria.withMatcher("timestamp", match -> match.exact());
+        }
+        if(StringUtils.hasText(StringUtils.trimWhitespace(accountId))) {
+            log.debug("accountId {} is valid", accountId);
+            providedFilters.put("accountId", accountId);
+            document.setAccountId(accountId);
+            matcherCriteria = matcherCriteria.withMatcher("accountId", match -> match.exact());
+        }
+        if(StringUtils.hasText(StringUtils.trimWhitespace(categoryId))) {
+            log.debug("categoryId {} is valid", categoryId);
+            providedFilters.put("categoryId", categoryId);
+            document.setCategoryId(categoryId);
+            matcherCriteria = matcherCriteria.withMatcher("categoryId", match -> match.exact());
+        }
+        if(providedFilters.isEmpty()) {
+            log.debug("search parameters are not valid");
+        } else {
+            log.debug("search parameters {} are valid", providedFilters);
+        }
+        Example<BookingDocument> bookingDocumentExample = Example.of(document, matcherCriteria);
+        List<BookingDocument> bookingDocumentList = repository.findAll(bookingDocumentExample);
+        matchedBookingList = reservationServiceHelper.bookingDocument2DetailedVo(bookingDocumentList);
+        log.info("Found {} BookingVo matching with provided parameters : {}", matchedBookingList.size(), providedFilters);
+        log.info("No BookingVo available matching with provided parameters : {}", matchedBookingList.size(), providedFilters);
+        return matchedBookingList;
+    }
+
+    @Override
     public String createBooking(BookingForm form) throws BookingException {
         log.info("Creating new BookingDocument");
 
@@ -285,13 +345,13 @@ public class BookingServiceImpl implements BookingService {
 
         BookingDocument expectedDocument = form2DocumentConverter.convert(form);
 
-        log.debug(BookingMessageTemplate.MSG_TEMPLATE_BOOKING_EXISTENCE_BY_TIMESTAMP_AND_ACCOUNT_ID.getValue(), form.getTimestamp(), form.getAccountId());
-        if(repository.existsByTimestampAndAccountId(expectedDocument.getTimestamp(), expectedDocument.getAccountId())) {
-            log.debug(BookingMessageTemplate.MSG_TEMPLATE_BOOKING_EXISTS_BY_TIMESTAMP_AND_ACCOUNT_ID.getValue(), expectedDocument.getTimestamp(), expectedDocument.getAccountId());
+        log.debug(BookingMessageTemplate.MSG_TEMPLATE_BOOKING_EXISTENCE_BY_CATEGORY_ID_AND_TIMESTAMP_AND_ACCOUNT_ID.getValue(), form.getAccountId(), form.getTimestamp(), form.getCategoryId());
+        if(repository.existsByAccountIdAndTimestampAndCategoryId(expectedDocument.getAccountId(), expectedDocument.getTimestamp(), expectedDocument.getCategoryId())) {
+            log.debug(BookingMessageTemplate.MSG_TEMPLATE_BOOKING_EXISTS_BY_CATEGORY_ID_AND_TIMESTAMP_AND_ACCOUNT_ID.getValue(), expectedDocument.getAccountId(), expectedDocument.getTimestamp(), expectedDocument.getCategoryId());
             throw new BookingException(ReservationErrorCode.RESERVATION_EXISTS,
-                    new Object[]{ "timestamp: " + form.getTimestamp(), ", accountId: " + form.getAccountId() });
+                    new Object[]{ "accountId: " + form.getAccountId(), "timestamp: " + form.getTimestamp() + ", categoryId: " + form.getCategoryId() });
         }
-        log.debug(BookingMessageTemplate.MSG_TEMPLATE_BOOKING_NON_EXISTENCE_BY_TIMESTAMP_AND_ACCOUNT_ID.getValue(), expectedDocument.getTimestamp(), expectedDocument.getAccountId());
+        log.debug(BookingMessageTemplate.MSG_TEMPLATE_BOOKING_NON_EXISTENCE_BY_CATEGORY_ID_AND_TIMESTAMP_AND_ACCOUNT_ID.getValue(), expectedDocument.getAccountId(), expectedDocument.getTimestamp(), expectedDocument.getCategoryId());
 
         log.debug("Saving {}", expectedDocument);
         BookingDocument actualDocument = repository.save(expectedDocument);
@@ -497,52 +557,60 @@ public class BookingServiceImpl implements BookingService {
 
     private void checkUniquenessOfBooking(BookingDto patchedBookingForm, BookingDocument actualDocument) throws BookingException {
         List<Boolean> similaritySwitchesCollection = new ArrayList<>(2);
+        if(patchedBookingForm.getAccountId().isPresent()) {
+            similaritySwitchesCollection.add(patchedBookingForm.getAccountId().get().compareTo(actualDocument.getAccountId()) == 0);
+        }
         if(patchedBookingForm.getTimestamp().isPresent()) {
             similaritySwitchesCollection.add(patchedBookingForm.getTimestamp().get().compareTo(
                     DateTimeFormatter.ofPattern(bookingTimeFormat).format(actualDocument.getTimestamp())) == 0);
         }
-        if(patchedBookingForm.getAccountId().isPresent()) {
-            similaritySwitchesCollection.add(patchedBookingForm.getAccountId().get().compareTo(actualDocument.getAccountId()) == 0);
+        if(patchedBookingForm.getCategoryId().isPresent()) {
+            similaritySwitchesCollection.add(patchedBookingForm.getCategoryId().get().compareTo(actualDocument.getCategoryId()) == 0);
         }
         if(!similaritySwitchesCollection.isEmpty()) {
+            String accountId = patchedBookingForm.getAccountId().isPresent() ? patchedBookingForm.getAccountId().get() : actualDocument.getAccountId();
             String timestamp = patchedBookingForm.getTimestamp().isPresent() ? patchedBookingForm.getTimestamp().get()
                     : DateTimeFormatter.ofPattern(bookingTimeFormat).format(actualDocument.getTimestamp());
-            String accountId = patchedBookingForm.getAccountId().isPresent() ? patchedBookingForm.getAccountId().get() : actualDocument.getAccountId();
-            log.debug(BookingMessageTemplate.MSG_TEMPLATE_BOOKING_EXISTENCE_BY_TIMESTAMP_AND_ACCOUNT_ID.getValue(), timestamp, accountId);
+            String categoryId = patchedBookingForm.getCategoryId().isPresent() ? patchedBookingForm.getCategoryId().get() : actualDocument.getCategoryId();
+            log.debug(BookingMessageTemplate.MSG_TEMPLATE_BOOKING_EXISTENCE_BY_CATEGORY_ID_AND_TIMESTAMP_AND_ACCOUNT_ID.getValue(), accountId, timestamp, categoryId);
             boolean sameDocumentSw = similaritySwitchesCollection.stream().allMatch(Boolean::valueOf);
-            boolean duplicateDocumentSw =  repository.existsByTimestampAndAccountId(
-                    LocalDateTime.parse(timestamp,DateTimeFormatter.ofPattern(bookingTimeFormat)), accountId);
+            boolean duplicateDocumentSw =  repository.existsByAccountIdAndTimestampAndCategoryId(accountId,
+                    LocalDateTime.parse(timestamp,DateTimeFormatter.ofPattern(bookingTimeFormat)), categoryId);
             if(sameDocumentSw || duplicateDocumentSw) {
-                log.debug(BookingMessageTemplate.MSG_TEMPLATE_BOOKING_EXISTS_BY_TIMESTAMP_AND_ACCOUNT_ID.getValue(), timestamp, accountId);
-                throw new BookingException(ReservationErrorCode.RESERVATION_EXISTS, new Object[]{ "timestamp: " + timestamp, ", accountId: " + accountId });
+                log.debug(BookingMessageTemplate.MSG_TEMPLATE_BOOKING_EXISTS_BY_CATEGORY_ID_AND_TIMESTAMP_AND_ACCOUNT_ID.getValue(), timestamp, accountId);
+                throw new BookingException(ReservationErrorCode.RESERVATION_EXISTS, new Object[]{ "accountId: " + accountId, ", timestamp: " + timestamp + ", categoryId: " + categoryId });
             }
-            log.debug(BookingMessageTemplate.MSG_TEMPLATE_BOOKING_NON_EXISTENCE_BY_TIMESTAMP_AND_ACCOUNT_ID.getValue(), timestamp, accountId);
+            log.debug(BookingMessageTemplate.MSG_TEMPLATE_BOOKING_NON_EXISTENCE_BY_CATEGORY_ID_AND_TIMESTAMP_AND_ACCOUNT_ID.getValue(), accountId, timestamp, categoryId);
 
         }
     }
 
     private void checkUniquenessOfBooking(BookingForm bookingForm, BookingDocument actualDocument) throws BookingException {
         List<Boolean> similaritySwitchesCollection = new ArrayList<>(3);
+        if(StringUtils.hasText(StringUtils.trimWhitespace(bookingForm.getAccountId()))) {
+            similaritySwitchesCollection.add(bookingForm.getAccountId().compareTo(actualDocument.getAccountId()) == 0);
+        }
         if(StringUtils.hasText(StringUtils.trimWhitespace(bookingForm.getTimestamp()))) {
             similaritySwitchesCollection.add(bookingForm.getTimestamp().compareTo(
                     DateTimeFormatter.ofPattern(bookingTimeFormat).format(actualDocument.getTimestamp())) == 0);
         }
-        if(StringUtils.hasText(StringUtils.trimWhitespace(bookingForm.getAccountId()))) {
-            similaritySwitchesCollection.add(bookingForm.getAccountId().compareTo(actualDocument.getAccountId()) == 0);
+        if(StringUtils.hasText(StringUtils.trimWhitespace(bookingForm.getCategoryId()))) {
+            similaritySwitchesCollection.add(bookingForm.getCategoryId().compareTo(actualDocument.getCategoryId()) == 0);
         }
         if(!similaritySwitchesCollection.isEmpty()) {
-            String timestamp = StringUtils.hasText(StringUtils.trimWhitespace(bookingForm.getTimestamp())) ? bookingForm.getTimestamp()
-                    : DateTimeFormatter.ofPattern(bookingTimeFormat).format(actualDocument.getTimestamp());
             String accountId = StringUtils.hasText(StringUtils.trimWhitespace(bookingForm.getAccountId())) ? bookingForm.getAccountId() : actualDocument.getAccountId();
-            log.debug(BookingMessageTemplate.MSG_TEMPLATE_BOOKING_EXISTENCE_BY_TIMESTAMP_AND_ACCOUNT_ID.getValue(), timestamp, accountId);
+            LocalDateTime timestamp = StringUtils.hasText(StringUtils.trimWhitespace(bookingForm.getTimestamp()))
+                    ? LocalDateTime.parse(bookingForm.getTimestamp(), DateTimeFormatter.ofPattern(bookingTimeFormat))
+                    : actualDocument.getTimestamp();
+            String categoryId = StringUtils.hasText(StringUtils.trimWhitespace(bookingForm.getCategoryId())) ? bookingForm.getCategoryId() : actualDocument.getCategoryId();
+            log.debug(BookingMessageTemplate.MSG_TEMPLATE_BOOKING_EXISTENCE_BY_CATEGORY_ID_AND_TIMESTAMP_AND_ACCOUNT_ID.getValue(), accountId, timestamp, categoryId);
             boolean sameDocumentSw = similaritySwitchesCollection.stream().allMatch(Boolean::valueOf);
-            boolean duplicateDocumentSw =  repository.existsByTimestampAndAccountId(
-                    LocalDateTime.parse(timestamp,DateTimeFormatter.ofPattern(bookingTimeFormat)), accountId);
+            boolean duplicateDocumentSw =  repository.existsByAccountIdAndTimestampAndCategoryId(accountId, timestamp, categoryId);
             if(sameDocumentSw || duplicateDocumentSw) {
-                log.debug(BookingMessageTemplate.MSG_TEMPLATE_BOOKING_EXISTS_BY_TIMESTAMP_AND_ACCOUNT_ID.getValue(), timestamp, accountId);
-                throw new BookingException(ReservationErrorCode.RESERVATION_EXISTS, new Object[]{ "timestamp: " + timestamp, ", accountId: " + accountId });
+                log.debug(BookingMessageTemplate.MSG_TEMPLATE_BOOKING_EXISTS_BY_CATEGORY_ID_AND_TIMESTAMP_AND_ACCOUNT_ID.getValue(), accountId, timestamp, categoryId);
+                throw new BookingException(ReservationErrorCode.RESERVATION_EXISTS, new Object[]{ "accountId: " + accountId, ", timestamp: " + timestamp + ", categoryId: " + categoryId });
             }
-            log.debug(BookingMessageTemplate.MSG_TEMPLATE_BOOKING_NON_EXISTENCE_BY_TIMESTAMP_AND_ACCOUNT_ID.getValue(), timestamp, accountId);
+            log.debug(BookingMessageTemplate.MSG_TEMPLATE_BOOKING_NON_EXISTENCE_BY_CATEGORY_ID_AND_TIMESTAMP_AND_ACCOUNT_ID.getValue(), accountId, timestamp, categoryId);
 
         }
     }

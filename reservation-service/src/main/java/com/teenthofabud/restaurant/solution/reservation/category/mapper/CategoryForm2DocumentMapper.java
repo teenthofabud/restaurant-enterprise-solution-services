@@ -17,7 +17,7 @@ public class CategoryForm2DocumentMapper implements DualChannelMapper<CategoryDo
 
     private List<String> fieldsToEscape;
 
-    @Value("#{'${res.booking.category.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.reservation.category.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }

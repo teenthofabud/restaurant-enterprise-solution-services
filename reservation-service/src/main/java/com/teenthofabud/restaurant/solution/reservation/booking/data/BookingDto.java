@@ -20,8 +20,8 @@ public class BookingDto {
     private Optional<String> timestamp;
     @ToString.Include
     private Optional<String> accountId;
-    @ToString.Include
-    private Optional<String> noOfPerson;
+    /*@ToString.Include
+    private Optional<String> noOfPerson;*/
     @ToString.Include
     private Optional<String> active;
 
@@ -29,7 +29,7 @@ public class BookingDto {
         this.categoryId = Optional.ofNullable(null);
         this.timestamp = Optional.ofNullable(null);
         this.accountId = Optional.ofNullable(null);
-        this.noOfPerson = Optional.ofNullable(null);
+        //this.noOfPerson = Optional.ofNullable(null);
         this.active = Optional.ofNullable(null);
     }
 

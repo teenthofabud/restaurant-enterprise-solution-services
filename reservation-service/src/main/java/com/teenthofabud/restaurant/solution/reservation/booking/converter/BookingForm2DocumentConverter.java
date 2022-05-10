@@ -40,9 +40,9 @@ public class BookingForm2DocumentConverter implements Converter<BookingForm, Boo
         if(!fieldsToEscape.contains("timestamp")) {
             document.setTimestamp(LocalDateTime.parse(form.getTimestamp(),DateTimeFormatter.ofPattern(bookingTimeFormat)));
         }
-        if(!fieldsToEscape.contains("noOfPerson")) {
+        /*if(!fieldsToEscape.contains("noOfPerson")) {
             document.setNoOfPerson(form.getNoOfPerson());
-        }
+        }*/
         if(!fieldsToEscape.contains("accountId")) {
             document.setAccountId(form.getAccountId());
         }

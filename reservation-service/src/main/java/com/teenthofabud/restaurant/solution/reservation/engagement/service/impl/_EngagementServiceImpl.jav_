@@ -15,7 +15,7 @@ import com.teenthofabud.restaurant.solution.reservation.engagement.converter.Eng
 import com.teenthofabud.restaurant.solution.reservation.engagement.converter.EngagementForm2DocumentConverter;
 import com.teenthofabud.restaurant.solution.reservation.engagement.data.*;
 import com.teenthofabud.restaurant.solution.reservation.engagement.mapper.EngagementDocumentSelfMapper;
-import com.teenthofabud.restaurant.solution.reservation.engagement.mapper.EngagementForm2DocumentMapper;
+import com.teenthofabud.restaurant.solution.reservation.engagement.mapper._EngagementForm2DocumentMapper_;
 import com.teenthofabud.restaurant.solution.reservation.engagement.repository.EngagementRepository;
 import com.teenthofabud.restaurant.solution.reservation.engagement.service.EngagementService;
 import com.teenthofabud.restaurant.solution.reservation.engagement.validator.EngagementDtoValidator;
@@ -72,7 +72,7 @@ public class EngagementServiceImpl implements EngagementService {
 
     private EngagementForm2DocumentConverter form2DocumentConverter;
     private EngagementDto2DocumentConverter dto2DocumentConverter;
-    private EngagementForm2DocumentMapper form2DocumentMapper;
+    private _EngagementForm2DocumentMapper_ form2DocumentMapper;
     private EngagementDocumentSelfMapper documentSelfMapper;
     private EngagementFormValidator formValidator;
     private EngagementFormRelaxedValidator relaxedFormValidator;
@@ -124,7 +124,7 @@ public class EngagementServiceImpl implements EngagementService {
     }
 
     @Autowired
-    public void setForm2DocumentMapper(EngagementForm2DocumentMapper form2DocumentMapper) {
+    public void setForm2DocumentMapper(_EngagementForm2DocumentMapper_ form2DocumentMapper) {
         this.form2DocumentMapper = form2DocumentMapper;
     }
 
@@ -179,7 +179,7 @@ public class EngagementServiceImpl implements EngagementService {
         } catch (NumberFormatException e) {
             log.error("Unable to parse engagement id", e);
             log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_ID_INVALID.getValue(), id);
-            throw new EngagementException(ReservationErrorCode.BOOKING_ATTRIBUTE_INVALID, new Object[] { "id", id });
+            throw new EngagementException(ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID, new Object[] { "id", id });
         }
         return engagementId;
     }
@@ -201,7 +201,7 @@ public class EngagementServiceImpl implements EngagementService {
         Optional<EngagementDocument> optDocument = repository.findById(id);
         if(optDocument.isEmpty()) {
             log.debug("No EngagementDocument found by id: {}", id);
-            throw new EngagementException(ReservationErrorCode.BOOKING_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
+            throw new EngagementException(ReservationErrorCode.RESERVATION_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
         log.info("Found EngagementVo by id: {}", id);
         EngagementDocument document = optDocument.get();
@@ -220,11 +220,11 @@ public class EngagementServiceImpl implements EngagementService {
         try {
             BookingVo bookingVo = bookingService.retrieveDetailsById(associationId, Optional.of(TOABCascadeLevel.ONE));
             if(!bookingVo.getActive()) {
-                throw new BookingException(ReservationErrorCode.BOOKING_INACTIVE, new Object [] { associationId });
+                throw new BookingException(ReservationErrorCode.RESERVATION_INACTIVE, new Object [] { associationId });
             }
         } catch (BookingException e) {
             log.error("associationId is invalid", e);
-            throw new EngagementException(ReservationErrorCode.BOOKING_ATTRIBUTE_INVALID, new Object [] { "associationId: " + associationId });
+            throw new EngagementException(ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID, new Object [] { "associationId: " + associationId });
         }
         List<EngagementDocument> engagementDocumentList = repository.findByAssociationId(associationId);
         TOABCascadeLevel cascadeLevel = optionalCascadeLevel.isPresent() ? optionalCascadeLevel.get() : TOABCascadeLevel.ZERO;
@@ -234,7 +234,7 @@ public class EngagementServiceImpl implements EngagementService {
         TOABRequestContextHolder.clearCascadeLevelContext();
         if(matchedEngagementList.isEmpty()) {
             log.debug("No EngagementVo found matching with associationId: {}", associationId);
-            throw new EngagementException(ReservationErrorCode.BOOKING_NOT_FOUND, new Object[] { "associationId", associationId });
+            throw new EngagementException(ReservationErrorCode.RESERVATION_NOT_FOUND, new Object[] { "associationId", associationId });
         }
         return matchedEngagementList;
     }
@@ -279,7 +279,7 @@ public class EngagementServiceImpl implements EngagementService {
             } catch (DateTimeParseException e) {
                 log.error("Unable to parse timestamp", e);
                 log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_TIMESTAMP_INVALID.getValue(), timestamp);
-                throw new EngagementException(ReservationErrorCode.BOOKING_ATTRIBUTE_INVALID, new Object[] { "timestamp", timestamp });
+                throw new EngagementException(ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID, new Object[] { "timestamp", timestamp });
             } 
             log.debug("event {} is valid", event);
             providedFilters.put("event", event);
@@ -305,7 +305,7 @@ public class EngagementServiceImpl implements EngagementService {
 
         if(form == null) {
             log.debug("EngagementForm provided is null");
-            throw new EngagementException(ReservationErrorCode.BOOKING_ATTRIBUTE_UNEXPECTED,
+            throw new EngagementException(ReservationErrorCode.RESERVATION_ATTRIBUTE_UNEXPECTED,
                     new Object[]{ "form", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
         }
         log.debug("Form details: {}", form);
@@ -329,7 +329,7 @@ public class EngagementServiceImpl implements EngagementService {
                 expectedDocument.getAssociationId(), expectedDocument.getEvent(), expectedDocument.getDate(), expectedDocument.getTime())) {
             log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_EXISTS_BY_ASSOCIATION_ID_EVENT_DATE_TIME.getValue(),
                     expectedDocument.getAssociationId(), expectedDocument.getEvent(), expectedDocument.getDate(), expectedDocument.getTime());
-            throw new EngagementException(ReservationErrorCode.BOOKING_EXISTS,
+            throw new EngagementException(ReservationErrorCode.RESERVATION_EXISTS,
                     new Object[]{ "associationId: " + form.getAssociationId() + ", event: " + form.getEvent(), ", date: " + form.getDate() + ", time: " + form.getTime() });
         }
         log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_NON_EXISTENCE_BY_ASSOCIATION_ID_EVENT_DATE_TIME.getValue(),
@@ -341,7 +341,7 @@ public class EngagementServiceImpl implements EngagementService {
 
         if(actualDocument == null) {
             log.debug("Unable to create {}", expectedDocument);
-            throw new EngagementException(ReservationErrorCode.BOOKING_ACTION_FAILURE,
+            throw new EngagementException(ReservationErrorCode.RESERVATION_ACTION_FAILURE,
                     new Object[]{ "creation", "unable to persist EngagementForm details" });
         }
         log.info("Created new EngagementForm with id: {}", actualDocument.getId());
@@ -356,20 +356,20 @@ public class EngagementServiceImpl implements EngagementService {
         Optional<EngagementDocument> optActualDocument = repository.findById(id);
         if(optActualDocument.isEmpty()) {
             log.debug(EngagementMessageTemplate.MSG_TEMPLATE_NO_ENGAGEMENT_ENTITY_ID_AVAILABLE.getValue(), id);
-            throw new EngagementException(ReservationErrorCode.BOOKING_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
+            throw new EngagementException(ReservationErrorCode.RESERVATION_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
         log.debug(EngagementMessageTemplate.MSG_TEMPLATE_FOUND_ENGAGEMENT_ENTITY_ID.getValue(), id);
 
         EngagementDocument actualDocument = optActualDocument.get();
         if(!actualDocument.getActive()) {
             log.debug("EngagementDocument is inactive with id: {}", id);
-            throw new EngagementException(ReservationErrorCode.BOOKING_INACTIVE, new Object[] { String.valueOf(id) });
+            throw new EngagementException(ReservationErrorCode.RESERVATION_INACTIVE, new Object[] { String.valueOf(id) });
         }
         log.debug("EngagementDocument is active with id: {}", id);
 
         if(form == null) {
             log.debug("EngagementForm is null");
-            throw new EngagementException(ReservationErrorCode.BOOKING_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
+            throw new EngagementException(ReservationErrorCode.RESERVATION_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
         }
         log.debug("Form details : {}", form);
 
@@ -383,14 +383,14 @@ public class EngagementServiceImpl implements EngagementService {
             throw new EngagementException(ec, new Object[] { err.getFieldError().getField(), err.getFieldError().getCode() });
         } else if (!allEmpty) {
             log.debug("All attributes of EngagementForm are empty");
-            throw new EngagementException(ReservationErrorCode.BOOKING_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are empty" });
+            throw new EngagementException(ReservationErrorCode.RESERVATION_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are empty" });
         }
         log.debug("All attributes of EngagementForm are valid");
 
         Optional<EngagementDocument> optExpectedDocument = form2DocumentMapper.compareAndMap(actualDocument, form);
         if(optExpectedDocument.isEmpty()) {
             log.debug("No new value for attributes of EngagementForm");
-            throw new EngagementException(ReservationErrorCode.BOOKING_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are expected with new values" });
+            throw new EngagementException(ReservationErrorCode.RESERVATION_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are expected with new values" });
         }
         log.debug("Successfully compared and copied attributes from EngagementForm to EngagementDocument");
 
@@ -407,7 +407,7 @@ public class EngagementServiceImpl implements EngagementService {
         log.debug("Updated: {}", actualDocument);
         if(actualDocument == null) {
             log.debug("Unable to update {}", actualDocument);
-            throw new EngagementException(ReservationErrorCode.BOOKING_ACTION_FAILURE,
+            throw new EngagementException(ReservationErrorCode.RESERVATION_ACTION_FAILURE,
                     new Object[]{ "update", "unable to persist currency engagement details" });
         }
         log.info("Updated existing EngagementDocument with id: {}", actualDocument.getId());
@@ -421,14 +421,14 @@ public class EngagementServiceImpl implements EngagementService {
         Optional<EngagementDocument> optDocument = repository.findById(id);
         if(optDocument.isEmpty()) {
             log.debug(EngagementMessageTemplate.MSG_TEMPLATE_NO_ENGAGEMENT_ENTITY_ID_AVAILABLE.getValue(), id);
-            throw new EngagementException(ReservationErrorCode.BOOKING_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
+            throw new EngagementException(ReservationErrorCode.RESERVATION_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
         log.debug(EngagementMessageTemplate.MSG_TEMPLATE_FOUND_ENGAGEMENT_ENTITY_ID.getValue(), id);
 
         EngagementDocument actualDocument = optDocument.get();
         if(!actualDocument.getActive()) {
             log.debug("EngagementDocument is inactive with id: {}", id);
-            throw new EngagementException(ReservationErrorCode.BOOKING_INACTIVE, new Object[] { String.valueOf(id) });
+            throw new EngagementException(ReservationErrorCode.RESERVATION_INACTIVE, new Object[] { String.valueOf(id) });
         }
         log.debug("EngagementDocument is active with id: {}", id);
 
@@ -439,7 +439,7 @@ public class EngagementServiceImpl implements EngagementService {
         log.debug("Soft deleted: {}", expectedDocument);
         if(expectedDocument == null) {
             log.debug("Unable to soft delete {}", actualDocument);
-            throw new EngagementException(ReservationErrorCode.BOOKING_ACTION_FAILURE,
+            throw new EngagementException(ReservationErrorCode.RESERVATION_ACTION_FAILURE,
                     new Object[]{ "deletion", "unable to soft delete current engagement details with id:" + id });
         }
 
@@ -454,21 +454,21 @@ public class EngagementServiceImpl implements EngagementService {
         Optional<EngagementDocument> optActualDocument = repository.findById(id);
         if(optActualDocument.isEmpty()) {
             log.debug(EngagementMessageTemplate.MSG_TEMPLATE_NO_ENGAGEMENT_ENTITY_ID_AVAILABLE.getValue(), id);
-            throw new EngagementException(ReservationErrorCode.BOOKING_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
+            throw new EngagementException(ReservationErrorCode.RESERVATION_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
         log.debug(EngagementMessageTemplate.MSG_TEMPLATE_FOUND_ENGAGEMENT_ENTITY_ID.getValue(), id);
 
         EngagementDocument actualDocument = optActualDocument.get();
         if(patches == null || (patches != null && patches.isEmpty())) {
             log.debug("Engagement patch list not provided");
-            throw new EngagementException(ReservationErrorCode.BOOKING_ATTRIBUTE_UNEXPECTED, new Object[]{ "patch", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
+            throw new EngagementException(ReservationErrorCode.RESERVATION_ATTRIBUTE_UNEXPECTED, new Object[]{ "patch", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
         }
         log.debug("Engagement patch list has {} items", patches.size());
 
 
         log.debug("Validating patch list items for Engagement");
         try {
-            toabBaseService.validatePatches(patches, ReservationErrorCode.BOOKING_EXISTS.getDomain() + ":LOV");
+            toabBaseService.validatePatches(patches, ReservationErrorCode.RESERVATION_EXISTS.getDomain() + ":LOV");
             log.debug("All Engagement patch list items are valid");
         } catch (TOABSystemException e) {
             log.debug("Some of the Engagement patch item are invalid");
@@ -494,14 +494,14 @@ public class EngagementServiceImpl implements EngagementService {
             EngagementException ex = null;
             if(e.getMessage().contains("no such path in target")) {
                 log.debug("Invalid patch attribute in EngagementDto");
-                ex = new EngagementException(ReservationErrorCode.BOOKING_ATTRIBUTE_INVALID, new Object[]{ "path" });
+                ex = new EngagementException(ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID, new Object[]{ "path" });
             } else {
-                ex = new EngagementException(ReservationErrorCode.BOOKING_ACTION_FAILURE, new Object[]{ "patching", "internal error: " + e.getMessage() });
+                ex = new EngagementException(ReservationErrorCode.RESERVATION_ACTION_FAILURE, new Object[]{ "patching", "internal error: " + e.getMessage() });
             }
             throw ex;
         } catch (IOException e) {
             log.debug("Failed to patch list items to EngagementDto: {}", e);
-            throw new EngagementException(ReservationErrorCode.BOOKING_ACTION_FAILURE, new Object[]{ "patching", "internal error: " + e.getMessage() });
+            throw new EngagementException(ReservationErrorCode.RESERVATION_ACTION_FAILURE, new Object[]{ "patching", "internal error: " + e.getMessage() });
         }
         log.debug("Successfully to patch list items to EngagementDto");
 
@@ -531,7 +531,7 @@ public class EngagementServiceImpl implements EngagementService {
         log.debug("Saved patched EngagementDocument: {}", actualDocument);
         if(actualDocument == null) {
             log.debug("Unable to patch delete EngagementDocument with id:{}", id);
-            throw new EngagementException(ReservationErrorCode.BOOKING_ACTION_FAILURE,
+            throw new EngagementException(ReservationErrorCode.RESERVATION_ACTION_FAILURE,
                     new Object[]{ "patching", "unable to patch currency engagement details with id:" + id });
         }
         log.info("Patched EngagementDocument with id:{}", id);
@@ -567,7 +567,7 @@ public class EngagementServiceImpl implements EngagementService {
             boolean duplicateDocumentSw =  repository.existsByAssociationIdAndEventAndDateAndTime(associationId, event, date, time);
             if(sameDocumentSw || duplicateDocumentSw) {
                 log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_EXISTS_BY_ASSOCIATION_ID_EVENT_DATE_TIME.getValue(), associationId, event, date, time);
-                throw new EngagementException(ReservationErrorCode.BOOKING_EXISTS,
+                throw new EngagementException(ReservationErrorCode.RESERVATION_EXISTS,
                         new Object[]{ "associationId: " + associationId + ", event: " + event, ", date: " + date + ", time: " + time });
             }
             log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_NON_EXISTENCE_BY_ASSOCIATION_ID_EVENT_DATE_TIME.getValue(), associationId, event, date, time);
@@ -605,7 +605,7 @@ public class EngagementServiceImpl implements EngagementService {
             boolean duplicateDocumentSw =  repository.existsByAssociationIdAndEventAndDateAndTime(associationId, event, date, time);
             if(sameDocumentSw || duplicateDocumentSw) {
                 log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_EXISTS_BY_ASSOCIATION_ID_EVENT_DATE_TIME.getValue(), associationId, event, date, time);
-                throw new EngagementException(ReservationErrorCode.BOOKING_EXISTS,
+                throw new EngagementException(ReservationErrorCode.RESERVATION_EXISTS,
                         new Object[]{ "associationId: " + associationId + ", event: " + event, ", date: " + date + ", time: " + time });
             }
             log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_NON_EXISTENCE_BY_ASSOCIATION_ID_EVENT_DATE_TIME.getValue(), associationId, event, date, time);

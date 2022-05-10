@@ -220,7 +220,7 @@ public class CategoryIntegrationTest extends ReservationIntegrationBaseTest {
     @Test
     public void test_Category_Get_ShouldReturn_200Response_And_CategoryListNaturallyOrdered_WhenRequested_ForAllCategorys() throws Exception {
         MvcResult mvcResult = null;
-        Set<CategoryVo> categoryList = new TreeSet<>(Arrays.asList(categoryVo1, categoryVo2, categoryVo3, categoryVo4, categoryVo5));
+        Set<CategoryVo> categoryList = new TreeSet<>(Arrays.asList(categoryVo1, categoryVo2, categoryVo3, categoryVo4));
 
         mvcResult = this.mockMvc.perform(get(CATEGORY_URI))
                 .andDo(print())

@@ -19,7 +19,7 @@ public class CategoryDocument2VoConverter extends TOABBaseDocument2VoConverter<C
     private List<String> fieldsToEscape;
     private ReservationServiceHelper reservationServiceHelper;
 
-    @Value("#{'${res.booking.category.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.reservation.category.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }

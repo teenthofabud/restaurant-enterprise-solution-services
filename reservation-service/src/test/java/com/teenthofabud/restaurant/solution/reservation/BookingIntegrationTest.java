@@ -29,10 +29,10 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -55,10 +55,16 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
     private CategoryRepository categoryRepository;
 
     private Integer bookingIntegrationPort;
+    private String bookingTimeFormat;
 
     @Value("${reservation.integration.port}")
     public void setBookingIntegrationPort(Integer bookingIntegrationPort) {
         this.bookingIntegrationPort = bookingIntegrationPort;
+    }
+
+    @Value("${res.reservation.booking.timestamp}")
+    public void setBookingTimeFormat(String bookingTimeFormat) {
+        this.bookingTimeFormat = bookingTimeFormat;
     }
 
     @Autowired
@@ -71,15 +77,17 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         this.categoryRepository = categoryRepository;
     }
 
+    private String inactiveCategoryId;
+
     private AccountVo accountVo1;
     private AccountVo accountVo2;
     private AccountVo accountVo4;
     private AccountVo accountVo22;
 
-    private TableVo tableVo1;
+    /*private TableVo tableVo1;
     private TableVo tableVo2;
     private TableVo tableVo4;
-    private TableVo tableVo22;
+    private TableVo tableVo22;*/
 
     private CategoryVo categoryVo1;
     private CategoryVo categoryVo2;
@@ -97,13 +105,19 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
     private BookingVo bookingVo4;
     private BookingVo bookingVo5;
     private BookingVo bookingVo6;
+    private BookingVo bookingVo7;
+    private BookingVo bookingVo8;
     private BookingDocument bookingDocument1;
     private BookingDocument bookingDocument2;
     private BookingDocument bookingDocument3;
     private BookingDocument bookingDocument4;
     private BookingDocument bookingDocument5;
+    private BookingDocument bookingDocument6;
+    private BookingDocument bookingDocument7;
 
     private List<PatchOperationForm> patches;
+
+    private LocalDateTime now;
 
     @BeforeEach
     private void init() {
@@ -130,6 +144,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         categoryDocument2.setActive(Boolean.FALSE);
 
         categoryDocument2 = categoryRepository.save(categoryDocument2);
+        inactiveCategoryId = categoryDocument2.getId();
 
         categoryVo2 = new CategoryVo();
         categoryVo2.setId(categoryDocument2.getId().toString());
@@ -192,7 +207,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
          * Table
          */
 
-        tableVo1 = new TableVo();
+        /*tableVo1 = new TableVo();
         tableVo1.setTableId("1");
         tableVo1.setTableName("Table 1");
         tableVo1.setActive(Boolean.TRUE);
@@ -210,96 +225,144 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         tableVo22 = new TableVo();
         tableVo22.setTableId("22");
         tableVo22.setTableName("Table 22");
-        tableVo22.setActive(Boolean.FALSE);
+        tableVo22.setActive(Boolean.FALSE);*/
 
         /**
          * Booking
          */
 
+        now = LocalDateTime.now().plusHours(1l);
+
         bookingForm = new BookingForm();
-        bookingForm.setTableId("4");
+        //bookingForm.setTableId("4");
         bookingForm.setCategoryId(categoryDocument3.getId());
         bookingForm.setAccountId("4");
+        bookingForm.setTimestamp(DateTimeFormatter.ofPattern(bookingTimeFormat).format(now));
+        //bookingForm.setNoOfPerson(4);
 
         patches = Arrays.asList(
                 new PatchOperationForm("replace", "/accountId", "2"),
-                new PatchOperationForm("replace", "/tableId", "4"));
+                new PatchOperationForm("replace", "/categoryId", "1"));
 
         bookingDocument1 = new BookingDocument();
         bookingDocument1.setAccountId("1");
-        bookingDocument1.setTableId("1");
+        //bookingDocument1.setTableId("1");
         bookingDocument1.setActive(Boolean.TRUE);
         bookingDocument1.setCategoryId(categoryDocument1.getId());
+        //bookingDocument1.setNoOfPerson(categoryDocument1.getId());
+        bookingDocument1.setTimestamp(now);
 
         bookingDocument1 = bookingRepository.save(bookingDocument1);
 
         bookingVo1 = new BookingVo();
         bookingVo1.setId(bookingDocument1.getId());
         bookingVo1.setCategoryId(categoryDocument1.getId());
-        bookingVo1.setTableId(bookingDocument1.getTableId());
+        //bookingVo1.setTableId(bookingDocument1.getTableId());
         bookingVo1.setAccountId(bookingDocument1.getAccountId());
+        bookingVo1.setTimestamp(bookingDocument1.getTimestamp());
 
         bookingDocument2 = new BookingDocument();
         bookingDocument2.setAccountId("1");
-        bookingDocument2.setTableId("2");
+        //bookingDocument2.setTableId("2");
         bookingDocument2.setActive(Boolean.FALSE);
-        bookingDocument2.setCategoryId(categoryDocument2.getId());
+        bookingDocument2.setCategoryId(categoryDocument3.getId());
+        bookingDocument2.setTimestamp(now.minusHours(2l));
 
         bookingDocument2 = bookingRepository.save(bookingDocument2);
 
         bookingVo2 = new BookingVo();
         bookingVo2.setId(bookingDocument2.getId());
-        bookingVo2.setCategoryId(categoryDocument2.getId());
-        bookingVo2.setTableId(bookingDocument2.getTableId());
+        bookingVo2.setCategoryId(categoryDocument3.getId());
+        //bookingVo2.setTableId(bookingDocument2.getTableId());
         bookingVo2.setAccountId(bookingDocument2.getAccountId());
+        bookingVo2.setTimestamp(bookingDocument2.getTimestamp());
 
         bookingDocument3 = new BookingDocument();
-        bookingDocument3.setAccountId("2");
-        bookingDocument3.setTableId("1");
+        bookingDocument3.setAccountId("1");
+        //bookingDocument3.setTableId("1");
         bookingDocument3.setActive(Boolean.TRUE);
-        bookingDocument3.setCategoryId(categoryDocument3.getId());
+        bookingDocument3.setCategoryId(categoryDocument1.getId());
+        bookingDocument3.setTimestamp(now.plusHours(2l));
 
         bookingDocument3 = bookingRepository.save(bookingDocument3);
 
         bookingVo3 = new BookingVo();
         bookingVo3.setId(bookingDocument3.getId());
-        bookingVo3.setCategoryId(categoryDocument3.getId());
-        bookingVo3.setTableId(bookingDocument3.getTableId());
+        bookingVo3.setCategoryId(categoryDocument1.getId());
+        //bookingVo3.setTableId(bookingDocument3.getTableId());
         bookingVo3.setAccountId(bookingDocument3.getAccountId());
+        bookingVo3.setTimestamp(bookingDocument3.getTimestamp());
 
         bookingDocument4 = new BookingDocument();
-        bookingDocument4.setAccountId("2");
-        bookingDocument4.setTableId("4");
+        bookingDocument4.setAccountId("1");
+        //bookingDocument4.setTableId("4");
         bookingDocument4.setActive(Boolean.TRUE);
         bookingDocument4.setCategoryId(categoryDocument4.getId());
+        bookingDocument4.setTimestamp(now);
 
         bookingDocument4 = bookingRepository.save(bookingDocument4);
 
         bookingVo4 = new BookingVo();
         bookingVo4.setId(bookingDocument4.getId());
         bookingVo4.setCategoryId(categoryDocument4.getId());
-        bookingVo4.setTableId(bookingDocument4.getTableId());
+        //bookingVo4.setTableId(bookingDocument4.getTableId());
         bookingVo4.setAccountId(bookingDocument4.getAccountId());
+        bookingVo4.setTimestamp(bookingDocument4.getTimestamp());
 
         bookingDocument5 = new BookingDocument();
-        bookingDocument5.setAccountId("4");
-        bookingDocument5.setTableId("2");
+        bookingDocument5.setAccountId("2");
+        //bookingDocument5.setTableId("2");
         bookingDocument5.setActive(Boolean.TRUE);
         bookingDocument5.setCategoryId(categoryDocument4.getId());
+        bookingDocument5.setTimestamp(now.plusSeconds(30l));
 
         bookingDocument5 = bookingRepository.save(bookingDocument5);
 
         bookingVo5 = new BookingVo();
         bookingVo5.setId(bookingDocument5.getId());
         bookingVo5.setCategoryId(categoryDocument4.getId());
-        bookingVo5.setTableId(bookingDocument5.getTableId());
+        //bookingVo5.setTableId(bookingDocument5.getTableId());
         bookingVo5.setAccountId(bookingDocument5.getAccountId());
+        bookingVo5.setTimestamp(bookingDocument5.getTimestamp());
+
+        bookingDocument6 = new BookingDocument();
+        bookingDocument6.setAccountId("2");
+        //bookingDocument5.setTableId("2");
+        bookingDocument6.setActive(Boolean.TRUE);
+        bookingDocument6.setCategoryId(categoryDocument3.getId());
+        bookingDocument6.setTimestamp(now);
+
+        bookingDocument6 = bookingRepository.save(bookingDocument6);
 
         bookingVo6 = new BookingVo();
-        bookingVo6.setId(UUID.randomUUID().toString());
-        bookingVo6.setCategoryId(bookingForm.getCategoryId());
-        bookingVo6.setTableId(bookingForm.getTableId());
-        bookingVo6.setAccountId(bookingForm.getAccountId());
+        bookingVo6.setId(bookingDocument6.getId());
+        bookingVo6.setCategoryId(categoryDocument3.getId());
+        //bookingVo5.setTableId(bookingDocument5.getTableId());
+        bookingVo6.setAccountId(bookingDocument6.getAccountId());
+        bookingVo6.setTimestamp(bookingDocument6.getTimestamp());
+
+        bookingDocument7 = new BookingDocument();
+        bookingDocument7.setAccountId("22");
+        //bookingDocument5.setTableId("2");
+        bookingDocument7.setActive(Boolean.TRUE);
+        bookingDocument7.setCategoryId(categoryDocument4.getId());
+        bookingDocument7.setTimestamp(now);
+
+        bookingDocument7 = bookingRepository.save(bookingDocument7);
+
+        bookingVo7 = new BookingVo();
+        bookingVo7.setId(bookingDocument7.getId());
+        bookingVo7.setCategoryId(categoryDocument4.getId());
+        //bookingVo5.setTableId(bookingDocument5.getTableId());
+        bookingVo7.setAccountId(bookingDocument7.getAccountId());
+        bookingVo7.setTimestamp(bookingDocument7.getTimestamp());
+
+
+        bookingVo8 = new BookingVo();
+        bookingVo8.setId(UUID.randomUUID().toString());
+        bookingVo8.setCategoryId(bookingForm.getCategoryId());
+        //bookingVo9.setTableId(bookingForm.getTableId());
+        bookingVo8.setAccountId(bookingForm.getAccountId());
 
     }
 
@@ -310,6 +373,8 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         bookingRepository.deleteById(bookingDocument3.getId());
         bookingRepository.deleteById(bookingDocument4.getId());
         bookingRepository.deleteById(bookingDocument5.getId());
+        bookingRepository.deleteById(bookingDocument6.getId());
+        bookingRepository.deleteById(bookingDocument7.getId());
 
         categoryRepository.deleteById(categoryDocument1.getId());
         categoryRepository.deleteById(categoryDocument2.getId());
@@ -333,7 +398,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
     }
     
     @Test
-    public void test_Booking_Post_ShouldReturn_400Response_And_ErrorCode_RES_BOOKING_001_WhenRequested_WithEmptyAccountId() throws Exception {
+    public void test_Booking_Post_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001_WhenRequested_WithEmptyAccountId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "accountId";
@@ -353,7 +418,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
     }
 
     @Test
-    public void test_Booking_Post_ShouldReturn_400Response_And_ErrorCode_RES_BOOKING_001_WhenRequested_WithEmptyCategoryId() throws Exception {
+    public void test_Booking_Post_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001_WhenRequested_WithEmptyCategoryId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "categoryId";
@@ -373,7 +438,27 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
     }
 
     @Test
-    public void test_Booking_Post_ShouldReturn_400Response_And_ErrorCode_RES_BOOKING_001_WhenRequested_WithEmptyTableId() throws Exception {
+    public void test_Booking_Post_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001_WhenRequested_WithEmptyTimestamp() throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "timestamp";
+        bookingForm.setTimestamp("");
+
+        mvcResult = mockMvc.perform(post(BOOKING_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(bookingForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+
+    }
+
+    /*@Test
+    public void test_Booking_Post_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001_WhenRequested_WithEmptyTableId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "tableId";
@@ -390,10 +475,10 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
 
-    }
+    }*/
 
     @Test
-    public void test_Booking_Post_ShouldReturn_400Response_And_ErrorCode_RES_BOOKING_001_WhenRequested_WithInactiveAccountId() throws Exception {
+    public void test_Booking_Post_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001_WhenRequested_WithInactiveAccountId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "accountId";
@@ -413,7 +498,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
     }
 
     @Test
-    public void test_Booking_Post_ShouldReturn_400Response_And_ErrorCode_RES_BOOKING_001_WhenRequested_WithInactiveCategoryId() throws Exception {
+    public void test_Booking_Post_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001_WhenRequested_WithInactiveCategoryId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "categoryId";
@@ -433,7 +518,27 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
     }
 
     @Test
-    public void test_Booking_Post_ShouldReturn_400Response_And_ErrorCode_RES_BOOKING_001_WhenRequested_WithInactiveTableId() throws Exception {
+    public void test_Booking_Post_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001_WhenRequested_WithPastTimestamp() throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "timestamp";
+        bookingForm.setTimestamp(DateTimeFormatter.ofPattern(bookingTimeFormat).format(LocalDateTime.now().minusHours(2l)));
+
+        mvcResult = mockMvc.perform(post(BOOKING_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(bookingForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+
+    }
+
+    /*@Test
+    public void test_Booking_Post_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001_WhenRequested_WithInactiveTableId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "tableId";
@@ -450,7 +555,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
 
-    }
+    }*/
 
     @Test
     public void test_Booking_Post_ShouldReturn_500Response_And_ErrorCode_RES_CUST_001_WhenRequested_WithInvalidAccountId() throws Exception {
@@ -473,7 +578,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
     }
 
     @Test
-    public void test_Booking_Post_ShouldReturn_400Response_And_ErrorCode_RES_BOOKING_001_WhenRequested_WithInvalidCategoryId() throws Exception {
+    public void test_Booking_Post_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001_WhenRequested_WithInvalidCategoryId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "categoryId";
@@ -493,6 +598,27 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
     }
 
     @Test
+    public void test_Booking_Post_ShouldReturn_500Response_And_ErrorCode_RES_EAREA_001_WhenRequested_WithInvalidTimestamp() throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "timestamp";
+        String message = "invalid";
+        bookingForm.setTimestamp("r");
+
+        mvcResult = mockMvc.perform(post(BOOKING_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(bookingForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+
+    }
+
+    /*@Test
     public void test_Booking_Post_ShouldReturn_500Response_And_ErrorCode_RES_EAREA_001_WhenRequested_WithInvalidTableId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = "RES-EAREA-001";
@@ -510,7 +636,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
 
-    }
+    }*/
 
     @Test
     public void test_Booking_Post_ShouldReturn_500Response_And_ErrorCode_RES_CUST_002_WhenRequested_WithAbsentAccountId() throws Exception {
@@ -533,7 +659,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
     }
 
     @Test
-    public void test_Booking_Post_ShouldReturn_400Response_And_ErrorCode_RES_BOOKING_001_WhenRequested_WithAbsentCategoryId() throws Exception {
+    public void test_Booking_Post_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001_WhenRequested_WithAbsentCategoryId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "categoryId";
@@ -552,7 +678,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
 
     }
 
-    @Test
+    /*@Test
     public void test_Booking_Post_ShouldReturn_500Response_And_ErrorCode_RES_EREA_002_WhenRequested_WithAbsentTableId() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = "RES-EAREA-002";
@@ -570,18 +696,24 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
 
-    }
+    }*/
 
     @Test
-    public void test_Booking_Post_ShouldReturn_409Response_And_ErrorCode_RES_BOOKING_004_WhenRequested_WithDuplicateBooking() throws Exception {
+    public void test_Booking_Post_ShouldReturn_409Response_And_ErrorCode_RES_RESV_004_WhenRequested_WithDuplicateBooking() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_EXISTS.getErrorCode();
         String field1Name = "accountId";
-        String field2Name = "tableId";
+        String field2Name = "categoryId";
+        String field3Name = "timestamp";
+        //String field2Name = "tableId";
         String field1Value = bookingDocument1.getAccountId();
-        String field2Value = bookingDocument1.getTableId();
+        String field2Value = bookingDocument1.getCategoryId();
+        String field3Value = bookingDocument1.getTimestamp().format(DateTimeFormatter.ofPattern(bookingTimeFormat));
+        //String field2Value = bookingDocument1.getTableId();
         bookingForm.setAccountId(field1Value);
-        bookingForm.setTableId(field2Value);
+        bookingForm.setCategoryId(field2Value);
+        bookingForm.setTimestamp(field3Value);
+        //bookingForm.setTableId(field2Value);
 
         mvcResult = mockMvc.perform(post(BOOKING_URI)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -596,10 +728,12 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field1Value));
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field2Name));
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field2Value));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field3Name));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field3Value));
     }
 
     @Test
-    public void test_Booking_Post_ShouldReturn_422Response_And_ErrorCode_RES_BOOKING_003_WhenPosted_WithNoBookingForm() throws Exception {
+    public void test_Booking_Post_ShouldReturn_422Response_And_ErrorCode_RES_RESV_003_WhenPosted_WithNoBookingForm() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_UNEXPECTED.getErrorCode();
         String fieldName = "form";
@@ -621,7 +755,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
     @Test
     public void test_Booking_Get_ShouldReturn_200Response_And_BookingListNaturallyOrdered_WhenRequested_ForAllBookings() throws Exception {
         MvcResult mvcResult = null;
-        List<BookingVo> bookingList = new ArrayList<>(Arrays.asList(bookingVo6, bookingVo1, bookingVo2, bookingVo3, bookingVo5, bookingVo4));
+        List<BookingVo> bookingList = new ArrayList<>(Arrays.asList(bookingVo6, bookingVo1, bookingVo2, bookingVo3, bookingVo4, bookingVo5, bookingVo6, bookingVo7, bookingVo8));
 
         mvcResult = this.mockMvc.perform(get(BOOKING_URI))
                 .andDo(print())
@@ -637,7 +771,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         MvcResult mvcResult = null;
         bookingVo4.setCategory(null);
         bookingVo5.setCategory(null);
-        List<BookingVo> bookingList = Arrays.asList(bookingVo4, bookingVo5);
+        List<BookingVo> bookingList = Arrays.asList(bookingVo4, bookingVo5, bookingVo7);
 
         mvcResult = this.mockMvc.perform(get(BOOKING_URI_BY_EXPERIENCE_ID, categoryDocument4.getId()))
                 .andDo(print())
@@ -666,7 +800,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
     }
 
     @Test
-    public void test_Booking_Get_ShouldReturn_404Response_And_ErrorCode_RES_BOOKING_001_WhenRequested_ByAbsentCategoryId() throws Exception {
+    public void test_Booking_Get_ShouldReturn_404Response_And_ErrorCode_RES_RESV_001_WhenRequested_ByAbsentCategoryId() throws Exception {
         MvcResult mvcResult = null;
         String categoryId = "kk";
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
@@ -684,7 +818,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
     }
 
     @Test
-    public void test_Booking_Get_ShouldReturn_404Response_And_ErrorCode_RES_BOOKING_001_WhenRequested_ByInactiveCategoryId() throws Exception {
+    public void test_Booking_Get_ShouldReturn_404Response_And_ErrorCode_RES_RESV_001_WhenRequested_ByInactiveCategoryId() throws Exception {
         MvcResult mvcResult = null;
         String categoryId = categoryDocument2.getId();
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
@@ -704,7 +838,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
     @Test
     public void test_Booking_Get_ShouldReturn_200Response_And_BookingListNaturallyOrdered_WhenRequested_ForBookings_WithAccountId() throws Exception {
         MvcResult mvcResult = null;
-        List<BookingVo> bookingList = new ArrayList<>(Arrays.asList(bookingVo1, bookingVo2));
+        List<BookingVo> bookingList = new ArrayList<>(Arrays.asList(bookingVo1, bookingVo2, bookingVo3, bookingVo4));
 
         mvcResult = this.mockMvc.perform(get(BOOKING_URI_FILTER)
                         .queryParam("accountId", "1"))
@@ -719,7 +853,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "", " " })
-    public void test_Booking_Get_ShouldReturn_400Response_And_ErrorCode_RES_BOOKING_001_WhenRequestedBy_EmptyAccountIdOnly(String accountId) throws Exception {
+    public void test_Booking_Get_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001_WhenRequestedBy_EmptyAccountIdOnly(String accountId) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "filters";
@@ -736,10 +870,9 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "22" })
-    public void test_Booking_Get_ShouldReturn_200Response_And_EmptyBookingList_WhenRequestedBy_InactiveAccountIdOnly(String accountId) throws Exception {
+    public void test_Booking_Get_ShouldReturn_200Response_And_MatchingBookingList_WhenRequestedBy_InactiveAccountIdOnly(String accountId) throws Exception {
         MvcResult mvcResult = null;
-        String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "filters";
+        List<BookingVo> bookingList = new ArrayList<>(Arrays.asList(bookingVo7));
 
         mvcResult = this.mockMvc.perform(get(BOOKING_URI_FILTER).queryParam("accountId", accountId))
                 .andDo(print())
@@ -747,7 +880,8 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
 
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(0, om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo[].class).length);
+        Assertions.assertEquals(bookingList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo[].class).length);
+        Assertions.assertEquals(om.writeValueAsString(bookingList), mvcResult.getResponse().getContentAsString());
     }
 
     @ParameterizedTest
@@ -766,7 +900,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertEquals(0, om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo[].class).length);
     }
 
-    @Test
+    /*@Test
     public void test_Booking_Get_ShouldReturn_200Response_And_BookingListNaturallyOrdered_WhenRequested_ForBookings_WithTableId() throws Exception {
         MvcResult mvcResult = null;
         bookingVo1.setCategory(null);
@@ -781,11 +915,29 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(bookingList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo[].class).length);
         Assertions.assertEquals(om.writeValueAsString(bookingList), mvcResult.getResponse().getContentAsString());
+    }*/
+
+    @Test
+    public void test_Booking_Get_ShouldReturn_200Response_And_BookingListNaturallyOrdered_WhenRequested_ForBookings_WithCategoryId() throws Exception {
+        MvcResult mvcResult = null;
+        bookingVo1.setCategory(null);
+        bookingVo3.setCategory(null);
+        List<BookingVo> bookingList = new ArrayList<>(Arrays.asList(bookingVo1, bookingVo3));
+
+        mvcResult = this.mockMvc.perform(get(BOOKING_URI_FILTER)
+                        .queryParam("categoryId", "1"))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(bookingList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo[].class).length);
+        Assertions.assertEquals(om.writeValueAsString(bookingList), mvcResult.getResponse().getContentAsString());
     }
 
-    @ParameterizedTest
+    /*@ParameterizedTest
     @ValueSource(strings = { "", " " })
-    public void test_Booking_Get_ShouldReturn_400Response_And_ErrorCode_RES_BOOKING_001_WhenRequestedBy_EmptyTableIdOnly(String tableId) throws Exception {
+    public void test_Booking_Get_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001_WhenRequestedBy_EmptyTableIdOnly(String tableId) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "filters";
@@ -798,9 +950,26 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-    }
+    }*/
 
     @ParameterizedTest
+    @ValueSource(strings = { "", " " })
+    public void test_Booking_Get_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001_WhenRequestedBy_EmptyCategoryIdOnly(String categoryId) throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "filters";
+
+        mvcResult = this.mockMvc.perform(get(BOOKING_URI_FILTER).queryParam("categoryId", categoryId))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+    }
+
+    /*@ParameterizedTest
     @ValueSource(strings = { "22" })
     public void test_Booking_Get_ShouldReturn_200Response_And_EmptyBookingList_WhenRequestedBy_InactiveTableIdOnly(String tableId) throws Exception {
         MvcResult mvcResult = null;
@@ -814,9 +983,25 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(0, om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo[].class).length);
+    }*/
+
+    @Test
+    public void test_Booking_Get_ShouldReturn_200Response_And_EmptyBookingList_WhenRequestedBy_InactiveCategoryIdOnly() throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "filters";
+        String categoryId = categoryDocument2.getId();
+
+        mvcResult = this.mockMvc.perform(get(BOOKING_URI_FILTER).queryParam("categoryId", categoryId))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(0, om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo[].class).length);
     }
 
-    @ParameterizedTest
+    /*@ParameterizedTest
     @ValueSource(strings = { "3" })
     public void test_Booking_Get_ShouldReturn_200Response_And_EmptyBookingList_WhenRequestedBy_AbsentTableIdOnly(String tableId) throws Exception {
         MvcResult mvcResult = null;
@@ -830,10 +1015,26 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(0, om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo[].class).length);
+    }*/
+
+    @ParameterizedTest
+    @ValueSource(strings = { "3" })
+    public void test_Booking_Get_ShouldReturn_200Response_And_EmptyBookingList_WhenRequestedBy_AbsentCategoryIdOnly(String categoryId) throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "filters";
+
+        mvcResult = this.mockMvc.perform(get(BOOKING_URI_FILTER).queryParam("categoryId", categoryId))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(0, om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo[].class).length);
     }
 
     @Test
-    public void test_Booking_Get_ShouldReturn_400Response_And_ErrorCode_RES_BOOKING_001__WhenRequestedBy_UnsupportedFilterAttribute() throws Exception {
+    public void test_Booking_Get_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001__WhenRequestedBy_UnsupportedFilterAttribute() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "filters";
@@ -848,7 +1049,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
     }
 
-    @Test
+    /*@Test
     public void test_Booking_Get_ShouldReturn_200Response_And_BookingListNaturallyOrdered_WhenRequested_ForBookings_WithAccountIdAndTableId() throws Exception {
         MvcResult mvcResult = null;
         bookingVo3.setCategory(null);
@@ -861,6 +1062,85 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         mvcResult = this.mockMvc.perform(get(BOOKING_URI_FILTER)
                         .queryParam("accountId", "1")
                         .queryParam("tableId", "1"))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(bookingList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo[].class).length);
+        Assertions.assertEquals(om.writeValueAsString(bookingList), mvcResult.getResponse().getContentAsString());
+    }*/
+
+    @Test
+    public void test_Booking_Get_ShouldReturn_200Response_And_BookingListNaturallyOrdered_WhenRequested_ForBookings_WithAccountIdAndCategoryId() throws Exception {
+        MvcResult mvcResult = null;
+        bookingVo1.setCategory(null);
+        bookingVo3.setCategory(null);
+        List<BookingVo> bookingList = Arrays.asList(bookingVo1, bookingVo3);
+
+        mvcResult = this.mockMvc.perform(get(BOOKING_URI_FILTER)
+                        .queryParam("accountId", "1")
+                        .queryParam("categoryId", categoryDocument1.getId()))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(bookingList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo[].class).length);
+        Assertions.assertEquals(om.writeValueAsString(bookingList), mvcResult.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void test_Booking_Get_ShouldReturn_200Response_And_BookingListNaturallyOrdered_WhenRequested_ForBookings_WithAccountIdAndTimestamp() throws Exception {
+        MvcResult mvcResult = null;
+        bookingVo1.setCategory(null);
+        bookingVo4.setCategory(null);
+        String timestamp = bookingDocument1.getTimestamp().format(DateTimeFormatter.ofPattern(bookingTimeFormat));
+        List<BookingVo> bookingList = Arrays.asList(bookingVo1, bookingVo4);
+
+        mvcResult = this.mockMvc.perform(get(BOOKING_URI_FILTER)
+                        .queryParam("accountId", "1")
+                        .queryParam("timestamp", timestamp))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(bookingList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo[].class).length);
+        Assertions.assertEquals(om.writeValueAsString(bookingList), mvcResult.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void test_Booking_Get_ShouldReturn_200Response_And_BookingListNaturallyOrdered_WhenRequested_ForBookings_WithCategoryIdAndTimestamp() throws Exception {
+        MvcResult mvcResult = null;
+        bookingVo4.setCategory(null);
+        bookingVo7.setCategory(null);
+        String timestamp = bookingDocument4.getTimestamp().format(DateTimeFormatter.ofPattern(bookingTimeFormat));
+        List<BookingVo> bookingList = Arrays.asList(bookingVo4, bookingVo7);
+
+        mvcResult = this.mockMvc.perform(get(BOOKING_URI_FILTER)
+                        .queryParam("categoryId", "4")
+                        .queryParam("timestamp", timestamp))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(bookingList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo[].class).length);
+        Assertions.assertEquals(om.writeValueAsString(bookingList), mvcResult.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void test_Booking_Get_ShouldReturn_200Response_And_BookingListNaturallyOrdered_WhenRequested_ForBookings_WithAccountIdAndCategoryIdAndTimestamp() throws Exception {
+        MvcResult mvcResult = null;
+        bookingVo4.setCategory(null);
+        bookingVo7.setCategory(null);
+        String timestamp = bookingDocument4.getTimestamp().format(DateTimeFormatter.ofPattern(bookingTimeFormat));
+        List<BookingVo> bookingList = Arrays.asList(bookingVo4, bookingVo7);
+
+        mvcResult = this.mockMvc.perform(get(BOOKING_URI_FILTER)
+                        .queryParam("categoryId", categoryDocument4.getId())
+                        .queryParam("timestamp", timestamp))
                 .andDo(print())
                 .andReturn();
 
@@ -888,7 +1168,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { " " })
-    public void test_Booking_Get_ShouldReturn_400Response_And_ErrorCode_RES_BOOKING_001_WhenRequestedBy_EmptyId(String id) throws Exception {
+    public void test_Booking_Get_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001_WhenRequestedBy_EmptyId(String id) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "id";
@@ -904,7 +1184,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
     }
 
     @Test
-    public void test_Booking_Get_ShouldReturn_400Response_And_ErrorCode_RES_BOOKING_002_WhenRequested_ByAbsentId() throws Exception {
+    public void test_Booking_Get_ShouldReturn_400Response_And_ErrorCode_RES_RESV_002_WhenRequested_ByAbsentId() throws Exception {
         String id = "55";
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_NOT_FOUND.getErrorCode();
@@ -934,7 +1214,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertEquals("", mvcResult.getResponse().getContentAsString());
     }
 
-    @Test
+    /*@Test
     public void test_Booking_Get_ShouldReturn_200Response_And_DomainDetails_WhenRequested_ById_AndFirstLevel_Cascade() throws Exception {
         String id = bookingDocument1.getId().toString();
         MvcResult mvcResult = null;
@@ -954,9 +1234,31 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo.class).getCreatedOn()));
         Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo.class).getModifiedOn()));
         Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo.class).getActive()));
-    }
+    }*/
 
     @Test
+    public void test_Booking_Get_ShouldReturn_200Response_And_DomainDetails_WhenRequested_ById_AndFirstLevel_Cascade() throws Exception {
+        String id = bookingDocument1.getId().toString();
+        MvcResult mvcResult = null;
+
+        mvcResult = this.mockMvc.perform(get(BOOKING_URI_BY_ID, id)
+                        .queryParam("cascadeUntilLevel", TOABCascadeLevel.ONE.getLevelCode()))
+                .andDo(print())
+                .andReturn();
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(bookingVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo.class).getId());
+        Assertions.assertEquals(bookingVo1.getTimestamp(), om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo.class).getTimestamp());
+        Assertions.assertEquals(bookingVo1.getAccountId(), om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo.class).getAccountId());
+        Assertions.assertEquals(bookingVo1.getCategoryId(), om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo.class).getCategoryId());
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo.class).getCreatedBy()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo.class).getModifiedBy()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo.class).getCreatedOn()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo.class).getModifiedOn()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo.class).getActive()));
+    }
+
+    /*@Test
     public void test_Booking_Get_ShouldReturn_200Response_And_DomainDetails_WhenRequested_ById_AndSecondLevel_Cascade() throws Exception {
         String id = bookingDocument1.getId();
         bookingVo1.setAccount(accountVo1);
@@ -982,11 +1284,39 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo.class).getCreatedOn()));
         Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo.class).getModifiedOn()));
         Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo.class).getActive()));
+    }*/
+
+    @Test
+    public void test_Booking_Get_ShouldReturn_200Response_And_DomainDetails_WhenRequested_ById_AndSecondLevel_Cascade() throws Exception {
+        String id = bookingDocument1.getId();
+        bookingVo1.setAccount(accountVo1);
+        //bookingVo1.setTable(tableVo1);
+        bookingVo1.setCategory(categoryVo1);
+        MvcResult mvcResult = null;
+
+        mvcResult = this.mockMvc.perform(get(BOOKING_URI_BY_ID, id)
+                        .queryParam("cascadeUntilLevel", TOABCascadeLevel.TWO.getLevelCode()))
+                .andDo(print())
+                .andReturn();
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(bookingVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo.class).getId());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo.class).getTimestamp() != null);
+        Assertions.assertEquals(bookingVo1.getTimestamp(), om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo.class).getTimestamp());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo.class).getAccount() != null);
+        Assertions.assertEquals(bookingVo1.getAccount().getId(), om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo.class).getAccount().getId());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo.class).getCategory() != null);
+        Assertions.assertEquals(bookingVo1.getCategory().getId(), om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo.class).getCategory().getId());
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo.class).getCreatedBy()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo.class).getModifiedBy()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo.class).getCreatedOn()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo.class).getModifiedOn()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), BookingVo.class).getActive()));
     }
 
     @ParameterizedTest
     @ValueSource(strings = { " " })
-    public void test_Booking_Delete_ShouldReturn_400Response_And_ErrorCode_RES_BOOKING_001_WhenDeleted_ByEmptyId(String id) throws Exception {
+    public void test_Booking_Delete_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001_WhenDeleted_ByEmptyId(String id) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "id";
@@ -1002,7 +1332,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
     }
 
     @Test
-    public void test_Booking_Delete_ShouldReturn_400Response_And_ErrorCode_RES_BOOKING_005_WhenDeleted_ByInactiveId() throws Exception {
+    public void test_Booking_Delete_ShouldReturn_400Response_And_ErrorCode_RES_RESV_005_WhenDeleted_ByInactiveId() throws Exception {
         String id = bookingDocument2.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_INACTIVE.getErrorCode();
@@ -1018,7 +1348,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
     }
 
     @Test
-    public void test_Booking_Delete_ShouldReturn_404Response_And_ErrorCode_RES_BOOKING_002_WhenDeleted_ByAbsentId() throws Exception {
+    public void test_Booking_Delete_ShouldReturn_404Response_And_ErrorCode_RES_RESV_002_WhenDeleted_ByAbsentId() throws Exception {
         String id = "55";
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_NOT_FOUND.getErrorCode();
@@ -1034,7 +1364,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
     }
 
-    @Test
+    /*@Test
     public void test_Booking_Put_ShouldReturn_204Response_And_NoResponseBody_WhenUpdated_ById_AndBookingDetails() throws Exception {
         String id = bookingDocument1.getId().toString();
         MvcResult mvcResult = null;
@@ -1050,11 +1380,29 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.NO_CONTENT.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals("", mvcResult.getResponse().getContentAsString());
+    }*/
+
+    @Test
+    public void test_Booking_Put_ShouldReturn_204Response_And_NoResponseBody_WhenUpdated_ById_AndBookingDetails() throws Exception {
+        String id = bookingDocument1.getId().toString();
+        MvcResult mvcResult = null;
+        bookingForm.setAccountId("1");
+        bookingForm.setCategoryId(categoryDocument4.getId());
+
+        mvcResult = this.mockMvc.perform(put(BOOKING_URI_BY_ID, id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(bookingForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.NO_CONTENT.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals("", mvcResult.getResponse().getContentAsString());
     }
 
     @ParameterizedTest
     @ValueSource(strings = { " " })
-    public void test_Booking_Put_ShouldReturn_400Response_And_ErrorCode_RES_BOOKING_001_WhenUpdatedBy_EmptyId_AndBookingDetails(String id) throws Exception {
+    public void test_Booking_Put_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001_WhenUpdatedBy_EmptyId_AndBookingDetails(String id) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "id";
@@ -1072,7 +1420,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
     }
 
     @Test
-    public void test_Booking_Put_ShouldReturn_404Response_And_ErrorCode_RES_BOOKING_002_WhenUpdated_ByAbsentId_AndBookingDetails() throws Exception {
+    public void test_Booking_Put_ShouldReturn_404Response_And_ErrorCode_RES_RESV_002_WhenUpdated_ByAbsentId_AndBookingDetails() throws Exception {
         String id = "55";
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_NOT_FOUND.getErrorCode();
@@ -1092,7 +1440,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
     }
 
     @Test
-    public void test_Booking_Put_ShouldReturn_400Response_And_ErrorCode_RES_BOOKING_005_WhenUpdated_ByInactiveId_AndBookingDetails() throws Exception {
+    public void test_Booking_Put_ShouldReturn_400Response_And_ErrorCode_RES_RESV_005_WhenUpdated_ByInactiveId_AndBookingDetails() throws Exception {
         String id = bookingDocument2.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_INACTIVE.getErrorCode();
@@ -1110,7 +1458,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
     }
 
     @Test
-    public void test_Booking_Put_ShouldReturn_422Response_And_ErrorCode_RES_BOOKING_003_WhenUpdated_ById_AndNoBookingDetails() throws Exception {
+    public void test_Booking_Put_ShouldReturn_422Response_And_ErrorCode_RES_RESV_003_WhenUpdated_ById_AndNoBookingDetails() throws Exception {
         String id = bookingDocument1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_UNEXPECTED.getErrorCode();
@@ -1131,10 +1479,10 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
 
     /*@ParameterizedTest
     @ValueSource(strings = { " ", "" })
-    public void test_Booking_Put_ShouldReturn_400Response_And_ErrorCode_RES_BOOKING_001_WhenRequested_ById_AndEmptyName(String name) throws Exception {
+    public void test_Booking_Put_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001_WhenRequested_ById_AndEmptyName(String name) throws Exception {
         String id = bookingDocument1.getId().toString();
         MvcResult mvcResult = null;
-        String errorCode = BookingErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
+        String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "name";
         bookingForm.setName(name);
 
@@ -1152,7 +1500,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { " ", "" })
-    public void test_Booking_Put_ShouldReturn_400Response_And_ErrorCode_RES_BOOKING_001_WhenRequested_ById_AndEmptyAccountId(String accountId) throws Exception {
+    public void test_Booking_Put_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001_WhenRequested_ById_AndEmptyAccountId(String accountId) throws Exception {
         String id = bookingDocument1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
@@ -1196,7 +1544,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { " ", "", "r" })
-    public void test_Booking_Put_ShouldReturn_400Response_And_ErrorCode_RES_BOOKING_001_WhenRequested_ById_AndEmptyInvalidCategoryId(String categoryId) throws Exception {
+    public void test_Booking_Put_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001_WhenRequested_ById_AndEmptyInvalidCategoryId(String categoryId) throws Exception {
         String id = bookingDocument1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
@@ -1215,9 +1563,9 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
     }
 
-    @ParameterizedTest
+    /*@ParameterizedTest
     @ValueSource(strings = { " ", "" })
-    public void test_Booking_Put_ShouldReturn_400Response_And_ErrorCode_RES_BOOKING_001_WhenRequested_ById_AndEmptyTableId(String tableId) throws Exception {
+    public void test_Booking_Put_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001_WhenRequested_ById_AndEmptyTableId(String tableId) throws Exception {
         String id = bookingDocument1.getId();
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
@@ -1234,9 +1582,30 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-    }
+    }*/
 
     @ParameterizedTest
+    @ValueSource(strings = { " ", "" })
+    public void test_Booking_Put_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001_WhenRequested_ById_AndEmptyTimestamp(String timestamp) throws Exception {
+        String id = bookingDocument1.getId();
+        MvcResult mvcResult = null;
+        String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "timestamp";
+        bookingForm.setTimestamp(timestamp);
+
+        mvcResult = mockMvc.perform(put(BOOKING_URI_BY_ID, id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(bookingForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+    }
+
+    /*@ParameterizedTest
     @ValueSource(strings = { "r" })
     public void test_Booking_Put_ShouldReturn_500Response_And_ErrorCode_RES_EAREA_001_WhenRequested_ById_AndInvalidTableId(String tableId) throws Exception {
         String id = bookingDocument1.getId();
@@ -1257,6 +1626,29 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
+    }*/
+
+    @ParameterizedTest
+    @ValueSource(strings = { "r" })
+    public void test_Booking_Put_ShouldReturn_500Response_And_ErrorCode_RES_EAREA_001_WhenRequested_ById_AndInvalidTimestamp(String timestamp) throws Exception {
+        String id = bookingDocument1.getId();
+        MvcResult mvcResult = null;
+        String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "id";
+        String message = "timestamp";
+        bookingForm.setTimestamp(timestamp);
+
+        mvcResult = mockMvc.perform(put(BOOKING_URI_BY_ID, id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(bookingForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
     }
 
     @ParameterizedTest
@@ -1264,9 +1656,12 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
     public void test_Booking_Put_ShouldReturn_500Response_And_ErrorCode_RES_CUST_002_WhenRequested_ById_AndAbsentAccountId(String accountId) throws Exception {
         String id = bookingDocument1.getId();
         MvcResult mvcResult = null;
+        //String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
         String errorCode = "RES-CUST-002";
         String fieldName = "id";
+        String message = "unavailable";
         bookingForm.setAccountId(accountId);
+        //bookingForm.setTimestamp(bookingDocument1.getTimestamp());
 
         mvcResult = mockMvc.perform(put(BOOKING_URI_BY_ID, id)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -1278,12 +1673,13 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(accountId));
     }
 
     @ParameterizedTest
     @ValueSource(strings = { "99999999" })
-    public void test_Booking_Put_ShouldReturn_400Response_And_ErrorCode_RES_BOOKING_001_WhenRequested_ById_AndAbsentCategoryId(String categoryId) throws Exception {
+    public void test_Booking_Put_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001_WhenRequested_ById_AndAbsentCategoryId(String categoryId) throws Exception {
         String id = bookingDocument1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
@@ -1302,7 +1698,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
     }
 
-    @ParameterizedTest
+    /*@ParameterizedTest
     @ValueSource(strings = { "3" })
     public void test_Booking_Put_ShouldReturn_500Response_And_ErrorCode_RES_EAREA_002_WhenRequested_ById_AndAbsentTableId(String tableId) throws Exception {
         String id = bookingDocument1.getId().toString();
@@ -1322,10 +1718,31 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(tableId));
+    }*/
+
+    @Test
+    public void test_Booking_Put_ShouldReturn_500Response_And_ErrorCode_RES_EAREA_002_WhenRequested_ById_AndPastTimestamp() throws Exception {
+        String id = bookingDocument1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "timestamp";
+        String timestamp = LocalDateTime.now().minusHours(2l).format(DateTimeFormatter.ofPattern(bookingTimeFormat));
+        bookingForm.setTimestamp(timestamp);
+
+        mvcResult = mockMvc.perform(put(BOOKING_URI_BY_ID, id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(bookingForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
     }
 
     @Test
-    public void test_Booking_Put_ShouldReturn_400Response_And_ErrorCode_RES_BOOKING_001_WhenRequested_ById_AndInactiveAccountId() throws Exception {
+    public void test_Booking_Put_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001_WhenRequested_ById_AndInactiveAccountId() throws Exception {
         String id = bookingDocument1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
@@ -1346,7 +1763,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
     }
 
     @Test
-    public void test_Booking_Put_ShouldReturn_400Response_And_ErrorCode_RES_BOOKING_001_WhenRequested_ById_AndInactiveCategoryId() throws Exception {
+    public void test_Booking_Put_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001_WhenRequested_ById_AndInactiveCategoryId() throws Exception {
         String id = bookingDocument1.getId();
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
@@ -1366,8 +1783,8 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
     }
 
-    @Test
-    public void test_Booking_Put_ShouldReturn_400Response_And_ErrorCode_RES_BOOKING_001_WhenRequested_ById_AndInactiveTableId() throws Exception {
+    /*@Test
+    public void test_Booking_Put_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001_WhenRequested_ById_AndInactiveTableId() throws Exception {
         String id = bookingDocument1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
@@ -1385,10 +1802,10 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-    }
+    }*/
 
     @Test
-    public void test_Booking_Put_ShouldReturn_422Response_And_ErrorCode_RES_BOOKING_003_WhenUpdated_ById_AndEmptyBookingDetails() throws Exception {
+    public void test_Booking_Put_ShouldReturn_422Response_And_ErrorCode_RES_RESV_003_WhenUpdated_ById_AndEmptyBookingDetails() throws Exception {
         String id = bookingDocument1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_UNEXPECTED.getErrorCode();
@@ -1408,8 +1825,8 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
     }
 
-    @Test
-    public void test_Booking_Put_ShouldReturn_409Response_And_ErrorCode_RES_BOOKING_004_WhenUpdated_ById_AndDuplicateBookingDetails() throws Exception {
+    /*@Test
+    public void test_Booking_Put_ShouldReturn_409Response_And_ErrorCode_RES_RESV_004_WhenUpdated_ById_AndDuplicateBookingDetails() throws Exception {
         String id = bookingDocument1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_EXISTS.getErrorCode();
@@ -1433,9 +1850,41 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field1Value));
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field2Name));
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field2Value));
-    }
+    }*/
 
     @Test
+    public void test_Booking_Put_ShouldReturn_409Response_And_ErrorCode_RES_RESV_004_WhenUpdated_ById_AndDuplicateBookingDetails() throws Exception {
+        String id = bookingDocument1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = ReservationErrorCode.RESERVATION_EXISTS.getErrorCode();
+        String field1Name = "accountId";
+        String field2Name = "categoryId";
+        String field3Name = "timestamp";
+        String field1Value = bookingDocument1.getAccountId();
+        String field2Value = bookingDocument1.getCategoryId();
+        String field3Value = DateTimeFormatter.ofPattern(bookingTimeFormat).format(bookingDocument3.getTimestamp());
+        bookingForm.setAccountId(field1Value);
+        bookingForm.setCategoryId(field2Value);
+        bookingForm.setTimestamp(field3Value);
+
+        mvcResult = mockMvc.perform(put(BOOKING_URI_BY_ID, id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(bookingForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.CONFLICT.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field1Name));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field1Value));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field2Name));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field2Value));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field3Name));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field3Value));
+    }
+
+    /*@Test
     public void test_Booking_Patch_ShouldReturn_204Response_And_NoResponseBody_WhenUpdated_ById_AndBookingDetails() throws Exception {
         String id = bookingDocument1.getId();
         patches = Arrays.asList(
@@ -1446,6 +1895,25 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         mvcResult = this.mockMvc.perform(patch(BOOKING_URI_BY_ID, id)
                 .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
                 .content(om.writeValueAsString(patches)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.NO_CONTENT.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals("", mvcResult.getResponse().getContentAsString());
+    }*/
+
+    @Test
+    public void test_Booking_Patch_ShouldReturn_204Response_And_NoResponseBody_WhenUpdated_ById_AndBookingDetails() throws Exception {
+        String id = bookingDocument1.getId();
+        /*patches = Arrays.asList(
+                new PatchOperationForm("replace", "/accountId", "2"),
+                new PatchOperationForm("replace", "/categoryId", "1"));*/
+        MvcResult mvcResult = null;
+
+        mvcResult = this.mockMvc.perform(patch(BOOKING_URI_BY_ID, id)
+                        .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
+                        .content(om.writeValueAsString(patches)))
                 .andDo(print())
                 .andReturn();
 
@@ -1473,7 +1941,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
     }
 
     @Test
-    public void test_Booking_Patch_ShouldReturn_404Response_And_ErrorCode_RES_BOOKING_002_WhenUpdated_ByAbsentId_AndBookingDetails() throws Exception {
+    public void test_Booking_Patch_ShouldReturn_404Response_And_ErrorCode_RES_RESV_002_WhenUpdated_ByAbsentId_AndBookingDetails() throws Exception {
         String id = "5";
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_NOT_FOUND.getErrorCode();
@@ -1492,8 +1960,8 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(id.toString()));
     }
 
-    @Test
-    public void test_Booking_Patch_ShouldReturn_409Response_And_ErrorCode_RES_BOOKING_002_WhenUpdated_ById_AndDuplicateBookingDetails() throws Exception {
+    /*@Test
+    public void test_Booking_Patch_ShouldReturn_409Response_And_ErrorCode_RES_RESV_002_WhenUpdated_ById_AndDuplicateBookingDetails() throws Exception {
         String id = bookingDocument1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_EXISTS.getErrorCode();
@@ -1518,10 +1986,43 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field1Value));
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field2Name));
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field2Value));
+    }*/
+
+    @Test
+    public void test_Booking_Patch_ShouldReturn_409Response_And_ErrorCode_RES_RESV_002_WhenUpdated_ById_AndDuplicateBookingDetails() throws Exception {
+        String id = bookingDocument1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = ReservationErrorCode.RESERVATION_EXISTS.getErrorCode();
+        String field1Name = "accountId";
+        String field2Name = "categoryId";
+        String field3Name = "timestamp";
+        String field1Value = bookingDocument1.getAccountId();
+        String field2Value = bookingDocument1.getCategoryId();
+        String field3Value = bookingDocument1.getTimestamp().format(DateTimeFormatter.ofPattern(bookingTimeFormat));
+        patches = Arrays.asList(
+                new PatchOperationForm("replace", "/" + field1Name, field1Value),
+                new PatchOperationForm("replace", "/" + field2Name, field2Value),
+                new PatchOperationForm("replace", "/" + field3Name, field3Value));
+
+
+        mvcResult = this.mockMvc.perform(patch(BOOKING_URI_BY_ID, id)
+                        .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
+                        .content(om.writeValueAsString(patches)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);Assertions.assertEquals(HttpStatus.CONFLICT.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field1Name));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field1Value));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field2Name));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field2Value));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field3Name));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field3Value));
     }
 
     @Test
-    public void test_Booking_Patch_ShouldReturn_422Response_And_ErrorCode_RES_BOOKING_003_WhenUpdated_ById_AndNoBookingDetails() throws Exception {
+    public void test_Booking_Patch_ShouldReturn_422Response_And_ErrorCode_RES_RESV_003_WhenUpdated_ById_AndNoBookingDetails() throws Exception {
         String id = bookingDocument1.getId();
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_UNEXPECTED.getErrorCode();
@@ -1540,7 +2041,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
     }
 
     @Test
-    public void test_Booking_Patch_ShouldReturn_400Response_And_ErrorCode_RES_BOOKING_001_WhenRequested_ById_AndInvalidActive() throws Exception {
+    public void test_Booking_Patch_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001_WhenRequested_ById_AndInvalidActive() throws Exception {
         String id = bookingDocument1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
@@ -1673,7 +2174,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
 
     }
 
-    @ParameterizedTest
+    /*@ParameterizedTest
     @ValueSource(strings = { " ", "" })
     public void test_Booking_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndEmptyTableId(String tableId) throws Exception {
         String id = bookingDocument1.getId();
@@ -1694,15 +2195,38 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
 
+    }*/
+
+    @ParameterizedTest
+    @ValueSource(strings = { " ", "" })
+    public void test_Booking_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndEmptyTimestamp(String tableId) throws Exception {
+        String id = bookingDocument1.getId();
+        MvcResult mvcResult = null;
+        String errorCode = TOABErrorCode.PATCH_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "value";
+        patches = Arrays.asList(
+                new PatchOperationForm("replace", "/timestamp", tableId));
+
+        mvcResult = mockMvc.perform(patch(BOOKING_URI_BY_ID, id)
+                        .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
+                        .content(om.writeValueAsString(patches)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
     }
 
-    /*@ParameterizedTest
+    @ParameterizedTest
     @ValueSource(strings = { "r" })
-    public void test_Booking_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndInvalidAccountId(String accountId) throws Exception {
+    public void test_Booking_Patch_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_ById_AndInvalidAccountId(String accountId) throws Exception {
         String id = bookingDocument1.getId().toString();
         MvcResult mvcResult = null;
-        String errorCode = BookingErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "accountId";
+        String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "id";
+        String message = "invalid";
         patches = Arrays.asList(
                 new PatchOperationForm("replace", "/" + fieldName, accountId));
 
@@ -1716,8 +2240,8 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-
-    }*/
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
+    }
 
     @ParameterizedTest
     @ValueSource(strings = { "r" })
@@ -1742,12 +2266,35 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
 
     }
 
+    @Test
+    public void test_Booking_Patch_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001_WhenRequested_ById_AndInvalidTimestamp() throws Exception {
+        String id = bookingDocument1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "timestamp";
+        String timestamp = "r";
+        patches = Arrays.asList(
+                new PatchOperationForm("replace", "/" + fieldName, timestamp));
+
+        mvcResult = mockMvc.perform(patch(BOOKING_URI_BY_ID, id)
+                        .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
+                        .content(om.writeValueAsString(patches)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+
+    }
+
     /*@ParameterizedTest
     @ValueSource(strings = { "r" })
     public void test_Booking_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndInvalidTableId(String tableId) throws Exception {
         String id = bookingDocument1.getId().toString();
         MvcResult mvcResult = null;
-        String errorCode = BookingErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
+        String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "tableId";
         patches = Arrays.asList(
                 new PatchOperationForm("replace", "/" + fieldName, tableId));
@@ -1811,7 +2358,7 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
 
     }
 
-    @Test
+    /*@Test
     public void test_Booking_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndInactiveTableId() throws Exception {
         String id = bookingDocument1.getId().toString();
         MvcResult mvcResult = null;
@@ -1832,10 +2379,33 @@ public class BookingIntegrationTest extends ReservationIntegrationBaseTest {
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
 
+    }*/
+
+    @Test
+    public void test_Booking_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndPastTimestamp() throws Exception {
+        String id = bookingDocument1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();
+        String timestamp = LocalDateTime.now().minusHours(2l).format(DateTimeFormatter.ofPattern(bookingTimeFormat));
+        String fieldName = "timestamp";
+        patches = Arrays.asList(
+                new PatchOperationForm("replace", "/" + fieldName, timestamp));
+
+        mvcResult = mockMvc.perform(patch(BOOKING_URI_BY_ID, id)
+                        .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
+                        .content(om.writeValueAsString(patches)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+
     }
 
     @Test
-    public void test_Booking_Patch_ShouldReturn_400Response_And_ErrorCode_RES_BOOKING_001_WhenRequested_ById_AndInvalidDefinitionOfBookingAttribute() throws Exception {
+    public void test_Booking_Patch_ShouldReturn_400Response_And_ErrorCode_RES_RESV_001_WhenRequested_ById_AndInvalidDefinitionOfBookingAttribute() throws Exception {
         String id = bookingDocument1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.getErrorCode();

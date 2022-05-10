@@ -17,7 +17,7 @@ import java.util.Optional;
 
 @Component
 @Slf4j
-public class EngagementForm2DocumentMapper implements DualChannelMapper<EngagementDocument, EngagementForm> {
+public class _EngagementForm2DocumentMapper_ implements DualChannelMapper<EngagementDocument, EngagementForm> {
 
     private List<String> fieldsToEscape;
     private String dateFormat;

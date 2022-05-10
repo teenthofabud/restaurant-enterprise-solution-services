@@ -31,7 +31,7 @@ import java.util.concurrent.*;
 public class BookingDocument2VoConverter extends TOABBaseDocument2VoConverter<BookingDocument, BookingVo> implements Converter<BookingDocument, BookingVo> {
 
     private List<String> fieldsToEscape;
-    private EstablishmentAreaServiceClient establishmentAreaServiceClient;
+    //private EstablishmentAreaServiceClient establishmentAreaServiceClient;
     private CustomerServiceClient customerServiceClient;
     private CategoryService categoryService;
 
@@ -40,10 +40,10 @@ public class BookingDocument2VoConverter extends TOABBaseDocument2VoConverter<Bo
         this.fieldsToEscape = fieldsToEscape;
     }
 
-    @Autowired
+    /*@Autowired
     public void setEstablishmentAreaServiceClient(EstablishmentAreaServiceClient establishmentAreaServiceClient) {
         this.establishmentAreaServiceClient = establishmentAreaServiceClient;
-    }
+    }*/
 
     @Autowired
     public void setCustomerServiceClient(CustomerServiceClient customerServiceClient) {
@@ -64,9 +64,9 @@ public class BookingDocument2VoConverter extends TOABBaseDocument2VoConverter<Bo
         if(!fieldsToEscape.contains("timestamp")) {
             vo.setTimestamp(document.getTimestamp());
         }
-        if(!fieldsToEscape.contains("noOfPerson")) {
+        /*if(!fieldsToEscape.contains("noOfPerson")) {
             vo.setNoOfPerson(document.getNoOfPerson());
-        }
+        }*/
         if(!fieldsToEscape.contains("categoryId")) {
             this.expandSecondLevelFields(document, vo, "categoryId");
         }
@@ -86,17 +86,35 @@ public class BookingDocument2VoConverter extends TOABBaseDocument2VoConverter<Bo
         switch(cascadeLevel) {
             case TWO:
                 if(!fieldsToEscape.contains("categoryId") && fieldName.compareTo("categoryId") == 0) {
-                    Callable<CategoryVo> recipeDocument2VoConversion = () -> {
+                    Callable<CategoryVo> categoryDocument2VoConversion = () -> {
                         CategoryVo recipeVo = categoryService.retrieveDetailsById(document.getCategoryId(), Optional.of(TOABCascadeLevel.ZERO));
                         return recipeVo;
                     };
                     String tName = "categoryDocument2VoConversion";
-                    ExecutorService executorService = Executors.newFixedThreadPool(1, new CustomizableThreadFactory("categoryDocument2VoConversion-"));
-                    Future<CategoryVo> categoryDocument2VoConversionResult = executorService.submit(recipeDocument2VoConversion);
+                    ExecutorService executorService = Executors.newFixedThreadPool(1, new CustomizableThreadFactory(tName + "-"));
+                    Future<CategoryVo> categoryDocument2VoConversionResult = executorService.submit(categoryDocument2VoConversion);
                     try {
                         CategoryVo categoryVo = categoryDocument2VoConversionResult.get();
                         vo.setCategory(categoryVo);
                         log.debug("Retrieved {} for categoryId: {}", categoryVo, document.getCategoryId());
+                    } catch (InterruptedException | ExecutionException e) {
+                        String msg = "Unable to perform " + tName;
+                        log.error(msg, e);
+                        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, msg, new Object[] { tName + " failure: " + e.getMessage() });
+                    }
+                }
+                if(!fieldsToEscape.contains("accountId") && fieldName.compareTo("accountId") == 0) {
+                    Callable<AccountVo> accountDocument2VoConversion = () -> {
+                        AccountVo accountVo = customerServiceClient.getAccountDetailsById(document.getAccountId());
+                        return accountVo;
+                    };
+                    String tName = "accountDocument2VoConversion";
+                    ExecutorService executorService = Executors.newFixedThreadPool(1, new CustomizableThreadFactory(tName + "-"));
+                    Future<AccountVo> accountDocument2VoConversionResult = executorService.submit(accountDocument2VoConversion);
+                    try {
+                        AccountVo accountVo = accountDocument2VoConversionResult.get();
+                        vo.setAccount(accountVo);
+                        log.debug("Retrieved {} for accountId: {}", accountVo, document.getCategoryId());
                     } catch (InterruptedException | ExecutionException e) {
                         String msg = "Unable to perform " + tName;
                         log.error(msg, e);
@@ -113,7 +131,7 @@ public class BookingDocument2VoConverter extends TOABBaseDocument2VoConverter<Bo
                 vo.setCategoryId(document.getCategoryId());
                 //vo.setTableId(document.getTableId());
                 vo.setAccountId(document.getAccountId());
-                log.debug("only first level cascaded for booking over categoryId, tableId and accountId");
+                log.debug("only first level cascaded for booking over categoryId and accountId");
                 break;
         }
     }

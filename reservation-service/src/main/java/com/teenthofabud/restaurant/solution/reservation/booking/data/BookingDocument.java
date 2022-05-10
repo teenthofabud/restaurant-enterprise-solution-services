@@ -20,8 +20,8 @@ public class BookingDocument extends TOABBaseDocument implements Comparable<Book
     private String id;
     @Indexed
     private String categoryId;
+    @Indexed
     private LocalDateTime timestamp;
-    private Integer noOfPerson;
     @Indexed
     private String accountId;
 

@@ -35,11 +35,11 @@ public class BookingDocumentSelfMapper implements SingleChannelMapper<BookingDoc
             changeSW = true;
             log.debug("Source BookingDocument.timestamp is valid");
         }
-        if(source.getNoOfPerson() != null && source.getNoOfPerson().compareTo(target.getNoOfPerson()) != 0) {
+        /*if(source.getNoOfPerson() != null && source.getNoOfPerson().compareTo(target.getNoOfPerson()) != 0) {
             target.setNoOfPerson(source.getNoOfPerson());
             changeSW = true;
             log.debug("Source BookingDocument.noOfPerson is valid");
-        }
+        }*/
         if(source.getAccountId() != null && StringUtils.hasText(StringUtils.trimWhitespace(source.getAccountId())) && source.getAccountId().compareTo(target.getAccountId()) != 0) {
             target.setAccountId(source.getAccountId());
             changeSW = true;

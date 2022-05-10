@@ -56,12 +56,12 @@ public class BookingDto2DocumentConverter implements ComparativePatchConverter<B
             log.debug("BookingDto.timestamp is valid");
         }
 
-        Optional<String> optNoOfPerson = dto.getNoOfPerson();
+        /*Optional<String> optNoOfPerson = dto.getNoOfPerson();
         if(!fieldsToEscape.contains("noOfPerson") && optNoOfPerson.isPresent()) {
             actualDocument.setNoOfPerson(Integer.parseInt(optNoOfPerson.get()));
             changeSW[i++] = true;
             log.debug("BookingDto.noOfPerson is valid");
-        }
+        }*/
 
         Optional<String> optAccountId = dto.getAccountId();
         if(!fieldsToEscape.contains("accountId") && optAccountId.isPresent()) {

@@ -13,6 +13,6 @@ public interface BookingRepository extends MongoRepository<BookingDocument, Stri
 
     public List<BookingDocument> findByCategoryId(String categoryId);
 
-    public Boolean existsByTimestampAndAccountId(LocalDateTime timestamp, String accountId);
+    public Boolean existsByAccountIdAndTimestampAndCategoryId(String accountId, LocalDateTime timestamp, String categoryId);
 
 }

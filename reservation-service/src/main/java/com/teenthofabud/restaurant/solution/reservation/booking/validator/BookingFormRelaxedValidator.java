@@ -17,6 +17,7 @@ import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -88,8 +89,12 @@ public class BookingFormRelaxedValidator implements RelaxedValidator<BookingForm
             return false;
         } else if(!fieldsToEscape.contains("timestamp") && form.getTimestamp() != null && StringUtils.hasText(StringUtils.trimWhitespace(form.getTimestamp()))) {
             try {
-                DateTimeFormatter dtf = DateTimeFormatter.ofPattern(bookingTimeFormat);
-                dtf.parse(form.getTimestamp());
+                LocalDateTime dt = LocalDateTime.parse(form.getTimestamp(), DateTimeFormatter.ofPattern(bookingTimeFormat));
+                if(dt.isBefore(LocalDateTime.now())) {
+                    log.debug("BookingForm.timestamp is in past");
+                    errors.rejectValue("timestamp", ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.name());
+                    return false;
+                }
             } catch (DateTimeParseException e) {
                 log.debug("BookingForm.timestamp is invalid");
                 errors.rejectValue("timestamp", ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.name());
@@ -99,12 +104,12 @@ public class BookingFormRelaxedValidator implements RelaxedValidator<BookingForm
         log.debug("BookingForm.timestamp is valid");
 
 
-        if(!fieldsToEscape.contains("noOfPerson") && (form.getNoOfPerson() != null || form.getNoOfPerson() <= 0)) {
+        /*if(!fieldsToEscape.contains("noOfPerson") && (form.getNoOfPerson() != null || form.getNoOfPerson() <= 0)) {
             errors.rejectValue("noOfPerson", ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID.name());
             log.debug("ReservationForm.noOfPerson is invalid");
             return false;
         }
-        log.debug("BookingForm.noOfPerson is valid");
+        log.debug("BookingForm.noOfPerson is valid");*/
 
 
         /*if(!fieldsToEscape.contains("tableId") && form.getTableId() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getTableId()))) {

@@ -23,8 +23,12 @@ public interface BookingService {
     /*public List<BookingVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalTableId,
                                                                 Optional<String> optionalAccountId) throws BookingException;*/
 
+    @Deprecated
     public List<BookingVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalTimestamp,
                                                                 Optional<String> optionalAccountId) throws BookingException;
+    public List<BookingVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalTimestamp,
+                                                                Optional<String> optionalAccountId,
+                                                                Optional<String> optionalCategoryId) throws BookingException;
 
     public String createBooking(BookingForm form) throws BookingException;
 
