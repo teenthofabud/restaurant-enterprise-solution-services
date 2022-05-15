@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>restaurant-enterprise-solution-services</artifactId>
+        <groupId>com.teenthofabud.restaurant.solution</groupId>
+        <version>2022.2-SNAPSHOT</version>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <properties>
+        <start-class>com.teenthofabud.restaurant.solution.configuration.ConfigurationServiceApplication</start-class>
+        <service.prefix>configuration</service.prefix>
+<!--        <maven.compiler.source>11</maven.compiler.source>-->
+<!--        <maven.compiler.target>11</maven.compiler.target>-->
+    </properties>
+
+    <groupId>com.teenthofabud.restaurant.solution</groupId>
+    <artifactId>restaurant-solution-configuration-service</artifactId>
+    <version>2022.2-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>${service.prefix}-service</name>
+    <description>manage entity definition attributes for configuration service</description>
+
+    <build>
+        <finalName>${service.prefix}-app</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>${maven-resources-plugin.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>${fabric8-plugin.version}</version>
+                <configuration>
+                    <dockerHost>${docker.host}</dockerHost>
+                    <registry>${docker.registry}</registry>
+                    <images>
+                        <image>
+                            <name>${docker.username}/${project.artifactId}:${project.version}</name>
+                            <alias>${project.artifactId}</alias>
+                            <build>
+                                <dockerFileDir>${project.basedir}</dockerFileDir>
+                                <tags>
+                                    <tag>${project.version}</tag>
+                                </tags>
+                            </build>
+                        </image>
+                    </images>
+                    <authConfig>
+                        <username>${docker.username}</username>
+                        <password>${docker.password}</password>
+                    </authConfig>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>default</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>push</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <jvmArguments>
+                        -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:6330
+                    </jvmArguments>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-config-server</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>
