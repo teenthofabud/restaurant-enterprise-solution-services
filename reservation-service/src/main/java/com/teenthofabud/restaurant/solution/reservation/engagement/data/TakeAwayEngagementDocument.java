@@ -13,14 +13,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @ToString(onlyExplicitlyIncluded = true)
 @Document("engagement")
-@TypeAlias("dineIn")
-public class DineInEngagementDocument extends EngagementDocument {
+@TypeAlias("takeAway")
+public class TakeAwayEngagementDocument extends EngagementDocument {
 
-    private Integer noOfPersons;
     @Indexed
-    private String tableId;
+    private String instructions;
 
-    @Override
     public void assign(EngagementForm2DocumentAssigner assigner) {
         assigner.assign(this);
     }
@@ -29,4 +27,5 @@ public class DineInEngagementDocument extends EngagementDocument {
     public Integer assign(EngagementDto2DocumentAssigner assigner) {
         return assigner.assign(this);
     }
+
 }

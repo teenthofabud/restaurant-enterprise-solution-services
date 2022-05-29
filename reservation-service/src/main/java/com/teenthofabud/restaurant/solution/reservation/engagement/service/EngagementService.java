@@ -18,11 +18,13 @@ public interface EngagementService {
 
     public EngagementVo retrieveDetailsById(String id, Optional<TOABCascadeLevel> optionalCascadeLevel) throws EngagementException;
 
-    List<EngagementVo> retrieveAllMatchingDetailsByAssociationId(String associationId, Optional<TOABCascadeLevel> optionalCascadeLevel) throws EngagementException;
+    List<EngagementVo> retrieveAllMatchingDetailsByBookingId(String bookingId, Optional<TOABCascadeLevel> optionalCascadeLevel) throws EngagementException;
 
-    public List<EngagementVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalAssociationId,
-                                                                   Optional<String> optionalEvent,
-                                                                   Optional<String> optionalTimestamp) throws EngagementException;
+    public List<EngagementVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalBookingId,
+                                                                   Optional<String> optionalTokenNumber,
+                                                                   Optional<String> optionalTableId,
+                                                                   Optional<String> optionalExtRef,
+                                                                   Optional<String> optionalInstructions) throws EngagementException;
 
     public String createEngagement(EngagementForm form) throws EngagementException;
 

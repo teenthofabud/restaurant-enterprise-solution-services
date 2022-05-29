@@ -1,5 +1,7 @@
 package com.teenthofabud.restaurant.solution.reservation.engagement.data;
 
+import com.teenthofabud.restaurant.solution.reservation.engagement.visitor.EngagementDto2DocumentAssigner;
+import com.teenthofabud.restaurant.solution.reservation.engagement.visitor.EngagementForm2DocumentAssigner;
 import lombok.*;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -16,5 +18,14 @@ public class DeliveryEngagementDocument extends EngagementDocument {
 
     @Indexed
     private String extRef;
+
+    public void assign(EngagementForm2DocumentAssigner assigner) {
+        assigner.assign(this);
+    }
+
+    @Override
+    public Integer assign(EngagementDto2DocumentAssigner assigner) {
+        return assigner.assign(this);
+    }
 
 }

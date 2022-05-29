@@ -14,21 +14,33 @@ import java.util.Optional;
 public class EngagementDto {
 
     @ToString.Include
-    private Optional<String> associationId;
+    private Optional<String> bookingId;
     @ToString.Include
-    private Optional<String> event;
+    private Optional<String> tokenNumber;
+    // START -> DINE IN
     @ToString.Include
-    private Optional<String> date;
+    private Optional<String> noOfPersons;
     @ToString.Include
-    private Optional<String> time;
+    private Optional<String> tableId;
+    // END -> DINE IN
+    // START -> DELIVERY
+    @ToString.Include
+    private Optional<String> extRef;
+    // END -> DELIVERY
+    // START -> INSTRUCTIONS
+    @ToString.Include
+    private Optional<String> instructions;
+    // END -> INSTRUCTIONS
     @ToString.Include
     private Optional<String> active;
 
     public EngagementDto() {
-        this.associationId = Optional.ofNullable(null);
-        this.event = Optional.ofNullable(null);
-        this.date = Optional.ofNullable(null);
-        this.time = Optional.ofNullable(null);
+        this.bookingId = Optional.ofNullable(null);
+        this.tokenNumber = Optional.ofNullable(null);
+        this.noOfPersons = Optional.ofNullable(null);
+        this.tableId = Optional.ofNullable(null);
+        this.instructions = Optional.ofNullable(null);
+        this.extRef = Optional.ofNullable(null);
         this.active = Optional.ofNullable(null);
     }
 

@@ -1,14 +1,12 @@
 package com.teenthofabud.restaurant.solution.reservation.engagement.data;
 
 import com.teenthofabud.core.common.data.document.TOABBaseDocument;
+import com.teenthofabud.restaurant.solution.reservation.engagement.visitor.EngagementDto2DocumentAssigner;
+import com.teenthofabud.restaurant.solution.reservation.engagement.visitor.EngagementForm2DocumentAssigner;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 @Getter
 @Setter
@@ -28,4 +26,8 @@ public abstract class EngagementDocument extends TOABBaseDocument implements Com
     public int compareTo(EngagementDocument o) {
         return this.getId().compareTo(o.getId());
     }
+
+    public abstract void assign(EngagementForm2DocumentAssigner assigner);
+
+    public abstract Integer assign(EngagementDto2DocumentAssigner assigner);
 }

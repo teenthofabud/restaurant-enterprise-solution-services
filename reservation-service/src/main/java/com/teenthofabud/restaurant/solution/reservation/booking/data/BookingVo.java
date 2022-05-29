@@ -1,6 +1,9 @@
 package com.teenthofabud.restaurant.solution.reservation.booking.data;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.teenthofabud.core.common.data.vo.TOABBaseVo;
 import com.teenthofabud.restaurant.solution.reservation.category.data.CategoryVo;
 import com.teenthofabud.restaurant.solution.reservation.integration.customer.data.AccountVo;
@@ -28,6 +31,8 @@ public class BookingVo extends TOABBaseVo implements Comparable<BookingVo> {
     private String accountId;
     @ToString.Include
     private AccountVo account;
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy~HH:mm:ss")
     @ToString.Include
     private String timestamp;
 

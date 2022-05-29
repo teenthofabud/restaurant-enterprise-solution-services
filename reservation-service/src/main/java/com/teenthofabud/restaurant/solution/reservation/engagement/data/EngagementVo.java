@@ -1,16 +1,10 @@
 package com.teenthofabud.restaurant.solution.reservation.engagement.data;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.teenthofabud.core.common.data.vo.TOABBaseVo;
 import com.teenthofabud.restaurant.solution.reservation.booking.data.BookingVo;
+import com.teenthofabud.restaurant.solution.reservation.integration.establishmentarea.data.TableVo;
 import lombok.*;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 @Getter
 @Setter
@@ -25,26 +19,25 @@ public class EngagementVo extends TOABBaseVo implements Comparable<EngagementVo>
     @ToString.Include
     private String id;
     @ToString.Include
-    private String associationId;
+    private String bookingId;
     @ToString.Include
-    private BookingVo association;
+    private BookingVo booking;
     @ToString.Include
-    private EngagementEvent event;
-    @JsonSerialize(using = LocalDateSerializer.class)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy") // date pattern referenced from res.reservation.engagement.event.date.format
+    private String tokenNumber;
     @ToString.Include
-    private LocalDate date;
-    @JsonSerialize(using = LocalDateSerializer.class)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss") // date pattern referenced from res.reservation.engagement.event.time.format
+    private Integer noOfPersons;
     @ToString.Include
-    private LocalTime time;
-    @JsonSerialize(using = LocalDateSerializer.class)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss") // date pattern referenced from res.reservation.engagement.event.timestamp.format
+    private String tableId;
     @ToString.Include
-    private LocalDateTime timestamp;
+    private TableVo table;
+    @ToString.Include
+    private String extRef;
+    @ToString.Include
+    private String instructions;
+
 
     @Override
     public int compareTo(EngagementVo o) {
-        return Integer.compare(this.associationId.compareTo(o.getAssociationId()), this.event.compareTo(o.getEvent()));
+        return Integer.compare(this.bookingId.compareTo(o.getBookingId()), this.tokenNumber.compareTo(o.getTokenNumber()));
     }
 }

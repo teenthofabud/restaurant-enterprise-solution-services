@@ -1,6 +1,7 @@
 package com.teenthofabud.restaurant.solution.reservation.configuration;
 
 import com.teenthofabud.core.common.repository.TOABBaseMongoRepositoryImpl;
+import com.teenthofabud.core.common.repository.TOABInheritanceAwareMongoRepositoryFactoryBean;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +18,8 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 @EnableMongoRepositories(basePackages = {"com.teenthofabud.restaurant.solution.reservation.category.repository",
         "com.teenthofabud.restaurant.solution.reservation.booking.repository",
         "com.teenthofabud.restaurant.solution.reservation.engagement.repository"},
-        repositoryBaseClass = TOABBaseMongoRepositoryImpl.class)
+        repositoryBaseClass = TOABBaseMongoRepositoryImpl.class,
+        repositoryFactoryBeanClass = TOABInheritanceAwareMongoRepositoryFactoryBean.class)
 public class ReservationServiceConfiguration {
 
     @Profile("!test")

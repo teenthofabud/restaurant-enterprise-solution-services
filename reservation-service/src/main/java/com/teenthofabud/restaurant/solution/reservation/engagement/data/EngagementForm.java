@@ -12,12 +12,16 @@ import lombok.*;
 public class EngagementForm {
 
     @ToString.Include
-    private String associationId;
+    private String bookingId;
     @ToString.Include
-    private String date;
+    private String tokenNumber;
     @ToString.Include
-    private String time;
+    private Integer noOfPersons;
     @ToString.Include
-    private String event;
+    private String tableId;
+    @ToString.Include
+    private String instructions;
+    @ToString.Include
+    private String extRef;
 
 }

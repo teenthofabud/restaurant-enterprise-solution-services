@@ -15,8 +15,10 @@ import com.teenthofabud.restaurant.solution.reservation.engagement.converter.Eng
 import com.teenthofabud.restaurant.solution.reservation.engagement.converter.EngagementForm2DocumentConverter;
 import com.teenthofabud.restaurant.solution.reservation.engagement.data.*;
 import com.teenthofabud.restaurant.solution.reservation.engagement.mapper.EngagementDocumentSelfMapper;
-import com.teenthofabud.restaurant.solution.reservation.engagement.mapper._EngagementForm2DocumentMapper_;
-import com.teenthofabud.restaurant.solution.reservation.engagement.repository.EngagementRepository;
+import com.teenthofabud.restaurant.solution.reservation.engagement.mapper.EngagementForm2DocumentMapper;
+import com.teenthofabud.restaurant.solution.reservation.engagement.repository.DeliveryEngagementRepository;
+import com.teenthofabud.restaurant.solution.reservation.engagement.repository.DineInEngagementRepository;
+import com.teenthofabud.restaurant.solution.reservation.engagement.repository.TakeAwayEngagementRepository;
 import com.teenthofabud.restaurant.solution.reservation.engagement.service.EngagementService;
 import com.teenthofabud.restaurant.solution.reservation.engagement.validator.EngagementDtoValidator;
 import com.teenthofabud.restaurant.solution.reservation.engagement.validator.EngagementFormRelaxedValidator;
@@ -28,7 +30,6 @@ import com.teenthofabud.restaurant.solution.reservation.booking.service.BookingS
 import com.teenthofabud.restaurant.solution.reservation.utils.ReservationServiceHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Component;
@@ -49,22 +50,12 @@ import java.util.*;
 @Slf4j
 public class EngagementServiceImpl implements EngagementService {
 
-    private static final Comparator<EngagementVo> CMP_BY_ASSOCIATION_DATE_TIME_EVENT = (s1, s2) -> {
-       int c1 = (s1.getAssociation() == null || s2.getAssociation() == null) ? s1.getAssociationId().compareTo(s2.getAssociationId())
-               : s1.getAssociation().compareTo(s2.getAssociation());
+    private static final Comparator<EngagementVo> CMP_BY_BOOKING_ID_TOKEN_NUMBER = (s1, s2) -> {
+       int c1 = (s1.getBooking() == null || s2.getBooking() == null) ? s1.getBookingId().compareTo(s2.getBookingId())
+               : s1.getBooking().compareTo(s2.getBooking());
        if(c1 == 0) {
-           int c2 = s1.getDate().compareTo(s2.getDate());
-           if(c2 == 0) {
-               int c3 = s1.getTime().compareTo(s2.getTime());
-               if(c3 == 0) {
-                   int c4 = s1.getEvent().compareTo(s2.getEvent());
-                   return c4;
-               } else {
-                   return c3;
-               }
-           } else {
-               return c2;
-           }
+           int c2 = s1.getTokenNumber().compareTo(s2.getTokenNumber());
+           return c2;
        } else {
            return c1;
        }
@@ -72,38 +63,22 @@ public class EngagementServiceImpl implements EngagementService {
 
     private EngagementForm2DocumentConverter form2DocumentConverter;
     private EngagementDto2DocumentConverter dto2DocumentConverter;
-    private _EngagementForm2DocumentMapper_ form2DocumentMapper;
+    private EngagementForm2DocumentMapper form2DocumentMapper;
     private EngagementDocumentSelfMapper documentSelfMapper;
     private EngagementFormValidator formValidator;
     private EngagementFormRelaxedValidator relaxedFormValidator;
     private EngagementDtoValidator dtoValidator;
-    private EngagementRepository repository;
+    //private EngagementRepository repository;
+    private DeliveryEngagementRepository deliveryEngagementRepository;
+    private TakeAwayEngagementRepository takeAwayEngagementRepository;
+    private DineInEngagementRepository dineInEngagementRepository;
     private TOABBaseService toabBaseService;
     private ObjectMapper om;
     private ReservationServiceHelper reservationServiceHelper;
     private BookingService bookingService;
 
-    private String dateFormat;
-    private String timeFormat;
-    private String timestampFormat;
-
-    @Value("${res.booking.engagement.timestamp.format}")
-    public void setTimestampFormat(String timestampFormat) {
-        this.timestampFormat = timestampFormat;
-    }
-
-    @Value("${res.booking.engagement.date.format}")
-    public void setDateFormat(String dateFormat) {
-        this.dateFormat = dateFormat;
-    }
-
-    @Value("${res.booking.engagement.time.format}")
-    public void setTimeFormat(String timeFormat) {
-        this.timeFormat = timeFormat;
-    }
-
     @Autowired
-    public void setAssociationService(BookingService bookingService) {
+    public void setBookingService(BookingService bookingService) {
         this.bookingService = bookingService;
     }
 
@@ -124,7 +99,7 @@ public class EngagementServiceImpl implements EngagementService {
     }
 
     @Autowired
-    public void setForm2DocumentMapper(_EngagementForm2DocumentMapper_ form2DocumentMapper) {
+    public void setForm2DocumentMapper(EngagementForm2DocumentMapper form2DocumentMapper) {
         this.form2DocumentMapper = form2DocumentMapper;
     }
 
@@ -159,9 +134,28 @@ public class EngagementServiceImpl implements EngagementService {
     }
 
     @Autowired
+    public void setDeliveryEngagementRepository(DeliveryEngagementRepository deliveryEngagementRepository) {
+        this.deliveryEngagementRepository = deliveryEngagementRepository;
+    }
+
+    @Autowired
+    public void setTakeAwayEngagementRepository(TakeAwayEngagementRepository takeAwayEngagementRepository) {
+        this.takeAwayEngagementRepository = takeAwayEngagementRepository;
+    }
+
+    public void setDineInEngagementRepository(DineInEngagementRepository dineInEngagementRepository) {
+        this.dineInEngagementRepository = dineInEngagementRepository;
+    }
+
+    @Autowired
+    public void setReservationServiceHelper(ReservationServiceHelper reservationServiceHelper) {
+        this.reservationServiceHelper = reservationServiceHelper;
+    }
+
+    /*@Autowired
     public void setRepository(EngagementRepository repository) {
         this.repository = repository;
-    }
+    }*/
 
     @Autowired
     public void setFormValidator(EngagementFormValidator formValidator) {
@@ -187,9 +181,18 @@ public class EngagementServiceImpl implements EngagementService {
     @Override
     public Set<EngagementVo> retrieveAllByNaturalOrdering() {
         log.info("Requesting all EngagementDocument by their natural ordering");
-        List<EngagementDocument> engagementDocumentList = repository.findAll();
+        List<? extends EngagementDocument> dineInEngagementDocumentList = dineInEngagementRepository.findAll();
+        log.debug("{} DineInEngagementDocument available", dineInEngagementDocumentList.size());
+        List<? extends EngagementDocument> takeAwayEngagementDocumentList = takeAwayEngagementRepository.findAll();
+        log.debug("{} TakeAwayEngagementDocument available", takeAwayEngagementDocumentList.size());
+        List<? extends EngagementDocument> deliveryEngagementDocumentList = deliveryEngagementRepository.findAll();
+        log.debug("{} DeliveryEngagementDocument available", deliveryEngagementDocumentList.size());
+        List<EngagementDocument> engagementDocumentList = new ArrayList<>();
+        engagementDocumentList.addAll(dineInEngagementDocumentList);
+        engagementDocumentList.addAll(takeAwayEngagementDocumentList);
+        engagementDocumentList.addAll(deliveryEngagementDocumentList);
         List<EngagementVo> engagementVoList = reservationServiceHelper.engagementDocument2DetailedVo(engagementDocumentList);
-        Set<EngagementVo> naturallyOrderedSet = new TreeSet<>(CMP_BY_ASSOCIATION_DATE_TIME_EVENT);
+        Set<EngagementVo> naturallyOrderedSet = new TreeSet<>(CMP_BY_BOOKING_ID_TOKEN_NUMBER);
         naturallyOrderedSet.addAll(engagementVoList);
         log.info("{} EngagementVo available", naturallyOrderedSet.size());
         return naturallyOrderedSet;
@@ -198,68 +201,92 @@ public class EngagementServiceImpl implements EngagementService {
     @Override
     public EngagementVo retrieveDetailsById(String id, Optional<TOABCascadeLevel> optionalCascadeLevel) throws EngagementException {
         log.info("Requesting EngagementDocument by id: {}", id);
-        Optional<EngagementDocument> optDocument = repository.findById(id);
-        if(optDocument.isEmpty()) {
+        Optional<? extends EngagementDocument> optionalDineInEngagementDocument = dineInEngagementRepository.findById(id);
+        Optional<? extends EngagementDocument> optionalTakeAwayEngagementDocument = takeAwayEngagementRepository.findById(id);
+        Optional<? extends EngagementDocument> optionalDeliveryEngagementDocument = deliveryEngagementRepository.findById(id);
+        if(optionalDineInEngagementDocument.isEmpty() && optionalTakeAwayEngagementDocument.isEmpty() && optionalDeliveryEngagementDocument.isEmpty()) {
             log.debug("No EngagementDocument found by id: {}", id);
             throw new EngagementException(ReservationErrorCode.RESERVATION_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
+        EngagementDocument engagementDocument = optionalDineInEngagementDocument.isPresent() ? optionalDineInEngagementDocument.get() :
+                optionalTakeAwayEngagementDocument.isPresent() ? optionalTakeAwayEngagementDocument.get() :
+                optionalDeliveryEngagementDocument.get();
         log.info("Found EngagementVo by id: {}", id);
-        EngagementDocument document = optDocument.get();
         TOABCascadeLevel cascadeLevel = optionalCascadeLevel.isPresent() ? optionalCascadeLevel.get() : TOABCascadeLevel.ZERO;
         TOABRequestContextHolder.setCascadeLevelContext(cascadeLevel);
-        EngagementVo vo = reservationServiceHelper.engagementDocument2DetailedVo(document);
+        EngagementVo vo = reservationServiceHelper.engagementDocument2DetailedVo(engagementDocument);
         log.debug("EngagementVo populated with fields cascaded to level: {}", cascadeLevel);
         TOABRequestContextHolder.clearCascadeLevelContext();
         return vo;
     }
 
     @Override
-    public List<EngagementVo> retrieveAllMatchingDetailsByAssociationId(String associationId, Optional<TOABCascadeLevel> optionalCascadeLevel) throws EngagementException {
-        log.info("Requesting EngagementDocument that match with associationId: {}", associationId);
-        Errors err = new DirectFieldBindingResult(associationId, "EngagementForm");
+    public List<EngagementVo> retrieveAllMatchingDetailsByBookingId(String bookingId, Optional<TOABCascadeLevel> optionalCascadeLevel) throws EngagementException {
+        log.info("Requesting EngagementDocument that match with bookingId: {}", bookingId);
         try {
-            BookingVo bookingVo = bookingService.retrieveDetailsById(associationId, Optional.of(TOABCascadeLevel.ONE));
+            BookingVo bookingVo = bookingService.retrieveDetailsById(bookingId, Optional.of(TOABCascadeLevel.ONE));
             if(!bookingVo.getActive()) {
-                throw new BookingException(ReservationErrorCode.RESERVATION_INACTIVE, new Object [] { associationId });
+                throw new BookingException(ReservationErrorCode.RESERVATION_INACTIVE, new Object [] { bookingId });
             }
         } catch (BookingException e) {
-            log.error("associationId is invalid", e);
-            throw new EngagementException(ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID, new Object [] { "associationId: " + associationId });
+            log.error("bookingId is invalid", e);
+            throw new EngagementException(ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID, new Object [] { "bookingId: " + bookingId });
         }
-        List<EngagementDocument> engagementDocumentList = repository.findByAssociationId(associationId);
+        List<? extends EngagementDocument> dineInEngagementDocumentList = dineInEngagementRepository.findByBookingId(bookingId);
+        List<? extends EngagementDocument> deliveryEngagementDocumentList = deliveryEngagementRepository.findByBookingId(bookingId);
+        List<? extends EngagementDocument> takeAwayEngagementDocumentList = takeAwayEngagementRepository.findByBookingId(bookingId);
         TOABCascadeLevel cascadeLevel = optionalCascadeLevel.isPresent() ? optionalCascadeLevel.get() : TOABCascadeLevel.ZERO;
+        List<EngagementDocument> engagementDocumentList = new ArrayList<>();
+        if(dineInEngagementDocumentList.isEmpty() && deliveryEngagementDocumentList.isEmpty() && takeAwayEngagementDocumentList.isEmpty()) {
+            log.debug("No EngagementDocument found by bookingId: {}", bookingId);
+            throw new EngagementException(ReservationErrorCode.RESERVATION_NOT_FOUND, new Object[] { "bookingId", String.valueOf(bookingId) });
+        }
+        if(!dineInEngagementDocumentList.isEmpty() && !deliveryEngagementDocumentList.isEmpty() && !takeAwayEngagementDocumentList.isEmpty()) {
+            log.debug("Multiple EngagementDocument found by bookingId: {}", bookingId);
+            throw new EngagementException(ReservationErrorCode.RESERVATION_ACTION_FAILURE, new Object[] { "get by bookingId", "multiple matches  by type" });
+        }
+        engagementDocumentList.addAll(!dineInEngagementDocumentList.isEmpty() ? dineInEngagementDocumentList :
+                !deliveryEngagementDocumentList.isEmpty() ? deliveryEngagementDocumentList : takeAwayEngagementDocumentList);
         TOABRequestContextHolder.setCascadeLevelContext(cascadeLevel);
         List<EngagementVo> matchedEngagementList = reservationServiceHelper.engagementDocument2DetailedVo(engagementDocumentList);
-        log.info("Found {} EngagementVo matching with recipeId: {}", matchedEngagementList.size(), associationId);
+        log.info("Found {} EngagementVo matching with recipeId: {}", matchedEngagementList.size(), bookingId);
         TOABRequestContextHolder.clearCascadeLevelContext();
         if(matchedEngagementList.isEmpty()) {
-            log.debug("No EngagementVo found matching with associationId: {}", associationId);
-            throw new EngagementException(ReservationErrorCode.RESERVATION_NOT_FOUND, new Object[] { "associationId", associationId });
+            log.debug("No EngagementVo found matching with bookingId: {}", bookingId);
+            throw new EngagementException(ReservationErrorCode.RESERVATION_NOT_FOUND, new Object[] { "bookingId", bookingId });
         }
         return matchedEngagementList;
     }
 
     @Override
-    public List<EngagementVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalAssociationId, Optional<String> optionalEvent, Optional<String> optionalTimestamp) throws EngagementException {
-        if(optionalAssociationId.isEmpty() && optionalEvent.isEmpty() && optionalTimestamp.isEmpty()) {
+    public List<EngagementVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalBookingId, Optional<String> optionalTokenNumber,
+                                                                   Optional<String> optionalTableId, Optional<String> optionalExtRef,
+                                                                   Optional<String> optionalInstructions) throws EngagementException {
+        if(optionalBookingId.isEmpty() && optionalTokenNumber.isEmpty() && optionalTableId.isEmpty() &&
+                optionalExtRef.isEmpty() && optionalInstructions.isEmpty()) {
             log.debug("No search parameters provided");
         }
-        String associationId = optionalAssociationId.isPresent() ? optionalAssociationId.get() : "";
-        String event = optionalEvent.isPresent() ? optionalEvent.get() : "";
-        String timestamp = optionalTimestamp.isPresent() ? optionalTimestamp.get() : "";
-        if(StringUtils.isEmpty(StringUtils.trimWhitespace(associationId)) && StringUtils.isEmpty(StringUtils.trimWhitespace(event))
-                && StringUtils.isEmpty(StringUtils.trimWhitespace(timestamp))) {
+        String bookingId = optionalBookingId.isPresent() ? optionalBookingId.get() : "";
+        String tokenNumber = optionalTokenNumber.isPresent() ? optionalTokenNumber.get() : "";
+        String tableId = optionalTableId.isPresent() ? optionalTableId.get() : "";
+        String extRef = optionalExtRef.isPresent() ? optionalExtRef.get() : "";
+        String instructions = optionalInstructions.isPresent() ? optionalInstructions.get() : "";
+        if(StringUtils.isEmpty(StringUtils.trimWhitespace(bookingId)) && StringUtils.isEmpty(StringUtils.trimWhitespace(tokenNumber))
+                && StringUtils.isEmpty(StringUtils.trimWhitespace(tableId)) && StringUtils.isEmpty(StringUtils.trimWhitespace(extRef))
+                && StringUtils.isEmpty(StringUtils.trimWhitespace(instructions))) {
             log.debug("All search parameters are empty");
         }
         List<EngagementVo> matchedEngagementList = new LinkedList<>();
         Map<String, String> providedFilters = new LinkedHashMap<>();
-        EngagementDocument document = new EngagementDocument();
+        Optional<EngagementDocument> document = Optional.empty();
         ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll();
-        if(StringUtils.hasText(StringUtils.trimWhitespace(associationId))) {
-            log.debug("associationId {} is valid", associationId);
-            providedFilters.put("associationId", associationId);
-            document.setAssociationId(associationId);
-            matcherCriteria = matcherCriteria.withMatcher("associationId", match -> match.exact());
+        if(StringUtils.hasText(StringUtils.trimWhitespace(bookingId))) {
+            log.debug("bookingId {} is valid", bookingId);
+            providedFilters.put("bookingId", bookingId);
+            document.setBookingId(bookingId);
+            matcherCriteria = matcherCriteria.withMatcher("bookingId", match -> match.exact());
+        } else {
+            // THROW EXCEPTION
         }
         if(StringUtils.hasText(StringUtils.trimWhitespace(event))) {
             log.debug("event {} is valid", event);
@@ -280,7 +307,7 @@ public class EngagementServiceImpl implements EngagementService {
                 log.error("Unable to parse timestamp", e);
                 log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_TIMESTAMP_INVALID.getValue(), timestamp);
                 throw new EngagementException(ReservationErrorCode.RESERVATION_ATTRIBUTE_INVALID, new Object[] { "timestamp", timestamp });
-            } 
+            }
             log.debug("event {} is valid", event);
             providedFilters.put("event", event);
             document.setEvent(EngagementEvent.valueOf(event));
@@ -323,17 +350,17 @@ public class EngagementServiceImpl implements EngagementService {
 
         EngagementDocument expectedDocument = form2DocumentConverter.convert(form);
 
-        log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_EXISTENCE_BY_ASSOCIATION_ID_EVENT_DATE_TIME.getValue(),
-                form.getAssociationId(), form.getEvent(), form.getDate(), form.getTime());
-        if(repository.existsByAssociationIdAndEventAndDateAndTime(
-                expectedDocument.getAssociationId(), expectedDocument.getEvent(), expectedDocument.getDate(), expectedDocument.getTime())) {
-            log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_EXISTS_BY_ASSOCIATION_ID_EVENT_DATE_TIME.getValue(),
-                    expectedDocument.getAssociationId(), expectedDocument.getEvent(), expectedDocument.getDate(), expectedDocument.getTime());
+        log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_EXISTENCE_BY_BOOKING_ID_EVENT_DATE_TIME.getValue(),
+                form.getBookingId(), form.getEvent(), form.getDate(), form.getTime());
+        if(repository.existsByBookingIdAndEventAndDateAndTime(
+                expectedDocument.getBookingId(), expectedDocument.getEvent(), expectedDocument.getDate(), expectedDocument.getTime())) {
+            log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_EXISTS_BY_BOOKING_ID_EVENT_DATE_TIME.getValue(),
+                    expectedDocument.getBookingId(), expectedDocument.getEvent(), expectedDocument.getDate(), expectedDocument.getTime());
             throw new EngagementException(ReservationErrorCode.RESERVATION_EXISTS,
-                    new Object[]{ "associationId: " + form.getAssociationId() + ", event: " + form.getEvent(), ", date: " + form.getDate() + ", time: " + form.getTime() });
+                    new Object[]{ "bookingId: " + form.getBookingId() + ", event: " + form.getEvent(), ", date: " + form.getDate() + ", time: " + form.getTime() });
         }
-        log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_NON_EXISTENCE_BY_ASSOCIATION_ID_EVENT_DATE_TIME.getValue(),
-                expectedDocument.getAssociationId(), expectedDocument.getEvent(), expectedDocument.getDate(), expectedDocument.getTime());
+        log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_NON_EXISTENCE_BY_BOOKING_ID_EVENT_DATE_TIME.getValue(),
+                expectedDocument.getBookingId(), expectedDocument.getEvent(), expectedDocument.getDate(), expectedDocument.getTime());
 
         log.debug("Saving {}", expectedDocument);
         EngagementDocument actualDocument = repository.save(expectedDocument);
@@ -539,8 +566,8 @@ public class EngagementServiceImpl implements EngagementService {
 
     private void checkUniquenessOfEngagement(EngagementDto patchedEngagementForm, EngagementDocument actualDocument) throws EngagementException {
         List<Boolean> similaritySwitchesCollection = new ArrayList<>(2);
-        if(patchedEngagementForm.getAssociationId().isPresent()) {
-            similaritySwitchesCollection.add(patchedEngagementForm.getAssociationId().get().compareTo(actualDocument.getAssociationId()) == 0);
+        if(patchedEngagementForm.getBookingId().isPresent()) {
+            similaritySwitchesCollection.add(patchedEngagementForm.getBookingId().get().compareTo(actualDocument.getBookingId()) == 0);
         }
         if(patchedEngagementForm.getEvent().isPresent()) {
             similaritySwitchesCollection.add(patchedEngagementForm.getEvent().get().toUpperCase().compareTo(actualDocument.getEvent().name()) == 0);
@@ -554,31 +581,31 @@ public class EngagementServiceImpl implements EngagementService {
             similaritySwitchesCollection.add(time.compareTo(actualDocument.getTime()) == 0);
         }
         if(!similaritySwitchesCollection.isEmpty()) {
-            String associationId = patchedEngagementForm.getAssociationId().isPresent() ? patchedEngagementForm.getAssociationId().get()
-                    : actualDocument.getAssociationId();
+            String bookingId = patchedEngagementForm.getBookingId().isPresent() ? patchedEngagementForm.getBookingId().get()
+                    : actualDocument.getBookingId();
             EngagementEvent event = patchedEngagementForm.getEvent().isPresent() ? EngagementEvent.valueOf(patchedEngagementForm.getEvent().get())
                     : actualDocument.getEvent();
             LocalDate date = patchedEngagementForm.getDate().isPresent() ? LocalDate.parse(patchedEngagementForm.getDate().get(), DateTimeFormatter.ofPattern(dateFormat))
                     : actualDocument.getDate();
             LocalTime time = patchedEngagementForm.getTime().isPresent() ? LocalTime.parse(patchedEngagementForm.getTime().get(), DateTimeFormatter.ofPattern(timeFormat))
                     : actualDocument.getTime();
-            log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_EXISTENCE_BY_ASSOCIATION_ID_EVENT_DATE_TIME.getValue(), associationId, event, date, time);
+            log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_EXISTENCE_BY_BOOKING_ID_EVENT_DATE_TIME.getValue(), bookingId, event, date, time);
             boolean sameDocumentSw = similaritySwitchesCollection.stream().allMatch(Boolean::valueOf);
-            boolean duplicateDocumentSw =  repository.existsByAssociationIdAndEventAndDateAndTime(associationId, event, date, time);
+            boolean duplicateDocumentSw =  repository.existsByBookingIdAndEventAndDateAndTime(bookingId, event, date, time);
             if(sameDocumentSw || duplicateDocumentSw) {
-                log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_EXISTS_BY_ASSOCIATION_ID_EVENT_DATE_TIME.getValue(), associationId, event, date, time);
+                log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_EXISTS_BY_BOOKING_ID_EVENT_DATE_TIME.getValue(), bookingId, event, date, time);
                 throw new EngagementException(ReservationErrorCode.RESERVATION_EXISTS,
-                        new Object[]{ "associationId: " + associationId + ", event: " + event, ", date: " + date + ", time: " + time });
+                        new Object[]{ "bookingId: " + bookingId + ", event: " + event, ", date: " + date + ", time: " + time });
             }
-            log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_NON_EXISTENCE_BY_ASSOCIATION_ID_EVENT_DATE_TIME.getValue(), associationId, event, date, time);
+            log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_NON_EXISTENCE_BY_BOOKING_ID_EVENT_DATE_TIME.getValue(), bookingId, event, date, time);
 
         }
     }
 
     private void checkUniquenessOfEngagement(EngagementForm engagementForm, EngagementDocument actualDocument) throws EngagementException {
         List<Boolean> similaritySwitchesCollection = new ArrayList<>(3);
-        if(StringUtils.hasText(StringUtils.trimWhitespace(engagementForm.getAssociationId()))) {
-            similaritySwitchesCollection.add(engagementForm.getAssociationId().compareTo(actualDocument.getAssociationId()) == 0);
+        if(StringUtils.hasText(StringUtils.trimWhitespace(engagementForm.getBookingId()))) {
+            similaritySwitchesCollection.add(engagementForm.getBookingId().compareTo(actualDocument.getBookingId()) == 0);
         }
         if(StringUtils.hasText(StringUtils.trimWhitespace(engagementForm.getEvent()))) {
             similaritySwitchesCollection.add(engagementForm.getEvent().toUpperCase().compareTo(actualDocument.getEvent().name()) == 0);
@@ -592,7 +619,7 @@ public class EngagementServiceImpl implements EngagementService {
             similaritySwitchesCollection.add(time.compareTo(actualDocument.getTime()) == 0);
         }
         if(!similaritySwitchesCollection.isEmpty()) {
-            String associationId = StringUtils.hasText(StringUtils.trimWhitespace(engagementForm.getAssociationId())) ? engagementForm.getAssociationId() : actualDocument.getAssociationId();
+            String bookingId = StringUtils.hasText(StringUtils.trimWhitespace(engagementForm.getBookingId())) ? engagementForm.getBookingId() : actualDocument.getBookingId();
             EngagementEvent event = StringUtils.hasText(StringUtils.trimWhitespace(engagementForm.getEvent())) ? EngagementEvent.valueOf(engagementForm.getEvent())
                     : actualDocument.getEvent();
             LocalDate date = StringUtils.hasText(StringUtils.trimWhitespace(engagementForm.getDate())) ? LocalDate.parse(engagementForm.getDate(), DateTimeFormatter.ofPattern(dateFormat))
@@ -600,15 +627,15 @@ public class EngagementServiceImpl implements EngagementService {
             LocalTime time = StringUtils.hasText(StringUtils.trimWhitespace(engagementForm.getTime())) ? LocalTime.parse(engagementForm.getTime(), DateTimeFormatter.ofPattern(timeFormat))
                     : actualDocument.getTime();
 
-            log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_EXISTENCE_BY_ASSOCIATION_ID_EVENT_DATE_TIME.getValue(), associationId, event, date, time);
+            log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_EXISTENCE_BY_BOOKING_ID_EVENT_DATE_TIME.getValue(), bookingId, event, date, time);
             boolean sameDocumentSw = similaritySwitchesCollection.stream().allMatch(Boolean::valueOf);
-            boolean duplicateDocumentSw =  repository.existsByAssociationIdAndEventAndDateAndTime(associationId, event, date, time);
+            boolean duplicateDocumentSw =  repository.existsByBookingIdAndEventAndDateAndTime(bookingId, event, date, time);
             if(sameDocumentSw || duplicateDocumentSw) {
-                log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_EXISTS_BY_ASSOCIATION_ID_EVENT_DATE_TIME.getValue(), associationId, event, date, time);
+                log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_EXISTS_BY_BOOKING_ID_EVENT_DATE_TIME.getValue(), bookingId, event, date, time);
                 throw new EngagementException(ReservationErrorCode.RESERVATION_EXISTS,
-                        new Object[]{ "associationId: " + associationId + ", event: " + event, ", date: " + date + ", time: " + time });
+                        new Object[]{ "bookingId: " + bookingId + ", event: " + event, ", date: " + date + ", time: " + time });
             }
-            log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_NON_EXISTENCE_BY_ASSOCIATION_ID_EVENT_DATE_TIME.getValue(), associationId, event, date, time);
+            log.debug(EngagementMessageTemplate.MSG_TEMPLATE_ENGAGEMENT_NON_EXISTENCE_BY_BOOKING_ID_EVENT_DATE_TIME.getValue(), bookingId, event, date, time);
 
         }
     }
