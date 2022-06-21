@@ -15,6 +15,6 @@ public interface DineInEngagementRepository extends MongoRepository<DineInEngage
 
     public List<DineInEngagementDocument> findByBookingIdAndTableIdAndNoOfPersons(String bookingId, String tableId, Integer noOfPersons);
 
-    public Boolean existsByBookingIdAndTableIdAndNoOfPersons(String bookingId, String tableId, Integer noOfPersons);
+    public Boolean existsByBookingIdAndTokenNumberAndTableIdAndNoOfPersons(String bookingId, String tableId, Integer noOfPersons);
 
 }

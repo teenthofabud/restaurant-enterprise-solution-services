@@ -20,7 +20,7 @@ import java.util.Optional;
 
 @Component
 @Slf4j
-public class EngagementForm2DocumentConverter implements Converter<EngagementForm, EngagementDocument> {
+public class EngagementForm2DocumentConverter<T extends EngagementDocument> implements Converter<EngagementForm, Optional<? extends EngagementDocument>> {
 
     private List<String> fieldsToEscape;
     private BookingService bookingService;
@@ -36,9 +36,9 @@ public class EngagementForm2DocumentConverter implements Converter<EngagementFor
     }
 
     @Override
-    public EngagementDocument convert(EngagementForm form) {
+    public Optional<? extends EngagementDocument> convert(EngagementForm form) {
         EngagementForm2DocumentAssigner engagementForm2DocumentAssigner = new EngagementForm2DocumentAssigner(form, fieldsToEscape);
-        Optional<EngagementDocument> optionalEngagementDocument = Optional.empty();
+        Optional<? extends EngagementDocument> optionalEngagementDocument = Optional.empty();
         if(!fieldsToEscape.contains("bookingId")) {
             try {
                 BookingVo bookingVo = bookingService.retrieveDetailsById(form.getBookingId(), Optional.of(TOABCascadeLevel.TWO));
@@ -75,7 +75,7 @@ public class EngagementForm2DocumentConverter implements Converter<EngagementFor
             document.setActive(Boolean.TRUE);
         }
         log.debug("Converting {} to {}", form, optionalEngagementDocument);
-        return optionalEngagementDocument.get();
+        return optionalEngagementDocument;
     }
 
 }
