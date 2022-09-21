@@ -1,0 +1,32 @@
+package com.teenthofabud.restaurant.solution.engagement.engagement.data;
+
+import com.teenthofabud.restaurant.solution.engagement.engagement.visitor.EngagementDto2DocumentAssigner;
+import com.teenthofabud.restaurant.solution.engagement.engagement.visitor.EngagementForm2DocumentAssigner;
+import lombok.*;
+import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString(onlyExplicitlyIncluded = true)
+@Document("engagement")
+@TypeAlias("dineIn")
+public class DineInEngagementDocument extends EngagementDocument {
+
+    private Integer noOfPersons;
+    @Indexed
+    private String tableId;
+
+    @Override
+    public void assign(EngagementForm2DocumentAssigner assigner) {
+        assigner.assign(this);
+    }
+
+    @Override
+    public Integer assign(EngagementDto2DocumentAssigner assigner) {
+        return assigner.assign(this);
+    }
+}
