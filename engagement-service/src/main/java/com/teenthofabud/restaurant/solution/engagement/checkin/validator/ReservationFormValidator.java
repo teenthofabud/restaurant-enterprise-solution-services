@@ -1,7 +1,7 @@
 
 package com.teenthofabud.restaurant.solution.engagement.checkin.validator;
 
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInFormDetails;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInFormParameters;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.ReservationForm;
 import com.teenthofabud.restaurant.solution.engagement.error.EngagementErrorCode;
 import lombok.extern.slf4j.Slf4j;
@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
-import org.springframework.validation.Validator;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -41,12 +40,12 @@ public class ReservationFormValidator extends CheckInFormValidator {
     }
 
     @Override
-    protected void validate(Optional<? extends CheckInFormDetails> optionalCheckInFormDetails, Errors errors) {
-        if(optionalCheckInFormDetails.isEmpty()) {
+    protected void validate(Optional<? extends CheckInFormParameters> optionalCheckInFormParameters, Errors errors) {
+        if(optionalCheckInFormParameters.isEmpty()) {
             log.debug("No ReservationForm available");
             return;
         }
-        CheckInFormDetails target = optionalCheckInFormDetails.get();
+        CheckInFormParameters target = optionalCheckInFormParameters.get();
         ReservationForm form = (ReservationForm) target;
 
         if (!fieldsToEscape.contains("date") && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getDate()))) {

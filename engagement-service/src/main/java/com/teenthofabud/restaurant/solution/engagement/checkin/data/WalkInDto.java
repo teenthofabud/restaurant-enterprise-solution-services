@@ -11,7 +11,7 @@ import java.util.Optional;
 @Setter
 @ToString
 @AllArgsConstructor
-public class WalkInDto implements CheckInDtoDetails {
+public class WalkInDto implements CheckInDtoParameters {
 
     @ToString.Include
     private Optional<String> name;

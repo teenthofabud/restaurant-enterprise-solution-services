@@ -1,10 +1,9 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.validator;
 
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInDto;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInDtoDetails;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInDtoParameters;
 import com.teenthofabud.restaurant.solution.engagement.error.EngagementErrorCode;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.nullness.Opt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -136,6 +135,6 @@ public abstract class CheckInDtoValidator implements Validator {
         this.validate(Optional.of(dto.getAttributes().get()), errors);
     }
 
-    protected abstract void validate(Optional<? extends CheckInDtoDetails> optionalCheckInDtoDetails, Errors errors);
+    protected abstract void validate(Optional<? extends CheckInDtoParameters> optionalCheckInDtoParameters, Errors errors);
 
 }

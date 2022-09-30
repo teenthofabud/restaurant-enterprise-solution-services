@@ -7,7 +7,6 @@ import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInForm;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInVo;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -19,12 +18,17 @@ public interface CheckInService {
 
     public CheckInVo retrieveDetailsById(String id, Optional<TOABCascadeLevel> optionalCascadeLevel) throws CheckInException;
 
-    public List<CheckInVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalAccountId,
-                                                                Optional<String> optionalTableId,
-                                                                Optional<String> optionalName,
-                                                                Optional<String> optionalPhoneNumber,
-                                                                Optional<String> optionalEmailId,
+    public List<CheckInVo> retrieveAllMatchingCheckInDetailsByCriteria(Optional<String> optionalAccountId,
+                                                                //Optional<String> optionalTableId,
+                                                                Optional<String> optionalSequence,
                                                                 Optional<String> optionalNotes) throws CheckInException;
+
+    public List<CheckInVo> retrieveAllMatchingWalkInDetailsByCriteria(Optional<String> optionalName,
+                                                                Optional<String> optionalPhoneNumber,
+                                                                Optional<String> optionalEmailId) throws CheckInException;
+
+    public List<CheckInVo> retrieveAllMatchingReservationDetailsByCriteria(Optional<String> optionalDate,
+                                                                Optional<String> optionalTime) throws CheckInException;
 
     public CheckInVo retrieveAllMatchingDetailsByCriteria(String sequence, String date) throws CheckInException;
 

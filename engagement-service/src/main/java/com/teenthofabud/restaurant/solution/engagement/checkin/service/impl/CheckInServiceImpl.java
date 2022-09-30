@@ -12,9 +12,9 @@ import com.teenthofabud.core.common.error.TOABBaseException;
 import com.teenthofabud.core.common.error.TOABSystemException;
 import com.teenthofabud.core.common.service.TOABBaseService;
 import com.teenthofabud.restaurant.solution.engagement.category.service.CategoryService;
-import com.teenthofabud.restaurant.solution.engagement.checkin.converter.CheckInDto2DocumentConverter;
-import com.teenthofabud.restaurant.solution.engagement.checkin.converter.CheckInForm2DocumentConverter;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInDocument;
+import com.teenthofabud.restaurant.solution.engagement.checkin.converter.CheckInDto2EntityConverter;
+import com.teenthofabud.restaurant.solution.engagement.checkin.converter.CheckInForm2EntityConverter;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInEntity;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInDto;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInException;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInForm;
@@ -77,10 +77,10 @@ public class CheckInServiceImpl implements CheckInService {
        }
     };
 
-    private CheckInForm2DocumentConverter form2DocumentConverter;
-    private CheckInDto2DocumentConverter dto2DocumentConverter;
-    private CheckInForm2EntityMapper form2DocumentMapper;
-    private CheckInEntitySelfMapper documentSelfMapper;
+    private CheckInForm2EntityConverter form2EntityConverter;
+    private CheckInDto2EntityConverter dto2EntityConverter;
+    private CheckInForm2EntityMapper form2EntityMapper;
+    private CheckInEntitySelfMapper entitySelfMapper;
     private CheckInFormValidator formValidator;
     private CheckInFormRelaxedValidator relaxedFormValidator;
     private CheckInDtoValidator dtoValidator;
@@ -118,18 +118,18 @@ public class CheckInServiceImpl implements CheckInService {
     }
 
     @Autowired
-    public void setDto2DocumentConverter(CheckInDto2DocumentConverter dto2DocumentConverter) {
-        this.dto2DocumentConverter = dto2DocumentConverter;
+    public void setDto2EntityConverter(CheckInDto2EntityConverter dto2EntityConverter) {
+        this.dto2EntityConverter = dto2EntityConverter;
     }
 
     @Autowired
-    public void setForm2DocumentMapper(CheckInForm2EntityMapper form2DocumentMapper) {
-        this.form2DocumentMapper = form2DocumentMapper;
+    public void setForm2EntityMapper(CheckInForm2EntityMapper form2EntityMapper) {
+        this.form2EntityMapper = form2EntityMapper;
     }
 
     @Autowired
-    public void setDocumentSelfMapper(CheckInEntitySelfMapper documentSelfMapper) {
-        this.documentSelfMapper = documentSelfMapper;
+    public void setEntitySelfMapper(CheckInEntitySelfMapper entitySelfMapper) {
+        this.entitySelfMapper = entitySelfMapper;
     }
 
     @Autowired
@@ -153,8 +153,8 @@ public class CheckInServiceImpl implements CheckInService {
     }
 
     @Autowired
-    public void setForm2DocumentConverter(CheckInForm2DocumentConverter form2DocumentConverter) {
-        this.form2DocumentConverter = form2DocumentConverter;
+    public void setForm2EntityConverter(CheckInForm2EntityConverter form2EntityConverter) {
+        this.form2EntityConverter = form2EntityConverter;
     }
 
     @Autowired
@@ -185,9 +185,9 @@ public class CheckInServiceImpl implements CheckInService {
 
     @Override
     public Set<CheckInVo> retrieveAllByNaturalOrdering() {
-        log.info("Requesting all CheckInDocument by their natural ordering");
-        List<CheckInDocument> checkInDocumentList = repository.findAll();
-        List<CheckInVo> checkInVoList = engagementServiceHelper.checkInDocument2DetailedVo(checkInDocumentList);
+        log.info("Requesting all CheckInEntity by their natural ordering");
+        List<CheckInEntity> checkInEntityList = repository.findAll();
+        List<CheckInVo> checkInVoList = engagementServiceHelper.checkInEntity2DetailedVo(checkInEntityList);
         Set<CheckInVo> naturallyOrderedSet = new TreeSet<>(CMP_BY_TABLE_TOKEN_ACCOUNT);
         naturallyOrderedSet.addAll(checkInVoList);
         log.info("{} CheckInVo available", naturallyOrderedSet.size());
@@ -196,20 +196,35 @@ public class CheckInServiceImpl implements CheckInService {
 
     @Override
     public CheckInVo retrieveDetailsById(String id, Optional<TOABCascadeLevel> optionalCascadeLevel) throws CheckInException {
-        log.info("Requesting CheckInDocument by id: {}", id);
-        Optional<CheckInDocument> optDocument = repository.findById(id);
-        if(optDocument.isEmpty()) {
-            log.debug("No CheckInDocument found by id: {}", id);
+        log.info("Requesting CheckInEntity by id: {}", id);
+        Optional<CheckInEntity> optEntity = repository.findById(id);
+        if(optEntity.isEmpty()) {
+            log.debug("No CheckInEntity found by id: {}", id);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
         log.info("Found CheckInVo by id: {}", id);
-        CheckInDocument document = optDocument.get();
+        CheckInEntity entity = optEntity.get();
         TOABCascadeLevel cascadeLevel = optionalCascadeLevel.isPresent() ? optionalCascadeLevel.get() : TOABCascadeLevel.ZERO;
         TOABRequestContextHolder.setCascadeLevelContext(cascadeLevel);
-        CheckInVo vo = engagementServiceHelper.checkInDocument2DetailedVo(document);
+        CheckInVo vo = engagementServiceHelper.checkInEntity2DetailedVo(entity);
         log.debug("CheckInVo populated with fields cascaded to level: {}", cascadeLevel);
         TOABRequestContextHolder.clearCascadeLevelContext();
         return vo;
+    }
+
+    @Override
+    public List<CheckInVo> retrieveAllMatchingCheckInDetailsByCriteria(Optional<String> optionalAccountId, Optional<String> optionalSequence, Optional<String> optionalNotes) throws CheckInException {
+        return null;
+    }
+
+    @Override
+    public List<CheckInVo> retrieveAllMatchingWalkInDetailsByCriteria(Optional<String> optionalName, Optional<String> optionalPhoneNumber, Optional<String> optionalEmailId) throws CheckInException {
+        return null;
+    }
+
+    @Override
+    public List<CheckInVo> retrieveAllMatchingReservationDetailsByCriteria(Optional<String> optionalDate, Optional<String> optionalTime) throws CheckInException {
+        return null;
     }
 
     @Override
@@ -229,42 +244,42 @@ public class CheckInServiceImpl implements CheckInService {
         }
         List<CheckInVo> matchedCheckInList = new LinkedList<>();
         Map<String, String> providedFilters = new LinkedHashMap<>();
-        CheckInDocument document = new CheckInDocument();
+        CheckInEntity entity = new CheckInEntity();
         ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll();
         if(StringUtils.hasText(StringUtils.trimWhitespace(accountId))) {
             log.debug("accountId {} is valid", accountId);
             providedFilters.put("accountId", accountId);
-            document.setAccountId(accountId);
+            entity.setAccountId(accountId);
             matcherCriteria = matcherCriteria.withMatcher("accountId", match -> match.exact());
         }
         if(StringUtils.hasText(StringUtils.trimWhitespace(tableId))) {
             log.debug("tableId {} is valid", tableId);
             providedFilters.put("tableId", tableId);
-            document.setTableId(tableId);
+            entity.setTableId(tableId);
             matcherCriteria = matcherCriteria.withMatcher("tableId", match -> match.exact());
         }
         if(StringUtils.hasText(StringUtils.trimWhitespace(name))) {
             log.debug("name {} is valid", accountId);
             providedFilters.put("name", accountId);
-            document.setName(name);
+            entity.setName(name);
             matcherCriteria = matcherCriteria.withMatcher("name", match -> match.exact());
         }
         if(StringUtils.hasText(StringUtils.trimWhitespace(phoneNumber))) {
             log.debug("phoneNumber {} is valid", accountId);
             providedFilters.put("phoneNumber", accountId);
-            document.setPhoneNumber(phoneNumber);
+            entity.setPhoneNumber(phoneNumber);
             matcherCriteria = matcherCriteria.withMatcher("phoneNumber", match -> match.exact());
         }
         if(StringUtils.hasText(StringUtils.trimWhitespace(emailId))) {
             log.debug("emailId {} is valid", accountId);
             providedFilters.put("emailId", accountId);
-            document.setPhoneNumber(emailId);
+            entity.setPhoneNumber(emailId);
             matcherCriteria = matcherCriteria.withMatcher("emailId", match -> match.exact());
         }
         if(StringUtils.hasText(StringUtils.trimWhitespace(notes))) {
             log.debug("notes {} is valid", accountId);
             providedFilters.put("notes", accountId);
-            document.setNotes(notes);
+            entity.setNotes(notes);
             matcherCriteria = matcherCriteria.withMatcher("notes", match -> match.contains());
         }
         if(providedFilters.isEmpty()) {
@@ -272,9 +287,9 @@ public class CheckInServiceImpl implements CheckInService {
         } else {
             log.debug("search parameters {} are valid", providedFilters);
         }
-        Example<CheckInDocument> checkInDocumentExample = Example.of(document, matcherCriteria);
-        List<CheckInDocument> checkInDocumentList = repository.findAll(checkInDocumentExample);
-        matchedCheckInList = engagementServiceHelper.checkInDocument2DetailedVo(checkInDocumentList);
+        Example<CheckInEntity> checkInEntityExample = Example.of(entity, matcherCriteria);
+        List<CheckInEntity> checkInEntityList = repository.findAll(checkInEntityExample);
+        matchedCheckInList = engagementServiceHelper.checkInEntity2DetailedVo(checkInEntityList);
         log.info("Found {} CheckInVo matching with provided parameters : {}", matchedCheckInList.size(), providedFilters);
         log.info("No CheckInVo available matching with provided parameters : {}", matchedCheckInList.size(), providedFilters);
         return matchedCheckInList;
@@ -305,21 +320,21 @@ public class CheckInServiceImpl implements CheckInService {
         start = LocalDateTime.of(dt, LocalTime.of(0,0, 0));
         end = LocalDateTime.of(dt, LocalTime.of(23,59, 59));
 
-        log.info("Requesting CheckInDocument by sequence: {} between timestamps: {} and {}", seq, start, end);
-        Optional<CheckInDocument> optDocument = repository.findBySequenceAndCreatedOnBetween(seq, start, end);
-        if(optDocument.isEmpty()) {
-            log.debug("No CheckInDocument found by sequence: {} between timestamps: {} and {}", seq, start, end);
+        log.info("Requesting CheckInEntity by sequence: {} between timestamps: {} and {}", seq, start, end);
+        Optional<CheckInEntity> optEntity = repository.findBySequenceAndCreatedOnBetween(seq, start, end);
+        if(optEntity.isEmpty()) {
+            log.debug("No CheckInEntity found by sequence: {} between timestamps: {} and {}", seq, start, end);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "seq: " + seq, ", date: " + date });
         }
         log.info("Found CheckInVo by sequence: {} between timestamps: {} and {}", seq, start, end);
-        CheckInDocument document = optDocument.get();
-        CheckInVo vo = engagementServiceHelper.checkInDocument2DetailedVo(document);
+        CheckInEntity entity = optEntity.get();
+        CheckInVo vo = engagementServiceHelper.checkInEntity2DetailedVo(entity);
         return vo;
     }
 
     @Override
     public String createCheckIn(CheckInForm form) throws CheckInException {
-        log.info("Creating new CheckInDocument");
+        log.info("Creating new CheckInEntity");
 
         if(form == null) {
             log.debug("CheckInForm provided is null");
@@ -339,29 +354,29 @@ public class CheckInServiceImpl implements CheckInService {
         }
         log.debug("All attributes of CheckInForm are valid");
 
-        CheckInDocument expectedDocument = form2DocumentConverter.convert(form);
+        CheckInEntity expectedEntity = form2EntityConverter.convert(form);
 
         log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTENCE_BY_TABLE_ID_AND_ACCOUNT_ID_AND_SEQUENCE.getValue(), form.getTableId(), form.getAccountId(), form.getSequence());
-        if(repository.existsByAccountIdAndTableIdAndSequence(expectedDocument.getAccountId(), expectedDocument.getTableId(), expectedDocument.getSequence())) {
+        if(repository.existsByAccountIdAndTableIdAndSequence(expectedEntity.getAccountId(), expectedEntity.getTableId(), expectedEntity.getSequence())) {
             log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTS_BY_TABLE_ID_AND_ACCOUNT_ID_AND_SEQUENCE.getValue(),
-                    expectedDocument.getTableId(), expectedDocument.getAccountId(), expectedDocument.getSequence());
+                    expectedEntity.getTableId(), expectedEntity.getAccountId(), expectedEntity.getSequence());
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_EXISTS,
                     new Object[]{ "tableId: " + form.getTableId(), "accountId: " + form.getAccountId() + ", sequence: " + form.getSequence() });
         }
-        log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_NON_EXISTENCE_BY_TABLE_ID_AND_ACCOUNT_ID_AND_SEQUENCE.getValue(), expectedDocument.getTableId(), expectedDocument.getAccountId(),
-                expectedDocument.getSequence());
+        log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_NON_EXISTENCE_BY_TABLE_ID_AND_ACCOUNT_ID_AND_SEQUENCE.getValue(), expectedEntity.getTableId(), expectedEntity.getAccountId(),
+                expectedEntity.getSequence());
 
-        log.debug("Saving {}", expectedDocument);
-        CheckInDocument actualDocument = repository.save(expectedDocument);
-        log.debug("Saved {}", actualDocument);
+        log.debug("Saving {}", expectedEntity);
+        CheckInEntity actualEntity = repository.save(expectedEntity);
+        log.debug("Saved {}", actualEntity);
 
-        if(actualDocument == null) {
-            log.debug("Unable to create {}", expectedDocument);
+        if(actualEntity == null) {
+            log.debug("Unable to create {}", expectedEntity);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_ACTION_FAILURE,
                     new Object[]{ "creation", "unable to persist CheckInForm details" });
         }
-        log.info("Created new CheckInForm with id: {}", actualDocument.getId());
-        return actualDocument.getId().toString();
+        log.info("Created new CheckInForm with id: {}", actualEntity.getId());
+        return actualEntity.getId().toString();
     }
 
     @Override
@@ -369,19 +384,19 @@ public class CheckInServiceImpl implements CheckInService {
         log.info("Updating CheckInForm by id: {}", id);
 
         log.debug(CheckInMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_CHECKIN_ENTITY_ID.getValue(), id);
-        Optional<CheckInDocument> optActualDocument = repository.findById(id);
-        if(optActualDocument.isEmpty()) {
+        Optional<CheckInEntity> optActualEntity = repository.findById(id);
+        if(optActualEntity.isEmpty()) {
             log.debug(CheckInMessageTemplate.MSG_TEMPLATE_NO_CHECKIN_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
         log.debug(CheckInMessageTemplate.MSG_TEMPLATE_FOUND_CHECKIN_ENTITY_ID.getValue(), id);
 
-        CheckInDocument actualDocument = optActualDocument.get();
-        if(!actualDocument.getActive()) {
-            log.debug("CheckInDocument is inactive with id: {}", id);
+        CheckInEntity actualEntity = optActualEntity.get();
+        if(!actualEntity.getActive()) {
+            log.debug("CheckInEntity is inactive with id: {}", id);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_INACTIVE, new Object[] { String.valueOf(id) });
         }
-        log.debug("CheckInDocument is active with id: {}", id);
+        log.debug("CheckInEntity is active with id: {}", id);
 
         if(form == null) {
             log.debug("CheckInForm is null");
@@ -403,78 +418,78 @@ public class CheckInServiceImpl implements CheckInService {
         }
         log.debug("All attributes of CheckInForm are valid");
 
-        Optional<CheckInDocument> optExpectedDocument = form2DocumentMapper.compareAndMap(actualDocument, form);
-        if(optExpectedDocument.isEmpty()) {
+        Optional<CheckInEntity> optExpectedEntity = form2EntityMapper.compareAndMap(actualEntity, form);
+        if(optExpectedEntity.isEmpty()) {
             log.debug("No new value for attributes of CheckInForm");
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are expected with new values" });
         }
-        log.debug("Successfully compared and copied attributes from CheckInForm to CheckInDocument");
+        log.debug("Successfully compared and copied attributes from CheckInForm to CheckInEntity");
 
-        CheckInDocument expectedDocument = optExpectedDocument.get();
+        CheckInEntity expectedEntity = optExpectedEntity.get();
 
-        this.checkUniquenessOfCheckIn(form, actualDocument);
+        this.checkUniquenessOfCheckIn(form, actualEntity);
 
-        documentSelfMapper.compareAndMap(expectedDocument, actualDocument);
-        log.debug("Compared and copied attributes from CheckInDocument to CheckInForm");
-        actualDocument.setModifiedOn(LocalDateTime.now(ZoneOffset.UTC));
+        entitySelfMapper.compareAndMap(expectedEntity, actualEntity);
+        log.debug("Compared and copied attributes from CheckInEntity to CheckInForm");
+        actualEntity.setModifiedOn(LocalDateTime.now(ZoneOffset.UTC));
 
-        log.debug("Updating: {}", actualDocument);
-        actualDocument = repository.save(actualDocument);
-        log.debug("Updated: {}", actualDocument);
-        if(actualDocument == null) {
-            log.debug("Unable to update {}", actualDocument);
+        log.debug("Updating: {}", actualEntity);
+        actualEntity = repository.save(actualEntity);
+        log.debug("Updated: {}", actualEntity);
+        if(actualEntity == null) {
+            log.debug("Unable to update {}", actualEntity);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_ACTION_FAILURE,
                     new Object[]{ "update", "unable to persist currency checkIn details" });
         }
-        log.info("Updated existing CheckInDocument with id: {}", actualDocument.getId());
+        log.info("Updated existing CheckInEntity with id: {}", actualEntity.getId());
     }
 
     @Override
     public void deleteCheckIn(String id) throws CheckInException {
-        log.info("Soft deleting CheckInDocument by id: {}", id);
+        log.info("Soft deleting CheckInEntity by id: {}", id);
 
         log.debug(CheckInMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_CHECKIN_ENTITY_ID.getValue(), id);
-        Optional<CheckInDocument> optDocument = repository.findById(id);
-        if(optDocument.isEmpty()) {
+        Optional<CheckInEntity> optEntity = repository.findById(id);
+        if(optEntity.isEmpty()) {
             log.debug(CheckInMessageTemplate.MSG_TEMPLATE_NO_CHECKIN_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
         log.debug(CheckInMessageTemplate.MSG_TEMPLATE_FOUND_CHECKIN_ENTITY_ID.getValue(), id);
 
-        CheckInDocument actualDocument = optDocument.get();
-        if(!actualDocument.getActive()) {
-            log.debug("CheckInDocument is inactive with id: {}", id);
+        CheckInEntity actualEntity = optEntity.get();
+        if(!actualEntity.getActive()) {
+            log.debug("CheckInEntity is inactive with id: {}", id);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_INACTIVE, new Object[] { String.valueOf(id) });
         }
-        log.debug("CheckInDocument is active with id: {}", id);
+        log.debug("CheckInEntity is active with id: {}", id);
 
-        actualDocument.setActive(Boolean.FALSE);
-        actualDocument.setModifiedOn(LocalDateTime.now(ZoneOffset.UTC));
-        log.debug("Soft deleting: {}", actualDocument);
-        CheckInDocument expectedDocument = repository.save(actualDocument);
-        log.debug("Soft deleted: {}", expectedDocument);
-        if(expectedDocument == null) {
-            log.debug("Unable to soft delete {}", actualDocument);
+        actualEntity.setActive(Boolean.FALSE);
+        actualEntity.setModifiedOn(LocalDateTime.now(ZoneOffset.UTC));
+        log.debug("Soft deleting: {}", actualEntity);
+        CheckInEntity expectedEntity = repository.save(actualEntity);
+        log.debug("Soft deleted: {}", expectedEntity);
+        if(expectedEntity == null) {
+            log.debug("Unable to soft delete {}", actualEntity);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_ACTION_FAILURE,
                     new Object[]{ "deletion", "unable to soft delete current checkIn details with id:" + id });
         }
 
-        log.info("Soft deleted existing CheckInDocument with id: {}", actualDocument.getId());
+        log.info("Soft deleted existing CheckInEntity with id: {}", actualEntity.getId());
     }
 
     @Override
     public void applyPatchOnCheckIn(String id, List<PatchOperationForm> patches) throws CheckInException {
-        log.info("Patching CheckInDocument by id: {}", id);
+        log.info("Patching CheckInEntity by id: {}", id);
 
         log.debug(CheckInMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_CHECKIN_ENTITY_ID.getValue(), id);
-        Optional<CheckInDocument> optActualDocument = repository.findById(id);
-        if(optActualDocument.isEmpty()) {
+        Optional<CheckInEntity> optActualEntity = repository.findById(id);
+        if(optActualEntity.isEmpty()) {
             log.debug(CheckInMessageTemplate.MSG_TEMPLATE_NO_CHECKIN_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
         log.debug(CheckInMessageTemplate.MSG_TEMPLATE_FOUND_CHECKIN_ENTITY_ID.getValue(), id);
 
-        CheckInDocument actualDocument = optActualDocument.get();
+        CheckInEntity actualEntity = optActualEntity.get();
         if(patches == null || (patches != null && patches.isEmpty())) {
             log.debug("CheckIn patch list not provided");
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_UNEXPECTED, new Object[]{ "patch", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
@@ -532,46 +547,46 @@ public class CheckInServiceImpl implements CheckInService {
         }
         log.debug("All attributes of patched CheckInDto are valid");
 
-        this.checkUniquenessOfCheckIn(patchedCheckInForm, actualDocument);
+        this.checkUniquenessOfCheckIn(patchedCheckInForm, actualEntity);
 
-        log.debug("Comparatively copying patched attributes from CheckInDto to CheckInDocument");
+        log.debug("Comparatively copying patched attributes from CheckInDto to CheckInEntity");
         try {
-            dto2DocumentConverter.compareAndMap(patchedCheckInForm, actualDocument);
+            dto2EntityConverter.compareAndMap(patchedCheckInForm, actualEntity);
         } catch (TOABBaseException e) {
             throw (CheckInException) e;
         }
-        log.debug("Comparatively copied patched attributes from CheckInDto to CheckInDocument");
+        log.debug("Comparatively copied patched attributes from CheckInDto to CheckInEntity");
 
-        log.debug("Saving patched CheckInDocument: {}", actualDocument);
-        actualDocument = repository.save(actualDocument);
-        log.debug("Saved patched CheckInDocument: {}", actualDocument);
-        if(actualDocument == null) {
-            log.debug("Unable to patch delete CheckInDocument with id:{}", id);
+        log.debug("Saving patched CheckInEntity: {}", actualEntity);
+        actualEntity = repository.save(actualEntity);
+        log.debug("Saved patched CheckInEntity: {}", actualEntity);
+        if(actualEntity == null) {
+            log.debug("Unable to patch delete CheckInEntity with id:{}", id);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_ACTION_FAILURE,
                     new Object[]{ "patching", "unable to patch currency checkIn details with id:" + id });
         }
-        log.info("Patched CheckInDocument with id:{}", id);
+        log.info("Patched CheckInEntity with id:{}", id);
     }
 
-    private void checkUniquenessOfCheckIn(CheckInDto patchedCheckInForm, CheckInDocument actualDocument) throws CheckInException {
+    private void checkUniquenessOfCheckIn(CheckInDto patchedCheckInForm, CheckInEntity actualEntity) throws CheckInException {
         List<Boolean> similaritySwitchesCollection = new ArrayList<>(2);
         if(patchedCheckInForm.getAccountId().isPresent()) {
-            similaritySwitchesCollection.add(patchedCheckInForm.getAccountId().get().compareTo(actualDocument.getAccountId()) == 0);
+            similaritySwitchesCollection.add(patchedCheckInForm.getAccountId().get().compareTo(actualEntity.getAccountId()) == 0);
         }
         if(patchedCheckInForm.getSequence().isPresent()) {
-            similaritySwitchesCollection.add(patchedCheckInForm.getSequence().get().compareTo(actualDocument.getSequence()) == 0);
+            similaritySwitchesCollection.add(patchedCheckInForm.getSequence().get().compareTo(actualEntity.getSequence()) == 0);
         }
         if(patchedCheckInForm.getTableId().isPresent()) {
-            similaritySwitchesCollection.add(patchedCheckInForm.getTableId().get().compareTo(actualDocument.getTableId()) == 0);
+            similaritySwitchesCollection.add(patchedCheckInForm.getTableId().get().compareTo(actualEntity.getTableId()) == 0);
         }
         if(!similaritySwitchesCollection.isEmpty()) {
-            String accountId = patchedCheckInForm.getAccountId().isPresent() ? patchedCheckInForm.getAccountId().get() : actualDocument.getAccountId();
-            String tableId = patchedCheckInForm.getTableId().isPresent() ? patchedCheckInForm.getTableId().get() : actualDocument.getTableId();
-            Long sequence = patchedCheckInForm.getSequence().isPresent() ? patchedCheckInForm.getSequence().get() : actualDocument.getSequence();
+            String accountId = patchedCheckInForm.getAccountId().isPresent() ? patchedCheckInForm.getAccountId().get() : actualEntity.getAccountId();
+            String tableId = patchedCheckInForm.getTableId().isPresent() ? patchedCheckInForm.getTableId().get() : actualEntity.getTableId();
+            Long sequence = patchedCheckInForm.getSequence().isPresent() ? patchedCheckInForm.getSequence().get() : actualEntity.getSequence();
             log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTENCE_BY_TABLE_ID_AND_ACCOUNT_ID_AND_SEQUENCE.getValue(), tableId, accountId, sequence);
-            boolean sameDocumentSw = similaritySwitchesCollection.stream().allMatch(Boolean::valueOf);
-            boolean duplicateDocumentSw =  repository.existsByAccountIdAndTableIdAndSequence(accountId, tableId, sequence);
-            if(sameDocumentSw || duplicateDocumentSw) {
+            boolean sameEntitySw = similaritySwitchesCollection.stream().allMatch(Boolean::valueOf);
+            boolean duplicateEntitySw =  repository.existsByAccountIdAndTableIdAndSequence(accountId, tableId, sequence);
+            if(sameEntitySw || duplicateEntitySw) {
                 log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTS_BY_TABLE_ID_AND_ACCOUNT_ID_AND_SEQUENCE.getValue(), tableId, accountId, sequence);
                 throw new CheckInException(EngagementErrorCode.ENGAGEMENT_EXISTS, new Object[]{ "tableId: " + tableId,
                         ", accountId: " + accountId + ", sequence: " + sequence });
@@ -581,25 +596,25 @@ public class CheckInServiceImpl implements CheckInService {
         }
     }
 
-    private void checkUniquenessOfCheckIn(CheckInForm checkInForm, CheckInDocument actualDocument) throws CheckInException {
+    private void checkUniquenessOfCheckIn(CheckInForm checkInForm, CheckInEntity actualEntity) throws CheckInException {
         List<Boolean> similaritySwitchesCollection = new ArrayList<>(3);
         if(StringUtils.hasText(StringUtils.trimWhitespace(checkInForm.getAccountId()))) {
-            similaritySwitchesCollection.add(checkInForm.getAccountId().compareTo(actualDocument.getAccountId()) == 0);
+            similaritySwitchesCollection.add(checkInForm.getAccountId().compareTo(actualEntity.getAccountId()) == 0);
         }
         if(!ObjectUtils.isEmpty(checkInForm.getSequence())) {
-            similaritySwitchesCollection.add(checkInForm.getSequence().compareTo(actualDocument.getSequence()) == 0);
+            similaritySwitchesCollection.add(checkInForm.getSequence().compareTo(actualEntity.getSequence()) == 0);
         }
         if(StringUtils.hasText(StringUtils.trimWhitespace(checkInForm.getTableId()))) {
-            similaritySwitchesCollection.add(checkInForm.getTableId().compareTo(actualDocument.getTableId()) == 0);
+            similaritySwitchesCollection.add(checkInForm.getTableId().compareTo(actualEntity.getTableId()) == 0);
         }
         if(!similaritySwitchesCollection.isEmpty()) {
-            String accountId = StringUtils.hasText(StringUtils.trimWhitespace(checkInForm.getAccountId())) ? checkInForm.getAccountId() : actualDocument.getAccountId();
-            Long sequence = !ObjectUtils.isEmpty(checkInForm.getSequence()) ? checkInForm.getSequence() : actualDocument.getSequence();
-            String tableId = StringUtils.hasText(StringUtils.trimWhitespace(checkInForm.getTableId())) ? checkInForm.getTableId() : actualDocument.getTableId();
+            String accountId = StringUtils.hasText(StringUtils.trimWhitespace(checkInForm.getAccountId())) ? checkInForm.getAccountId() : actualEntity.getAccountId();
+            Long sequence = !ObjectUtils.isEmpty(checkInForm.getSequence()) ? checkInForm.getSequence() : actualEntity.getSequence();
+            String tableId = StringUtils.hasText(StringUtils.trimWhitespace(checkInForm.getTableId())) ? checkInForm.getTableId() : actualEntity.getTableId();
             log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTENCE_BY_TABLE_ID_AND_ACCOUNT_ID_AND_SEQUENCE.getValue(), tableId, accountId, sequence);
-            boolean sameDocumentSw = similaritySwitchesCollection.stream().allMatch(Boolean::valueOf);
-            boolean duplicateDocumentSw =  repository.existsByAccountIdAndTableIdAndSequence(accountId, tableId, sequence);
-            if(sameDocumentSw || duplicateDocumentSw) {
+            boolean sameEntitySw = similaritySwitchesCollection.stream().allMatch(Boolean::valueOf);
+            boolean duplicateEntitySw =  repository.existsByAccountIdAndTableIdAndSequence(accountId, tableId, sequence);
+            if(sameEntitySw || duplicateEntitySw) {
                 log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTS_BY_TABLE_ID_AND_ACCOUNT_ID_AND_SEQUENCE.getValue(), tableId, accountId, sequence);
                 throw new CheckInException(EngagementErrorCode.ENGAGEMENT_EXISTS, new Object[]{ "tableId: " + tableId,
                         ", accountId: " + accountId + ", sequence: " + sequence });

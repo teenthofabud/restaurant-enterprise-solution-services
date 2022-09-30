@@ -1,15 +1,12 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.validator;
 
-import com.teenthofabud.restaurant.solution.engagement.category.service.CategoryService;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInForm;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInFormDetails;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInStatus;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInFormParameters;
 import com.teenthofabud.restaurant.solution.engagement.error.EngagementErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
@@ -131,6 +128,6 @@ public abstract class CheckInFormValidator implements Validator {
         this.validate(Optional.of(form.getAttributes()), errors);
     }
 
-    protected abstract void validate(Optional<? extends CheckInFormDetails> optionalCheckInFormDetails, Errors errors);
+    protected abstract void validate(Optional<? extends CheckInFormParameters> optionalCheckInFormParameters, Errors errors);
 
 }

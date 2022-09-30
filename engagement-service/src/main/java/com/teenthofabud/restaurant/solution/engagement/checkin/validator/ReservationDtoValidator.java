@@ -1,7 +1,6 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.validator;
 
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInDto;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInDtoDetails;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInDtoParameters;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.ReservationDto;
 import com.teenthofabud.restaurant.solution.engagement.error.EngagementErrorCode;
 import lombok.extern.slf4j.Slf4j;
@@ -40,12 +39,12 @@ public class ReservationDtoValidator extends CheckInDtoValidator {
     }
 
     @Override
-    protected void validate(Optional<? extends CheckInDtoDetails> optionalCheckInDtoDetails, Errors errors) {
-        if(optionalCheckInDtoDetails.isEmpty()) {
+    protected void validate(Optional<? extends CheckInDtoParameters> optionalCheckInDtoParameters, Errors errors) {
+        if(optionalCheckInDtoParameters.isEmpty()) {
             log.debug("No ReservationDto available");
             return;
         }
-        CheckInDtoDetails target = optionalCheckInDtoDetails.get();
+        CheckInDtoParameters target = optionalCheckInDtoParameters.get();
         ReservationDto dto = (ReservationDto) target;
 
         Optional<String> optDate = dto.getDate();

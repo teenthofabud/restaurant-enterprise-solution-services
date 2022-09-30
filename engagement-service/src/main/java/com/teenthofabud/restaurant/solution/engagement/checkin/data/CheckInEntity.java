@@ -20,7 +20,7 @@ import javax.persistence.*;
 @Inheritance(
         strategy = InheritanceType.JOINED
 )
-public abstract class CheckInEntity extends TOABBaseEntity implements Comparable<CheckInEntity> {
+public class CheckInEntity extends TOABBaseEntity implements Comparable<CheckInEntity> {
 
     public CheckInEntity() {
         this.id = 0l;

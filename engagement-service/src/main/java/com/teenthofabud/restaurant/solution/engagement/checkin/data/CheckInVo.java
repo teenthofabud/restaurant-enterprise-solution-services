@@ -1,13 +1,8 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.data;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.teenthofabud.core.common.data.vo.TOABBaseVo;
-import com.teenthofabud.restaurant.solution.engagement.category.data.CategoryVo;
 import com.teenthofabud.restaurant.solution.engagement.integration.customer.data.AccountVo;
-import com.teenthofabud.restaurant.solution.engagement.integration.establishmentarea.data.TableVo;
 import lombok.*;
 
 @Getter
@@ -17,7 +12,7 @@ import lombok.*;
 @ToString(onlyExplicitlyIncluded = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public abstract class CheckInVo extends TOABBaseVo implements Comparable<CheckInVo> {
+public class CheckInVo extends TOABBaseVo implements Comparable<CheckInVo> {
 
     @EqualsAndHashCode.Include
     @ToString.Include
@@ -45,7 +40,7 @@ public abstract class CheckInVo extends TOABBaseVo implements Comparable<CheckIn
     @ToString.Include
     private String notes;
     @ToString.Include
-    private CheckInVoDetails attributes;
+    private CheckInVoParameters attributes;
 
 
     @Override

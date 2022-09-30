@@ -1,43 +1,46 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.converter;
 
 import com.teenthofabud.core.common.constant.TOABCascadeLevel;
-import com.teenthofabud.core.common.converter.TOABBaseDocument2VoConverter;
+import com.teenthofabud.core.common.converter.TOABBaseEntity2VoConverter;
 import com.teenthofabud.core.common.data.dto.TOABRequestContextHolder;
 import com.teenthofabud.core.common.error.TOABErrorCode;
 import com.teenthofabud.core.common.error.TOABSystemException;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInDocument;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInEntity;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInVo;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInVoParameters;
 import com.teenthofabud.restaurant.solution.engagement.integration.customer.data.AccountVo;
 import com.teenthofabud.restaurant.solution.engagement.integration.customer.proxy.CustomerServiceClient;
-import com.teenthofabud.restaurant.solution.engagement.integration.establishmentarea.data.TableVo;
-import com.teenthofabud.restaurant.solution.engagement.integration.establishmentarea.proxy.EstablishmentAreaServiceClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
-@Component
+
 @Slf4j
-public class CheckInDocument2VoConverter extends TOABBaseDocument2VoConverter<CheckInDocument, CheckInVo> implements Converter<CheckInDocument, CheckInVo> {
+public abstract class CheckInEntity2VoConverter extends TOABBaseEntity2VoConverter<CheckInEntity, CheckInVo> implements Converter<CheckInEntity, CheckInVo> {
 
     private List<String> fieldsToEscape;
-    private EstablishmentAreaServiceClient establishmentAreaServiceClient;
+    //private EstablishmentAreaServiceClient establishmentAreaServiceClient;
     private CustomerServiceClient customerServiceClient;
 
-    @Value("#{'${res.engagement.checkin.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.engagement.checkIn.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }
 
-    @Autowired
+    /*@Autowired
     public void setEstablishmentAreaServiceClient(EstablishmentAreaServiceClient establishmentAreaServiceClient) {
         this.establishmentAreaServiceClient = establishmentAreaServiceClient;
-    }
+    }*/
 
     @Autowired
     public void setCustomerServiceClient(CustomerServiceClient customerServiceClient) {
@@ -45,90 +48,95 @@ public class CheckInDocument2VoConverter extends TOABBaseDocument2VoConverter<Ch
     }
 
     @Override
-    public CheckInVo convert(CheckInDocument document) {
+    public CheckInVo convert(CheckInEntity entity) {
         CheckInVo vo = new CheckInVo();
         if(!fieldsToEscape.contains("id")) {
-            vo.setId(document.getId());
+            vo.setId(entity.getId().toString());
         }
-        if(!fieldsToEscape.contains("name")) {
-            vo.setName(document.getName());
+        /*if(!fieldsToEscape.contains("name")) {
+            vo.setName(entity.getName());
         }
         if(!fieldsToEscape.contains("emailId")) {
-            vo.setEmailId(document.getEmailId());
+            vo.setEmailId(entity.getEmailId());
         }
         if(!fieldsToEscape.contains("phoneNumber")) {
-            vo.setPhoneNumber(document.getPhoneNumber());
-        }
+            vo.setPhoneNumber(entity.getPhoneNumber());
+        }*/
         if(!fieldsToEscape.contains("notes")) {
-            vo.setNotes(document.getNotes());
+            vo.setNotes(entity.getNotes());
         }
-        if(!fieldsToEscape.contains("status")) {
-            vo.setStatus(document.getStatus().get().name());
-        }
+        /*if(!fieldsToEscape.contains("status")) {
+            vo.setStatus(entity.getStatus().get().name());
+        }*/
         if(!fieldsToEscape.contains("noOfPersons")) {
-            vo.setNoOfPersons(document.getNoOfPersons());
+            vo.setNoOfPersons(entity.getNoOfPersons());
         }
         if(!fieldsToEscape.contains("sequence")) {
-            vo.setSequence(document.getSequence());
+            vo.setSequence(entity.getSequence());
         }
-        if(!fieldsToEscape.contains("tableId")) {
-            this.expandSecondLevelFields(document, vo, "tableId");
-        }
+        /*if(!fieldsToEscape.contains("tableId")) {
+            this.expandSecondLevelFields(entity, vo, "tableId");
+        }*/
         if(!fieldsToEscape.contains("accountId")) {
-            this.expandSecondLevelFields(document, vo, "accountId");
+            this.expandSecondLevelFields(entity, vo, "accountId");
         }
-        super.expandAuditFields(document, vo);
-        log.debug("Converted {} to {} ", document, vo);
+        CheckInVoParameters attributes = this.convert(Optional.of(entity));
+        vo.setAttributes(attributes);
+        super.expandAuditFields(entity, vo);
+        log.debug("Converted {} to {} ", entity, vo);
         return vo;
     }
 
-    private void expandSecondLevelFields(CheckInDocument document, CheckInVo vo, String fieldName) {
+    private void expandSecondLevelFields(CheckInEntity entity, CheckInVo vo, String fieldName) {
         TOABCascadeLevel cascadeLevel = TOABRequestContextHolder.getCascadeLevelContext();
         switch(cascadeLevel) {
             case TWO:
                 if(!fieldsToEscape.contains("accountId") && fieldName.compareTo("accountId") == 0) {
-                    Callable<AccountVo> accountDocument2VoConversion = () -> {
-                        AccountVo accountVo = customerServiceClient.getAccountDetailsById(document.getAccountId());
+                    Callable<AccountVo> accountEntity2VoConversion = () -> {
+                        AccountVo accountVo = customerServiceClient.getAccountDetailsById(entity.getAccountId());
                         return accountVo;
                     };
-                    String tName = "accountDocument2VoConversion";
+                    String tName = "accountEntity2VoConversion";
                     ExecutorService executorService = Executors.newFixedThreadPool(1, new CustomizableThreadFactory(tName + "-"));
-                    Future<AccountVo> accountDocument2VoConversionResult = executorService.submit(accountDocument2VoConversion);
+                    Future<AccountVo> accountEntity2VoConversionResult = executorService.submit(accountEntity2VoConversion);
                     try {
-                        AccountVo accountVo = accountDocument2VoConversionResult.get();
+                        AccountVo accountVo = accountEntity2VoConversionResult.get();
                         vo.setAccount(accountVo);
-                        log.debug("Retrieved {} for accountId: {}", accountVo, document.getAccountId());
+                        log.debug("Retrieved {} for accountId: {}", accountVo, entity.getAccountId());
                     } catch (InterruptedException | ExecutionException e) {
                         String msg = "Unable to perform " + tName;
                         log.error(msg, e);
                         throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, msg, new Object[] { tName + " failure: " + e.getMessage() });
                     }
                 }
-                if(!fieldsToEscape.contains("tableId") && fieldName.compareTo("tableId") == 0) {
-                    Callable<TableVo> tableDocument2VoConversion = () -> {
-                        TableVo tableVo = establishmentAreaServiceClient.getTableDetailsById(document.getTableId());
+                /*if(!fieldsToEscape.contains("tableId") && fieldName.compareTo("tableId") == 0) {
+                    Callable<TableVo> tableEntity2VoConversion = () -> {
+                        TableVo tableVo = establishmentAreaServiceClient.getTableDetailsById(entity.getTableId());
                         return tableVo;
                     };
-                    String tName = "tableDocument2VoConversion";
+                    String tName = "tableEntity2VoConversion";
                     ExecutorService executorService = Executors.newFixedThreadPool(1, new CustomizableThreadFactory(tName + "-"));
-                    Future<TableVo> tableDocument2VoConversionResult = executorService.submit(tableDocument2VoConversion);
+                    Future<TableVo> tableEntity2VoConversionResult = executorService.submit(tableEntity2VoConversion);
                     try {
-                        TableVo tableVo = tableDocument2VoConversionResult.get();
+                        TableVo tableVo = tableEntity2VoConversionResult.get();
                         vo.setTable(tableVo);
-                        log.debug("Retrieved {} for tableId: {}", tableVo, document.getTableId());
+                        log.debug("Retrieved {} for tableId: {}", tableVo, entity.getTableId());
                     } catch (InterruptedException | ExecutionException e) {
                         String msg = "Unable to perform " + tName;
                         log.error(msg, e);
                         throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, msg, new Object[] { tName + " failure: " + e.getMessage() });
                     }
-                }
+                }*/
                 break;
             default:
-                vo.setTableId(document.getTableId());
-                vo.setAccountId(document.getAccountId());
-                log.debug("only first level cascaded for booking over tableId and accountId");
+                //vo.setTableId(entity.getTableId());
+                vo.setAccountId(entity.getAccountId());
+                //log.debug("only first level cascaded for booking over tableId");
+                log.debug("only first level cascaded for booking over accountId");
                 break;
         }
     }
+
+    protected abstract CheckInVoParameters convert(Optional<? extends CheckInEntity> optionalCheckInEntityChild);
 
 }

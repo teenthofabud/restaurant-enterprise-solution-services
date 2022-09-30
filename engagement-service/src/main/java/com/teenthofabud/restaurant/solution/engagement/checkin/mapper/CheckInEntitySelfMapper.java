@@ -9,9 +9,8 @@ import org.springframework.util.StringUtils;
 
 import java.util.Optional;
 
-@Component
 @Slf4j
-public class CheckInEntitySelfMapper implements SingleChannelMapper<CheckInEntity> {
+public abstract class CheckInEntitySelfMapper implements SingleChannelMapper<CheckInEntity> {
 
     @Override
     public Optional<CheckInEntity> compareAndMap(CheckInEntity source, CheckInEntity target) {
@@ -41,26 +40,12 @@ public class CheckInEntitySelfMapper implements SingleChannelMapper<CheckInEntit
             changeSW = true;
             log.debug("Source CheckInEntity.accountId is valid");
         }
-        /*if(source.getName() != null && StringUtils.hasText(StringUtils.trimWhitespace(source.getName())) && source.getName().compareTo(target.getName()) != 0) {
-            target.setName(source.getName());
-            changeSW = true;
-            log.debug("Source CheckInEntity.name is valid");
-        }*/
         if(source.getNotes() != null && StringUtils.hasText(StringUtils.trimWhitespace(source.getNotes())) && source.getNotes().compareTo(target.getNotes()) != 0) {
             target.setNotes(source.getNotes());
             changeSW = true;
             log.debug("Source CheckInEntity.notes is valid");
         }
-        /*if(source.getEmailId() != null && StringUtils.hasText(StringUtils.trimWhitespace(source.getEmailId())) && source.getEmailId().compareTo(target.getEmailId()) != 0) {
-            target.setEmailId(source.getEmailId());
-            changeSW = true;
-            log.debug("Source CheckInEntity.emailId is valid");
-        }
-        if(source.getPhoneNumber() != null && StringUtils.hasText(StringUtils.trimWhitespace(source.getPhoneNumber())) && source.getPhoneNumber().compareTo(target.getPhoneNumber()) != 0) {
-            target.setPhoneNumber(source.getPhoneNumber());
-            changeSW = true;
-            log.debug("Source CheckInEntity.phoneNumber is valid");
-        }
+        /*
         if(source.getStatusHistory() != null && !CollectionUtils.isEmpty(source.getStatusHistory()) && !source.getStatusHistory().containsAll(target.getStatusHistory())) {
             target.setStatusHistory(source.getStatusHistory());
             changeSW = true;
@@ -74,4 +59,6 @@ public class CheckInEntitySelfMapper implements SingleChannelMapper<CheckInEntit
             return Optional.empty();
         }
     }
+    public abstract Optional<? extends CheckInEntity> compareAndMap(Optional<? extends CheckInEntity> optionalSource, Optional<? extends CheckInEntity> optionalTarget);
+
 }

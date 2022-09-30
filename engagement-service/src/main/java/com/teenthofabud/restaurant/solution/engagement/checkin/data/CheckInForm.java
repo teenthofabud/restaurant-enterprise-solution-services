@@ -23,7 +23,7 @@ public class CheckInForm {
     private String notes;
 
     private CheckInType type;
-    private CheckInFormDetails attributes;
+    private CheckInFormParameters attributes;
 
 
 }

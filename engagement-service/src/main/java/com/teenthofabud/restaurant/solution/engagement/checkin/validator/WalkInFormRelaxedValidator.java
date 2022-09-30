@@ -1,19 +1,13 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.validator;
 
-import com.teenthofabud.core.common.validator.RelaxedValidator;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInForm;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInFormDetails;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInFormParameters;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.WalkInForm;
 import com.teenthofabud.restaurant.solution.engagement.error.EngagementErrorCode;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
-import org.springframework.validation.Validator;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,13 +24,13 @@ public class WalkInFormRelaxedValidator extends CheckInFormRelaxedValidator  {
     }
 
     @Override
-    public Boolean validateLoosely(Optional<? extends CheckInFormDetails> optionalCheckInFormDetails, Errors errors) {
-        if(optionalCheckInFormDetails.isEmpty()) {
+    public Boolean validateLoosely(Optional<? extends CheckInFormParameters> optionalCheckInFormParameters, Errors errors) {
+        if(optionalCheckInFormParameters.isEmpty()) {
             log.debug("No WalkInForm available");
             return false;
         }
-        CheckInFormDetails checkInFormDetails = optionalCheckInFormDetails.get();
-        WalkInForm form = (WalkInForm) checkInFormDetails;
+        CheckInFormParameters checkInFormParameters = optionalCheckInFormParameters.get();
+        WalkInForm form = (WalkInForm) checkInFormParameters;
         log.debug("WalkInForm is available");
 
         if(!fieldsToEscape.contains("name") && form.getName() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getName()))) {

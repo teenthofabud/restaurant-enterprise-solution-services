@@ -10,7 +10,7 @@ import lombok.*;
 @ToString(onlyExplicitlyIncluded = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class ReservationVo implements CheckInVoDetails {
+public class ReservationVo implements CheckInVoParameters {
 
     @EqualsAndHashCode.Include
     @ToString.Include

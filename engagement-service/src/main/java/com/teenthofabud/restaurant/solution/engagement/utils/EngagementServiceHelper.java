@@ -2,17 +2,11 @@ package com.teenthofabud.restaurant.solution.engagement.utils;
 
 import com.teenthofabud.core.common.error.TOABErrorCode;
 import com.teenthofabud.core.common.error.TOABSystemException;
-import com.teenthofabud.restaurant.solution.engagement.checkin.converter.CheckInDocument2VoConverter;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInDocument;
+import com.teenthofabud.restaurant.solution.engagement.checkin.converter.CheckInEntity2VoConverter;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInEntity;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInVo;
-import com.teenthofabud.restaurant.solution.engagement.engagement.converter.EngagementDocument2VoConverter;
 import com.teenthofabud.restaurant.solution.engagement.engagement.data.EngagementVo;
-import com.teenthofabud.restaurant.solution.engagement.booking.converter.BookingDocument2VoConverter;
-import com.teenthofabud.restaurant.solution.engagement.booking.data.BookingDocument;
 import com.teenthofabud.restaurant.solution.engagement.booking.data.BookingVo;
-import com.teenthofabud.restaurant.solution.engagement.engagement.data.EngagementDocument;
-import com.teenthofabud.restaurant.solution.engagement.category.converter.CategoryDocument2VoConverter;
-import com.teenthofabud.restaurant.solution.engagement.category.data.CategoryDocument;
 import com.teenthofabud.restaurant.solution.engagement.category.data.CategoryVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,109 +19,109 @@ import java.util.List;
 @Component
 public class EngagementServiceHelper {
 
-    private CategoryDocument2VoConverter categoryDocument2VoConverter;
-    private BookingDocument2VoConverter bookingDocument2VoConverter;
-    private CheckInDocument2VoConverter checkInDocument2VoConverter;
-    private EngagementDocument2VoConverter engagementDocument2VoConverter;
+    //private CategoryEntity2VoConverter categoryEntity2VoConverter;
+    //private BookingEntity2VoConverter bookingEntity2VoConverter;
+    private CheckInEntity2VoConverter checkInEntity2VoConverter;
+    //private EngagementEntity2VoConverter engagementEntity2VoConverter;
 
     @Autowired
-    public void setCheckInDocument2VoConverter(CheckInDocument2VoConverter checkInDocument2VoConverter) {
-        this.checkInDocument2VoConverter = checkInDocument2VoConverter;
+    public void setCheckInEntity2VoConverter(CheckInEntity2VoConverter checkInEntity2VoConverter) {
+        this.checkInEntity2VoConverter = checkInEntity2VoConverter;
     }
 
     @Autowired
-    public void setBookingDocument2VoConverter(BookingDocument2VoConverter bookingDocument2VoConverter) {
-        this.bookingDocument2VoConverter = bookingDocument2VoConverter;
+    public void setBookingEntity2VoConverter(BookingEntity2VoConverter bookingEntity2VoConverter) {
+        this.bookingEntity2VoConverter = bookingEntity2VoConverter;
     }
 
     @Autowired
-    public void setCategoryDocument2VoConverter(CategoryDocument2VoConverter categoryDocument2VoConverter) {
-        this.categoryDocument2VoConverter = categoryDocument2VoConverter;
+    public void setCategoryEntity2VoConverter(CategoryEntity2VoConverter categoryEntity2VoConverter) {
+        this.categoryEntity2VoConverter = categoryEntity2VoConverter;
     }
 
     @Autowired
-    public void setEngagementDocument2VoConverter(EngagementDocument2VoConverter engagementDocument2VoConverter) {
-        this.engagementDocument2VoConverter = engagementDocument2VoConverter;
+    public void setEngagementEntity2VoConverter(EngagementEntity2VoConverter engagementEntity2VoConverter) {
+        this.engagementEntity2VoConverter = engagementEntity2VoConverter;
     }
 
-    public List<CategoryVo> categoryDocument2DetailedVo(List<? extends CategoryDocument> categoryDocumentList) throws TOABSystemException {
+    public List<CategoryVo> categoryEntity2DetailedVo(List<? extends CategoryEntity> categoryEntityList) throws TOABSystemException {
         List<CategoryVo> categoryDetailsList = new LinkedList<>();
-        if(categoryDocumentList != null && !categoryDocumentList.isEmpty()) {
-            for(CategoryDocument document : categoryDocumentList) {
-                CategoryVo vo = this.categoryDocument2DetailedVo(document);
+        if(categoryEntityList != null && !categoryEntityList.isEmpty()) {
+            for(CategoryEntity entity : categoryEntityList) {
+                CategoryVo vo = this.categoryEntity2DetailedVo(entity);
                 categoryDetailsList.add(vo);
             }
         }
         return categoryDetailsList;
     }
 
-    public CategoryVo categoryDocument2DetailedVo(CategoryDocument categoryDocument) throws TOABSystemException {
-        if(categoryDocument != null) {
-            CategoryVo vo = categoryDocument2VoConverter.convert(categoryDocument);
-            log.debug("Converting {} to {}", categoryDocument, vo);
+    public CategoryVo categoryEntity2DetailedVo(CategoryEntity categoryEntity) throws TOABSystemException {
+        if(categoryEntity != null) {
+            CategoryVo vo = categoryEntity2VoConverter.convert(categoryEntity);
+            log.debug("Converting {} to {}", categoryEntity, vo);
             return vo;
         }
-        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "category document is null" });
+        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "category entity is null" });
     }
 
-    public List<BookingVo> bookingDocument2DetailedVo(List<? extends BookingDocument> bookingDocumentList) {
+    public List<BookingVo> bookingEntity2DetailedVo(List<? extends BookingEntity> bookingEntityList) {
         List<BookingVo> bookingDetailsList = new LinkedList<>();
-        if(bookingDocumentList != null && !bookingDocumentList.isEmpty()) {
-            for(BookingDocument document : bookingDocumentList) {
-                BookingVo vo = this.bookingDocument2DetailedVo(document);
+        if(bookingEntityList != null && !bookingEntityList.isEmpty()) {
+            for(BookingEntity entity : bookingEntityList) {
+                BookingVo vo = this.bookingEntity2DetailedVo(entity);
                 bookingDetailsList.add(vo);
             }
         }
         return bookingDetailsList;
     }
 
-    public BookingVo bookingDocument2DetailedVo(BookingDocument bookingDocument) {
-        if(bookingDocument != null) {
-            BookingVo vo = bookingDocument2VoConverter.convert(bookingDocument);
-            log.debug("Converting {} to {}", bookingDocument, vo);
+    public BookingVo bookingEntity2DetailedVo(BookingEntity bookingEntity) {
+        if(bookingEntity != null) {
+            BookingVo vo = bookingEntity2VoConverter.convert(bookingEntity);
+            log.debug("Converting {} to {}", bookingEntity, vo);
             return vo;
         }
-        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "booking document is null" });
+        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "booking entity is null" });
     }
 
-    public List<EngagementVo> engagementDocument2DetailedVo(List<? extends EngagementDocument> engagementDocumentList) {
+    public List<EngagementVo> engagementEntity2DetailedVo(List<? extends EngagementEntity> engagementEntityList) {
         List<EngagementVo> engagementDetailsList = new LinkedList<>();
-        if(engagementDocumentList != null && !engagementDocumentList.isEmpty()) {
-            for(EngagementDocument document : engagementDocumentList) {
-                EngagementVo vo = this.engagementDocument2DetailedVo(document);
+        if(engagementEntityList != null && !engagementEntityList.isEmpty()) {
+            for(EngagementEntity entity : engagementEntityList) {
+                EngagementVo vo = this.engagementEntity2DetailedVo(entity);
                 engagementDetailsList.add(vo);
             }
         }
         return engagementDetailsList;
     }
 
-    public EngagementVo engagementDocument2DetailedVo(EngagementDocument engagementDocument) {
-        if(engagementDocument != null) {
-            EngagementVo vo = engagementDocument2VoConverter.convert(engagementDocument);
-            log.debug("Converting {} to {}", engagementDocument, vo);
+    public EngagementVo engagementEntity2DetailedVo(EngagementEntity engagementEntity) {
+        if(engagementEntity != null) {
+            EngagementVo vo = engagementEntity2VoConverter.convert(engagementEntity);
+            log.debug("Converting {} to {}", engagementEntity, vo);
             return vo;
         }
-        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "engagement document is null" });
+        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "engagement entity is null" });
     }
 
-    public List<CheckInVo> checkInDocument2DetailedVo(List<? extends CheckInDocument> checkInDocumentList) {
+    public List<CheckInVo> checkInEntity2DetailedVo(List<? extends CheckInEntity> checkInEntityList) {
         List<CheckInVo> checkInDetailsList = new LinkedList<>();
-        if(checkInDocumentList != null && !checkInDocumentList.isEmpty()) {
-            for(CheckInDocument document : checkInDocumentList) {
-                CheckInVo vo = this.checkInDocument2DetailedVo(document);
+        if(checkInEntityList != null && !checkInEntityList.isEmpty()) {
+            for(CheckInEntity entity : checkInEntityList) {
+                CheckInVo vo = this.checkInEntity2DetailedVo(entity);
                 checkInDetailsList.add(vo);
             }
         }
         return checkInDetailsList;
     }
 
-    public CheckInVo checkInDocument2DetailedVo(CheckInDocument checkInDocument) {
-        if(checkInDocument != null) {
-            CheckInVo vo = checkInDocument2VoConverter.convert(checkInDocument);
-            log.debug("Converting {} to {}", checkInDocument, vo);
+    public CheckInVo checkInEntity2DetailedVo(CheckInEntity checkInEntity) {
+        if(checkInEntity != null) {
+            CheckInVo vo = checkInEntity2VoConverter.convert(checkInEntity);
+            log.debug("Converting {} to {}", checkInEntity, vo);
             return vo;
         }
-        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "checkIn document is null" });
+        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "checkIn entity is null" });
     }
 
 }

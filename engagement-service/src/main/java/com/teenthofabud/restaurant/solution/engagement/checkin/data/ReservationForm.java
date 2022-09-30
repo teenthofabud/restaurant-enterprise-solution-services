@@ -9,7 +9,7 @@ import lombok.*;
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ReservationForm implements CheckInFormDetails {
+public class ReservationForm implements CheckInFormParameters {
 
     private String date;
     private String time;

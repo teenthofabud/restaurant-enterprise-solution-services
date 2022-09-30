@@ -34,7 +34,7 @@ public class CheckInDto {
     @ToString.Include
     private Optional<String> active;
     @ToString.Include
-    private Optional<CheckInDtoDetails> attributes;
+    private Optional<CheckInDtoParameters> attributes;
 
 
     public CheckInDto() {

@@ -1,6 +1,6 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.validator;
 
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInFormDetails;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInFormParameters;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.ReservationForm;
 import com.teenthofabud.restaurant.solution.engagement.error.EngagementErrorCode;
 import lombok.extern.slf4j.Slf4j;
@@ -39,13 +39,13 @@ public class ReservationFormRelaxedValidator extends CheckInFormRelaxedValidator
     }
 
     @Override
-    public Boolean validateLoosely(Optional<? extends CheckInFormDetails> optionalCheckInFormDetails, Errors errors) {
-        if(optionalCheckInFormDetails.isEmpty()) {
+    public Boolean validateLoosely(Optional<? extends CheckInFormParameters> optionalCheckInFormParameters, Errors errors) {
+        if(optionalCheckInFormParameters.isEmpty()) {
             log.debug("No ReservationForm available");
             return false;
         }
-        CheckInFormDetails checkInFormDetails = optionalCheckInFormDetails.get();
-        ReservationForm form = (ReservationForm) checkInFormDetails;
+        CheckInFormParameters checkInFormParameters = optionalCheckInFormParameters.get();
+        ReservationForm form = (ReservationForm) checkInFormParameters;
         log.debug("ReservationForm is available");
 
         if (!fieldsToEscape.contains("date") && form.getDate() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getDate()))) {

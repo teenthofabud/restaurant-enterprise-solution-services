@@ -9,7 +9,7 @@ import lombok.*;
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class WalkInForm implements CheckInFormDetails {
+public class WalkInForm implements CheckInFormParameters {
 
     private String name;
     private String phoneNumber;
