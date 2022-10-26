@@ -11,8 +11,8 @@ import com.teenthofabud.core.common.data.form.PatchOperationForm;
 import com.teenthofabud.core.common.error.TOABBaseException;
 import com.teenthofabud.core.common.error.TOABSystemException;
 import com.teenthofabud.core.common.service.TOABBaseService;
-import com.teenthofabud.restaurant.solution.engagement.category.service.CategoryService;
 import com.teenthofabud.restaurant.solution.engagement.checkin.converter.CheckInDto2EntityConverter;
+import com.teenthofabud.restaurant.solution.engagement.checkin.converter.CheckInEntity2VoConverter;
 import com.teenthofabud.restaurant.solution.engagement.checkin.converter.CheckInForm2EntityConverter;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInEntity;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInDto;
@@ -20,6 +20,7 @@ import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInExcep
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInForm;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInMessageTemplate;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInVo;
+import com.teenthofabud.restaurant.solution.engagement.checkin.factory.CheckInBeanFactory;
 import com.teenthofabud.restaurant.solution.engagement.checkin.mapper.CheckInEntitySelfMapper;
 import com.teenthofabud.restaurant.solution.engagement.checkin.mapper.CheckInForm2EntityMapper;
 import com.teenthofabud.restaurant.solution.engagement.checkin.repository.CheckInRepository;
@@ -27,15 +28,13 @@ import com.teenthofabud.restaurant.solution.engagement.checkin.service.CheckInSe
 import com.teenthofabud.restaurant.solution.engagement.checkin.validator.CheckInDtoValidator;
 import com.teenthofabud.restaurant.solution.engagement.checkin.validator.CheckInFormRelaxedValidator;
 import com.teenthofabud.restaurant.solution.engagement.checkin.validator.CheckInFormValidator;
-import com.teenthofabud.restaurant.solution.engagement.error.EngagementErrorCode;
-import com.teenthofabud.restaurant.solution.engagement.integration.customer.validator.AccountIdValidator;
+import com.teenthofabud.restaurant.solution.engagement.constants.EngagementErrorCode;
 import com.teenthofabud.restaurant.solution.engagement.utils.EngagementServiceHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.DirectFieldBindingResult;
@@ -58,38 +57,25 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
-@Component
 @Slf4j
-public class CheckInServiceImpl implements CheckInService {
+public abstract class CheckInServiceImpl<A extends CheckInFormValidator, B extends CheckInFormRelaxedValidator, C extends CheckInDtoValidator, D extends CheckInRepository,
+        E extends CheckInEntitySelfMapper, F extends CheckInForm2EntityMapper, G extends CheckInForm2EntityConverter,
+        H extends CheckInEntity2VoConverter, I extends CheckInDto2EntityConverter> implements CheckInService<CheckInForm, CheckInVo> {
 
-    private static final Comparator<CheckInVo> CMP_BY_TABLE_TOKEN_ACCOUNT = (s1, s2) -> {
-       int c1 = s1.getTableId().compareTo(s2.getTableId());
+    private static final Comparator<CheckInVo> CMP_BY_ACCOUNT_SEQUENCE = (s1, s2) -> {
+       int c1 = s1.getAccountId().compareTo(s2.getAccountId());
        if(c1 == 0) {
            int c2 = s1.getSequence().compareTo(s2.getSequence());
-           if(c2 == 0) {
-               int c3 = s1.getAccountId().compareTo(s2.getAccountId());
-               return c3;
-           } else {
-               return c2;
-           }
+           return c2;
        } else {
            return c1;
        }
     };
 
-    private CheckInForm2EntityConverter form2EntityConverter;
-    private CheckInDto2EntityConverter dto2EntityConverter;
-    private CheckInForm2EntityMapper form2EntityMapper;
-    private CheckInEntitySelfMapper entitySelfMapper;
-    private CheckInFormValidator formValidator;
-    private CheckInFormRelaxedValidator relaxedFormValidator;
-    private CheckInDtoValidator dtoValidator;
-    private CheckInRepository repository;
     private TOABBaseService toabBaseService;
     private ObjectMapper om;
-    private EngagementServiceHelper engagementServiceHelper;
-    private CategoryService categoryService;
-    private AccountIdValidator accountIdValidator;
+    protected EngagementServiceHelper engagementServiceHelper;
+    protected CheckInBeanFactory checkInBeanFactory;
     private String checkInTimeFormat;
 
     @Value("${res.engagement.checkIn.timestamp}")
@@ -98,47 +84,12 @@ public class CheckInServiceImpl implements CheckInService {
     }
 
     @Autowired
-    public void setAccountIdValidator(AccountIdValidator accountIdValidator) {
-        this.accountIdValidator = accountIdValidator;
-    }
-
-    @Autowired
     public void setEngagementServiceHelper(EngagementServiceHelper engagementServiceHelper) {
         this.engagementServiceHelper = engagementServiceHelper;
     }
 
     @Autowired
-    public void setCategoryService(CategoryService categoryService) {
-        this.categoryService = categoryService;
-    }
-
-    @Autowired
     public void setToabBaseService(TOABBaseService toabBaseService) {
-        this.toabBaseService = toabBaseService;
-    }
-
-    @Autowired
-    public void setDto2EntityConverter(CheckInDto2EntityConverter dto2EntityConverter) {
-        this.dto2EntityConverter = dto2EntityConverter;
-    }
-
-    @Autowired
-    public void setForm2EntityMapper(CheckInForm2EntityMapper form2EntityMapper) {
-        this.form2EntityMapper = form2EntityMapper;
-    }
-
-    @Autowired
-    public void setEntitySelfMapper(CheckInEntitySelfMapper entitySelfMapper) {
-        this.entitySelfMapper = entitySelfMapper;
-    }
-
-    @Autowired
-    public void setRelaxedFormValidator(CheckInFormRelaxedValidator relaxedFormValidator) {
-        this.relaxedFormValidator = relaxedFormValidator;
-    }
-
-    @Autowired
-    public void setPatchCheckInValidator(TOABBaseService toabBaseService) {
         this.toabBaseService = toabBaseService;
     }
 
@@ -148,27 +99,12 @@ public class CheckInServiceImpl implements CheckInService {
     }
 
     @Autowired
-    public void setDtoValidator(CheckInDtoValidator dtoValidator) {
-        this.dtoValidator = dtoValidator;
+    public void setCheckInBeanFactory(CheckInBeanFactory checkInBeanFactory) {
+        this.checkInBeanFactory = checkInBeanFactory;
     }
 
-    @Autowired
-    public void setForm2EntityConverter(CheckInForm2EntityConverter form2EntityConverter) {
-        this.form2EntityConverter = form2EntityConverter;
-    }
-
-    @Autowired
-    public void setRepository(CheckInRepository repository) {
-        this.repository = repository;
-    }
-
-    @Autowired
-    public void setFormValidator(CheckInFormValidator formValidator) {
-        this.formValidator = formValidator;
-    }
-
-    private Long parseCheckInId(String id) throws CheckInException {
-        Long checkInId = null;
+    private Long parsePK(String id) throws CheckInException {
+        Long checkInId = -1L;
         try {
             checkInId = Long.parseLong(id);
             log.debug("Parsed id {} to checkIn id {} in numeric format", id, checkInId);
@@ -186,9 +122,9 @@ public class CheckInServiceImpl implements CheckInService {
     @Override
     public Set<CheckInVo> retrieveAllByNaturalOrdering() {
         log.info("Requesting all CheckInEntity by their natural ordering");
-        List<CheckInEntity> checkInEntityList = repository.findAll();
+        List<CheckInEntity> checkInEntityList = this.getCheckInRepository().findAll();
         List<CheckInVo> checkInVoList = engagementServiceHelper.checkInEntity2DetailedVo(checkInEntityList);
-        Set<CheckInVo> naturallyOrderedSet = new TreeSet<>(CMP_BY_TABLE_TOKEN_ACCOUNT);
+        Set<CheckInVo> naturallyOrderedSet = new TreeSet<>(CMP_BY_ACCOUNT_SEQUENCE);
         naturallyOrderedSet.addAll(checkInVoList);
         log.info("{} CheckInVo available", naturallyOrderedSet.size());
         return naturallyOrderedSet;
@@ -197,7 +133,8 @@ public class CheckInServiceImpl implements CheckInService {
     @Override
     public CheckInVo retrieveDetailsById(String id, Optional<TOABCascadeLevel> optionalCascadeLevel) throws CheckInException {
         log.info("Requesting CheckInEntity by id: {}", id);
-        Optional<CheckInEntity> optEntity = repository.findById(id);
+        Long idL = this.parsePK(id);
+        Optional<CheckInEntity> optEntity = this.getCheckInRepository().findById(idL);
         if(optEntity.isEmpty()) {
             log.debug("No CheckInEntity found by id: {}", id);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
@@ -211,35 +148,15 @@ public class CheckInServiceImpl implements CheckInService {
         TOABRequestContextHolder.clearCascadeLevelContext();
         return vo;
     }
-
     @Override
-    public List<CheckInVo> retrieveAllMatchingCheckInDetailsByCriteria(Optional<String> optionalAccountId, Optional<String> optionalSequence, Optional<String> optionalNotes) throws CheckInException {
-        return null;
-    }
-
-    @Override
-    public List<CheckInVo> retrieveAllMatchingWalkInDetailsByCriteria(Optional<String> optionalName, Optional<String> optionalPhoneNumber, Optional<String> optionalEmailId) throws CheckInException {
-        return null;
-    }
-
-    @Override
-    public List<CheckInVo> retrieveAllMatchingReservationDetailsByCriteria(Optional<String> optionalDate, Optional<String> optionalTime) throws CheckInException {
-        return null;
-    }
-
-    @Override
-    public List<CheckInVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalAccountId, Optional<String> optionalTableId, Optional<String> optionalName, Optional<String> optionalPhoneNumber, Optional<String> optionalEmailId, Optional<String> optionalNotes) throws CheckInException {
-        if(optionalAccountId.isEmpty() && optionalTableId.isEmpty() && optionalPhoneNumber.isEmpty() && optionalName.isEmpty() && optionalEmailId.isEmpty() && optionalNotes.isEmpty()) {
+    public List<CheckInVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalAccountId, Optional<String> optionalSequence, Optional<String> optionalNotes) throws CheckInException {
+        if(optionalAccountId.isEmpty() && optionalSequence.isEmpty() && optionalNotes.isEmpty()) {
             log.debug("No search parameters provided");
         }
         String accountId = optionalAccountId.isPresent() ? optionalAccountId.get() : "";
-        String tableId = optionalTableId.isPresent() ? optionalTableId.get() : "";
-        String phoneNumber = optionalPhoneNumber.isPresent() ? optionalPhoneNumber.get() : "";
-        String name = optionalName.isPresent() ? optionalName.get() : "";
-        String emailId = optionalEmailId.isPresent() ? optionalEmailId.get() : "";
+        String sequence = optionalSequence.isPresent() ? optionalSequence.get() : "";
         String notes = optionalNotes.isPresent() ? optionalNotes.get() : "";
-        if(StringUtils.isEmpty(StringUtils.trimWhitespace(accountId)) && StringUtils.isEmpty(StringUtils.trimWhitespace(tableId)) && StringUtils.isEmpty(StringUtils.trimWhitespace(phoneNumber))
-                && StringUtils.isEmpty(StringUtils.trimWhitespace(name)) && StringUtils.isEmpty(StringUtils.trimWhitespace(emailId)) && StringUtils.isEmpty(StringUtils.trimWhitespace(notes))) {
+        if(StringUtils.isEmpty(StringUtils.trimWhitespace(accountId)) && StringUtils.isEmpty(StringUtils.trimWhitespace(sequence)) && StringUtils.isEmpty(StringUtils.trimWhitespace(notes))) {
             log.debug("All search parameters are empty");
         }
         List<CheckInVo> matchedCheckInList = new LinkedList<>();
@@ -252,29 +169,11 @@ public class CheckInServiceImpl implements CheckInService {
             entity.setAccountId(accountId);
             matcherCriteria = matcherCriteria.withMatcher("accountId", match -> match.exact());
         }
-        if(StringUtils.hasText(StringUtils.trimWhitespace(tableId))) {
-            log.debug("tableId {} is valid", tableId);
-            providedFilters.put("tableId", tableId);
-            entity.setTableId(tableId);
-            matcherCriteria = matcherCriteria.withMatcher("tableId", match -> match.exact());
-        }
-        if(StringUtils.hasText(StringUtils.trimWhitespace(name))) {
-            log.debug("name {} is valid", accountId);
-            providedFilters.put("name", accountId);
-            entity.setName(name);
-            matcherCriteria = matcherCriteria.withMatcher("name", match -> match.exact());
-        }
-        if(StringUtils.hasText(StringUtils.trimWhitespace(phoneNumber))) {
-            log.debug("phoneNumber {} is valid", accountId);
-            providedFilters.put("phoneNumber", accountId);
-            entity.setPhoneNumber(phoneNumber);
-            matcherCriteria = matcherCriteria.withMatcher("phoneNumber", match -> match.exact());
-        }
-        if(StringUtils.hasText(StringUtils.trimWhitespace(emailId))) {
-            log.debug("emailId {} is valid", accountId);
-            providedFilters.put("emailId", accountId);
-            entity.setPhoneNumber(emailId);
-            matcherCriteria = matcherCriteria.withMatcher("emailId", match -> match.exact());
+        if(StringUtils.hasText(StringUtils.trimWhitespace(sequence))) {
+            log.debug("sequence {} is valid", accountId);
+            providedFilters.put("sequence", accountId);
+            entity.setSequence(sequence);
+            matcherCriteria = matcherCriteria.withMatcher("sequence", match -> match.exact());
         }
         if(StringUtils.hasText(StringUtils.trimWhitespace(notes))) {
             log.debug("notes {} is valid", accountId);
@@ -288,7 +187,7 @@ public class CheckInServiceImpl implements CheckInService {
             log.debug("search parameters {} are valid", providedFilters);
         }
         Example<CheckInEntity> checkInEntityExample = Example.of(entity, matcherCriteria);
-        List<CheckInEntity> checkInEntityList = repository.findAll(checkInEntityExample);
+        List<CheckInEntity> checkInEntityList = this.getCheckInRepository().findAll(checkInEntityExample);
         matchedCheckInList = engagementServiceHelper.checkInEntity2DetailedVo(checkInEntityList);
         log.info("Found {} CheckInVo matching with provided parameters : {}", matchedCheckInList.size(), providedFilters);
         log.info("No CheckInVo available matching with provided parameters : {}", matchedCheckInList.size(), providedFilters);
@@ -307,21 +206,21 @@ public class CheckInServiceImpl implements CheckInService {
             seq = Long.parseLong(sequence);
         } catch (NumberFormatException e) {
             log.debug("Sequence: {} format is invalid", sequence);
-            throw new CheckInException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID, new Object[] { "sequece", sequence });
+            throw new CheckInException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID, new Object[] { "sequence", sequence });
         }
 
         try {
             dt = LocalDate.parse(date, dtf);
         } catch (DateTimeParseException e) {
             log.debug("Date: {} format is invalid", sequence);
-            throw new CheckInException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID, new Object[] { "sequece", sequence });
+            throw new CheckInException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID, new Object[] { "sequence", sequence });
         }
 
         start = LocalDateTime.of(dt, LocalTime.of(0,0, 0));
         end = LocalDateTime.of(dt, LocalTime.of(23,59, 59));
 
         log.info("Requesting CheckInEntity by sequence: {} between timestamps: {} and {}", seq, start, end);
-        Optional<CheckInEntity> optEntity = repository.findBySequenceAndCreatedOnBetween(seq, start, end);
+        Optional<CheckInEntity> optEntity = this.getCheckInRepository().findBySequenceAndCreatedOnBetween(seq, start, end);
         if(optEntity.isEmpty()) {
             log.debug("No CheckInEntity found by sequence: {} between timestamps: {} and {}", seq, start, end);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "seq: " + seq, ", date: " + date });
@@ -345,7 +244,7 @@ public class CheckInServiceImpl implements CheckInService {
 
         log.debug("Validating provided attributes of CheckInForm");
         Errors err = new DirectFieldBindingResult(form, form.getClass().getSimpleName());
-        formValidator.validate(form, err);
+        this.getCheckInFormValidator().validate(form, err);
         if(err.hasErrors()) {
             log.debug("CheckInForm has {} errors", err.getErrorCount());
             EngagementErrorCode ec = EngagementErrorCode.valueOf(err.getFieldError().getCode());
@@ -354,20 +253,19 @@ public class CheckInServiceImpl implements CheckInService {
         }
         log.debug("All attributes of CheckInForm are valid");
 
-        CheckInEntity expectedEntity = form2EntityConverter.convert(form);
+        CheckInEntity expectedEntity = this.getCheckInForm2EntityConverter().convert(form);
 
-        log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTENCE_BY_TABLE_ID_AND_ACCOUNT_ID_AND_SEQUENCE.getValue(), form.getTableId(), form.getAccountId(), form.getSequence());
-        if(repository.existsByAccountIdAndTableIdAndSequence(expectedEntity.getAccountId(), expectedEntity.getTableId(), expectedEntity.getSequence())) {
-            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTS_BY_TABLE_ID_AND_ACCOUNT_ID_AND_SEQUENCE.getValue(),
-                    expectedEntity.getTableId(), expectedEntity.getAccountId(), expectedEntity.getSequence());
+        log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE.getValue(), form.getAccountId(), form.getSequence());
+        if(this.getCheckInRepository().existsByAccountIdAndSequence(expectedEntity.getAccountId(), expectedEntity.getSequence())) {
+            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTS_BY_ACCOUNT_ID_AND_SEQUENCE.getValue(),
+                    expectedEntity.getAccountId(), expectedEntity.getSequence());
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_EXISTS,
-                    new Object[]{ "tableId: " + form.getTableId(), "accountId: " + form.getAccountId() + ", sequence: " + form.getSequence() });
+                    new Object[]{"accountId: " + form.getAccountId(), "sequence: " + form.getSequence() });
         }
-        log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_NON_EXISTENCE_BY_TABLE_ID_AND_ACCOUNT_ID_AND_SEQUENCE.getValue(), expectedEntity.getTableId(), expectedEntity.getAccountId(),
-                expectedEntity.getSequence());
+        log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_NON_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE.getValue(), expectedEntity.getAccountId(), expectedEntity.getSequence());
 
         log.debug("Saving {}", expectedEntity);
-        CheckInEntity actualEntity = repository.save(expectedEntity);
+        CheckInEntity actualEntity = (CheckInEntity) this.getCheckInRepository().save(expectedEntity);
         log.debug("Saved {}", actualEntity);
 
         if(actualEntity == null) {
@@ -384,7 +282,8 @@ public class CheckInServiceImpl implements CheckInService {
         log.info("Updating CheckInForm by id: {}", id);
 
         log.debug(CheckInMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_CHECKIN_ENTITY_ID.getValue(), id);
-        Optional<CheckInEntity> optActualEntity = repository.findById(id);
+        Long idL = this.parsePK(id);
+        Optional<CheckInEntity> optActualEntity = this.getCheckInRepository().findById(idL);
         if(optActualEntity.isEmpty()) {
             log.debug(CheckInMessageTemplate.MSG_TEMPLATE_NO_CHECKIN_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
@@ -406,7 +305,7 @@ public class CheckInServiceImpl implements CheckInService {
 
         log.debug("Validating provided attributes of CheckInForm");
         Errors err = new DirectFieldBindingResult(form, form.getClass().getSimpleName());
-        Boolean allEmpty = relaxedFormValidator.validateLoosely(form, err);
+        Boolean allEmpty = this.getCheckInFormRelaxedValidator().validateLoosely(form, err);
         if(err.hasErrors()) {
             log.debug("CheckInForm has {} errors", err.getErrorCount());
             EngagementErrorCode ec = EngagementErrorCode.valueOf(err.getFieldError().getCode());
@@ -418,7 +317,7 @@ public class CheckInServiceImpl implements CheckInService {
         }
         log.debug("All attributes of CheckInForm are valid");
 
-        Optional<CheckInEntity> optExpectedEntity = form2EntityMapper.compareAndMap(actualEntity, form);
+        Optional<CheckInEntity> optExpectedEntity = this.getCheckInForm2EntityMapper().compareAndMap(actualEntity, form);
         if(optExpectedEntity.isEmpty()) {
             log.debug("No new value for attributes of CheckInForm");
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are expected with new values" });
@@ -429,12 +328,12 @@ public class CheckInServiceImpl implements CheckInService {
 
         this.checkUniquenessOfCheckIn(form, actualEntity);
 
-        entitySelfMapper.compareAndMap(expectedEntity, actualEntity);
+        this.getCheckInEntitySelfMapper().compareAndMap(expectedEntity, actualEntity);
         log.debug("Compared and copied attributes from CheckInEntity to CheckInForm");
         actualEntity.setModifiedOn(LocalDateTime.now(ZoneOffset.UTC));
 
         log.debug("Updating: {}", actualEntity);
-        actualEntity = repository.save(actualEntity);
+        actualEntity = (CheckInEntity) this.getCheckInRepository().save(actualEntity);
         log.debug("Updated: {}", actualEntity);
         if(actualEntity == null) {
             log.debug("Unable to update {}", actualEntity);
@@ -449,7 +348,8 @@ public class CheckInServiceImpl implements CheckInService {
         log.info("Soft deleting CheckInEntity by id: {}", id);
 
         log.debug(CheckInMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_CHECKIN_ENTITY_ID.getValue(), id);
-        Optional<CheckInEntity> optEntity = repository.findById(id);
+        Long idL = this.parsePK(id);
+        Optional<CheckInEntity> optEntity = this.getCheckInRepository().findById(idL);
         if(optEntity.isEmpty()) {
             log.debug(CheckInMessageTemplate.MSG_TEMPLATE_NO_CHECKIN_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
@@ -466,7 +366,7 @@ public class CheckInServiceImpl implements CheckInService {
         actualEntity.setActive(Boolean.FALSE);
         actualEntity.setModifiedOn(LocalDateTime.now(ZoneOffset.UTC));
         log.debug("Soft deleting: {}", actualEntity);
-        CheckInEntity expectedEntity = repository.save(actualEntity);
+        CheckInEntity expectedEntity = (CheckInEntity) this.getCheckInRepository().save(actualEntity);
         log.debug("Soft deleted: {}", expectedEntity);
         if(expectedEntity == null) {
             log.debug("Unable to soft delete {}", actualEntity);
@@ -482,7 +382,8 @@ public class CheckInServiceImpl implements CheckInService {
         log.info("Patching CheckInEntity by id: {}", id);
 
         log.debug(CheckInMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_CHECKIN_ENTITY_ID.getValue(), id);
-        Optional<CheckInEntity> optActualEntity = repository.findById(id);
+        Long idL = this.parsePK(id);
+        Optional<CheckInEntity> optActualEntity = this.getCheckInRepository().findById(idL);
         if(optActualEntity.isEmpty()) {
             log.debug(CheckInMessageTemplate.MSG_TEMPLATE_NO_CHECKIN_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
@@ -538,7 +439,7 @@ public class CheckInServiceImpl implements CheckInService {
 
         log.debug("Validating patched CheckInDto");
         Errors err = new DirectFieldBindingResult(patchedCheckInForm, patchedCheckInForm.getClass().getSimpleName());
-        dtoValidator.validate(patchedCheckInForm, err);
+        this.getCheckInDtoValidator().validate(patchedCheckInForm, err);
         if(err.hasErrors()) {
             log.debug("Patched CheckInDto has {} errors", err.getErrorCount());
             EngagementErrorCode ec = EngagementErrorCode.valueOf(err.getFieldError().getCode());
@@ -551,14 +452,14 @@ public class CheckInServiceImpl implements CheckInService {
 
         log.debug("Comparatively copying patched attributes from CheckInDto to CheckInEntity");
         try {
-            dto2EntityConverter.compareAndMap(patchedCheckInForm, actualEntity);
+            this.getCheckInDto2EntityConverter().compareAndMap(patchedCheckInForm, actualEntity);
         } catch (TOABBaseException e) {
             throw (CheckInException) e;
         }
         log.debug("Comparatively copied patched attributes from CheckInDto to CheckInEntity");
 
         log.debug("Saving patched CheckInEntity: {}", actualEntity);
-        actualEntity = repository.save(actualEntity);
+        actualEntity = (CheckInEntity) this.getCheckInRepository().save(actualEntity);
         log.debug("Saved patched CheckInEntity: {}", actualEntity);
         if(actualEntity == null) {
             log.debug("Unable to patch delete CheckInEntity with id:{}", id);
@@ -576,22 +477,17 @@ public class CheckInServiceImpl implements CheckInService {
         if(patchedCheckInForm.getSequence().isPresent()) {
             similaritySwitchesCollection.add(patchedCheckInForm.getSequence().get().compareTo(actualEntity.getSequence()) == 0);
         }
-        if(patchedCheckInForm.getTableId().isPresent()) {
-            similaritySwitchesCollection.add(patchedCheckInForm.getTableId().get().compareTo(actualEntity.getTableId()) == 0);
-        }
         if(!similaritySwitchesCollection.isEmpty()) {
             String accountId = patchedCheckInForm.getAccountId().isPresent() ? patchedCheckInForm.getAccountId().get() : actualEntity.getAccountId();
-            String tableId = patchedCheckInForm.getTableId().isPresent() ? patchedCheckInForm.getTableId().get() : actualEntity.getTableId();
-            Long sequence = patchedCheckInForm.getSequence().isPresent() ? patchedCheckInForm.getSequence().get() : actualEntity.getSequence();
-            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTENCE_BY_TABLE_ID_AND_ACCOUNT_ID_AND_SEQUENCE.getValue(), tableId, accountId, sequence);
+            String sequence = patchedCheckInForm.getSequence().isPresent() ? patchedCheckInForm.getSequence().get() : actualEntity.getSequence();
+            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE.getValue(), accountId, sequence);
             boolean sameEntitySw = similaritySwitchesCollection.stream().allMatch(Boolean::valueOf);
-            boolean duplicateEntitySw =  repository.existsByAccountIdAndTableIdAndSequence(accountId, tableId, sequence);
+            boolean duplicateEntitySw =  this.getCheckInRepository().existsByAccountIdAndSequence(accountId, sequence);
             if(sameEntitySw || duplicateEntitySw) {
-                log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTS_BY_TABLE_ID_AND_ACCOUNT_ID_AND_SEQUENCE.getValue(), tableId, accountId, sequence);
-                throw new CheckInException(EngagementErrorCode.ENGAGEMENT_EXISTS, new Object[]{ "tableId: " + tableId,
-                        ", accountId: " + accountId + ", sequence: " + sequence });
+                log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTS_BY_ACCOUNT_ID_AND_SEQUENCE.getValue(), accountId, sequence);
+                throw new CheckInException(EngagementErrorCode.ENGAGEMENT_EXISTS, new Object[]{ "accountId: " + accountId, "sequence: " + sequence });
             }
-            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_NON_EXISTENCE_BY_TABLE_ID_AND_ACCOUNT_ID_AND_SEQUENCE.getValue(), tableId, accountId, sequence);
+            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_NON_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE.getValue(), accountId, sequence);
 
         }
     }
@@ -604,24 +500,29 @@ public class CheckInServiceImpl implements CheckInService {
         if(!ObjectUtils.isEmpty(checkInForm.getSequence())) {
             similaritySwitchesCollection.add(checkInForm.getSequence().compareTo(actualEntity.getSequence()) == 0);
         }
-        if(StringUtils.hasText(StringUtils.trimWhitespace(checkInForm.getTableId()))) {
-            similaritySwitchesCollection.add(checkInForm.getTableId().compareTo(actualEntity.getTableId()) == 0);
-        }
         if(!similaritySwitchesCollection.isEmpty()) {
             String accountId = StringUtils.hasText(StringUtils.trimWhitespace(checkInForm.getAccountId())) ? checkInForm.getAccountId() : actualEntity.getAccountId();
-            Long sequence = !ObjectUtils.isEmpty(checkInForm.getSequence()) ? checkInForm.getSequence() : actualEntity.getSequence();
-            String tableId = StringUtils.hasText(StringUtils.trimWhitespace(checkInForm.getTableId())) ? checkInForm.getTableId() : actualEntity.getTableId();
-            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTENCE_BY_TABLE_ID_AND_ACCOUNT_ID_AND_SEQUENCE.getValue(), tableId, accountId, sequence);
+            String sequence = !ObjectUtils.isEmpty(checkInForm.getSequence()) ? checkInForm.getSequence() : actualEntity.getSequence();
+            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE.getValue(), accountId, sequence);
             boolean sameEntitySw = similaritySwitchesCollection.stream().allMatch(Boolean::valueOf);
-            boolean duplicateEntitySw =  repository.existsByAccountIdAndTableIdAndSequence(accountId, tableId, sequence);
+            boolean duplicateEntitySw =  this.getCheckInRepository().existsByAccountIdAndSequence(accountId, sequence);
             if(sameEntitySw || duplicateEntitySw) {
-                log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTS_BY_TABLE_ID_AND_ACCOUNT_ID_AND_SEQUENCE.getValue(), tableId, accountId, sequence);
-                throw new CheckInException(EngagementErrorCode.ENGAGEMENT_EXISTS, new Object[]{ "tableId: " + tableId,
-                        ", accountId: " + accountId + ", sequence: " + sequence });
+                log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTS_BY_ACCOUNT_ID_AND_SEQUENCE.getValue(), accountId, sequence);
+                throw new CheckInException(EngagementErrorCode.ENGAGEMENT_EXISTS, new Object[]{ "accountId: " + accountId, "sequence: " + sequence });
             }
-            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_NON_EXISTENCE_BY_TABLE_ID_AND_ACCOUNT_ID_AND_SEQUENCE.getValue(), tableId, accountId, sequence);
+            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_NON_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE.getValue(), accountId, sequence);
 
         }
     }
+
+    public abstract A getCheckInFormValidator();
+    public abstract B getCheckInFormRelaxedValidator();
+    public abstract C getCheckInDtoValidator();
+    public abstract D getCheckInRepository();
+    public abstract E getCheckInEntitySelfMapper();
+    public abstract F getCheckInForm2EntityMapper();
+    public abstract G getCheckInForm2EntityConverter();
+    public abstract H getCheckInEntity2VoConverter();
+    public abstract I getCheckInDto2EntityConverter();
     
 }

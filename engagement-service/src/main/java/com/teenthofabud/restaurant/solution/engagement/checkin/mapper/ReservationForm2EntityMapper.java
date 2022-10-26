@@ -1,9 +1,6 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.mapper;
 
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInEntity;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInForm;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.ReservationEntity;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.ReservationForm;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -17,7 +14,7 @@ import java.util.Optional;
 
 @Component
 @Slf4j
-public class ReservationForm2EntityMapper extends CheckInForm2EntityMapper {
+public class ReservationForm2EntityMapper extends CheckInForm2EntityMapper<ReservationEntity, ReservationForm> {
 
     private List<String> fieldsToEscape;
     private String reservationTimeFormat;
@@ -39,24 +36,23 @@ public class ReservationForm2EntityMapper extends CheckInForm2EntityMapper {
     }
 
     @Override
-    public Optional<? extends CheckInEntity> compareAndMap(Optional<? extends CheckInEntity> optionalCheckInEntityChild, CheckInForm form) {
-        ReservationEntity actualEntity = (ReservationEntity) optionalCheckInEntityChild.get();
-        ReservationForm checkInFormParameters = (ReservationForm) form.getAttributes();
+    protected Optional<CheckInEntity> compareAndMap(CheckInEntity parent, ReservationEntity checkInEntityChild, ReservationForm checkInFormChild) {
+        ReservationEntity actualEntity = checkInEntityChild;
+        ReservationForm form = checkInFormChild;
         boolean changeSW = false;
-        // direct copy of common attributes handled in parent
-        Optional<CheckInEntity> expectedParentEntity = super.compareAndMap(actualEntity, form);
-        ReservationEntity expectedEntity = expectedParentEntity.isPresent() ? (ReservationEntity) expectedParentEntity.get() : new ReservationEntity();
+
+        ReservationEntity expectedEntity = new ReservationEntity(parent);
         // direct copy
         expectedEntity.setId(actualEntity.getId());
         log.debug("Directly copying ReservationEntity.id: {} from actualEntity to expectedEntity", actualEntity.getId());
 
 
-        if(!fieldsToEscape.contains("date") && StringUtils.hasText(StringUtils.trimWhitespace(checkInFormParameters.getDate()))) {
-            LocalDate date = LocalDate.parse(checkInFormParameters.getDate(), DateTimeFormatter.ofPattern(reservationDateFormat));
+        if(!fieldsToEscape.contains("date") && StringUtils.hasText(StringUtils.trimWhitespace(form.getDate()))) {
+            LocalDate date = LocalDate.parse(form.getDate(), DateTimeFormatter.ofPattern(reservationDateFormat));
             if(date.compareTo(actualEntity.getDate()) != 0) {
                 expectedEntity.setDate(date);
                 changeSW = true;
-                log.debug("ReservationForm.date: {} is different as ReservationEntity.date: {}", checkInFormParameters.getDate(), actualEntity.getDate());
+                log.debug("ReservationForm.date: {} is different as ReservationEntity.date: {}", form.getDate(), actualEntity.getDate());
             } else {
                 expectedEntity.setDate(actualEntity.getDate());
                 log.debug("ReservationForm.date: is unchanged");
@@ -66,12 +62,12 @@ public class ReservationForm2EntityMapper extends CheckInForm2EntityMapper {
             log.debug("ReservationForm.date: is unchanged");
         }
 
-        if(!fieldsToEscape.contains("time") && StringUtils.hasText(StringUtils.trimWhitespace(checkInFormParameters.getTime()))) {
-            LocalTime time = LocalTime.parse(checkInFormParameters.getDate(), DateTimeFormatter.ofPattern(reservationTimeFormat));
+        if(!fieldsToEscape.contains("time") && StringUtils.hasText(StringUtils.trimWhitespace(form.getTime()))) {
+            LocalTime time = LocalTime.parse(form.getDate(), DateTimeFormatter.ofPattern(reservationTimeFormat));
             if(time.compareTo(actualEntity.getTime()) != 0) {
                 expectedEntity.setTime(time);
                 changeSW = true;
-                log.debug("ReservationForm.time: {} is different as ReservationEntity.time: {}", checkInFormParameters.getTime(), actualEntity.getTime());
+                log.debug("ReservationForm.time: {} is different as ReservationEntity.time: {}", form.getTime(), actualEntity.getTime());
             } else {
                 expectedEntity.setDate(actualEntity.getDate());
                 log.debug("ReservationForm.time: is unchanged");

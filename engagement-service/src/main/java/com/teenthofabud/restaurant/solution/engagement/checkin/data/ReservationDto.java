@@ -11,7 +11,7 @@ import java.util.Optional;
 @Setter
 @ToString
 @AllArgsConstructor
-public class ReservationDto implements CheckInDtoParameters {
+public class ReservationDto extends CheckInDto {
 
     @ToString.Include
     private Optional<String> date;
@@ -21,6 +21,10 @@ public class ReservationDto implements CheckInDtoParameters {
     public ReservationDto() {
         this.date = Optional.ofNullable(null);
         this.time = Optional.ofNullable(null);
+    }
+
+    public ReservationDto(CheckInDto dto) {
+        super(dto);
     }
 
 }

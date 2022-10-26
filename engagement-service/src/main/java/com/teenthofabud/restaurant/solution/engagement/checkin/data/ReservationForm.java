@@ -9,9 +9,15 @@ import lombok.*;
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ReservationForm implements CheckInFormParameters {
+public class ReservationForm extends CheckInForm {
 
     private String date;
     private String time;
+
+    public ReservationForm(CheckInForm form) {
+        super(form);
+        this.date = "";
+        this.time = "";
+    }
 
 }

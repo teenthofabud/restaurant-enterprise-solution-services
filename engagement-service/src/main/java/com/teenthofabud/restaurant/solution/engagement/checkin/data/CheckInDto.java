@@ -32,9 +32,9 @@ public class CheckInDto {
     @ToString.Include
     private Optional<String> notes;
     @ToString.Include
-    private Optional<String> active;
+    private Optional<String> checkInType;
     @ToString.Include
-    private Optional<CheckInDtoParameters> attributes;
+    private Optional<String> active;
 
 
     public CheckInDto() {
@@ -48,6 +48,19 @@ public class CheckInDto {
         //this.emailId = Optional.ofNullable(null);
         this.notes = Optional.ofNullable(null);
         this.active = Optional.ofNullable(null);
+    }
+
+    public CheckInDto(CheckInDto dto) {
+        //this.tableId = Optional.ofNullable(null);
+        this.noOfPersons = dto.getNoOfPersons();
+        this.sequence = dto.getSequence();
+        this.accountId = dto.getAccountId();
+        //this.status = Optional.ofNullable(null);
+        //this.name = Optional.ofNullable(null);
+        //this.phoneNumber = Optional.ofNullable(null);
+        //this.emailId = Optional.ofNullable(null);
+        this.notes = dto.getNotes();
+        this.active = dto.getActive();
     }
 
 }

@@ -2,18 +2,14 @@ package com.teenthofabud.restaurant.solution.engagement.checkin.converter;
 
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInEntity;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInForm;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInFormParameters;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
-public abstract class CheckInForm2EntityConverter implements Converter<CheckInForm, CheckInEntity> {
+public abstract class CheckInForm2EntityConverter<T extends CheckInForm, U extends CheckInEntity> implements Converter<CheckInForm, CheckInEntity> {
 
     private List<String> fieldsToEscape;
 
@@ -55,10 +51,10 @@ public abstract class CheckInForm2EntityConverter implements Converter<CheckInFo
         }
         entity.setActive(Boolean.TRUE);
         log.debug("Converting {} to {}", form, entity);
-        this.convert(Optional.of(form.getAttributes()));
-        return entity;
+        U child = this.convertChild((T) form, entity);
+        return child;
     }
 
-    protected abstract Optional<? extends CheckInEntity> convert(Optional<? extends CheckInFormParameters> optionalCheckInFormParameters);
+    protected abstract U convertChild(T heckInFormChild, CheckInEntity checkInEntity);
 
 }

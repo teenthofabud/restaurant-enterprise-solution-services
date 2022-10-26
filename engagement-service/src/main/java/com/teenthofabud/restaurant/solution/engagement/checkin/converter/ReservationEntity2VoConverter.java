@@ -7,11 +7,10 @@ import org.springframework.stereotype.Component;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 @Slf4j
-public class ReservationEntity2VoConverter extends CheckInEntity2VoConverter {
+public class ReservationEntity2VoConverter extends CheckInEntity2VoConverter<ReservationEntity, ReservationVo> {
 
     private List<String> fieldsToEscape;
     private String reservationDateFormat;
@@ -33,9 +32,8 @@ public class ReservationEntity2VoConverter extends CheckInEntity2VoConverter {
     }
 
     @Override
-    protected CheckInVoParameters convert(Optional<? extends CheckInEntity> optionalCheckInEntityChild) {
-        ReservationEntity entity = (ReservationEntity) optionalCheckInEntityChild.get();
-        ReservationVo vo = new ReservationVo();
+    protected ReservationVo convertChild(ReservationEntity entity, CheckInVo checkInVo) {
+        ReservationVo vo = new ReservationVo(checkInVo);
         if(!fieldsToEscape.contains("date")) {
             vo.setDate(entity.getDate().format(DateTimeFormatter.ofPattern(reservationDateFormat)));
         }

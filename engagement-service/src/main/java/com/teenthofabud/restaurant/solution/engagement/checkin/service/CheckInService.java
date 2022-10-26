@@ -12,29 +12,22 @@ import java.util.Optional;
 import java.util.Set;
 
 @Service
-public interface CheckInService {
+public interface CheckInService<T extends CheckInForm, V extends CheckInVo> {
 
-    public Set<CheckInVo> retrieveAllByNaturalOrdering();
+    public Set<V> retrieveAllByNaturalOrdering();
 
-    public CheckInVo retrieveDetailsById(String id, Optional<TOABCascadeLevel> optionalCascadeLevel) throws CheckInException;
+    public V retrieveDetailsById(String id, Optional<TOABCascadeLevel> optionalCascadeLevel) throws CheckInException;
 
-    public List<CheckInVo> retrieveAllMatchingCheckInDetailsByCriteria(Optional<String> optionalAccountId,
+    public List<V> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalAccountId,
                                                                 //Optional<String> optionalTableId,
                                                                 Optional<String> optionalSequence,
                                                                 Optional<String> optionalNotes) throws CheckInException;
 
-    public List<CheckInVo> retrieveAllMatchingWalkInDetailsByCriteria(Optional<String> optionalName,
-                                                                Optional<String> optionalPhoneNumber,
-                                                                Optional<String> optionalEmailId) throws CheckInException;
+    public V retrieveAllMatchingDetailsByCriteria(String sequence, String date) throws CheckInException;
 
-    public List<CheckInVo> retrieveAllMatchingReservationDetailsByCriteria(Optional<String> optionalDate,
-                                                                Optional<String> optionalTime) throws CheckInException;
+    public String createCheckIn(T form) throws CheckInException;
 
-    public CheckInVo retrieveAllMatchingDetailsByCriteria(String sequence, String date) throws CheckInException;
-
-    public String createCheckIn(CheckInForm form) throws CheckInException;
-
-    public void updateCheckIn(String id, CheckInForm form) throws CheckInException;
+    public void updateCheckIn(String id, T form) throws CheckInException;
 
     public void deleteCheckIn(String id) throws CheckInException;
 

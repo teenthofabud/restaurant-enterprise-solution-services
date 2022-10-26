@@ -6,11 +6,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
 
 @Component
 @Slf4j
-public class WalkInForm2EntityConverter extends CheckInForm2EntityConverter {
+public class WalkInForm2EntityConverter extends CheckInForm2EntityConverter<WalkInForm, WalkInEntity> {
 
     private List<String> fieldsToEscape;
 
@@ -20,9 +19,8 @@ public class WalkInForm2EntityConverter extends CheckInForm2EntityConverter {
     }
 
     @Override
-    protected Optional<? extends CheckInEntity> convert(Optional<? extends CheckInFormParameters> optionalCheckInFormParameters) {
-        WalkInForm form = (WalkInForm) optionalCheckInFormParameters.get();
-        WalkInEntity entity = new WalkInEntity();
+    protected WalkInEntity convertChild(WalkInForm form, CheckInEntity checkInEntity) {
+        WalkInEntity entity = new WalkInEntity(checkInEntity);
         if(!fieldsToEscape.contains("name")) {
             entity.setName(form.getName());
         }
@@ -34,7 +32,7 @@ public class WalkInForm2EntityConverter extends CheckInForm2EntityConverter {
         }
         entity.setActive(Boolean.TRUE);
         log.debug("Converting {} to {}", form, entity);
-        return Optional.of(entity);
+        return entity;
     }
 
 }

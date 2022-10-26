@@ -22,4 +22,4 @@ java -jar \
 -DENGAGEMENT_FEIGN_LOGGING_LEVEL=basic \
 -DENGAGEMENT_METADATA_GENDER_FEIGN_LOGGING_LEVEL=basic \
 -DENGAGEMENT_CIRCUIT_BREAKER_ENABLED=true \
-target/engagements-app.jar
+target/engagement-app.jar

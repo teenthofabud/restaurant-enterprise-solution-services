@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Component
 @Slf4j
-public class WalkInForm2EntityMapper extends CheckInForm2EntityMapper {
+public class WalkInForm2EntityMapper extends CheckInForm2EntityMapper<WalkInEntity, WalkInForm> {
 
     private List<String> fieldsToEscape;
 
@@ -21,41 +21,40 @@ public class WalkInForm2EntityMapper extends CheckInForm2EntityMapper {
     }
 
     @Override
-    public Optional<? extends CheckInEntity> compareAndMap(Optional<? extends CheckInEntity> optionalCheckInEntityChild, CheckInForm form) {
-        WalkInEntity actualEntity = (WalkInEntity) optionalCheckInEntityChild.get();
-        WalkInForm checkInFormParameters = (WalkInForm) form.getAttributes();
+    public Optional<CheckInEntity> compareAndMap(CheckInEntity parent, WalkInEntity checkInEntityChild, WalkInForm checkInFormChild) {
+        WalkInEntity actualEntity = (WalkInEntity) checkInEntityChild;
+        WalkInForm form = checkInFormChild;
         boolean changeSW = false;
         // direct copy of common attributes handled in parent
-        Optional<CheckInEntity> expectedParentEntity = super.compareAndMap(actualEntity, form);
-        WalkInEntity expectedEntity = expectedParentEntity.isPresent() ? (WalkInEntity) expectedParentEntity.get() : new WalkInEntity();
+        WalkInEntity expectedEntity = new WalkInEntity(parent);
         // direct copy
         expectedEntity.setId(actualEntity.getId());
         log.debug("Directly copying WalkInEntity.id: {} from actualEntity to expectedEntity", actualEntity.getId());
 
 
-        if(!fieldsToEscape.contains("name") && StringUtils.hasText(StringUtils.trimWhitespace(checkInFormParameters.getName())) && checkInFormParameters.getName().compareTo(actualEntity.getName()) != 0) {
-            expectedEntity.setName(checkInFormParameters.getName());
+        if(!fieldsToEscape.contains("name") && StringUtils.hasText(StringUtils.trimWhitespace(form.getName())) && form.getName().compareTo(actualEntity.getName()) != 0) {
+            expectedEntity.setName(form.getName());
             changeSW = true;
-            log.debug("WalkInForm.name: {} is different as WalkInEntity.name: {}", checkInFormParameters.getName(), actualEntity.getName());
+            log.debug("WalkInForm.name: {} is different as WalkInEntity.name: {}", form.getName(), actualEntity.getName());
         } else {
             expectedEntity.setName(actualEntity.getName());
             log.debug("WalkInForm.name: is unchanged");
         }
 
-        if(!fieldsToEscape.contains("phoneNumber") && StringUtils.hasText(StringUtils.trimWhitespace(checkInFormParameters.getPhoneNumber()))
-                && checkInFormParameters.getPhoneNumber().compareTo(actualEntity.getPhoneNumber()) != 0) {
-            expectedEntity.setPhoneNumber(checkInFormParameters.getPhoneNumber());
+        if(!fieldsToEscape.contains("phoneNumber") && StringUtils.hasText(StringUtils.trimWhitespace(form.getPhoneNumber()))
+                && form.getPhoneNumber().compareTo(actualEntity.getPhoneNumber()) != 0) {
+            expectedEntity.setPhoneNumber(form.getPhoneNumber());
             changeSW = true;
-            log.debug("WalkInForm.phoneNumber: {} is different as WalkInEntity.phoneNumber: {}", checkInFormParameters.getPhoneNumber(), actualEntity.getPhoneNumber());
+            log.debug("WalkInForm.phoneNumber: {} is different as WalkInEntity.phoneNumber: {}", form.getPhoneNumber(), actualEntity.getPhoneNumber());
         } else {
             expectedEntity.setPhoneNumber(actualEntity.getPhoneNumber());
             log.debug("WalkInForm.phoneNumber: is unchanged");
         }
 
-        if(!fieldsToEscape.contains("emailId") && StringUtils.hasText(StringUtils.trimWhitespace(checkInFormParameters.getEmailId())) && checkInFormParameters.getEmailId().compareTo(actualEntity.getEmailId()) != 0) {
-            expectedEntity.setEmailId(checkInFormParameters.getEmailId());
+        if(!fieldsToEscape.contains("emailId") && StringUtils.hasText(StringUtils.trimWhitespace(form.getEmailId())) && form.getEmailId().compareTo(actualEntity.getEmailId()) != 0) {
+            expectedEntity.setEmailId(form.getEmailId());
             changeSW = true;
-            log.debug("WalkInForm.emailId: {} is different as WalkInEntity.emailId: {}", checkInFormParameters.getEmailId(), actualEntity.getEmailId());
+            log.debug("WalkInForm.emailId: {} is different as WalkInEntity.emailId: {}", form.getEmailId(), actualEntity.getEmailId());
         } else {
             expectedEntity.setEmailId(actualEntity.getEmailId());
             log.debug("WalkInForm.emailId: is unchanged");

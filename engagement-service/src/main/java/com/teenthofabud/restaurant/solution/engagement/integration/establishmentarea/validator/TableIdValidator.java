@@ -1,6 +1,6 @@
 package com.teenthofabud.restaurant.solution.engagement.integration.establishmentarea.validator;
 
-import com.teenthofabud.restaurant.solution.checkin.error.CheckInErrorCode;
+import com.teenthofabud.restaurant.solution.engagement.constants.EngagementErrorCode;
 import com.teenthofabud.restaurant.solution.engagement.integration.establishmentarea.data.TableVo;
 import com.teenthofabud.restaurant.solution.engagement.integration.establishmentarea.proxy.EstablishmentAreaServiceClient;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +36,7 @@ public class TableIdValidator implements Validator {
         tableVo = establishmentAreaServiceClient.getTableDetailsById(tableId);
         log.info("Retrieved table: {} by id", tableVo);
         if(tableVo == null) {
-            errors.reject(CheckInErrorCode.RESERVATION_ATTRIBUTE_INVALID.name());
+            errors.reject(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             log.debug(objectName + ".tableId is invalid");
             return;
         }
@@ -44,16 +44,16 @@ public class TableIdValidator implements Validator {
         boolean emptyTableId = !StringUtils.hasText(StringUtils.trimWhitespace(tableVo.getTableId()));
         if(emptyTableName) {
             log.debug(objectName + ".table.name is invalid");
-            errors.reject(CheckInErrorCode.RESERVATION_ATTRIBUTE_INVALID.name());
+            errors.reject(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             return;
         }
         if(emptyTableId) {
             log.debug(objectName + ".table.tableId is invalid");
-            errors.reject(CheckInErrorCode.RESERVATION_ATTRIBUTE_INVALID.name());
+            errors.reject(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             return;
         }
         if(!tableVo.getActive()) {
-            errors.reject(CheckInErrorCode.RESERVATION_ATTRIBUTE_INVALID.name());
+            errors.reject(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             log.debug(objectName + ".tableId is not active");
             return;
         }

@@ -2,6 +2,7 @@ package com.teenthofabud.restaurant.solution.engagement.checkin.data;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.teenthofabud.core.common.data.vo.TOABBaseVo;
+import com.teenthofabud.restaurant.solution.engagement.constants.CheckInType;
 import com.teenthofabud.restaurant.solution.engagement.integration.customer.data.AccountVo;
 import lombok.*;
 
@@ -40,11 +41,21 @@ public class CheckInVo extends TOABBaseVo implements Comparable<CheckInVo> {
     @ToString.Include
     private String notes;
     @ToString.Include
-    private CheckInVoParameters attributes;
+    private CheckInType type;
 
 
     @Override
     public int compareTo(CheckInVo o) {
         return Integer.compare(this.getCreatedOn().compareTo(o.getCreatedOn()), this.getSequence().compareTo(o.getSequence()));
+    }
+
+    public CheckInVo(CheckInVo vo) {
+        this.account = vo.getAccount();
+        this.accountId = vo.getAccountId();
+        this.type = vo.getType();
+        this.id = vo.getId();
+        this.noOfPersons = vo.getNoOfPersons();
+        this.notes = vo.getNotes();
+        this.sequence = vo.getSequence();
     }
 }

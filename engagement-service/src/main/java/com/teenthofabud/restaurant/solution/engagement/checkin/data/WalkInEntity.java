@@ -1,9 +1,6 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.data;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.Column;
@@ -19,9 +16,11 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "walk_in")
 @EntityListeners(AuditingEntityListener.class)
+@NoArgsConstructor
 public class WalkInEntity extends CheckInEntity {
 
-    public WalkInEntity() {
+    public WalkInEntity(CheckInEntity parent) {
+        super(parent);
         this.name = "";
         this.phoneNumber = "";
         this.emailId = "";

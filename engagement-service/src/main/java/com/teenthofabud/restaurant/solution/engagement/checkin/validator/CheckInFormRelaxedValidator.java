@@ -2,8 +2,7 @@ package com.teenthofabud.restaurant.solution.engagement.checkin.validator;
 
 import com.teenthofabud.core.common.validator.RelaxedValidator;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInForm;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInFormParameters;
-import com.teenthofabud.restaurant.solution.engagement.error.EngagementErrorCode;
+import com.teenthofabud.restaurant.solution.engagement.constants.EngagementErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -114,12 +113,12 @@ public abstract class CheckInFormRelaxedValidator implements RelaxedValidator<Ch
         }
         log.debug("CheckInForm.accountId is valid");
 
-        Boolean childValidationResult = this.validateLoosely(Optional.of(form.getAttributes()), errors);
+        Boolean childValidationResult = this.validateLoosely(Optional.of(form), errors);
 
         return childValidationResult;
 
 
     }
 
-    public abstract Boolean validateLoosely(Optional<? extends CheckInFormParameters> optionalCheckInFormParameters, Errors errors);
+    public abstract Boolean validateLoosely(Optional<? extends CheckInForm> optionalCheckInFormParameters, Errors errors);
 }

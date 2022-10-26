@@ -9,11 +9,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 @Slf4j
-public class ReservationForm2EntityConverter extends CheckInForm2EntityConverter {
+public class ReservationForm2EntityConverter extends CheckInForm2EntityConverter<ReservationForm, ReservationEntity>{
 
     private List<String> fieldsToEscape;
     private String reservationDateFormat;
@@ -35,9 +34,8 @@ public class ReservationForm2EntityConverter extends CheckInForm2EntityConverter
     }
 
     @Override
-    protected Optional<? extends CheckInEntity> convert(Optional<? extends CheckInFormParameters> optionalCheckInFormParameters) {
-        ReservationForm form = (ReservationForm) optionalCheckInFormParameters.get();
-        ReservationEntity entity = new ReservationEntity();
+    protected ReservationEntity convertChild(ReservationForm form, CheckInEntity checkInEntity) {
+        ReservationEntity entity = new ReservationEntity(checkInEntity);
         if(!fieldsToEscape.contains("date")) {
             entity.setDate(LocalDate.parse(form.getDate(), DateTimeFormatter.ofPattern(reservationDateFormat)));
         }
@@ -46,7 +44,7 @@ public class ReservationForm2EntityConverter extends CheckInForm2EntityConverter
         }
         entity.setActive(Boolean.TRUE);
         log.debug("Converting {} to {}", form, entity);
-        return Optional.of(entity);
+        return entity;
     }
 
 }

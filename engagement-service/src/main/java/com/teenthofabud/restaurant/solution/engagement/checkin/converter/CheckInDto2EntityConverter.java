@@ -2,7 +2,6 @@ package com.teenthofabud.restaurant.solution.engagement.checkin.converter;
 
 import com.teenthofabud.core.common.converter.ComparativePatchConverter;
 import com.teenthofabud.core.common.error.TOABBaseException;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInDtoParameters;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInEntity;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInDto;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j
-public abstract class CheckInDto2EntityConverter implements ComparativePatchConverter<CheckInDto, CheckInEntity> {
+public abstract class CheckInDto2EntityConverter<T extends CheckInDto, U extends CheckInEntity> implements ComparativePatchConverter<CheckInDto, CheckInEntity> {
 
     private static final Integer NO_OF_COMPARABLE_AND_MAPPABLE_FIELDS = 10;
 
@@ -106,11 +105,12 @@ public abstract class CheckInDto2EntityConverter implements ComparativePatchConv
 
         if(Collections.frequency(Arrays.asList(changeSW), Boolean.TRUE) >= 1) {
             log.debug("All provided CheckInDto attributes are valid");
+            this.compareAndMap(dto, actualEntity);
             actualEntity.setModifiedOn(LocalDateTime.now(ZoneOffset.UTC));
             return;
         }
         log.debug("Not all provided CheckInDto attributes are valid");
     }
 
-    protected abstract void compareAndMap(Optional<? extends CheckInDtoParameters> optionalCheckInDtoParameters, Optional<? extends CheckInEntity> optionalCheckInEntity) throws TOABBaseException;
+    protected abstract void compareAndMapChild(T checkInDtoChild, U checkInEntityChild) throws TOABBaseException;
 }

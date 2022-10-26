@@ -3,14 +3,12 @@ package com.teenthofabud.restaurant.solution.engagement.checkin.mapper;
 import com.teenthofabud.core.common.mapper.SingleChannelMapper;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInEntity;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.Optional;
 
 @Slf4j
-public abstract class CheckInEntitySelfMapper implements SingleChannelMapper<CheckInEntity> {
+public abstract class CheckInEntitySelfMapper<T extends CheckInEntity> implements SingleChannelMapper<CheckInEntity> {
 
     @Override
     public Optional<CheckInEntity> compareAndMap(CheckInEntity source, CheckInEntity target) {
@@ -53,12 +51,13 @@ public abstract class CheckInEntitySelfMapper implements SingleChannelMapper<Che
         }*/
         if(changeSW) {
             log.debug("All provided CheckInEntity attributes are valid");
+            this.compareAndMapChild((T) source, (T) target);
             return Optional.of(target);
         } else {
             log.debug("Not all provided CheckInEntity attributes are valid");
             return Optional.empty();
         }
     }
-    public abstract Optional<? extends CheckInEntity> compareAndMap(Optional<? extends CheckInEntity> optionalSource, Optional<? extends CheckInEntity> optionalTarget);
+    protected abstract void compareAndMapChild(T source, T target);
 
 }

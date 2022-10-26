@@ -10,7 +10,7 @@ import lombok.*;
 @ToString(onlyExplicitlyIncluded = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class ReservationVo implements CheckInVoParameters {
+public class ReservationVo extends CheckInVo {
 
     @EqualsAndHashCode.Include
     @ToString.Include
@@ -18,5 +18,11 @@ public class ReservationVo implements CheckInVoParameters {
     @EqualsAndHashCode.Include
     @ToString.Include
     private String time;
+
+    public ReservationVo(CheckInVo vo) {
+        super(vo);
+        this.date = "";
+        this.time = "";
+    }
 
 }

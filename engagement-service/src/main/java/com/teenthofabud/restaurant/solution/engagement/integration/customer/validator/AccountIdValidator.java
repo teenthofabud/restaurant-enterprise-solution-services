@@ -1,6 +1,6 @@
 package com.teenthofabud.restaurant.solution.engagement.integration.customer.validator;
 
-import com.teenthofabud.restaurant.solution.checkin.error.CheckInErrorCode;
+import com.teenthofabud.restaurant.solution.engagement.constants.EngagementErrorCode;
 import com.teenthofabud.restaurant.solution.engagement.integration.customer.data.AccountVo;
 import com.teenthofabud.restaurant.solution.engagement.integration.customer.proxy.CustomerServiceClient;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +36,7 @@ public class AccountIdValidator implements Validator {
         accountVo = customerServiceClient.getAccountDetailsById(accountId);
         log.info("Retrieved account: {} by id", accountVo);
         if(accountVo == null) {
-            errors.reject(CheckInErrorCode.RESERVATION_ATTRIBUTE_INVALID.name());
+            errors.reject(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             log.debug(objectName + ".accountId is invalid");
             return;
         }
@@ -45,21 +45,21 @@ public class AccountIdValidator implements Validator {
         boolean emptyId = !StringUtils.hasText(StringUtils.trimWhitespace(accountVo.getId()));
         if(emptyFirstName) {
             log.debug(objectName + ".account.firstName is invalid");
-            errors.reject(CheckInErrorCode.RESERVATION_ATTRIBUTE_INVALID.name());
+            errors.reject(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             return;
         }
         if(emptyLastName) {
             log.debug(objectName + ".account.lastName is invalid");
-            errors.reject(CheckInErrorCode.RESERVATION_ATTRIBUTE_INVALID.name());
+            errors.reject(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             return;
         }
         if(emptyId) {
             log.debug(objectName + ".account.accountId is invalid");
-            errors.reject(CheckInErrorCode.RESERVATION_ATTRIBUTE_INVALID.name());
+            errors.reject(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             return;
         }
         if(!accountVo.getActive()) {
-            errors.reject(CheckInErrorCode.RESERVATION_ATTRIBUTE_INVALID.name());
+            errors.reject(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             log.debug(objectName + ".accountId is not active");
             return;
         }

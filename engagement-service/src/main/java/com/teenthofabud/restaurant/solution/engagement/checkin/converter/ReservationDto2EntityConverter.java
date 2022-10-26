@@ -15,7 +15,7 @@ import java.util.Optional;
 
 @Component
 @Slf4j
-public class ReservationDto2EntityConverter extends CheckInDto2EntityConverter {
+public class ReservationDto2EntityConverter extends CheckInDto2EntityConverter<ReservationDto, ReservationEntity> {
 
     private static final Integer NO_OF_COMPARABLE_AND_MAPPABLE_FIELDS = 10;
 
@@ -40,12 +40,10 @@ public class ReservationDto2EntityConverter extends CheckInDto2EntityConverter {
     }
 
     @Override
-    protected void compareAndMap(Optional<? extends CheckInDtoParameters> optionalCheckInDtoParameters, Optional<? extends CheckInEntity> optionalCheckInEntity) throws TOABBaseException {
+    protected void compareAndMapChild(ReservationDto dto, ReservationEntity actualEntity) throws TOABBaseException {
         boolean[] changeSW = new boolean[NO_OF_COMPARABLE_AND_MAPPABLE_FIELDS]; // size = number of attributes in dto
         Arrays.fill(changeSW, Boolean.FALSE);
         int i = 0;
-        ReservationDto dto = (ReservationDto) optionalCheckInDtoParameters.get();
-        ReservationEntity actualEntity = (ReservationEntity) optionalCheckInEntity.get();
 
         Optional<String> optDate = dto.getDate();
         if(!fieldsToEscape.contains("date") && optDate.isPresent()) {

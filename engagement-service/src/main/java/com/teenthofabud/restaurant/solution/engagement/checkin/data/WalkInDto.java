@@ -11,7 +11,7 @@ import java.util.Optional;
 @Setter
 @ToString
 @AllArgsConstructor
-public class WalkInDto implements CheckInDtoParameters {
+public class WalkInDto extends CheckInDto {
 
     @ToString.Include
     private Optional<String> name;
@@ -24,6 +24,10 @@ public class WalkInDto implements CheckInDtoParameters {
         this.name = Optional.ofNullable(null);
         this.phoneNumber = Optional.ofNullable(null);
         this.emailId = Optional.ofNullable(null);
+    }
+
+    public WalkInDto(CheckInDto dto) {
+        super(dto);
     }
 
 }

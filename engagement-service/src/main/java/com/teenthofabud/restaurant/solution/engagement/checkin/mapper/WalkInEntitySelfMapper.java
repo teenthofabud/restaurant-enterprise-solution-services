@@ -1,6 +1,5 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.mapper;
 
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInEntity;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.WalkInEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -10,20 +9,12 @@ import java.util.Optional;
 
 @Component
 @Slf4j
-public class WalkInEntitySelfMapper extends CheckInEntitySelfMapper {
+public class WalkInEntitySelfMapper extends CheckInEntitySelfMapper<WalkInEntity> {
 
     @Override
-    public Optional<? extends CheckInEntity> compareAndMap(Optional<? extends CheckInEntity> optionalSource, Optional<? extends CheckInEntity> optionalTarget) {
-        CheckInEntity checkInEntitySource = optionalSource.get();
-        CheckInEntity checkInEntityTarget = optionalTarget.get();
-        Optional<CheckInEntity> optionalCheckInEntity = super.compareAndMap(checkInEntitySource, checkInEntityTarget);
-        if(optionalCheckInEntity.isEmpty()) {
-            return Optional.empty();
-        }
-
+    protected void compareAndMapChild(WalkInEntity source, WalkInEntity target) {
         boolean changeSW = false;
-        WalkInEntity source = (WalkInEntity) checkInEntitySource;
-        WalkInEntity target = (WalkInEntity) checkInEntityTarget;
+
         if(source.getId() != null && source.getId().compareTo(target.getId()) != 0) {
             target.setId(source.getId());
             changeSW = true;
@@ -47,10 +38,8 @@ public class WalkInEntitySelfMapper extends CheckInEntitySelfMapper {
 
         if(changeSW) {
             log.debug("All provided WalkInEntity attributes are valid");
-            return Optional.of(target);
         } else {
             log.debug("Not all provided WalkInEntity attributes are valid");
-            return Optional.empty();
         }
     }
 }

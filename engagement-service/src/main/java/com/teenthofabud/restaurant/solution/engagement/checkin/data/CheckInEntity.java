@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.data.mongodb.core.index.Indexed;
 
 import javax.persistence.*;
 
@@ -32,12 +31,20 @@ public class CheckInEntity extends TOABBaseEntity implements Comparable<CheckInE
         this.notes = "";
     }
 
+    public CheckInEntity(CheckInEntity checkInEntity) {
+        this.id = checkInEntity.getId();
+        this.accountId = checkInEntity.getAccountId();
+        this.sequence = checkInEntity.getSequence();
+        this.notes = checkInEntity.getNotes();
+        this.noOfPersons = checkInEntity.getNoOfPersons();
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     /*@Indexed
     private List<String> tableId;*/
-    @Indexed
+    @Column(name = "customer_account_id")
     private String accountId;
     private String sequence;
     @Column(name = "number_of_persons")
@@ -70,4 +77,5 @@ public class CheckInEntity extends TOABBaseEntity implements Comparable<CheckInE
     public int compareTo(CheckInEntity o) {
         return this.getId().compareTo(o.getId());
     }
+
 }

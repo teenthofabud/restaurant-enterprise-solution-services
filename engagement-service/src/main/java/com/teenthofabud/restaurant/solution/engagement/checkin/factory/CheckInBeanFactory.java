@@ -32,6 +32,7 @@ public class CheckInBeanFactory implements ApplicationContextAware {
                 break;
             default:
                 log.error("CheckIn type: {} not supported");
+                checkInRepository = Optional.of(applicationContext.getBean(CheckInRepository.class));
                 break;
         }
         return checkInRepository;

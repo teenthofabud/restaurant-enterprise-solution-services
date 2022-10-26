@@ -4,15 +4,13 @@ import com.teenthofabud.core.common.mapper.DualChannelMapper;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.parameters.P;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
 
 @Slf4j
-public abstract class CheckInForm2EntityMapper implements DualChannelMapper<CheckInEntity, CheckInForm> {
+public abstract class CheckInForm2EntityMapper<T extends CheckInEntity, U extends CheckInForm> implements DualChannelMapper<CheckInEntity, CheckInForm> {
 
     private List<String> fieldsToEscape;
 
@@ -88,10 +86,15 @@ public abstract class CheckInForm2EntityMapper implements DualChannelMapper<Chec
             log.debug("CheckInForm.notes: is unchanged");
         }
 
-        return changeSW ? Optional.of(expectedEntity) : Optional.empty();
+        if(changeSW) {
+            Optional<CheckInEntity> optionalExpectedEntity = this.compareAndMap(expectedEntity, (T) actualEntity, (U) form);
+            return optionalExpectedEntity.isPresent() ? optionalExpectedEntity : Optional.empty();
+        } else {
+            return Optional.empty();
+        }
 
     }
 
-    public abstract Optional<? extends CheckInEntity> compareAndMap(Optional<? extends CheckInEntity> optionalCheckInEntityChild, CheckInForm form);
+    protected abstract Optional<CheckInEntity> compareAndMap(CheckInEntity parent, T checkInEntityChild, U checkInFormChild);
 
 }

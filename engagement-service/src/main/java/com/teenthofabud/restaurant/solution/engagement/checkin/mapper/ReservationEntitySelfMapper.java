@@ -9,20 +9,12 @@ import java.util.Optional;
 
 @Component
 @Slf4j
-public class ReservationEntitySelfMapper extends CheckInEntitySelfMapper {
+public class ReservationEntitySelfMapper extends CheckInEntitySelfMapper<ReservationEntity> {
 
     @Override
-    public Optional<? extends CheckInEntity> compareAndMap(Optional<? extends CheckInEntity> optionalSource, Optional<? extends CheckInEntity> optionalTarget) {
-        CheckInEntity checkInEntitySource = optionalSource.get();
-        CheckInEntity checkInEntityTarget = optionalTarget.get();
-        Optional<CheckInEntity> optionalCheckInEntity = super.compareAndMap(checkInEntitySource, checkInEntityTarget);
-        if(optionalCheckInEntity.isEmpty()) {
-            return Optional.empty();
-        }
-
+    protected void compareAndMapChild(ReservationEntity source, ReservationEntity target) {
         boolean changeSW = false;
-        ReservationEntity source = (ReservationEntity) checkInEntitySource;
-        ReservationEntity target = (ReservationEntity) checkInEntityTarget;
+
         if(source.getId() != null && source.getId().compareTo(target.getId()) != 0) {
             target.setId(source.getId());
             changeSW = true;
@@ -41,10 +33,8 @@ public class ReservationEntitySelfMapper extends CheckInEntitySelfMapper {
 
         if(changeSW) {
             log.debug("All provided ReservationEntity attributes are valid");
-            return Optional.of(target);
         } else {
             log.debug("Not all provided ReservationEntity attributes are valid");
-            return Optional.empty();
         }
     }
 }

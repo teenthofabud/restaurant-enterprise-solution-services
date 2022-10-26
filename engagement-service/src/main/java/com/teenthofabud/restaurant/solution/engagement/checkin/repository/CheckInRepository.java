@@ -8,10 +8,10 @@ import java.util.Optional;
 
 public interface CheckInRepository<T extends CheckInEntity> extends TOABSimpleEntityBaseRepository<T> {
 
-    public Optional<? extends CheckInEntity> findBySequenceAndCreatedOnBetween(Long sequence, LocalDateTime start, LocalDateTime end);
+    public Optional<T> findBySequenceAndCreatedOnBetween(Long sequence, LocalDateTime start, LocalDateTime end);
 
     public Boolean existsByAccountIdAndSequence(String accountId, String sequence);
 
-    public Optional<? extends CheckInEntity> findByCreatedOnBetween(LocalDateTime start, LocalDateTime end);
+    //public Optional<T> findByCreatedOnBetween(LocalDateTime start, LocalDateTime end);
 
 }

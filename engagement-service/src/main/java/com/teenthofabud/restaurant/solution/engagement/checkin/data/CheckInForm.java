@@ -23,7 +23,14 @@ public class CheckInForm {
     private String notes;
 
     private CheckInType type;
-    private CheckInFormParameters attributes;
+
+    public CheckInForm(CheckInForm form) {
+        this.accountId = form.getAccountId();
+        this.sequence = form.getSequence();
+        this.noOfPersons = form.getNoOfPersons();
+        this.notes = form.getNotes();
+        this.type = form.getType();
+    }
 
 
 }

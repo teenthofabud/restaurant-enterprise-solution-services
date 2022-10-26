@@ -1,8 +1,7 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.validator;
 
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInForm;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInFormParameters;
-import com.teenthofabud.restaurant.solution.engagement.error.EngagementErrorCode;
+import com.teenthofabud.restaurant.solution.engagement.constants.EngagementErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -125,9 +124,9 @@ public abstract class CheckInFormValidator implements Validator {
         }
         log.debug("CheckInForm.accountId is valid");
 
-        this.validate(Optional.of(form.getAttributes()), errors);
+        this.validate(Optional.of(form), errors);
     }
 
-    protected abstract void validate(Optional<? extends CheckInFormParameters> optionalCheckInFormParameters, Errors errors);
+    protected abstract void validate(Optional<? extends CheckInForm> optionalCheckInFormParameters, Errors errors);
 
 }

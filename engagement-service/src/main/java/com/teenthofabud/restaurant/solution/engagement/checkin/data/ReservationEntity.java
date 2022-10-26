@@ -1,9 +1,7 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.data;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.Entity;
@@ -19,9 +17,11 @@ import java.time.LocalTime;
 @Entity
 @Table(name = "reservation")
 @EntityListeners(AuditingEntityListener.class)
+@NoArgsConstructor
 public class ReservationEntity extends CheckInEntity {
 
-    public ReservationEntity() {
+    public ReservationEntity(CheckInEntity parent) {
+        super(parent);
         this.date = LocalDate.now();
         this.time = LocalTime.now();
     }

@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Component
 @Slf4j
-public class WalkInDto2EntityConverter extends CheckInDto2EntityConverter {
+public class WalkInDto2EntityConverter extends CheckInDto2EntityConverter<WalkInDto, WalkInEntity> {
 
     private static final Integer NO_OF_COMPARABLE_AND_MAPPABLE_FIELDS = 10;
 
@@ -24,12 +24,10 @@ public class WalkInDto2EntityConverter extends CheckInDto2EntityConverter {
     }
 
     @Override
-    protected void compareAndMap(Optional<? extends CheckInDtoParameters> optionalCheckInDtoParameters, Optional<? extends CheckInEntity> optionalCheckInEntity) throws TOABBaseException {
+    protected void compareAndMapChild(WalkInDto dto, WalkInEntity actualEntity) throws TOABBaseException {
         boolean[] changeSW = new boolean[NO_OF_COMPARABLE_AND_MAPPABLE_FIELDS]; // size = number of attributes in dto
         Arrays.fill(changeSW, Boolean.FALSE);
         int i = 0;
-        WalkInDto dto = (WalkInDto) optionalCheckInDtoParameters.get();
-        WalkInEntity actualEntity = (WalkInEntity) optionalCheckInEntity.get();
 
         Optional<String> optName = dto.getName();
         if(!fieldsToEscape.contains("name") && optName.isPresent()) {

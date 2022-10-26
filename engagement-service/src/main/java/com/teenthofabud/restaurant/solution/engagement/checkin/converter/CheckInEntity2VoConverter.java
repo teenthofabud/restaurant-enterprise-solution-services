@@ -7,17 +7,14 @@ import com.teenthofabud.core.common.error.TOABErrorCode;
 import com.teenthofabud.core.common.error.TOABSystemException;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInEntity;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInVo;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInVoParameters;
 import com.teenthofabud.restaurant.solution.engagement.integration.customer.data.AccountVo;
 import com.teenthofabud.restaurant.solution.engagement.integration.customer.proxy.CustomerServiceClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -26,7 +23,7 @@ import java.util.concurrent.Future;
 
 
 @Slf4j
-public abstract class CheckInEntity2VoConverter extends TOABBaseEntity2VoConverter<CheckInEntity, CheckInVo> implements Converter<CheckInEntity, CheckInVo> {
+public abstract class CheckInEntity2VoConverter<T extends CheckInEntity, U extends CheckInVo> extends TOABBaseEntity2VoConverter<CheckInEntity, CheckInVo> {
 
     private List<String> fieldsToEscape;
     //private EstablishmentAreaServiceClient establishmentAreaServiceClient;
@@ -47,8 +44,7 @@ public abstract class CheckInEntity2VoConverter extends TOABBaseEntity2VoConvert
         this.customerServiceClient = customerServiceClient;
     }
 
-    @Override
-    public CheckInVo convert(CheckInEntity entity) {
+    public U convert(T entity) {
         CheckInVo vo = new CheckInVo();
         if(!fieldsToEscape.contains("id")) {
             vo.setId(entity.getId().toString());
@@ -80,11 +76,10 @@ public abstract class CheckInEntity2VoConverter extends TOABBaseEntity2VoConvert
         if(!fieldsToEscape.contains("accountId")) {
             this.expandSecondLevelFields(entity, vo, "accountId");
         }
-        CheckInVoParameters attributes = this.convert(Optional.of(entity));
-        vo.setAttributes(attributes);
-        super.expandAuditFields(entity, vo);
-        log.debug("Converted {} to {} ", entity, vo);
-        return vo;
+        U child = this.convertChild((T) entity, (U) vo);
+        super.expandAuditFields(entity, child);
+        log.debug("Converted {} to {} ", entity, child);
+        return child;
     }
 
     private void expandSecondLevelFields(CheckInEntity entity, CheckInVo vo, String fieldName) {
@@ -137,6 +132,5 @@ public abstract class CheckInEntity2VoConverter extends TOABBaseEntity2VoConvert
         }
     }
 
-    protected abstract CheckInVoParameters convert(Optional<? extends CheckInEntity> optionalCheckInEntityChild);
-
+    protected abstract U convertChild(T checkInEntityChild, CheckInVo checkInVo);
 }

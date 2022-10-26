@@ -3,14 +3,14 @@ package com.teenthofabud.restaurant.solution.engagement.checkin.converter;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Component
-public class WalkInEntity2VoConverter extends CheckInEntity2VoConverter {
+public class WalkInEntity2VoConverter extends CheckInEntity2VoConverter<WalkInEntity, WalkInVo> {
 
     private List<String> fieldsToEscape;
 
@@ -20,9 +20,8 @@ public class WalkInEntity2VoConverter extends CheckInEntity2VoConverter {
     }
 
     @Override
-    protected CheckInVoParameters convert(Optional<? extends CheckInEntity> optionalCheckInEntityChild) {
-        WalkInEntity entity = (WalkInEntity) optionalCheckInEntityChild.get();
-        WalkInVo vo = new WalkInVo();
+    protected WalkInVo convertChild(WalkInEntity entity, CheckInVo checkInVo) {
+        WalkInVo vo = new WalkInVo(checkInVo);
         if(!fieldsToEscape.contains("name")) {
             vo.setName(entity.getName());
         }

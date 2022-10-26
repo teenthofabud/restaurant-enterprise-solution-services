@@ -1,8 +1,8 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.validator;
 
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInFormParameters;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInForm;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.WalkInForm;
-import com.teenthofabud.restaurant.solution.engagement.error.EngagementErrorCode;
+import com.teenthofabud.restaurant.solution.engagement.constants.EngagementErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -24,13 +24,13 @@ public class WalkInFormRelaxedValidator extends CheckInFormRelaxedValidator  {
     }
 
     @Override
-    public Boolean validateLoosely(Optional<? extends CheckInFormParameters> optionalCheckInFormParameters, Errors errors) {
-        if(optionalCheckInFormParameters.isEmpty()) {
+    public Boolean validateLoosely(Optional<? extends CheckInForm> optionalCheckInForm, Errors errors) {
+        if(optionalCheckInForm.isEmpty()) {
             log.debug("No WalkInForm available");
             return false;
         }
-        CheckInFormParameters checkInFormParameters = optionalCheckInFormParameters.get();
-        WalkInForm form = (WalkInForm) checkInFormParameters;
+        CheckInForm checkInForm = optionalCheckInForm.get();
+        WalkInForm form = (WalkInForm) checkInForm;
         log.debug("WalkInForm is available");
 
         if(!fieldsToEscape.contains("name") && form.getName() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getName()))) {

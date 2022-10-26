@@ -10,7 +10,7 @@ import lombok.*;
 @ToString(onlyExplicitlyIncluded = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class WalkInVo implements CheckInVoParameters {
+public class WalkInVo extends CheckInVo {
 
     @EqualsAndHashCode.Include
     @ToString.Include
@@ -21,5 +21,12 @@ public class WalkInVo implements CheckInVoParameters {
     @EqualsAndHashCode.Include
     @ToString.Include
     private String emailId;
+
+    public WalkInVo(CheckInVo vo) {
+        super(vo);
+        this.name = "";
+        this.emailId = "";
+        this.phoneNumber = "";
+    }
 
 }

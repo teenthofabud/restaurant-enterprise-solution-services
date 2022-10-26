@@ -1,8 +1,8 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.validator;
 
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInDtoParameters;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInDto;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.WalkInDto;
-import com.teenthofabud.restaurant.solution.engagement.error.EngagementErrorCode;
+import com.teenthofabud.restaurant.solution.engagement.constants.EngagementErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -23,13 +23,13 @@ public class WalkInDtoValidator extends CheckInDtoValidator {
     }
 
     @Override
-    protected void validate(Optional<? extends CheckInDtoParameters> optionalCheckInDtoParameters, Errors errors) {
-        if(optionalCheckInDtoParameters.isEmpty()) {
+    protected void validate(Optional<? extends CheckInDto> optionalCheckInDto, Errors errors) {
+        if(optionalCheckInDto.isEmpty()) {
             log.debug("No WalkInDto available");
             return;
         }
-        CheckInDtoParameters checkInDtoParameters = optionalCheckInDtoParameters.get();
-        WalkInDto dto = (WalkInDto) checkInDtoParameters;
+        CheckInDto checkInDto = optionalCheckInDto.get();
+        WalkInDto dto = (WalkInDto) checkInDto;
 
         Optional<String> optName = dto.getName();
         if(!fieldsToEscape.contains("name") && optName.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optName.get()))) {
