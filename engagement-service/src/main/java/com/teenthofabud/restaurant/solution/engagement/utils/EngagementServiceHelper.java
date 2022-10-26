@@ -1,0 +1,95 @@
+package com.teenthofabud.restaurant.solution.engagement.utils;
+
+import com.teenthofabud.core.common.error.TOABErrorCode;
+import com.teenthofabud.core.common.error.TOABSystemException;
+import com.teenthofabud.restaurant.solution.engagement.checkin.converter.CheckInEntity2VoConverter;
+import com.teenthofabud.restaurant.solution.engagement.checkin.converter.ReservationEntity2VoConverter;
+import com.teenthofabud.restaurant.solution.engagement.checkin.converter.WalkInEntity2VoConverter;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.*;
+import com.teenthofabud.restaurant.solution.engagement.checkin.factory.CheckInBeanFactory;
+import com.teenthofabud.restaurant.solution.engagement.constants.CheckInType;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+
+@Slf4j
+@Component
+public class EngagementServiceHelper<T extends CheckInForm, U extends CheckInVo, V extends CheckInEntity> {
+
+    private CheckInBeanFactory checkInBeanFactory;
+
+    @Autowired
+    public void setCheckInBeanFactory(CheckInBeanFactory checkInBeanFactory) {
+        this.checkInBeanFactory = checkInBeanFactory;
+    }
+
+    public List<CheckInVo> checkInEntity2DetailedVo(List<? extends CheckInEntity> checkInEntityList) {
+        List<CheckInVo> checkInDetailsList = new LinkedList<>();
+        if(checkInEntityList != null && !checkInEntityList.isEmpty()) {
+            for(CheckInEntity entity : checkInEntityList) {
+                CheckInVo vo = this.checkInEntity2DetailedVo(entity);
+                checkInDetailsList.add(vo);
+            }
+        }
+        return checkInDetailsList;
+    }
+
+    public CheckInVo checkInEntity2DetailedVo(CheckInEntity checkInEntity) {
+        Optional<? extends CheckInEntity2VoConverter> optionalCheckInEntity2VoConverter = this.checkInBeanFactory.getCheckInEntity2VoConverter("");
+        CheckInEntity2VoConverter checkInEntity2VoConverter = optionalCheckInEntity2VoConverter.get();
+        if(checkInEntity != null) {
+            CheckInVo vo = checkInEntity2VoConverter.convert(checkInEntity);
+            log.debug("Converting {} to {}", checkInEntity, vo);
+            return vo;
+        }
+        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "checkIn entity is null" });
+    }
+
+    public WalkInVo walkInEntity2DetailedVo(WalkInEntity walkInEntity) {
+        Optional<? extends CheckInEntity2VoConverter> optionalCheckInEntity2VoConverter = this.checkInBeanFactory.getCheckInEntity2VoConverter(CheckInType.WALK_IN.name());
+        WalkInEntity2VoConverter walkInEntity2VoConverter = (WalkInEntity2VoConverter) optionalCheckInEntity2VoConverter.get();
+        if(walkInEntity != null) {
+            WalkInVo vo = walkInEntity2VoConverter.convert(walkInEntity);
+            log.debug("Converting {} to {}", walkInEntity, vo);
+            return vo;
+        }
+        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "walkIn entity is null" });
+    }
+
+    public List<WalkInVo> walkInEntity2DetailedVo(List<WalkInEntity> walkInEntityList) {
+        List<WalkInVo> walkInDetailsList = new LinkedList<>();
+        if(walkInEntityList != null && !walkInEntityList.isEmpty()) {
+            for(WalkInEntity entity : walkInEntityList) {
+                WalkInVo vo = this.walkInEntity2DetailedVo(entity);
+                walkInDetailsList.add(vo);
+            }
+        }
+        return walkInDetailsList;
+    }
+
+    public ReservationVo reservationEntity2DetailedVo(ReservationEntity reservationEntity) {
+        Optional<? extends CheckInEntity2VoConverter> optionalCheckInEntity2VoConverter = this.checkInBeanFactory.getCheckInEntity2VoConverter(CheckInType.WALK_IN.name());
+        ReservationEntity2VoConverter reservationEntity2VoConverter = (ReservationEntity2VoConverter) optionalCheckInEntity2VoConverter.get();
+        if(reservationEntity != null) {
+            ReservationVo vo = reservationEntity2VoConverter.convert(reservationEntity);
+            log.debug("Converting {} to {}", reservationEntity, vo);
+            return vo;
+        }
+        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "reservation entity is null" });
+    }
+
+    public List<ReservationVo> reservationEntity2DetailedVo(List<ReservationEntity> reservationEntityList) {
+        List<ReservationVo> reservationDetailsList = new LinkedList<>();
+        if(reservationEntityList != null && !reservationEntityList.isEmpty()) {
+            for(ReservationEntity entity : reservationEntityList) {
+                ReservationVo vo = this.reservationEntity2DetailedVo(entity);
+                reservationDetailsList.add(vo);
+            }
+        }
+        return reservationDetailsList;
+    }
+}

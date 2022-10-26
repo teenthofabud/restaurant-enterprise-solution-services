@@ -22,7 +22,8 @@
         <module>inventory-service</module>
         <module>menu-service</module>
         <module>settings-service</module>
-        <module>booking-service</module>
+        <module>engagement-service</module>
+        <module>encounter-service</module>
         <module>naming-service</module>
         <module>configuration-service</module>
         <module>gateway-service</module>
