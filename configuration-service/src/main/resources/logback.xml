@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <property resource="bootstrap.properties" />
+    <property name="LOGS_DIR" value="logs" />
+    <property name="LOG_FILE_NAME" value="${spring.application.name}" />
+
+    <appender name="Console"
+              class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>${CONSOLE_LOG_PATTERN}</Pattern>
+        </layout>
+    </appender>
+
+    <appender name="RollingFile"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS_DIR}/${LOG_FILE_NAME}.log</file>
+        <encoder
+                class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>${CONSOLE_LOG_PATTERN}</Pattern>
+        </encoder>
+
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- rollover daily and when the file reaches 10 MegaBytes -->
+            <fileNamePattern>${LOGS_DIR}/archived/${LOG_FILE_NAME}-%d{yyyy-MM-dd}.%i.log
+            </fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+
+    <!--<if condition='&quot;${spring.profiles.active}&quot;.equals(&quot;local&quot;)'>-->
+    <if condition='&quot;${logstash.enabled}&quot;.equals(&quot;true&quot;)'>
+        <then>
+            <appender name="Stash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+                <destination>${logstash.url}</destination>
+                <keepAliveDuration>1 minute</keepAliveDuration>
+                <reconnectionDelay>1 second</reconnectionDelay>
+                <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                    <includeCallerData>true</includeCallerData>
+                </encoder>
+            </appender>
+        </then>
+    </if>
+
+    <!-- LOG everything at INFO level -->
+    <root level="info">
+        <appender-ref ref="RollingFile" />
+        <appender-ref ref="Console" />
+        <!--<if condition='&quot;${spring.profiles.active}&quot;.equals(&quot;local&quot;)'>-->
+        <if condition='&quot;${logstash.enabled}&quot;.equals(&quot;true&quot;)'>
+            <then>
+                <appender-ref ref="Stash" />
+            </then>
+        </if>
+    </root>
+
+    <logger name="com.teenthofabud.restaurant.solution.configuration" level="${logback.logging.level}" additivity="false">
+        <appender-ref ref="RollingFile" />
+        <appender-ref ref="Console" />
+        <if condition='&quot;${logstash.enabled}&quot;.equals(&quot;true&quot;)'>
+            <then>
+                <appender-ref ref="Stash" />
+            </then>
+        </if>
+    </logger>
+
+</configuration>
