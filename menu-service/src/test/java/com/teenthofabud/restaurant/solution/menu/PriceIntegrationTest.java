@@ -819,11 +819,11 @@ public class PriceIntegrationTest extends MenuIntegrationBaseTest {
         Assertions.assertEquals(priceVo1.getCurrencyId(), om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getCurrencyId());
         Assertions.assertEquals(priceVo1.getItemId(), om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getItemId());
         Assertions.assertEquals(priceVo1.getAmount(), om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getAmount());
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getCreatedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getModifiedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getCreatedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getModifiedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getActive()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getCreatedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getModifiedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getCreatedOn()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getModifiedOn()));
+        Assertions.assertFalse(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PriceVo.class).getActive()));
     }
 
     @Test

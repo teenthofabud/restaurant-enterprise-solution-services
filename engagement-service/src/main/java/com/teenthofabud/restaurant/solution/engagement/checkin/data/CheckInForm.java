@@ -1,7 +1,7 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.data;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.teenthofabud.restaurant.solution.engagement.constants.CheckInType;
+import com.teenthofabud.restaurant.solution.engagement.checkin.constants.CheckInType;
 import lombok.*;
 
 @NoArgsConstructor

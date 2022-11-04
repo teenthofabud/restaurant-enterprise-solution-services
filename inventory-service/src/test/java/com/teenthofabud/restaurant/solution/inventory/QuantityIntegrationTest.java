@@ -825,11 +825,11 @@ public class QuantityIntegrationTest extends InventoryIntegrationBaseTest {
         Assertions.assertEquals(quantityVo1.getWeightId(), om.readValue(mvcResult.getResponse().getContentAsString(), QuantityVo.class).getWeightId());
         Assertions.assertEquals(quantityVo1.getProductId(), om.readValue(mvcResult.getResponse().getContentAsString(), QuantityVo.class).getProductId());
         Assertions.assertEquals(quantityVo1.getAmount(), om.readValue(mvcResult.getResponse().getContentAsString(), QuantityVo.class).getAmount());
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), QuantityVo.class).getCreatedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), QuantityVo.class).getModifiedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), QuantityVo.class).getCreatedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), QuantityVo.class).getModifiedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), QuantityVo.class).getActive()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), QuantityVo.class).getCreatedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), QuantityVo.class).getModifiedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), QuantityVo.class).getCreatedOn()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), QuantityVo.class).getModifiedOn()));
+        Assertions.assertFalse(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), QuantityVo.class).getActive()));
     }
 
     @Test

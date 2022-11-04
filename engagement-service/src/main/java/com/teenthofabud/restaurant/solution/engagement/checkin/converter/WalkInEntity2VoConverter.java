@@ -35,4 +35,9 @@ public class WalkInEntity2VoConverter extends CheckInEntity2VoConverter<WalkInEn
         return vo;
     }
 
+    @Override
+    public List<String> getFieldsToEscape() {
+        return this.fieldsToEscape;
+    }
+
 }

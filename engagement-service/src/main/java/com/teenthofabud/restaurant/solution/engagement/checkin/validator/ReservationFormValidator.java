@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -50,7 +51,7 @@ public class ReservationFormValidator extends CheckInFormValidator {
 
         if (!fieldsToEscape.contains("date") && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getDate()))) {
             errors.rejectValue("date", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
-            log.debug("ReservationForm.date is invalid");
+            log.debug("ReservationForm.date is empty");
             return;
         } else {
             try {
@@ -65,17 +66,22 @@ public class ReservationFormValidator extends CheckInFormValidator {
 
         if (!fieldsToEscape.contains("time") && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getTime()))) {
             errors.rejectValue("time", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
-            log.debug("ReservationForm.time is invalid");
+            log.debug("ReservationForm.time is empty");
             return;
         } else {
             try {
-                LocalDate.parse(form.getTime(), DateTimeFormatter.ofPattern(reservationTimeFormat));
+                LocalTime.parse(form.getTime(), DateTimeFormatter.ofPattern(reservationTimeFormat));
             } catch (DateTimeParseException w) {
                 log.debug("ReservationForm.time is invalid");
                 errors.rejectValue("time", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
                 return;
             }
         }
-        log.debug("ReservationForm.time is invalid");
+        log.debug("ReservationForm.time is valid");
+    }
+
+    @Override
+    public List<String> getFieldsToEscape() {
+        return this.fieldsToEscape;
     }
 }

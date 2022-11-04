@@ -2,12 +2,12 @@ package com.teenthofabud.restaurant.solution.engagement.utils;
 
 import com.teenthofabud.core.common.error.TOABErrorCode;
 import com.teenthofabud.core.common.error.TOABSystemException;
+import com.teenthofabud.restaurant.solution.engagement.checkin.constants.CheckInType;
 import com.teenthofabud.restaurant.solution.engagement.checkin.converter.CheckInEntity2VoConverter;
 import com.teenthofabud.restaurant.solution.engagement.checkin.converter.ReservationEntity2VoConverter;
 import com.teenthofabud.restaurant.solution.engagement.checkin.converter.WalkInEntity2VoConverter;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.*;
 import com.teenthofabud.restaurant.solution.engagement.checkin.factory.CheckInBeanFactory;
-import com.teenthofabud.restaurant.solution.engagement.constants.CheckInType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

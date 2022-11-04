@@ -44,4 +44,9 @@ public class ReservationEntity2VoConverter extends CheckInEntity2VoConverter<Res
         return vo;
     }
 
+    @Override
+    public List<String> getFieldsToEscape() {
+        return this.fieldsToEscape;
+    }
+
 }

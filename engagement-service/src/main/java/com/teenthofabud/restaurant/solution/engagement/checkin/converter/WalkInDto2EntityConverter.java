@@ -52,4 +52,9 @@ public class WalkInDto2EntityConverter extends CheckInDto2EntityConverter<WalkIn
         log.debug("Not all provided WalkInDto attributes are valid");
     }
 
+    @Override
+    public List<String> getFieldsToEscape() {
+        return this.fieldsToEscape;
+    }
+
 }

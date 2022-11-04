@@ -57,4 +57,9 @@ public class WalkInFormRelaxedValidator extends CheckInFormRelaxedValidator  {
         return true;
     }
 
+    @Override
+    public List<String> getFieldsToEscape() {
+        return this.fieldsToEscape;
+    }
+
 }

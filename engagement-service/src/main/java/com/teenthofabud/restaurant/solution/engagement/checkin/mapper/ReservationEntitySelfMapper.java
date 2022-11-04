@@ -1,11 +1,8 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.mapper;
 
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInEntity;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.ReservationEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
 
 @Component
 @Slf4j

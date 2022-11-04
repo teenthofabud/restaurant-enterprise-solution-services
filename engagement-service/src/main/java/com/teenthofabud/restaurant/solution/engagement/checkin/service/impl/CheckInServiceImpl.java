@@ -1,3 +1,4 @@
+/*
 package com.teenthofabud.restaurant.solution.engagement.checkin.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -525,4 +526,4 @@ public abstract class CheckInServiceImpl<A extends CheckInFormValidator, B exten
     public abstract H getCheckInEntity2VoConverter();
     public abstract I getCheckInDto2EntityConverter();
     
-}
+}*/

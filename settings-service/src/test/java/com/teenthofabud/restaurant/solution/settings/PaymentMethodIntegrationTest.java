@@ -432,11 +432,11 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
         Assertions.assertEquals(paymentMethodVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getId());
         Assertions.assertEquals(paymentMethodVo1.getName(), om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getName());
         Assertions.assertEquals(paymentMethodVo1.getDescription(), om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getDescription());
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getCreatedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getModifiedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getCreatedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getModifiedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getActive()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getCreatedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getModifiedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getCreatedOn()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getModifiedOn()));
+        Assertions.assertFalse(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), PaymentMethodVo.class).getActive()));
     }
 
     @Test

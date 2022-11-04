@@ -53,4 +53,9 @@ public class WalkInDtoValidator extends CheckInDtoValidator {
         }
     }
 
+    @Override
+    public List<String> getFieldsToEscape() {
+        return this.fieldsToEscape;
+    }
+
 }

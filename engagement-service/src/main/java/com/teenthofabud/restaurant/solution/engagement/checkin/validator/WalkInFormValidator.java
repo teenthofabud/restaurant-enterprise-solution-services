@@ -54,4 +54,9 @@ public class WalkInFormValidator extends CheckInFormValidator {
         log.debug("WalkInForm.phoneNumber is invalid");
     }
 
+    @Override
+    public List<String> getFieldsToEscape() {
+        return this.fieldsToEscape;
+    }
+
 }

@@ -8,18 +8,19 @@ import lombok.ToString;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @ToString(onlyExplicitlyIncluded = true)
-@Entity
+@Entity(name = "checkIn")
 @Table(name = "check_in")
 @EntityListeners(AuditingEntityListener.class)
 @Inheritance(
         strategy = InheritanceType.JOINED
 )
-public class CheckInEntity extends TOABBaseEntity implements Comparable<CheckInEntity> {
+public abstract class CheckInEntity extends TOABBaseEntity implements Comparable<CheckInEntity> {
 
     public CheckInEntity() {
         this.id = 0l;
@@ -29,6 +30,7 @@ public class CheckInEntity extends TOABBaseEntity implements Comparable<CheckInE
         this.noOfPersons = 0;
         //this.statusHistory = new LinkedList<>();
         this.notes = "";
+        //this.tableAllocations = new ArrayList<>();
     }
 
     public CheckInEntity(CheckInEntity checkInEntity) {
@@ -37,6 +39,7 @@ public class CheckInEntity extends TOABBaseEntity implements Comparable<CheckInE
         this.sequence = checkInEntity.getSequence();
         this.notes = checkInEntity.getNotes();
         this.noOfPersons = checkInEntity.getNoOfPersons();
+        //this.tableAllocations = new ArrayList<>();
     }
 
     @Id
@@ -51,6 +54,28 @@ public class CheckInEntity extends TOABBaseEntity implements Comparable<CheckInE
     private Integer noOfPersons;
     //private List<CheckInHistoryDocument> statusHistory;
     private String notes;
+    /*@OneToMany(mappedBy = "checkIn", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<TableAllocationEntity> tableAllocations;
+
+    public void addTableAllocation(TableAllocationEntity tableAllocation) {
+        this.tableAllocations.add(tableAllocation);
+    }
+
+
+    public Optional<TableAllocationEntity> getTableAllocation() {
+        Optional<TableAllocationEntity> optStatus = Optional.empty();
+        if(!CollectionUtils.isEmpty(this.tableAllocations)) {
+            this.tableAllocations.sort(new Comparator<TableAllocationEntity>() {
+                @Override
+                public int compare(TableAllocationEntity o1, TableAllocationEntity o2) {
+                    return o1.getCreatedOn().compareTo(o2.getCreatedOn());
+                }
+            });
+            TableAllocationEntity tableAllocation = this.tableAllocations.get(this.tableAllocations.size() - 1);
+            optStatus = Optional.of(tableAllocation);
+        }
+        return optStatus;
+    }*/
 
     /*public void addStatus(CheckInStatus status) {
         CheckInHistoryDocument checkInHistoryDocument = new CheckInHistoryDocument();

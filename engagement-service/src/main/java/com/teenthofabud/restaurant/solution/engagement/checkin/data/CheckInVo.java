@@ -2,7 +2,7 @@ package com.teenthofabud.restaurant.solution.engagement.checkin.data;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.teenthofabud.core.common.data.vo.TOABBaseVo;
-import com.teenthofabud.restaurant.solution.engagement.constants.CheckInType;
+import com.teenthofabud.restaurant.solution.engagement.checkin.constants.CheckInType;
 import com.teenthofabud.restaurant.solution.engagement.integration.customer.data.AccountVo;
 import lombok.*;
 

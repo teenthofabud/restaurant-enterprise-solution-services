@@ -1675,11 +1675,11 @@ public class IngredientIntegrationTest extends CookbookIntegrationBaseTest {
         Assertions.assertEquals(ingredientVo1.getProductId(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getProductId());
         Assertions.assertEquals(ingredientVo1.getRecipeId(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getRecipeId());
         Assertions.assertEquals(ingredientVo1.getQuantity(), om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getQuantity());
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getCreatedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getModifiedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getCreatedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getModifiedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getActive()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getCreatedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getModifiedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getCreatedOn()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getModifiedOn()));
+        Assertions.assertFalse(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), IngredientVo.class).getActive()));
     }
 
     @Test

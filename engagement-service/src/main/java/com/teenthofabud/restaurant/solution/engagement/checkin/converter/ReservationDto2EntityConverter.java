@@ -62,4 +62,9 @@ public class ReservationDto2EntityConverter extends CheckInDto2EntityConverter<R
         log.debug("Not all provided ReservationDto attributes are valid");
     }
 
+    @Override
+    public List<String> getFieldsToEscape() {
+        return this.fieldsToEscape;
+    }
+
 }

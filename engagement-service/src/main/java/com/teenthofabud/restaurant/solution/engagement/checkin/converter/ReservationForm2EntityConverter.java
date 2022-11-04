@@ -34,8 +34,14 @@ public class ReservationForm2EntityConverter extends CheckInForm2EntityConverter
     }
 
     @Override
-    protected ReservationEntity convertChild(ReservationForm form, CheckInEntity checkInEntity) {
-        ReservationEntity entity = new ReservationEntity(checkInEntity);
+    public List<String> getFieldsToEscape() {
+        return this.fieldsToEscape;
+    }
+
+    @Override
+    public ReservationEntity convert(ReservationForm form) {
+        ReservationEntity entity = new ReservationEntity();
+        super.convert(form, entity);
         if(!fieldsToEscape.contains("date")) {
             entity.setDate(LocalDate.parse(form.getDate(), DateTimeFormatter.ofPattern(reservationDateFormat)));
         }
@@ -46,5 +52,4 @@ public class ReservationForm2EntityConverter extends CheckInForm2EntityConverter
         log.debug("Converting {} to {}", form, entity);
         return entity;
     }
-
 }

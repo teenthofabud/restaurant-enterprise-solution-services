@@ -3,58 +3,70 @@ package com.teenthofabud.restaurant.solution.engagement.checkin.converter;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInEntity;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInForm;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
 
 import java.util.List;
 
 @Slf4j
-public abstract class CheckInForm2EntityConverter<T extends CheckInForm, U extends CheckInEntity> implements Converter<CheckInForm, CheckInEntity> {
+public abstract class CheckInForm2EntityConverter<T extends CheckInForm, U extends CheckInEntity> implements Converter<T, U> {
 
-    private List<String> fieldsToEscape;
+    public abstract List<String> getFieldsToEscape();
 
-    @Value("#{'${res.engagement.checkIn.fields-to-escape}'.split(',')}")
-    public void setFieldsToEscape(List<String> fieldsToEscape) {
-        this.fieldsToEscape = fieldsToEscape;
-    }
-
-    @Override
-    public CheckInEntity convert(CheckInForm form) {
-        CheckInEntity entity = new CheckInEntity();
-        if(!fieldsToEscape.contains("sequence")) {
+    protected U convert(T form, U entity) {
+        if(!getFieldsToEscape().contains("sequence")) {
             entity.setSequence(form.getSequence());
         }
-        /*if(!fieldsToEscape.contains("tableId")) {
-            entity.setTableId(form.getTableId());
-        }
-        if(!fieldsToEscape.contains("status")) {
-            CheckInStatus status = CheckInStatus.valueOf(form.getStatus());
-            entity.addStatus(status);
-        }*/
-        if(!fieldsToEscape.contains("noOfPersons")) {
+        if(!getFieldsToEscape().contains("noOfPersons")) {
             entity.setNoOfPersons(form.getNoOfPersons());
         }
-        if(!fieldsToEscape.contains("accountId")) {
+        if(!getFieldsToEscape().contains("accountId")) {
             entity.setAccountId(form.getAccountId());
         }
-        /*if(!fieldsToEscape.contains("name")) {
+        if(!getFieldsToEscape().contains("notes")) {
+            entity.setNotes(form.getNotes());
+        }
+        entity.setActive(Boolean.TRUE);
+        log.debug("Converting {} to {}", form, entity);
+        return entity;
+    }
+    
+    /*@Override
+    public U convert(T form) {
+        CheckInEntity entity = new CheckInEntity();
+        if(!getFieldsToEscape().contains("sequence")) {
+            entity.setSequence(form.getSequence());
+        }
+        *//*if(!getFieldsToEscape().contains("tableId")) {
+            entity.setTableId(form.getTableId());
+        }
+        if(!getFieldsToEscape().contains("status")) {
+            CheckInStatus status = CheckInStatus.valueOf(form.getStatus());
+            entity.addStatus(status);
+        }*//*
+        if(!getFieldsToEscape().contains("noOfPersons")) {
+            entity.setNoOfPersons(form.getNoOfPersons());
+        }
+        if(!getFieldsToEscape().contains("accountId")) {
+            entity.setAccountId(form.getAccountId());
+        }
+        *//*if(!getFieldsToEscape().contains("name")) {
             entity.setName(form.getName());
         }
-        if(!fieldsToEscape.contains("phoneNumber")) {
+        if(!getFieldsToEscape().contains("phoneNumber")) {
             entity.setPhoneNumber(form.getPhoneNumber());
         }
-        if(!fieldsToEscape.contains("emailId")) {
+        if(!getFieldsToEscape().contains("emailId")) {
             entity.setEmailId(form.getEmailId());
-        }*/
-        if(!fieldsToEscape.contains("notes")) {
+        }*//*
+        if(!getFieldsToEscape().contains("notes")) {
             entity.setNotes(form.getNotes());
         }
         entity.setActive(Boolean.TRUE);
         log.debug("Converting {} to {}", form, entity);
         U child = this.convertChild((T) form, entity);
         return child;
-    }
+    }*/
 
-    protected abstract U convertChild(T heckInFormChild, CheckInEntity checkInEntity);
+    //protected abstract U convertChild(T heckInFormChild, CheckInEntity checkInEntity);
 
 }

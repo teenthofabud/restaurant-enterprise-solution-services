@@ -435,11 +435,11 @@ public class DeliveryPartnerIntegrationTest extends SettingsIntegrationBaseTest 
         Assertions.assertEquals(deliveryPartnerVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getId());
         Assertions.assertEquals(deliveryPartnerVo1.getName(), om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getName());
         Assertions.assertEquals(deliveryPartnerVo1.getDescription(), om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getDescription());
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getCreatedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getModifiedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getCreatedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getModifiedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getActive()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getCreatedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getModifiedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getCreatedOn()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getModifiedOn()));
+        Assertions.assertFalse(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryPartnerVo.class).getActive()));
     }
 
     @Test

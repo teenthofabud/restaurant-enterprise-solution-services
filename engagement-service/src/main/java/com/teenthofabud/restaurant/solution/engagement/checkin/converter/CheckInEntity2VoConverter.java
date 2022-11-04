@@ -25,14 +25,10 @@ import java.util.concurrent.Future;
 @Slf4j
 public abstract class CheckInEntity2VoConverter<T extends CheckInEntity, U extends CheckInVo> extends TOABBaseEntity2VoConverter<CheckInEntity, CheckInVo> {
 
-    private List<String> fieldsToEscape;
     //private EstablishmentAreaServiceClient establishmentAreaServiceClient;
     private CustomerServiceClient customerServiceClient;
 
-    @Value("#{'${res.engagement.checkIn.fields-to-escape}'.split(',')}")
-    public void setFieldsToEscape(List<String> fieldsToEscape) {
-        this.fieldsToEscape = fieldsToEscape;
-    }
+    public abstract List<String> getFieldsToEscape();
 
     /*@Autowired
     public void setEstablishmentAreaServiceClient(EstablishmentAreaServiceClient establishmentAreaServiceClient) {
@@ -46,34 +42,34 @@ public abstract class CheckInEntity2VoConverter<T extends CheckInEntity, U exten
 
     public U convert(T entity) {
         CheckInVo vo = new CheckInVo();
-        if(!fieldsToEscape.contains("id")) {
+        if(!getFieldsToEscape().contains("id")) {
             vo.setId(entity.getId().toString());
         }
-        /*if(!fieldsToEscape.contains("name")) {
+        /*if(!getFieldsToEscape().contains("name")) {
             vo.setName(entity.getName());
         }
-        if(!fieldsToEscape.contains("emailId")) {
+        if(!getFieldsToEscape().contains("emailId")) {
             vo.setEmailId(entity.getEmailId());
         }
-        if(!fieldsToEscape.contains("phoneNumber")) {
+        if(!getFieldsToEscape().contains("phoneNumber")) {
             vo.setPhoneNumber(entity.getPhoneNumber());
         }*/
-        if(!fieldsToEscape.contains("notes")) {
+        if(!getFieldsToEscape().contains("notes")) {
             vo.setNotes(entity.getNotes());
         }
-        /*if(!fieldsToEscape.contains("status")) {
+        /*if(!getFieldsToEscape().contains("status")) {
             vo.setStatus(entity.getStatus().get().name());
         }*/
-        if(!fieldsToEscape.contains("noOfPersons")) {
+        if(!getFieldsToEscape().contains("noOfPersons")) {
             vo.setNoOfPersons(entity.getNoOfPersons());
         }
-        if(!fieldsToEscape.contains("sequence")) {
+        if(!getFieldsToEscape().contains("sequence")) {
             vo.setSequence(entity.getSequence());
         }
-        /*if(!fieldsToEscape.contains("tableId")) {
+        /*if(!getFieldsToEscape().contains("tableId")) {
             this.expandSecondLevelFields(entity, vo, "tableId");
         }*/
-        if(!fieldsToEscape.contains("accountId")) {
+        if(!getFieldsToEscape().contains("accountId")) {
             this.expandSecondLevelFields(entity, vo, "accountId");
         }
         U child = this.convertChild((T) entity, (U) vo);
@@ -86,9 +82,9 @@ public abstract class CheckInEntity2VoConverter<T extends CheckInEntity, U exten
         TOABCascadeLevel cascadeLevel = TOABRequestContextHolder.getCascadeLevelContext();
         switch(cascadeLevel) {
             case TWO:
-                if(!fieldsToEscape.contains("accountId") && fieldName.compareTo("accountId") == 0) {
+                if(!getFieldsToEscape().contains("accountId") && fieldName.compareTo("accountId") == 0) {
                     Callable<AccountVo> accountEntity2VoConversion = () -> {
-                        AccountVo accountVo = customerServiceClient.getAccountDetailsById(entity.getAccountId());
+                        AccountVo accountVo = customerServiceClient.getAccountDetailsById(entity.getAccountId(), TOABCascadeLevel.TWO.getLevelCode());
                         return accountVo;
                     };
                     String tName = "accountEntity2VoConversion";
@@ -104,7 +100,7 @@ public abstract class CheckInEntity2VoConverter<T extends CheckInEntity, U exten
                         throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, msg, new Object[] { tName + " failure: " + e.getMessage() });
                     }
                 }
-                /*if(!fieldsToEscape.contains("tableId") && fieldName.compareTo("tableId") == 0) {
+                /*if(!getFieldsToEscape().contains("tableId") && fieldName.compareTo("tableId") == 0) {
                     Callable<TableVo> tableEntity2VoConversion = () -> {
                         TableVo tableVo = establishmentAreaServiceClient.getTableDetailsById(entity.getTableId());
                         return tableVo;
