@@ -1,14 +1,19 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.data;
 
 import com.teenthofabud.core.common.data.entity.TOABBaseEntity;
+import com.teenthofabud.restaurant.solution.engagement.tableallocation.data.TableAllocationEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.util.CollectionUtils;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 
 @Getter
 @Setter
@@ -24,13 +29,12 @@ public abstract class CheckInEntity extends TOABBaseEntity implements Comparable
 
     public CheckInEntity() {
         this.id = 0l;
-        //this.tableId = "";
         this.accountId = "";
         this.sequence = "";
         this.noOfPersons = 0;
         //this.statusHistory = new LinkedList<>();
         this.notes = "";
-        //this.tableAllocations = new ArrayList<>();
+        this.tableAllocations = new ArrayList<>();
     }
 
     public CheckInEntity(CheckInEntity checkInEntity) {
@@ -39,14 +43,12 @@ public abstract class CheckInEntity extends TOABBaseEntity implements Comparable
         this.sequence = checkInEntity.getSequence();
         this.notes = checkInEntity.getNotes();
         this.noOfPersons = checkInEntity.getNoOfPersons();
-        //this.tableAllocations = new ArrayList<>();
+        this.tableAllocations = new ArrayList<>();
     }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    /*@Indexed
-    private List<String> tableId;*/
     @Column(name = "customer_account_id")
     private String accountId;
     private String sequence;
@@ -54,7 +56,8 @@ public abstract class CheckInEntity extends TOABBaseEntity implements Comparable
     private Integer noOfPersons;
     //private List<CheckInHistoryDocument> statusHistory;
     private String notes;
-    /*@OneToMany(mappedBy = "checkIn", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+
+    @OneToMany(mappedBy = "checkIn", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TableAllocationEntity> tableAllocations;
 
     public void addTableAllocation(TableAllocationEntity tableAllocation) {
@@ -75,7 +78,7 @@ public abstract class CheckInEntity extends TOABBaseEntity implements Comparable
             optStatus = Optional.of(tableAllocation);
         }
         return optStatus;
-    }*/
+    }
 
     /*public void addStatus(CheckInStatus status) {
         CheckInHistoryDocument checkInHistoryDocument = new CheckInHistoryDocument();

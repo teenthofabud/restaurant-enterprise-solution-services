@@ -22,7 +22,7 @@ public class WalkInForm2EntityMapper extends CheckInForm2EntityMapper<WalkInEnti
     }
 
     /*@Override
-    public Optional<WalkInEntity> compareAndMap(CheckInEntity parent, WalkInEntity checkInEntityChild, WalkInForm checkInFormChild) {
+    public Optional<WalkInEntity> compareAndMap(ReservationEntity parent, WalkInEntity checkInEntityChild, WalkInForm checkInFormChild) {
         WalkInEntity actualEntity = (WalkInEntity) checkInEntityChild;
         WalkInForm form = checkInFormChild;
         boolean changeSW = false;

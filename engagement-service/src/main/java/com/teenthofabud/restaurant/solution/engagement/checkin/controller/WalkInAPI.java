@@ -20,7 +20,7 @@ import java.util.List;
 
 @RequestMapping("walkIn")
 @Tag(name = "WalkIn API", description = "Manage WalkIns and their details")
-public interface WalkInAPI extends CheckInAPI<WalkInForm, WalkInVo, WalkInService> {
+public abstract class WalkInAPI extends CheckInAPI<WalkInForm, WalkInVo, WalkInService> {
 
     @Operation(summary = "Get all WalkIn details by name, phoneNumber, emailId")
     @ApiResponses(value = {
@@ -31,7 +31,7 @@ public interface WalkInAPI extends CheckInAPI<WalkInForm, WalkInVo, WalkInServic
             @ApiResponse(responseCode = "404", description = "No CheckIns available by the given filters",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
-    public List<WalkInVo> getAllWalkInsByWalkInFilters(@RequestParam(required = false) String name,
+    public abstract List<WalkInVo> getAllWalkInsByWalkInFilters(@RequestParam(required = false) String name,
                                                    @RequestParam(required = false) String phoneNumber,
                                                    @RequestParam(required = false) String emailId) throws CheckInException ;
 

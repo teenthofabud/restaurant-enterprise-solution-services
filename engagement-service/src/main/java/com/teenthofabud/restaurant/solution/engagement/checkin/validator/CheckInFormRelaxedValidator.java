@@ -1,6 +1,7 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.validator;
 
 import com.teenthofabud.core.common.validator.RelaxedValidator;
+import com.teenthofabud.restaurant.solution.engagement.checkin.constants.CheckInType;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInForm;
 import com.teenthofabud.restaurant.solution.engagement.constants.EngagementErrorCode;
 import lombok.extern.slf4j.Slf4j;
@@ -59,6 +60,24 @@ public abstract class CheckInFormRelaxedValidator implements RelaxedValidator<Ch
         }
         log.debug("CheckInForm.timestamp is valid");*/
 
+        if(!getFieldsToEscape().contains("type") && form.getType() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getType()))) {
+            errors.rejectValue("type", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
+            log.debug("CheckInForm.type is invalid");
+            return false;
+        } else if(!getFieldsToEscape().contains("type") && form.getType() != null && StringUtils.hasText(StringUtils.trimWhitespace(form.getType()))) {
+            try {
+                CheckInType type = CheckInType.valueOf(form.getType());
+                if(type.compareTo(getCheckInTypeInContext()) != 0) {
+                    throw new IllegalArgumentException("CheckInType " + type + " not supported in child implementation");
+                }
+            } catch (IllegalArgumentException e) {
+                log.debug("CheckInForm.type is invalid");
+                errors.rejectValue("type", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
+                return false;
+            }
+        }
+        log.debug("CheckInForm.type is valid");
+
 
         if(!getFieldsToEscape().contains("sequence") && form.getSequence() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getSequence()))) {
             errors.rejectValue("sequence", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
@@ -116,4 +135,6 @@ public abstract class CheckInFormRelaxedValidator implements RelaxedValidator<Ch
     }
 
     public abstract Boolean validateLoosely(Optional<? extends CheckInForm> optionalCheckInFormParameters, Errors errors);
+
+    protected abstract CheckInType getCheckInTypeInContext();
 }

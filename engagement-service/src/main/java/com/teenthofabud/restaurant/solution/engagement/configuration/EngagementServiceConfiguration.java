@@ -22,7 +22,8 @@ import org.springframework.web.servlet.resource.ResourceUrlProvider;
 @Configuration
 @EnableEurekaClient
 @EnableJpaAuditing(auditorAwareRef = "baseAuditPropertyHandler")
-@EnableJpaRepositories(basePackages = {"com.teenthofabud.restaurant.solution.engagement.checkin.repository" })
+@EnableJpaRepositories(basePackages = { "com.teenthofabud.restaurant.solution.engagement.checkin.repository",
+        "com.teenthofabud.restaurant.solution.engagement.tableallocation.repository"})
 @EnableTransactionManagement
 public class EngagementServiceConfiguration extends DelegatingWebMvcConfiguration {
 

@@ -28,7 +28,7 @@ import java.util.Set;
 
 @RestController
 @Slf4j
-public class WalkInController /*extends CheckInAPI<WalkInForm, WalkInVo, WalkInServiceImpl>*/ implements ApplicationContextAware, WalkInAPI {
+public class WalkInController extends WalkInAPI implements ApplicationContextAware {
 
     private ApplicationContext applicationContext;
 
@@ -156,7 +156,7 @@ public class WalkInController /*extends CheckInAPI<WalkInForm, WalkInVo, WalkInS
         WalkInVo matchedBySequenceAndDate = new WalkInVo();
         log.debug("Requesting all available walkIns with given sequence and date");
         if(StringUtils.hasText(StringUtils.trimWhitespace(sequence)) && StringUtils.hasText(StringUtils.trimWhitespace(date))) {
-            matchedBySequenceAndDate = this.getCheckInService().retrieveAllMatchingDetailsByCriteria(sequence, date);
+            matchedBySequenceAndDate = this.getCheckInService().retrieveMatchingDetailsByCriteria(sequence, date);
             log.debug("Responding with all available walkIns with given sequence and date");
         } else if(StringUtils.isEmpty(StringUtils.trimWhitespace(sequence))) {
             log.debug("walkIn sequence is empty");

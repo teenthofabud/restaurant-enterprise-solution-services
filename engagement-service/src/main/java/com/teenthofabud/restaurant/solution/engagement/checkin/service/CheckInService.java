@@ -13,28 +13,28 @@ import com.teenthofabud.restaurant.solution.engagement.checkin.repository.CheckI
 import com.teenthofabud.restaurant.solution.engagement.checkin.validator.*;
 import com.teenthofabud.restaurant.solution.engagement.constants.EngagementErrorCode;
 import com.teenthofabud.restaurant.solution.engagement.utils.EngagementServiceHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.*;
 
 @Service
-public interface CheckInService<T extends CheckInForm, V extends CheckInVo, 
+public interface CheckInService<T extends CheckInForm, V extends CheckInVo,
         A extends CheckInFormValidator, B extends CheckInFormRelaxedValidator, C extends CheckInDtoValidator,
         D extends CheckInRepository, E extends CheckInEntitySelfMapper, F extends CheckInForm2EntityMapper,
         G extends CheckInForm2EntityConverter, H extends CheckInEntity2VoConverter, I extends CheckInDto2EntityConverter> {
 
     static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+    static Logger LOGGER = LoggerFactory.getLogger(CheckInService.class);
+
     public String getContextCheckInType();
-    
-    public void setCheckInBeanFactory(CheckInBeanFactory checkInBeanFactory);
-
-    public void setToabBaseService(TOABBaseService toabBaseService);
-
-    public void setEngagementServiceHelper(EngagementServiceHelper engagementServiceHelper);
 
     public A getCheckInFormValidator();
 
@@ -58,16 +58,66 @@ public interface CheckInService<T extends CheckInForm, V extends CheckInVo,
         Long checkInId = -1L;
         try {
             checkInId = Long.parseLong(id);
-            //log.debug("Parsed id {} to checkIn id {} in numeric format", id, checkInId);
             if(checkInId <= 0) {
+                LOGGER.debug("PK {} can't be negative", id);
                 throw new CheckInException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID, new Object[] { "id", id });
             }
         } catch (NumberFormatException e) {
-            //log.error("Unable to parse checkIn id", e);
-            //log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_ID_INVALID.getValue(), id);
+            LOGGER.error("Unable to parse PK: {}", id, e);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID, new Object[] { "id", id });
         }
         return checkInId;
+    }
+
+    default void checkUniquenessOfCheckIn(CheckInDto patchedReservationForm, CheckInEntity actualEntity) throws CheckInException {
+        List<Boolean> similaritySwitchesCollection = new ArrayList<>(2);
+        if(patchedReservationForm.getAccountId().isPresent()) {
+            similaritySwitchesCollection.add(patchedReservationForm.getAccountId().get().compareTo(actualEntity.getAccountId()) == 0);
+        }
+        if(patchedReservationForm.getSequence().isPresent()) {
+            similaritySwitchesCollection.add(patchedReservationForm.getSequence().get().compareTo(actualEntity.getSequence()) == 0);
+        }
+        if(!similaritySwitchesCollection.isEmpty()) {
+            String accountId = patchedReservationForm.getAccountId().isPresent() ? patchedReservationForm.getAccountId().get() : actualEntity.getAccountId();
+            String sequence = patchedReservationForm.getSequence().isPresent() ? patchedReservationForm.getSequence().get() : actualEntity.getSequence();
+            LocalDate dt = LocalDate.now();
+            LocalDateTime start = LocalDateTime.of(dt, LocalTime.of(0,0, 0));
+            LocalDateTime end = LocalDateTime.of(dt, LocalTime.of(23,59, 59));
+            LOGGER.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence, start, end);
+            boolean sameEntitySw = similaritySwitchesCollection.stream().allMatch(Boolean::valueOf);
+            boolean duplicateEntitySw =  this.getCheckInRepository().existsByAccountIdAndSequenceAndCreatedOnBetween(accountId, sequence, start, end);
+            if(sameEntitySw || duplicateEntitySw) {
+                LOGGER.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTS_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence, start, end);
+                throw new CheckInException(EngagementErrorCode.ENGAGEMENT_EXISTS, new Object[]{ "accountId: " + accountId, ", sequence: " + sequence + ", start: " + start + ", end: " + end });
+            }
+            LOGGER.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_NON_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence, start, end);
+
+        }
+    }
+
+    default void checkUniquenessOfCheckIn(CheckInForm reservationForm, CheckInEntity actualEntity) throws CheckInException {
+        List<Boolean> similaritySwitchesCollection = new ArrayList<>(3);
+        if(StringUtils.hasText(StringUtils.trimWhitespace(reservationForm.getAccountId()))) {
+            similaritySwitchesCollection.add(reservationForm.getAccountId().compareTo(actualEntity.getAccountId()) == 0);
+        }
+        if(!ObjectUtils.isEmpty(reservationForm.getSequence())) {
+            similaritySwitchesCollection.add(reservationForm.getSequence().compareTo(actualEntity.getSequence()) == 0);
+        }
+        if(!similaritySwitchesCollection.isEmpty()) {
+            String accountId = StringUtils.hasText(StringUtils.trimWhitespace(reservationForm.getAccountId())) ? reservationForm.getAccountId() : actualEntity.getAccountId();
+            String sequence = !ObjectUtils.isEmpty(reservationForm.getSequence()) ? reservationForm.getSequence() : actualEntity.getSequence();
+            LocalDate dt = LocalDate.now();
+            LocalDateTime start = LocalDateTime.of(dt, LocalTime.of(0,0, 0));
+            LocalDateTime end = LocalDateTime.of(dt, LocalTime.of(23,59, 59));
+            LOGGER.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence, start, end);
+            boolean sameEntitySw = similaritySwitchesCollection.stream().allMatch(Boolean::valueOf);
+            boolean duplicateEntitySw =  this.getCheckInRepository().existsByAccountIdAndSequenceAndCreatedOnBetween(accountId, sequence, start, end);
+            if(sameEntitySw || duplicateEntitySw) {
+                LOGGER.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTS_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence, start, end);
+                throw new CheckInException(EngagementErrorCode.ENGAGEMENT_EXISTS, new Object[]{ "accountId: " + accountId, ", sequence: " + sequence + ", start: " + start + ", end: " + end });
+            }
+            LOGGER.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_NON_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence, start, end);
+        }
     }
 
     public Comparator<V> getCheckInVoTypeComparator();
@@ -77,11 +127,10 @@ public interface CheckInService<T extends CheckInForm, V extends CheckInVo,
     public V retrieveDetailsById(String id, Optional<TOABCascadeLevel> optionalCascadeLevel) throws CheckInException;
 
     public List<V> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalAccountId,
-                                                                //Optional<String> optionalTableId,
                                                                 Optional<String> optionalSequence,
                                                                 Optional<String> optionalNotes) throws CheckInException;
 
-    public V retrieveAllMatchingDetailsByCriteria(String sequence, String date) throws CheckInException;
+    public V retrieveMatchingDetailsByCriteria(String sequence, String date) throws CheckInException;
 
     public String createCheckIn(T form) throws CheckInException;
 

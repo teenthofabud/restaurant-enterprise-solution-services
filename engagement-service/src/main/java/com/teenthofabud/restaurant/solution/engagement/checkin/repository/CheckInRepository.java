@@ -10,8 +10,5 @@ public interface CheckInRepository<T extends CheckInEntity> extends TOABSimpleEn
 
     public Optional<T> findBySequenceAndCreatedOnBetween(Long sequence, LocalDateTime start, LocalDateTime end);
 
-    public Boolean existsByAccountIdAndSequence(String accountId, String sequence);
-
-    //public Optional<T> findByCreatedOnBetween(LocalDateTime start, LocalDateTime end);
-
+    public Boolean existsByAccountIdAndSequenceAndCreatedOnBetween(String accountId, String sequence, LocalDateTime start, LocalDateTime end);
 }

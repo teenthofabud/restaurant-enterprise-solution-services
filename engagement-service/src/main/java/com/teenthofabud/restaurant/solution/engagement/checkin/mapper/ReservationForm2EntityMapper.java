@@ -37,7 +37,7 @@ public class ReservationForm2EntityMapper extends CheckInForm2EntityMapper<Reser
     }
 
     /*@Override
-    protected Optional<ReservationEntity> compareAndMap(CheckInEntity parent, ReservationEntity checkInEntityChild, ReservationForm checkInFormChild) {
+    protected Optional<ReservationEntity> compareAndMap(ReservationEntity parent, ReservationEntity checkInEntityChild, ReservationForm checkInFormChild) {
         ReservationEntity actualEntity = checkInEntityChild;
         ReservationForm form = checkInFormChild;
         boolean changeSW = false;

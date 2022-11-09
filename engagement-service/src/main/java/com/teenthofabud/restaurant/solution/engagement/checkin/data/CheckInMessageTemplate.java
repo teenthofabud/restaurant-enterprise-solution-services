@@ -13,9 +13,9 @@ public enum CheckInMessageTemplate {
     MSG_TEMPLATE_CHECKIN_ID_INVALID("CHECKIN  id: {} is invalid"),
     MSG_TEMPLATE_CHECKIN_ID_EMPTY("CHECKIN  id is empty"),
     MSG_TEMPLATE_CHECKIN_CASCADE_LEVEL_EMPTY("CHECKIN  cascadeLevel is empty"),
-    MSG_TEMPLATE_CHECKIN_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE("Checking CheckIn existence by accountId: {} and sequence: {}"),
-    MSG_TEMPLATE_CHECKIN_EXISTS_BY_ACCOUNT_ID_AND_SEQUENCE("CheckIn exists between accountId: {} and sequence: {}"),
-    MSG_TEMPLATE_CHECKIN_NON_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE("No CheckIn exists between accountId: {} and sequence: {}");
+    MSG_TEMPLATE_CHECKIN_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN("Checking CheckIn existence by accountId: {}, sequence: {}, start: {} and end: {}"),
+    MSG_TEMPLATE_CHECKIN_EXISTS_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN("CheckIn exists between accountId: {}, sequence: {}, start: {} and end: {}"),
+    MSG_TEMPLATE_CHECKIN_NON_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN("No CheckIn exists between accountId: {}, sequence: {}, start: {} and end: {}");
 
     private String value;
 

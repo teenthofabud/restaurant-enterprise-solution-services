@@ -14,7 +14,7 @@ public abstract class CheckInForm2EntityMapper<T extends CheckInEntity, U extend
 
     private List<String> fieldsToEscape;
 
-    @Value("#{'${res.engagement.checkIn.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.engagement.tableAllocation.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }

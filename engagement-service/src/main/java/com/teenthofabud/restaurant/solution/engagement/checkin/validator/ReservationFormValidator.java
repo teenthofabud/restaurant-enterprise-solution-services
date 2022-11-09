@@ -1,6 +1,7 @@
 
 package com.teenthofabud.restaurant.solution.engagement.checkin.validator;
 
+import com.teenthofabud.restaurant.solution.engagement.checkin.constants.CheckInType;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInForm;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.ReservationForm;
 import com.teenthofabud.restaurant.solution.engagement.constants.EngagementErrorCode;
@@ -83,5 +84,10 @@ public class ReservationFormValidator extends CheckInFormValidator {
     @Override
     public List<String> getFieldsToEscape() {
         return this.fieldsToEscape;
+    }
+
+    @Override
+    protected CheckInType getCheckInTypeInContext() {
+        return CheckInType.RESERVATION;
     }
 }

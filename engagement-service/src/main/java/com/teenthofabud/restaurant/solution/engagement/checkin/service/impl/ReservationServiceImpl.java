@@ -65,13 +65,11 @@ public class ReservationServiceImpl implements ReservationService {
         this.reservationDateFormat = reservationDateFormat;
     }
 
-    @Override
     @Autowired
     public void setToabBaseService(TOABBaseService toabBaseService) {
         this.toabBaseService = toabBaseService;
     }
 
-    @Override
     @Autowired
     public void setCheckInBeanFactory(CheckInBeanFactory checkInBeanFactory) {
         this.checkInBeanFactory = checkInBeanFactory;
@@ -82,7 +80,6 @@ public class ReservationServiceImpl implements ReservationService {
         return CheckInType.RESERVATION.name();
     }
 
-    @Override
     @Autowired
     public void setEngagementServiceHelper(EngagementServiceHelper engagementServiceHelper) {
         this.engagementServiceHelper = engagementServiceHelper;
@@ -266,14 +263,14 @@ public class ReservationServiceImpl implements ReservationService {
             matcherCriteria = matcherCriteria.withMatcher("accountId", match -> match.exact());
         }
         if(StringUtils.hasText(StringUtils.trimWhitespace(sequence))) {
-            log.debug("sequence {} is valid", accountId);
-            providedFilters.put("sequence", accountId);
+            log.debug("sequence {} is valid", sequence);
+            providedFilters.put("sequence", sequence);
             entity.setSequence(sequence);
             matcherCriteria = matcherCriteria.withMatcher("sequence", match -> match.exact());
         }
         if(StringUtils.hasText(StringUtils.trimWhitespace(notes))) {
-            log.debug("notes {} is valid", accountId);
-            providedFilters.put("notes", accountId);
+            log.debug("notes {} is valid", notes);
+            providedFilters.put("notes", notes);
             entity.setNotes(notes);
             matcherCriteria = matcherCriteria.withMatcher("notes", match -> match.contains());
         }
@@ -291,7 +288,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public ReservationVo retrieveAllMatchingDetailsByCriteria(String sequence, String date) throws CheckInException {
+    public ReservationVo retrieveMatchingDetailsByCriteria(String sequence, String date) throws CheckInException {
         Long seq = 0l;
         LocalDate dt = LocalDate.now();
         LocalDateTime start = LocalDateTime.now();
@@ -308,8 +305,8 @@ public class ReservationServiceImpl implements ReservationService {
         try {
             dt = LocalDate.parse(date, dtf);
         } catch (DateTimeParseException e) {
-            log.debug("Date: {} format is invalid", sequence);
-            throw new CheckInException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID, new Object[] { "sequence", sequence });
+            log.debug("Date: {} format is invalid", date);
+            throw new CheckInException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID, new Object[] { "date", date });
         }
 
         start = LocalDateTime.of(dt, LocalTime.of(0,0, 0));
@@ -351,17 +348,20 @@ public class ReservationServiceImpl implements ReservationService {
 
         ReservationEntity expectedEntity = this.getCheckInForm2EntityConverter().convert(form);
 
-        log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE.getValue(), form.getAccountId(), form.getSequence());
-        if(this.getCheckInRepository().existsByAccountIdAndSequence(expectedEntity.getAccountId(), expectedEntity.getSequence())) {
-            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTS_BY_ACCOUNT_ID_AND_SEQUENCE.getValue(),
-                    expectedEntity.getAccountId(), expectedEntity.getSequence());
-            throw new CheckInException(EngagementErrorCode.ENGAGEMENT_EXISTS,
-                    new Object[]{"accountId: " + form.getAccountId(), "sequence: " + form.getSequence() });
+        LocalDate dt = LocalDate.now();
+        LocalDateTime start = LocalDateTime.of(dt, LocalTime.of(0,0, 0));
+        LocalDateTime end = LocalDateTime.of(dt, LocalTime.of(23,59, 59));
+
+        log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), form.getAccountId(), form.getSequence(), start, end);
+        if(this.getCheckInRepository().existsByAccountIdAndSequenceAndCreatedOnBetween(expectedEntity.getAccountId(), expectedEntity.getSequence(), start, end)) {
+            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTS_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(),
+                    expectedEntity.getAccountId(), expectedEntity.getSequence(), start, end);
+            throw new CheckInException(EngagementErrorCode.ENGAGEMENT_EXISTS, new Object[]{ "accountId: " + form.getAccountId(), "sequence: " + form.getSequence() + ", start: " + start + ", end: " + end });
         }
-        log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_NON_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE.getValue(), expectedEntity.getAccountId(), expectedEntity.getSequence());
+        log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_NON_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), expectedEntity.getAccountId(), expectedEntity.getSequence(), start, end);
 
         log.debug("Saving {}", expectedEntity);
-        ReservationEntity actualEntity = (ReservationEntity) this.getCheckInRepository().save(expectedEntity);
+        ReservationEntity actualEntity = this.getCheckInRepository().save(expectedEntity);
         log.debug("Saved {}", actualEntity);
 
         if(actualEntity == null) {
@@ -556,7 +556,7 @@ public class ReservationServiceImpl implements ReservationService {
         log.debug("Comparatively copied patched attributes from ReservationDto to ReservationEntity");
 
         log.debug("Saving patched ReservationEntity: {}", actualEntity);
-        actualEntity = (ReservationEntity) this.getCheckInRepository().save(actualEntity);
+        actualEntity = this.getCheckInRepository().save(actualEntity);
         log.debug("Saved patched ReservationEntity: {}", actualEntity);
         if(actualEntity == null) {
             log.debug("Unable to patch delete ReservationEntity with id:{}", id);
@@ -566,7 +566,7 @@ public class ReservationServiceImpl implements ReservationService {
         log.info("Patched ReservationEntity with id:{}", id);
     }
 
-    private void checkUniquenessOfCheckIn(ReservationDto patchedReservationForm, ReservationEntity actualEntity) throws CheckInException {
+    /*private void checkUniquenessOfCheckIn(ReservationDto patchedReservationForm, ReservationEntity actualEntity) throws CheckInException {
         List<Boolean> similaritySwitchesCollection = new ArrayList<>(2);
         if(patchedReservationForm.getAccountId().isPresent()) {
             similaritySwitchesCollection.add(patchedReservationForm.getAccountId().get().compareTo(actualEntity.getAccountId()) == 0);
@@ -577,14 +577,17 @@ public class ReservationServiceImpl implements ReservationService {
         if(!similaritySwitchesCollection.isEmpty()) {
             String accountId = patchedReservationForm.getAccountId().isPresent() ? patchedReservationForm.getAccountId().get() : actualEntity.getAccountId();
             String sequence = patchedReservationForm.getSequence().isPresent() ? patchedReservationForm.getSequence().get() : actualEntity.getSequence();
-            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE.getValue(), accountId, sequence);
+            LocalDate dt = LocalDate.now();
+            LocalDateTime start = LocalDateTime.of(dt, LocalTime.of(0,0, 0));
+            LocalDateTime end = LocalDateTime.of(dt, LocalTime.of(23,59, 59));
+            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence, start, end);
             boolean sameEntitySw = similaritySwitchesCollection.stream().allMatch(Boolean::valueOf);
-            boolean duplicateEntitySw =  this.getCheckInRepository().existsByAccountIdAndSequence(accountId, sequence);
+            boolean duplicateEntitySw =  this.getCheckInRepository().existsByAccountIdAndSequenceAndCreatedOnBetween(accountId, sequence, start, end);
             if(sameEntitySw || duplicateEntitySw) {
-                log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTS_BY_ACCOUNT_ID_AND_SEQUENCE.getValue(), accountId, sequence);
-                throw new CheckInException(EngagementErrorCode.ENGAGEMENT_EXISTS, new Object[]{ "accountId: " + accountId, "sequence: " + sequence });
+                log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTS_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence, start, end);
+                throw new CheckInException(EngagementErrorCode.ENGAGEMENT_EXISTS, new Object[]{ "accountId: " + accountId, "sequence: " + sequence + ", start: " + start + ", end: " + end });
             }
-            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_NON_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE.getValue(), accountId, sequence);
+            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_NON_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence, start, end);
 
         }
     }
@@ -600,15 +603,18 @@ public class ReservationServiceImpl implements ReservationService {
         if(!similaritySwitchesCollection.isEmpty()) {
             String accountId = StringUtils.hasText(StringUtils.trimWhitespace(reservationForm.getAccountId())) ? reservationForm.getAccountId() : actualEntity.getAccountId();
             String sequence = !ObjectUtils.isEmpty(reservationForm.getSequence()) ? reservationForm.getSequence() : actualEntity.getSequence();
-            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE.getValue(), accountId, sequence);
+            LocalDate dt = LocalDate.now();
+            LocalDateTime start = LocalDateTime.of(dt, LocalTime.of(0,0, 0));
+            LocalDateTime end = LocalDateTime.of(dt, LocalTime.of(23,59, 59));
+            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence, start, end);
             boolean sameEntitySw = similaritySwitchesCollection.stream().allMatch(Boolean::valueOf);
-            boolean duplicateEntitySw =  this.getCheckInRepository().existsByAccountIdAndSequence(accountId, sequence);
+            boolean duplicateEntitySw =  this.getCheckInRepository().existsByAccountIdAndSequenceAndCreatedOnBetween(accountId, sequence, start, end);
             if(sameEntitySw || duplicateEntitySw) {
-                log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTS_BY_ACCOUNT_ID_AND_SEQUENCE.getValue(), accountId, sequence);
-                throw new CheckInException(EngagementErrorCode.ENGAGEMENT_EXISTS, new Object[]{ "accountId: " + accountId, "sequence: " + sequence });
+                log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTS_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence, start, end);
+                throw new CheckInException(EngagementErrorCode.ENGAGEMENT_EXISTS, new Object[]{ "accountId: " + accountId, "sequence: " + sequence + ", start: " + start + ", end: " + end });
             }
-            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_NON_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE.getValue(), accountId, sequence);
+            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_NON_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence, start, end);
 
         }
-    }
+    }*/
 }

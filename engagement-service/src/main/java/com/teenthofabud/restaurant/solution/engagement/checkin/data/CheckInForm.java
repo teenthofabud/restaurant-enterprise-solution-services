@@ -22,7 +22,7 @@ public class CheckInForm {
     private String emailId;*/
     private String notes;
 
-    private CheckInType type;
+    private String type;
 
     public CheckInForm(CheckInForm form) {
         this.accountId = form.getAccountId();

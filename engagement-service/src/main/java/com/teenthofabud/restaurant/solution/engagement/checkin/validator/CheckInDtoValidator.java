@@ -1,5 +1,6 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.validator;
 
+import com.teenthofabud.restaurant.solution.engagement.checkin.constants.CheckInType;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInDto;
 import com.teenthofabud.restaurant.solution.engagement.constants.EngagementErrorCode;
 import lombok.extern.slf4j.Slf4j;
@@ -16,16 +17,9 @@ import java.util.Optional;
 @Slf4j
 public abstract class CheckInDtoValidator implements Validator {
 
-    //private Validator tableIdValidator;
     private Validator accountIdValidator;
 
     public abstract List<String> getFieldsToEscape();
-
-    /*@Autowired
-    @Qualifier("tableIdValidator")
-    public void setTableIdValidator(Validator tableIdValidator) {
-        this.tableIdValidator = tableIdValidator;
-    }*/
 
     @Autowired
     @Qualifier("accountIdValidator")
@@ -97,6 +91,24 @@ public abstract class CheckInDtoValidator implements Validator {
             }
         }*/
 
+        Optional<String> optType = dto.getType();
+        if(!getFieldsToEscape().contains("type") && optType.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optType.get()))) {
+            errors.rejectValue("type", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
+            log.debug("CheckInDto.type is invalid");
+            return;
+        } else if(!getFieldsToEscape().contains("type") && optType.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optType.get()))) {
+            try {
+                CheckInType type = CheckInType.valueOf(optType.get());
+                if(type.compareTo(getCheckInTypeInContext()) != 0) {
+                    throw new IllegalArgumentException("CheckInType " + type + " not supported in child implementation");
+                }
+            } catch (IllegalArgumentException e) {
+                errors.rejectValue("type", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
+                log.debug("CheckInDto.type is invalid");
+                return;
+            }
+        }
+
         Optional<String> optAccountId = dto.getAccountId();
         if(!getFieldsToEscape().contains("accountId") && optAccountId.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optAccountId.get()))) {
             errors.rejectValue("accountId", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
@@ -130,5 +142,7 @@ public abstract class CheckInDtoValidator implements Validator {
     }
 
     protected abstract void validate(Optional<? extends CheckInDto> optionalCheckInDtoParameters, Errors errors);
+
+    protected abstract CheckInType getCheckInTypeInContext();
 
 }

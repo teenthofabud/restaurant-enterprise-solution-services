@@ -1,5 +1,6 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.validator;
 
+import com.teenthofabud.restaurant.solution.engagement.checkin.constants.CheckInType;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInDto;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.ReservationDto;
 import com.teenthofabud.restaurant.solution.engagement.constants.EngagementErrorCode;
@@ -82,6 +83,11 @@ public class ReservationDtoValidator extends CheckInDtoValidator {
                 return;
             }
         }
+    }
+
+    @Override
+    protected CheckInType getCheckInTypeInContext() {
+        return CheckInType.RESERVATION;
     }
 
 }

@@ -17,7 +17,7 @@ import java.util.Optional;
 @Slf4j
 public abstract class CheckInDto2EntityConverter<T extends CheckInDto, U extends CheckInEntity> implements ComparativePatchConverter<CheckInDto, CheckInEntity> {
 
-    private static final Integer NO_OF_COMPARABLE_AND_MAPPABLE_FIELDS = 10;
+    private static final Integer NO_OF_COMPARABLE_AND_MAPPABLE_FIELDS = 5;
 
     public abstract List<String> getFieldsToEscape();
     

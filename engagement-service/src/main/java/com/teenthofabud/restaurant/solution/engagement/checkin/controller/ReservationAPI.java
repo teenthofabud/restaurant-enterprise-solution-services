@@ -20,7 +20,7 @@ import java.util.List;
 
 @RequestMapping("reservation")
 @Tag(name = "Reservation API", description = "Manage Reservations and their details")
-public interface ReservationAPI extends CheckInAPI<ReservationForm, ReservationVo, ReservationService> {
+public abstract class ReservationAPI extends CheckInAPI<ReservationForm, ReservationVo, ReservationService> {
 
     @Operation(summary = "Get all Reservation details by date, time")
     @ApiResponses(value = {
@@ -31,6 +31,6 @@ public interface ReservationAPI extends CheckInAPI<ReservationForm, ReservationV
             @ApiResponse(responseCode = "404", description = "No CheckIns available by the given filters",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
-    public List<ReservationVo> getAllReservationsByReservationFilters(@RequestParam(required = false) String date, @RequestParam(required = false) String time) throws CheckInException ;
+    public abstract List<ReservationVo> getAllReservationsByReservationFilters(@RequestParam(required = false) String date, @RequestParam(required = false) String time) throws CheckInException ;
 
 }

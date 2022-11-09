@@ -1,5 +1,6 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.validator;
 
+import com.teenthofabud.restaurant.solution.engagement.checkin.constants.CheckInType;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInForm;
 import com.teenthofabud.restaurant.solution.engagement.constants.EngagementErrorCode;
 import lombok.extern.slf4j.Slf4j;
@@ -70,6 +71,24 @@ public abstract class CheckInFormValidator implements Validator {
         }
         log.debug("CheckInForm.status is valid");*/
 
+        if(!getFieldsToEscape().contains("type") && form.getType() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getType()))) {
+            errors.rejectValue("type", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
+            log.debug("CheckInForm.type is invalid");
+            return;
+        } else if(!getFieldsToEscape().contains("type") && form.getType() != null && StringUtils.hasText(StringUtils.trimWhitespace(form.getType()))) {
+            try {
+                CheckInType type = CheckInType.valueOf(form.getType());
+                if(type.compareTo(getCheckInTypeInContext()) != 0) {
+                    throw new IllegalArgumentException("CheckInType " + type + " not supported in child implementation");
+                }
+            } catch (IllegalArgumentException e) {
+                log.debug("CheckInForm.type is invalid");
+                errors.rejectValue("type", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
+                return;
+            }
+        }
+        log.debug("CheckInForm.status is valid");
+
 
         if(!getFieldsToEscape().contains("noOfPersons") && (form.getNoOfPersons() == null || form.getNoOfPersons() <= 0)) {
             errors.rejectValue("noOfPersons", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
@@ -123,5 +142,7 @@ public abstract class CheckInFormValidator implements Validator {
     }
 
     protected abstract void validate(Optional<? extends CheckInForm> optionalCheckInFormParameters, Errors errors);
+
+    protected abstract CheckInType getCheckInTypeInContext();
 
 }

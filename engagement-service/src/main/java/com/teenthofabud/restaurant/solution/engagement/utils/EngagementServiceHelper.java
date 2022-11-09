@@ -8,6 +8,9 @@ import com.teenthofabud.restaurant.solution.engagement.checkin.converter.Reserva
 import com.teenthofabud.restaurant.solution.engagement.checkin.converter.WalkInEntity2VoConverter;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.*;
 import com.teenthofabud.restaurant.solution.engagement.checkin.factory.CheckInBeanFactory;
+import com.teenthofabud.restaurant.solution.engagement.tableallocation.converter.TableAllocationEntity2VoConverter;
+import com.teenthofabud.restaurant.solution.engagement.tableallocation.data.TableAllocationEntity;
+import com.teenthofabud.restaurant.solution.engagement.tableallocation.data.TableAllocationVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,6 +24,13 @@ import java.util.Optional;
 public class EngagementServiceHelper<T extends CheckInForm, U extends CheckInVo, V extends CheckInEntity> {
 
     private CheckInBeanFactory checkInBeanFactory;
+
+    private TableAllocationEntity2VoConverter tableAllocationEntity2VoConverter;
+
+    @Autowired
+    public void setTableAllocationEntity2VoConverter(TableAllocationEntity2VoConverter tableAllocationEntity2VoConverter) {
+        this.tableAllocationEntity2VoConverter = tableAllocationEntity2VoConverter;
+    }
 
     @Autowired
     public void setCheckInBeanFactory(CheckInBeanFactory checkInBeanFactory) {
@@ -91,5 +101,25 @@ public class EngagementServiceHelper<T extends CheckInForm, U extends CheckInVo,
             }
         }
         return reservationDetailsList;
+    }
+
+    public List<TableAllocationVo> tableAllocationEntity2DetailedVo(List<TableAllocationEntity> tableAllocationEntityList) {
+        List<TableAllocationVo> tableAllocationVoList = new LinkedList<>();
+        if(tableAllocationEntityList != null && !tableAllocationEntityList.isEmpty()) {
+            for(TableAllocationEntity entity : tableAllocationEntityList) {
+                TableAllocationVo vo = this.tableAllocationEntity2DetailedVo(entity);
+                tableAllocationVoList.add(vo);
+            }
+        }
+        return tableAllocationVoList;
+    }
+
+    public TableAllocationVo tableAllocationEntity2DetailedVo(TableAllocationEntity tableAllocationEntity) {
+        if(tableAllocationEntity != null) {
+            TableAllocationVo vo = tableAllocationEntity2VoConverter.convert(tableAllocationEntity);
+            log.debug("Converting {} to {}", tableAllocationEntity, vo);
+            return vo;
+        }
+        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "tableAllocationEntity entity is null" });
     }
 }

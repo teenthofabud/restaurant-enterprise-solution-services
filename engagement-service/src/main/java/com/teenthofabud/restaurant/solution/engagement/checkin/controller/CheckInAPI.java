@@ -23,11 +23,11 @@ import java.util.List;
 import java.util.Set;
 
 @RequestMapping("checkIn")
-public interface CheckInAPI<T extends CheckInForm, U extends CheckInVo, A extends CheckInService> {
+public abstract class CheckInAPI<T extends CheckInForm, U extends CheckInVo, A extends CheckInService> {
 
-    static final String MEDIA_BOOKING_APPLICATION_JSON_PATCH = "application/json-patch+json";
+    protected static final String MEDIA_BOOKING_APPLICATION_JSON_PATCH = "application/json-patch+json";
 
-    public A getCheckInService();
+    public abstract A getCheckInService();
 
     @Operation(summary = "Create new CheckIn details by id")
     @ApiResponses(value = {
@@ -42,7 +42,7 @@ public interface CheckInAPI<T extends CheckInForm, U extends CheckInVo, A extend
             @ApiResponse(responseCode = "500", description = "Internal system error while trying to create new CheckIn",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
-    public CreatedVo postNewCheckIn(/*@RequestBody(required = false, content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+    public abstract CreatedVo postNewCheckIn(/*@RequestBody(required = false, content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
             schema = @Schema(oneOf = { WalkInForm.class, ReservationForm.class }, discriminatorMapping = {
                     @DiscriminatorMapping( value = "WALK_IN", schema = WalkInForm.class ),
                     @DiscriminatorMapping( value = "RESERVATION", schema = ReservationForm.class )
@@ -61,7 +61,7 @@ public interface CheckInAPI<T extends CheckInForm, U extends CheckInVo, A extend
             @ApiResponse(responseCode = "500", description = "Internal system error while trying to update CheckIn details",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
-    public void putExistingCheckIn(@Parameter(in = ParameterIn.PATH, name = "id", description = "CheckIn id") String id, /*@RequestBody(required = false,
+    public abstract void putExistingCheckIn(@Parameter(in = ParameterIn.PATH, name = "id", description = "CheckIn id") String id, /*@RequestBody(required = false,
             content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
             schema = @Schema(oneOf = { WalkInForm.class, ReservationForm.class }, discriminatorMapping = {
                     @DiscriminatorMapping( value = "WALK_IN", schema = WalkInForm.class ),
@@ -82,7 +82,7 @@ public interface CheckInAPI<T extends CheckInForm, U extends CheckInVo, A extend
             @ApiResponse(responseCode = "500", description = "Internal system error while trying to soft delete CheckIn",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
-    public void deleteExistingCheckIn(@Parameter(in = ParameterIn.PATH, name = "id", description = "CheckIn id")  String id) throws CheckInException ;
+    public abstract void deleteExistingCheckIn(@Parameter(in = ParameterIn.PATH, name = "id", description = "CheckIn id")  String id) throws CheckInException ;
 
     @Operation(summary = "Patch CheckIn attributes by id")
     @ApiResponses(value = {
@@ -97,7 +97,7 @@ public interface CheckInAPI<T extends CheckInForm, U extends CheckInVo, A extend
             @ApiResponse(responseCode = "500", description = "Internal system error while trying to patch provided attributes of CheckIn with the given values",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
-    public void patchExistingCheckIn(@Parameter(in = ParameterIn.PATH, name = "id", description = "CheckIn id")  String id, @RequestBody(required = false,
+    public abstract void patchExistingCheckIn(@Parameter(in = ParameterIn.PATH, name = "id", description = "CheckIn id")  String id, @RequestBody(required = false,
             content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema =
             @Schema(implementation = PatchOperationForm.class))) }) List<PatchOperationForm> dtoList) throws CheckInException ;
 
@@ -110,7 +110,7 @@ public interface CheckInAPI<T extends CheckInForm, U extends CheckInVo, A extend
                                     @DiscriminatorMapping( value = "RESERVATION", schema = ReservationVo.class )
                             }, discriminatorProperty = "type"))) })
     })*/
-    public Set<U> getAllCheckInNaturallyOrdered() ;
+    public abstract Set<U> getAllCheckInNaturallyOrdered() ;
 
     @Operation(summary = "Get all CheckIn details by accountId, sequence, notes")
     @ApiResponses(value = {
@@ -125,7 +125,7 @@ public interface CheckInAPI<T extends CheckInForm, U extends CheckInVo, A extend
             @ApiResponse(responseCode = "404", description = "No CheckIns available by the given filters",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
-    public List<U> getAllCheckInsByFilters(@Parameter(in = ParameterIn.QUERY, name = "accountId", description = "CheckIn made with accountId") String accountId,
+    public abstract List<U> getAllCheckInsByFilters(@Parameter(in = ParameterIn.QUERY, name = "accountId", description = "CheckIn made with accountId") String accountId,
                                            @Parameter(in = ParameterIn.QUERY, name = "sequence", description = "CheckIn sequence number for a day") String sequence,
                                            @Parameter(in = ParameterIn.QUERY, name = "notes", description = "CheckIn has notes") String notes) throws CheckInException ;
 
@@ -161,10 +161,10 @@ public interface CheckInAPI<T extends CheckInForm, U extends CheckInVo, A extend
                     }, discriminatorProperty = "type"))) }),*/
             @ApiResponse(responseCode = "400", description = "CheckIn id is invalid",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) }),
-            @ApiResponse(responseCode = "404", description = "No CheckInes available with the given category id",
+            @ApiResponse(responseCode = "404", description = "No CheckInes available with the given sequence",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
-    public U getCheckInBySequenceOnDate(@Parameter(in = ParameterIn.PATH, name = "sequence", description = "sequence number for a day") String sequence,
+    public abstract U getCheckInBySequenceOnDate(@Parameter(in = ParameterIn.PATH, name = "sequence", description = "sequence number for a day") String sequence,
                                                           @Parameter(in = ParameterIn.QUERY, name = "date", description = "expected date the sequence was generated")  String date) throws CheckInException;
 
     @Operation(summary = "Get CheckIn details by id")
@@ -180,7 +180,7 @@ public interface CheckInAPI<T extends CheckInForm, U extends CheckInVo, A extend
             @ApiResponse(responseCode = "404", description = "No CheckIn found with the given id",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
-    public U getCheckInDetailsById(@Parameter(in = ParameterIn.PATH, name = "id", description = "CheckIn id") String id,
+    public abstract U getCheckInDetailsById(@Parameter(in = ParameterIn.PATH, name = "id", description = "CheckIn id") String id,
     @Parameter(in = ParameterIn.QUERY, description = "levels of nested fields to be unfolded within the response body") String cascadeUntilLevel) throws CheckInException ;
 
 }

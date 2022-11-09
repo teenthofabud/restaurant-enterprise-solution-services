@@ -23,9 +23,9 @@ import com.teenthofabud.restaurant.solution.customer.account.mapper.AccountEntit
 import com.teenthofabud.restaurant.solution.customer.account.mapper.AccountForm2EntityMapper;
 import com.teenthofabud.restaurant.solution.customer.account.repository.AccountRepository;
 import com.teenthofabud.restaurant.solution.customer.account.service.AccountService;
+import com.teenthofabud.restaurant.solution.customer.account.validator.AccountDtoValidator;
 import com.teenthofabud.restaurant.solution.customer.integration.metadata.validator.GenderIdValidator;
 import com.teenthofabud.restaurant.solution.customer.utils.CustomerServiceHelper;
-import com.teenthofabud.restaurant.solution.customer.account.validator.AccountDtoValidator;
 import com.teenthofabud.restaurant.solution.customer.account.validator.AccountFormRelaxedValidator;
 import com.teenthofabud.restaurant.solution.customer.account.validator.AccountFormValidator;
 import com.teenthofabud.restaurant.solution.customer.error.CustomerErrorCode;

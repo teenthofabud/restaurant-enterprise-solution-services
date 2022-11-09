@@ -22,6 +22,8 @@ public interface WalkInService extends CheckInService<WalkInForm, WalkInVo, Walk
 
     public void setWalkInTimeFormat(String walkInTimeFormat);
 
+    public List<WalkInVo> retrieveAllMatchingWalkInDetailsByName(String name) throws CheckInException;
+
     public List<WalkInVo> retrieveAllMatchingWalkInDetailsByCriteria(Optional<String> optionalName, Optional<String> optionalPhoneNumber, Optional<String> optionalEmailId) throws CheckInException;
 
 }
