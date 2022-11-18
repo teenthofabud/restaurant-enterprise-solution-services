@@ -19,7 +19,7 @@ public interface MeetingService<T extends MeetingForm, V extends MeetingVo> {
     public V retrieveDetailsById(String id, Optional<TOABCascadeLevel> optionalCascadeLevel) throws MeetingException;
 
     public List<V> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalAccountId,
-           Optional<String> optionalSequence, Optional<String> optionalNotes) throws MeetingException;
+           Optional<String> optionalSequence) throws MeetingException;
 
     public V retrieveAllMatchingDetailsByCriteria(String sequence, String date) throws MeetingException;
 

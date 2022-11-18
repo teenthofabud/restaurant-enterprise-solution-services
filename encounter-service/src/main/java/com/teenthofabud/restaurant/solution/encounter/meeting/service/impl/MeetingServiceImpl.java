@@ -137,14 +137,13 @@ public abstract class MeetingServiceImpl<A extends MeetingFormValidator, B exten
         return vo;
     }
     @Override
-    public List<MeetingVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalAccountId, Optional<String> optionalSequence, Optional<String> optionalNotes) throws MeetingException {
-        if(optionalAccountId.isEmpty() && optionalSequence.isEmpty() && optionalNotes.isEmpty()) {
+    public List<MeetingVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalAccountId, Optional<String> optionalSequence) throws MeetingException {
+        if(optionalAccountId.isEmpty() && optionalSequence.isEmpty()) {
             log.debug("No search parameters provided");
         }
         String accountId = optionalAccountId.isPresent() ? optionalAccountId.get() : "";
         String sequence = optionalSequence.isPresent() ? optionalSequence.get() : "";
-        String notes = optionalNotes.isPresent() ? optionalNotes.get() : "";
-        if(StringUtils.isEmpty(StringUtils.trimWhitespace(accountId)) && StringUtils.isEmpty(StringUtils.trimWhitespace(sequence)) && StringUtils.isEmpty(StringUtils.trimWhitespace(notes))) {
+        if(StringUtils.isEmpty(StringUtils.trimWhitespace(accountId)) && StringUtils.isEmpty(StringUtils.trimWhitespace(sequence))) {
             log.debug("All search parameters are empty");
         }
         List<MeetingVo> matchedMeetingList = new LinkedList<>();
