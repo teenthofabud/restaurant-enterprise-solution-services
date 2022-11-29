@@ -32,7 +32,6 @@ public class ReservationController extends ReservationAPI implements Application
 
     private ApplicationContext applicationContext;
 
-
     @Override
     public ReservationServiceImpl getCheckInService() {
         return applicationContext.getBean(ReservationServiceImpl.class);

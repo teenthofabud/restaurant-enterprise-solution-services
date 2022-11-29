@@ -1,4 +1,4 @@
-package com.teenthofabud.restaurant.solution.checkin;
+package com.teenthofabud.restaurant.solution.engagement;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public abstract class ReservationIntegrationBaseTest {
+public abstract class EngagementIntegrationBaseTest {
 
     protected ObjectMapper om;
     protected MockMvc mockMvc;

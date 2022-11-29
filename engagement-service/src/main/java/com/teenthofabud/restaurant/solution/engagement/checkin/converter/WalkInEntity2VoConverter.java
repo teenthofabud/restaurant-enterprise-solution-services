@@ -1,5 +1,6 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.converter;
 
+import com.teenthofabud.restaurant.solution.engagement.checkin.constants.CheckInType;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,6 +39,11 @@ public class WalkInEntity2VoConverter extends CheckInEntity2VoConverter<WalkInEn
     @Override
     public List<String> getFieldsToEscape() {
         return this.fieldsToEscape;
+    }
+
+    @Override
+    protected CheckInType getContextualCheckInType() {
+        return CheckInType.WALK_IN;
     }
 
 }

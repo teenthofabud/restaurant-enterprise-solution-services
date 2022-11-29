@@ -18,16 +18,9 @@ import java.util.Optional;
 @Slf4j
 public abstract class CheckInFormRelaxedValidator implements RelaxedValidator<CheckInForm>  {
 
-    //private Validator tableIdValidator;
     private Validator accountIdValidator;
 
     public abstract List<String> getFieldsToEscape();
-
-    /*@Autowired
-    @Qualifier("tableIdValidator")
-    public void setTableIdValidator(Validator tableIdValidator) {
-        this.tableIdValidator = tableIdValidator;
-    }*/
 
     @Autowired
     @Qualifier("accountIdValidator")
@@ -92,23 +85,6 @@ public abstract class CheckInFormRelaxedValidator implements RelaxedValidator<Ch
             return false;
         }
         log.debug("CheckInForm.noOfPersons is valid");
-
-        /*if(!getFieldsToEscape().contains("tableId") && form.getTableId() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getTableId()))) {
-            log.debug("ReservationForm.tableId is empty");
-            errors.rejectValue("tableId", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
-            return false;
-        } else if(!getFieldsToEscape().contains("tableId") && form.getTableId() != null && StringUtils.hasText(StringUtils.trimWhitespace(form.getTableId()))){
-            Errors err = new DirectFieldBindingResult(form.getTableId(), "ReservationForm");
-            tableIdValidator.validate(form.getTableId(), err);
-            if(err.hasErrors()) {
-                log.debug("ReservationForm.tableId is invalid");
-                EngagementErrorCode ec = EngagementErrorCode.valueOf(err.getGlobalError().getCode());
-                log.debug("ReservationForm error detail: {}", ec);
-                errors.rejectValue("tableId", ec.name());
-                return false;
-            }
-        }
-        log.debug("ReservationForm.tableId is valid");*/
 
         if(!getFieldsToEscape().contains("accountId") && form.getAccountId() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getAccountId()))) {
             log.debug("CheckInForm.accountId is empty");

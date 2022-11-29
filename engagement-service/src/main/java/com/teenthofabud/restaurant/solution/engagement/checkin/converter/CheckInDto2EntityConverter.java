@@ -17,7 +17,7 @@ import java.util.Optional;
 @Slf4j
 public abstract class CheckInDto2EntityConverter<T extends CheckInDto, U extends CheckInEntity> implements ComparativePatchConverter<CheckInDto, CheckInEntity> {
 
-    private static final Integer NO_OF_COMPARABLE_AND_MAPPABLE_FIELDS = 5;
+    private static final Integer NO_OF_COMPARABLE_AND_MAPPABLE_FIELDS = 6;
 
     public abstract List<String> getFieldsToEscape();
     
@@ -27,12 +27,7 @@ public abstract class CheckInDto2EntityConverter<T extends CheckInDto, U extends
         Arrays.fill(changeSW, Boolean.FALSE);
         int i = 0;
 
-        /*Optional<String> optTableId = dto.getTableId();
-        if(!getFieldsToEscape().contains("tableId") && optTableId.isPresent()) {
-            actualEntity.setTableId(optTableId.get());
-            changeSW[i++] = true;
-            log.debug("CheckInDto.tableId is valid");
-        }
+        /*
 
         Optional<String> optStatus = dto.getStatus();
         if(!getFieldsToEscape().contains("status") && optStatus.isPresent()) {
@@ -49,13 +44,6 @@ public abstract class CheckInDto2EntityConverter<T extends CheckInDto, U extends
             log.debug("CheckInDto.noOfPersons is valid");
         }
 
-        Optional<String> optSequence = dto.getSequence();
-        if(!getFieldsToEscape().contains("sequence") && optSequence.isPresent()) {
-            actualEntity.setSequence(optSequence.get());
-            changeSW[i++] = true;
-            log.debug("CheckInDto.sequence is valid");
-        }
-
         Optional<String> optAccountId = dto.getAccountId();
         if(!getFieldsToEscape().contains("accountId") && optAccountId.isPresent()) {
             actualEntity.setAccountId(optAccountId.get());
@@ -63,32 +51,18 @@ public abstract class CheckInDto2EntityConverter<T extends CheckInDto, U extends
             log.debug("CheckInDto.accountId is valid");
         }
 
-        /*Optional<String> optName = dto.getName();
-        if(!getFieldsToEscape().contains("name") && optName.isPresent()) {
-            actualEntity.setName(optName.get());
-            changeSW[i++] = true;
-            log.debug("CheckInDto.name is valid");
-        }
-
-        Optional<String> optEmailId = dto.getEmailId();
-        if(!getFieldsToEscape().contains("emailId") && optEmailId.isPresent()) {
-            actualEntity.setEmailId(optEmailId.get());
-            changeSW[i++] = true;
-            log.debug("CheckInDto.emailId is valid");
-        }
-
-        Optional<String> optPhoneNumber = dto.getPhoneNumber();
-        if(!getFieldsToEscape().contains("phoneNumber") && optPhoneNumber.isPresent()) {
-            actualEntity.setPhoneNumber(optPhoneNumber.get());
-            changeSW[i++] = true;
-            log.debug("CheckInDto.phoneNumber is valid");
-        }*/
-
         Optional<String> optNotes = dto.getNotes();
         if(!getFieldsToEscape().contains("notes") && optNotes.isPresent()) {
             actualEntity.setNotes(optNotes.get());
             changeSW[i++] = true;
             log.debug("CheckInDto.notes is valid");
+        }
+
+        Optional<String> optSequence = dto.getSequence();
+        if(!getFieldsToEscape().contains("sequence") && optSequence.isPresent()) {
+            actualEntity.setSequence(optSequence.get());
+            changeSW[i++] = true;
+            log.debug("CheckInDto.sequence is valid");
         }
 
         Optional<String> optActive = dto.getActive();

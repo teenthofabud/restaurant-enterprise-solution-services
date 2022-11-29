@@ -13,8 +13,6 @@ import java.util.Optional;
 @AllArgsConstructor
 public class CheckInDto {
 
-    /*@ToString.Include
-    private Optional<String> tableId;*/
     @ToString.Include
     private Optional<String> accountId;
     @ToString.Include
@@ -23,22 +21,13 @@ public class CheckInDto {
     private Optional<Integer> noOfPersons;
     /*@ToString.Include
     private Optional<String> status;*/
-    /*@ToString.Include
-    private Optional<String> name;
-    @ToString.Include
-    private Optional<String> phoneNumber;
-    @ToString.Include
-    private Optional<String> emailId;*/
     @ToString.Include
     private Optional<String> notes;
-    @ToString.Include
-    private Optional<String> type;
     @ToString.Include
     private Optional<String> active;
 
 
     public CheckInDto() {
-        this.type = Optional.ofNullable(null);
         this.noOfPersons = Optional.ofNullable(null);
         this.sequence = Optional.ofNullable(null);
         this.accountId = Optional.ofNullable(null);
@@ -48,7 +37,6 @@ public class CheckInDto {
     }
 
     public CheckInDto(CheckInDto dto) {
-        this.type = dto.getType();
         this.noOfPersons = dto.getNoOfPersons();
         this.sequence = dto.getSequence();
         this.accountId = dto.getAccountId();

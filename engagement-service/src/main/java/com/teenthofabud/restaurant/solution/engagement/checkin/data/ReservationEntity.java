@@ -14,7 +14,7 @@ import java.time.LocalTime;
 @Getter
 @Setter
 @AllArgsConstructor
-@ToString(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true, callSuper = true)
 @Entity(name = "reservation")
 @Table(name = "reservation")
 @EntityListeners(AuditingEntityListener.class)
@@ -28,7 +28,9 @@ public class ReservationEntity extends CheckInEntity {
         this.time = LocalTime.now();
     }
 
+    @ToString.Include
     private LocalDate date;
+    @ToString.Include
     private LocalTime time;
 
 }

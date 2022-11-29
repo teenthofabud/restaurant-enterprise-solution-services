@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Getter
 @Setter
-@ToString
+@ToString(callSuper = true)
 @AllArgsConstructor
 public class WalkInDto extends CheckInDto {
 

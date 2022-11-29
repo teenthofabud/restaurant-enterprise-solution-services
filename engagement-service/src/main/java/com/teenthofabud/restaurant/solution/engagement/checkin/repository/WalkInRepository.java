@@ -9,6 +9,4 @@ import java.util.Optional;
 @Repository
 public interface WalkInRepository extends CheckInRepository<WalkInEntity> {
 
-    public Optional<ReservationEntity> findByName(String name);
-
 }

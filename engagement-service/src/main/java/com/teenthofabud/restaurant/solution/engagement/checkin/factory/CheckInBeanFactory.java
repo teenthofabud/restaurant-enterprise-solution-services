@@ -10,6 +10,7 @@ import com.teenthofabud.restaurant.solution.engagement.checkin.repository.WalkIn
 import com.teenthofabud.restaurant.solution.engagement.checkin.validator.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;

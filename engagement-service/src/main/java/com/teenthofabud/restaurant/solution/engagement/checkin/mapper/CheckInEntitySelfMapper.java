@@ -18,11 +18,6 @@ public abstract class CheckInEntitySelfMapper<T extends CheckInEntity> implement
             changeSW = true;
             log.debug("Source CheckInEntity.id is valid");
         }
-        /*if(source.getTableId() != null && StringUtils.hasText(StringUtils.trimWhitespace(source.getTableId())) && source.getTableId().compareTo(target.getTableId()) != 0) {
-            target.setTableId(source.getTableId());
-            changeSW = true;
-            log.debug("Source CheckInEntity.tableId is valid");
-        }*/
         if(source.getNoOfPersons() != null && source.getNoOfPersons().compareTo(target.getNoOfPersons()) != 0) {
             target.setNoOfPersons(source.getNoOfPersons());
             changeSW = true;

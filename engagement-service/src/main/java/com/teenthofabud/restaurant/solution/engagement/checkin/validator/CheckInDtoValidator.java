@@ -73,42 +73,6 @@ public abstract class CheckInDtoValidator implements Validator {
             }
         }*/
 
-        /*Optional<String> optTableId = dto.getTableId();
-        if(!getFieldsToEscape().contains("tableId") && optTableId.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optTableId.get()))) {
-            errors.rejectValue("tableId", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
-            log.debug("CheckInDto.tableId is invalid");
-            return;
-        } else if(!getFieldsToEscape().contains("tableId") && optTableId.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optTableId.get()))) {
-            String tableId = optTableId.get();
-            Errors err = new DirectFieldBindingResult(tableId, "CheckInDto");
-            tableIdValidator.validate(tableId, err);
-            if(err.hasErrors()) {
-                log.debug("CheckInDto.tableId is invalid");
-                EngagementErrorCode ec = EngagementErrorCode.valueOf(err.getGlobalError().getCode());
-                log.debug("CheckInDto error detail: {}", ec);
-                errors.rejectValue("tableId", ec.name());
-                return;
-            }
-        }*/
-
-        Optional<String> optType = dto.getType();
-        if(!getFieldsToEscape().contains("type") && optType.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optType.get()))) {
-            errors.rejectValue("type", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
-            log.debug("CheckInDto.type is invalid");
-            return;
-        } else if(!getFieldsToEscape().contains("type") && optType.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optType.get()))) {
-            try {
-                CheckInType type = CheckInType.valueOf(optType.get());
-                if(type.compareTo(getCheckInTypeInContext()) != 0) {
-                    throw new IllegalArgumentException("CheckInType " + type + " not supported in child implementation");
-                }
-            } catch (IllegalArgumentException e) {
-                errors.rejectValue("type", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
-                log.debug("CheckInDto.type is invalid");
-                return;
-            }
-        }
-
         Optional<String> optAccountId = dto.getAccountId();
         if(!getFieldsToEscape().contains("accountId") && optAccountId.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optAccountId.get()))) {
             errors.rejectValue("accountId", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());

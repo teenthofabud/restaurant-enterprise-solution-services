@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(value = MenuServiceClient.SERVICE_CLIENT_NAME, url = "${cookbook.menu.service.url}", configuration = MenuServiceIntegrationConfiguration.class)
 public interface MenuServiceClient {
 
-    public static final String SERVICE_CLIENT_NAME = "establishment-area-service";
+    public static final String SERVICE_CLIENT_NAME = "menu-service";
 
     @GetMapping("/menu/item/{id}")
     @TOABFeignErrorHandler(MenuServiceClientExceptionHandler.class)

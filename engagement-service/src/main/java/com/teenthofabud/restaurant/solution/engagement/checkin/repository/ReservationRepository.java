@@ -11,6 +11,4 @@ import java.util.Optional;
 @Repository
 public interface ReservationRepository extends CheckInRepository<ReservationEntity> {
 
-    public Optional<ReservationEntity> findByDateAndTime(LocalDate date, LocalTime time);
-
 }

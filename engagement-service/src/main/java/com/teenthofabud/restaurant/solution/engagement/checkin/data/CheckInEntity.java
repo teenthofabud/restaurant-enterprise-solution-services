@@ -25,7 +25,7 @@ import java.util.Optional;
 @Inheritance(
         strategy = InheritanceType.JOINED
 )
-public abstract class CheckInEntity extends TOABBaseEntity implements Comparable<CheckInEntity> {
+public class CheckInEntity extends TOABBaseEntity implements Comparable<CheckInEntity> {
 
     public CheckInEntity() {
         this.id = 0l;
@@ -35,6 +35,7 @@ public abstract class CheckInEntity extends TOABBaseEntity implements Comparable
         //this.statusHistory = new LinkedList<>();
         this.notes = "";
         this.tableAllocations = new ArrayList<>();
+        this.active = false;
     }
 
     public CheckInEntity(CheckInEntity checkInEntity) {
@@ -44,17 +45,23 @@ public abstract class CheckInEntity extends TOABBaseEntity implements Comparable
         this.notes = checkInEntity.getNotes();
         this.noOfPersons = checkInEntity.getNoOfPersons();
         this.tableAllocations = new ArrayList<>();
+        this.active = checkInEntity.getActive();
     }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ToString.Include
     private Long id;
     @Column(name = "customer_account_id")
+    @ToString.Include
     private String accountId;
+    @ToString.Include
     private String sequence;
     @Column(name = "number_of_persons")
+    @ToString.Include
     private Integer noOfPersons;
     //private List<CheckInHistoryDocument> statusHistory;
+    @ToString.Include
     private String notes;
 
     @OneToMany(mappedBy = "checkIn", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)

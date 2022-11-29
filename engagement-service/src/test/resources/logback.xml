@@ -19,7 +19,7 @@
         <appender-ref ref="Console" />
     </root>
 
-    <logger name="com.teenthofabud.restaurant.solution.checkin" level="debug" additivity="false">
+    <logger name="com.teenthofabud.restaurant.solution.engagement" level="debug" additivity="false">
         <appender-ref ref="Console" />
     </logger>
 

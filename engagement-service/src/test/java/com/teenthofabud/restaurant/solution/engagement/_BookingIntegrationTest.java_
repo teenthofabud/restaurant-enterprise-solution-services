@@ -1,4 +1,4 @@
-package com.teenthofabud.restaurant.solution.checkin;
+package com.teenthofabud.restaurant.solution.engagement;
 
 import com.teenthofabud.core.common.constant.TOABCascadeLevel;
 import com.teenthofabud.core.common.data.form.PatchOperationForm;
@@ -7,7 +7,7 @@ import com.teenthofabud.core.common.error.TOABErrorCode;
 import com.teenthofabud.restaurant.solution.engagement.category.data.CategoryDocument;
 import com.teenthofabud.restaurant.solution.engagement.category.data.CategoryVo;
 import com.teenthofabud.restaurant.solution.engagement.category.repository.CategoryRepository;
-import com.teenthofabud.restaurant.solution.checkin.error.CheckInErrorCode;
+import com.teenthofabud.restaurant.solution.engagement.error.CheckInErrorCode;
 import com.teenthofabud.restaurant.solution.engagement.booking.data.BookingDocument;
 import com.teenthofabud.restaurant.solution.engagement.booking.data.BookingForm;
 import com.teenthofabud.restaurant.solution.engagement.booking.data.BookingVo;

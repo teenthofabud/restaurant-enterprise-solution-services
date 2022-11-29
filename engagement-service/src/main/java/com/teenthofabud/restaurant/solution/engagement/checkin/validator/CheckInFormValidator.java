@@ -17,28 +17,15 @@ import java.util.Optional;
 @Slf4j
 public abstract class CheckInFormValidator implements Validator {
 
-    //private Validator tableIdValidator;
     private Validator accountIdValidator;
-    //private CategoryService categoryService;
 
     public abstract List<String> getFieldsToEscape();
-
-    /*@Autowired
-    @Qualifier("tableIdValidator")
-    public void setTableIdValidator(Validator tableIdValidator) {
-        this.tableIdValidator = tableIdValidator;
-    }*/
 
     @Autowired
     @Qualifier("accountIdValidator")
     public void setAccountIdValidator(Validator accountIdValidator) {
         this.accountIdValidator = accountIdValidator;
     }
-
-/*    @Autowired
-    public void setCategoryService(CategoryService categoryService) {
-        this.categoryService = categoryService;
-    }*/
     
     @Override
     public boolean supports(Class<?> clazz) {
@@ -87,7 +74,7 @@ public abstract class CheckInFormValidator implements Validator {
                 return;
             }
         }
-        log.debug("CheckInForm.status is valid");
+        log.debug("CheckInForm.type is valid");
 
 
         if(!getFieldsToEscape().contains("noOfPersons") && (form.getNoOfPersons() == null || form.getNoOfPersons() <= 0)) {
@@ -103,23 +90,6 @@ public abstract class CheckInFormValidator implements Validator {
             return;
         }
         log.debug("CheckInForm.sequence is valid");
-
-        /*if(!getFieldsToEscape().contains("tableId") && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getTableId()))) {
-            log.debug("CheckInForm.tableId is empty");
-            errors.rejectValue("tableId", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
-            return;
-        } else if(!getFieldsToEscape().contains("tableId") && StringUtils.hasText(StringUtils.trimWhitespace(form.getTableId()))){
-            Errors err = new DirectFieldBindingResult(form.getTableId(), "CheckInForm");
-            tableIdValidator.validate(form.getTableId(), err);
-            if(err.hasErrors()) {
-                log.debug("CheckInForm.tableId is invalid");
-                EngagementErrorCode ec = EngagementErrorCode.valueOf(err.getGlobalError().getCode());
-                log.debug("CheckInForm error detail: {}", ec);
-                errors.rejectValue("tableId", ec.name());
-                return;
-            }
-        }
-        log.debug("CheckInForm.tableId is valid");*/
 
         if(!getFieldsToEscape().contains("accountId") && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getAccountId()))) {
             log.debug("CheckInForm.accountId is empty");

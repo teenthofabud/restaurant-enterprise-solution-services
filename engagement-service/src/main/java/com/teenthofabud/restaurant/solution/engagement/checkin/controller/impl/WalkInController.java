@@ -31,7 +31,6 @@ import java.util.Set;
 public class WalkInController extends WalkInAPI implements ApplicationContextAware {
 
     private ApplicationContext applicationContext;
-
     @Override
     public WalkInServiceImpl getCheckInService() {
         return applicationContext.getBean(WalkInServiceImpl.class);

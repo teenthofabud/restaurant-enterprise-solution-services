@@ -9,7 +9,7 @@ import javax.persistence.*;
 @Getter
 @Setter
 @AllArgsConstructor
-@ToString(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true, callSuper = true)
 @Entity(name = "walkIn")
 @Table(name = "walk_in")
 @EntityListeners(AuditingEntityListener.class)
@@ -24,9 +24,12 @@ public class WalkInEntity extends CheckInEntity {
         this.emailId = "";
     }
 
+    @ToString.Include
     private String name;
+    @ToString.Include
     @Column(name = "phone_number")
     private String phoneNumber;
+    @ToString.Include
     @Column(name = "email_id")
     private String emailId;
 
