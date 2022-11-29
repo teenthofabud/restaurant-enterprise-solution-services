@@ -11,7 +11,7 @@ import java.util.Optional;
 @Service
 public interface DeliveryService<T extends DeliveryForm, U extends DeliveryVo> {
 
-    public List<U> retrieveAllMatchingDeliveryDetailsByCriteria(Optional<String> optionalName,
-            Optional<String> optionalPhoneNo) throws MeetingException;
+    public List<U> retrieveAllMatchingDeliveryDetailsByCriteria(Optional<String> optionalOrderId)
+            throws MeetingException;
 
 }

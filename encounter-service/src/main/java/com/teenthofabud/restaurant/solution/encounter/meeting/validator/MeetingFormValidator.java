@@ -20,7 +20,7 @@ public abstract class MeetingFormValidator implements Validator {
     private List<String> fieldsToEscape;
     private Validator accountIdValidator;
 
-    @Value("#{'${res.encounter.checkIn.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.encounter.meeting.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }

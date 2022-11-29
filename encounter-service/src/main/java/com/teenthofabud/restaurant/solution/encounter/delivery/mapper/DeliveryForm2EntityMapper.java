@@ -18,7 +18,7 @@ public class DeliveryForm2EntityMapper extends MeetingForm2EntityMapper<Delivery
 
     private List<String> fieldsToEscape;
 
-    @Value("#{'${res.engagement.delivery.walkIn.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.encounter.meeting.delivery.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }

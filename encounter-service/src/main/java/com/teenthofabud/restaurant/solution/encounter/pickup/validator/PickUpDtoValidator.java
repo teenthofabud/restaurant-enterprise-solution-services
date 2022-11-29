@@ -18,7 +18,7 @@ import java.util.Optional;
 public class PickUpDtoValidator extends MeetingDtoValidator {
 
     private List<String> fieldsToEscape;
-    @Value("#{'${res.engagement.checkIn.walkIn.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.encounter.meeting.pickUp.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }

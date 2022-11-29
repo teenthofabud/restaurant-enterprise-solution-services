@@ -19,7 +19,7 @@ public class DeliveryFormValidator extends MeetingFormValidator {
 
     private List<String> fieldsToEscape;
 
-    @Value("#{'${res.engagement.checkIn.walkIn.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.encounter.meeting.delivery.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }

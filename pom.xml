@@ -92,11 +92,6 @@
             <artifactId>spring-cloud-sleuth-zipkin</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jdk8</artifactId>
-            <version>${jackson-datatype-jdk8.version}</version>
-        </dependency>
-        <dependency>
             <groupId>javax.json</groupId>
             <artifactId>javax.json-api</artifactId>
             <version>${javax.json-api.version}</version>
@@ -126,11 +121,6 @@
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jdk8</artifactId>
             <version>${jackson-datatype-jdk8.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.json</groupId>
-            <artifactId>javax.json-api</artifactId>
-            <version>${javax.json-api.version}</version>
         </dependency>
         <dependency>
             <groupId>net.logstash.logback</groupId>

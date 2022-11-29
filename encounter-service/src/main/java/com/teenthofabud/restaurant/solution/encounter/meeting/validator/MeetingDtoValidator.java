@@ -21,7 +21,7 @@ public abstract class MeetingDtoValidator implements Validator {
     //private Validator tableIdValidator;
     private Validator accountIdValidator;
 
-    @Value("#{'${res.Encounter.Meeting.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.encounter.meeting.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }

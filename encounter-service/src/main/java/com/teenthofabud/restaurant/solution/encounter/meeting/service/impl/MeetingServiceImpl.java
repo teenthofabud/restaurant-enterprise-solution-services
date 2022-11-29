@@ -23,6 +23,7 @@ import com.teenthofabud.restaurant.solution.encounter.meeting.service.MeetingSer
 import com.teenthofabud.restaurant.solution.encounter.meeting.validator.MeetingDtoValidator;
 import com.teenthofabud.restaurant.solution.encounter.meeting.validator.MeetingFormRelaxedValidator;
 import com.teenthofabud.restaurant.solution.encounter.meeting.validator.MeetingFormValidator;
+import com.teenthofabud.restaurant.solution.encounter.pickup.data.PickUpVo;
 import com.teenthofabud.restaurant.solution.encounter.utils.EncounterServiceHelper;
 import constants.EncounterErrorCode;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.DirectFieldBindingResult;
@@ -505,5 +507,4 @@ public abstract class MeetingServiceImpl<A extends MeetingFormValidator, B exten
     public abstract G getMeetingForm2EntityConverter();
     public abstract H getMeetingEntity2VoConverter();
     public abstract I getMeetingDto2EntityConverter();
-    
 }

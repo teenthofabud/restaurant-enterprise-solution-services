@@ -18,7 +18,7 @@ public class PickUpForm2EntityMapper extends MeetingForm2EntityMapper<PickUpEnti
 
     private List<String> fieldsToEscape;
 
-    @Value("#{'${res.encounter.meeting.reservation.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.encounter.meeting.pickUp.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }

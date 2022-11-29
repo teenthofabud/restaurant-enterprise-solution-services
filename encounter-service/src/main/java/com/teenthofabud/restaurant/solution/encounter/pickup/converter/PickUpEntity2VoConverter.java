@@ -16,7 +16,7 @@ public class PickUpEntity2VoConverter extends MeetingEntity2VoConverter<PickUpEn
 
     private List<String> fieldsToEscape;
 
-    @Value("#{'${res.engagement.checkIn.walkIn.fields-to-escape}'.split(',')}")
+    @Value("#{'${res.encounter.meeting.pickUp.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }
