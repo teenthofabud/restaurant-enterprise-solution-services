@@ -1,6 +1,5 @@
 package com.teenthofabud.restaurant.solution.encounter.pickup.mapper;
 
-import com.teenthofabud.restaurant.solution.encounter.meeting.data.MeetingEntity;
 import com.teenthofabud.restaurant.solution.encounter.meeting.mapper.MeetingForm2EntityMapper;
 import com.teenthofabud.restaurant.solution.encounter.pickup.data.PickUpEntity;
 import com.teenthofabud.restaurant.solution.encounter.pickup.data.PickUpForm;
@@ -24,33 +23,31 @@ public class PickUpForm2EntityMapper extends MeetingForm2EntityMapper<PickUpEnti
     }
 
     @Override
-    protected Optional<MeetingEntity> compareAndMap(MeetingEntity parent, PickUpEntity pickUpEntityChild, PickUpForm pickUpFormChild) {
-        PickUpEntity actualEntity = pickUpEntityChild;
-        PickUpForm form = pickUpFormChild;
+    public Optional<PickUpEntity> compareAndMap(PickUpEntity pickUpEntity, PickUpForm pickUpForm) {
         boolean changeSW = false;
-
-        PickUpEntity expectedEntity = new PickUpEntity(parent);
+        // direct copy of common attributes handled in parent
+        PickUpEntity expectedEntity = new PickUpEntity();
         // direct copy
-        expectedEntity.setId(actualEntity.getId());
-        log.debug("Directly copying PickUpEntity.id: {} from actualEntity to expectedEntity", actualEntity.getId());
+        expectedEntity.setId(pickUpEntity.getId());
+        log.debug("Directly copying PickUpEntity.id: {} from pickUpEntity to expectedEntity", pickUpEntity.getId());
 
 
-        if(!fieldsToEscape.contains("name") && StringUtils.hasText(StringUtils.trimWhitespace(form.getName())) && form.getName().compareTo(actualEntity.getName()) != 0) {
-            expectedEntity.setName(form.getName());
+        if(!fieldsToEscape.contains("name") && StringUtils.hasText(StringUtils.trimWhitespace(pickUpForm.getName())) && pickUpForm.getName().compareTo(pickUpEntity.getName()) != 0) {
+            expectedEntity.setName(pickUpForm.getName());
             changeSW = true;
-            log.debug("PickUpForm.name: {} is different as PickUpEntity.name: {}", form.getName(), actualEntity.getName());
+            log.debug("PickUpForm.name: {} is different as PickUpEntity.name: {}", pickUpForm.getName(), pickUpEntity.getName());
         } else {
-            expectedEntity.setName(actualEntity.getName());
+            expectedEntity.setName(pickUpEntity.getName());
             log.debug("PickUpForm.name: is unchanged");
         }
 
-        if(!fieldsToEscape.contains("phoneNumber") && StringUtils.hasText(StringUtils.trimWhitespace(form.getPhoneNo()))
-                && form.getPhoneNo().compareTo(actualEntity.getPhoneNo()) != 0) {
-            expectedEntity.setPhoneNo(form.getPhoneNo());
+        if(!fieldsToEscape.contains("phoneNumber") && StringUtils.hasText(StringUtils.trimWhitespace(pickUpForm.getPhoneNo()))
+                && pickUpForm.getPhoneNo().compareTo(pickUpEntity.getPhoneNo()) != 0) {
+            expectedEntity.setPhoneNo(pickUpForm.getPhoneNo());
             changeSW = true;
-            log.debug("PickUpForm.phoneNumber: {} is different as PickUpEntity.phoneNumber: {}", form.getPhoneNo(), actualEntity.getPhoneNo());
+            log.debug("PickUpForm.phoneNumber: {} is different as PickUpEntity.phoneNumber: {}", pickUpForm.getPhoneNo(), pickUpEntity.getPhoneNo());
         } else {
-            expectedEntity.setPhoneNo(actualEntity.getPhoneNo());
+            expectedEntity.setPhoneNo(pickUpEntity.getPhoneNo());
             log.debug("PickUpForm.phoneNumber: is unchanged");
         }
 

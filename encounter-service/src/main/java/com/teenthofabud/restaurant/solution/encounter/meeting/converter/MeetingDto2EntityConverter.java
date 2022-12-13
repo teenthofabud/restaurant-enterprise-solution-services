@@ -18,7 +18,7 @@ import java.util.Optional;
 public abstract class MeetingDto2EntityConverter<T extends MeetingDto, U extends MeetingEntity>
         implements ComparativePatchConverter<MeetingDto, MeetingEntity> {
 
-    private static final Integer NO_OF_COMPARABLE_AND_MAPPABLE_FIELDS = 10;
+    private static final Integer NO_OF_COMPARABLE_AND_MAPPABLE_FIELDS = 3;
 
     private List<String> fieldsToEscape;
 
@@ -26,6 +26,8 @@ public abstract class MeetingDto2EntityConverter<T extends MeetingDto, U extends
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }
+
+    public abstract List<String> getFieldsToEscape();
 
     @Override
     public void compareAndMap(MeetingDto dto, MeetingEntity actualEntity) throws TOABBaseException {

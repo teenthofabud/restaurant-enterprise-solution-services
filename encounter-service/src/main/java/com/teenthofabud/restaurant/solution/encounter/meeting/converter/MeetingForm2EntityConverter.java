@@ -10,18 +10,16 @@ import java.util.List;
 
 @Slf4j
 public abstract class MeetingForm2EntityConverter<T extends MeetingForm, U extends MeetingEntity>
-        implements Converter<MeetingForm, MeetingEntity> {
+        implements Converter<T, U> {
 
-    private List<String> fieldsToEscape;
+    public List<String> fieldsToEscape;
 
     @Value("#{'${res.encounter.meeting.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
     }
 
-    @Override
-    public MeetingEntity convert(MeetingForm form) {
-        MeetingEntity entity = new MeetingEntity();
+    protected U convert(T form, U entity) {
         if(!fieldsToEscape.contains("sequence")) {
             entity.setSequence(form.getSequence());
         }
@@ -30,10 +28,8 @@ public abstract class MeetingForm2EntityConverter<T extends MeetingForm, U exten
         }
         entity.setActive(Boolean.TRUE);
         log.debug("Converting {} to {}", form, entity);
-        U child = this.convertChild((T) form, entity);
-        return child;
+        return entity;
     }
 
-    protected abstract U convertChild(T heckInFormChild, MeetingEntity checkInEntity);
-
+    public abstract List<String> getFieldsToEscape();
 }

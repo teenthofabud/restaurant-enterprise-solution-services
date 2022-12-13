@@ -1,3 +1,4 @@
+/*
 package com.teenthofabud.restaurant.solution.encounter.meeting.controller.impl;
 
 import com.teenthofabud.core.common.constant.TOABBaseMessageTemplate;
@@ -173,3 +174,4 @@ public abstract class MeetingController<A extends MeetingService> implements Mee
         throw new MeetingException(EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID, new Object[] { "id", id });
     }
 }
+*/

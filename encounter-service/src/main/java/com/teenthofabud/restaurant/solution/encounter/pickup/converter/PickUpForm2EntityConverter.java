@@ -22,8 +22,13 @@ public class PickUpForm2EntityConverter extends MeetingForm2EntityConverter<Pick
     }
 
     @Override
-    protected PickUpEntity convertChild(PickUpForm form, MeetingEntity meetingEntity) {
-        PickUpEntity entity = new PickUpEntity(meetingEntity);
+    public List<String> getFieldsToEscape() {
+        return this.fieldsToEscape;
+    }
+
+    @Override
+    public PickUpEntity convert(PickUpForm form) {
+        PickUpEntity entity = new PickUpEntity();
         if(!fieldsToEscape.contains("name")) {
             entity.setName(form.getName());
         }
@@ -34,5 +39,4 @@ public class PickUpForm2EntityConverter extends MeetingForm2EntityConverter<Pick
         log.debug("Converting {} to {}", form, entity);
         return entity;
     }
-
 }

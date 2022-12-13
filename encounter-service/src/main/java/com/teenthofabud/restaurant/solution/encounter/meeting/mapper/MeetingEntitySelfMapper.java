@@ -8,10 +8,10 @@ import org.springframework.util.StringUtils;
 import java.util.Optional;
 
 @Slf4j
-public abstract class MeetingEntitySelfMapper<T extends MeetingEntity> implements SingleChannelMapper<MeetingEntity> {
+public abstract class MeetingEntitySelfMapper<T extends MeetingEntity> implements SingleChannelMapper<T> {
 
     @Override
-    public Optional<MeetingEntity> compareAndMap(MeetingEntity source, MeetingEntity target) {
+    public Optional<T> compareAndMap(T source, T target) {
         boolean changeSW = false;
         if(source.getId() != null && source.getId().compareTo(target.getId()) != 0) {
             target.setId(source.getId());

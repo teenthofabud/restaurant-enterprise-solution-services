@@ -24,20 +24,18 @@ public class DeliveryForm2EntityMapper extends MeetingForm2EntityMapper<Delivery
     }
 
     @Override
-    public Optional<MeetingEntity> compareAndMap(MeetingEntity parent, DeliveryEntity deliveryEntityChild, DeliveryForm deliveryFormChild) {
-        DeliveryEntity actualEntity = (DeliveryEntity) deliveryEntityChild;
-        DeliveryForm form = deliveryFormChild;
+    public Optional<DeliveryEntity> compareAndMap(DeliveryEntity actualEntity, DeliveryForm deliveryForm) {
         boolean changeSW = false;
         // direct copy of common attributes handled in parent
-        DeliveryEntity expectedEntity = new DeliveryEntity(parent);
+        DeliveryEntity expectedEntity = new DeliveryEntity();
         // direct copy
         expectedEntity.setId(actualEntity.getId());
         log.debug("Directly copying DeliveryEntity.id: {} from actualEntity to expectedEntity", actualEntity.getId());
 
-        if(!fieldsToEscape.contains("orderId") && StringUtils.hasText(StringUtils.trimWhitespace(form.getOrderId())) && form.getOrderId().compareTo(actualEntity.getOrderId()) != 0) {
-            expectedEntity.setOrderId(form.getOrderId());
+        if(!fieldsToEscape.contains("orderId") && StringUtils.hasText(StringUtils.trimWhitespace(deliveryForm.getOrderId())) && deliveryForm.getOrderId().compareTo(actualEntity.getOrderId()) != 0) {
+            expectedEntity.setOrderId(deliveryForm.getOrderId());
             changeSW = true;
-            log.debug("DeliveryForm.orderId: {} is different as DeliveryEntity.orderId: {}", form.getOrderId(), actualEntity.getOrderId());
+            log.debug("DeliveryForm.orderId: {} is different as DeliveryEntity.orderId: {}", deliveryForm.getOrderId(), actualEntity.getOrderId());
         } else {
             expectedEntity.setOrderId(actualEntity.getOrderId());
             log.debug("DeliveryForm.orderId: is unchanged");

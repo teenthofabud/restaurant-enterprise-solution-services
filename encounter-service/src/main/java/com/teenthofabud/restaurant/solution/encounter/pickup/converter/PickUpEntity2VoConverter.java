@@ -1,5 +1,6 @@
 package com.teenthofabud.restaurant.solution.encounter.pickup.converter;
 
+import com.teenthofabud.restaurant.solution.encounter.meeting.constants.MeetingType;
 import com.teenthofabud.restaurant.solution.encounter.meeting.converter.MeetingEntity2VoConverter;
 import com.teenthofabud.restaurant.solution.encounter.meeting.data.MeetingVo;
 import com.teenthofabud.restaurant.solution.encounter.pickup.data.PickUpEntity;
@@ -33,5 +34,13 @@ public class PickUpEntity2VoConverter extends MeetingEntity2VoConverter<PickUpEn
         log.debug("Converted {} to {} ", entity, vo);
         return vo;
     }
+    @Override
+    public List<String> getFieldsToEscape() {
+        return this.fieldsToEscape;
+    }
 
+    @Override
+    protected MeetingType getContextualMeetingType() {
+        return MeetingType.PICK_UP;
+    }
 }

@@ -22,8 +22,13 @@ public class DeliveryForm2EntityConverter extends MeetingForm2EntityConverter<De
     }
 
     @Override
-    protected DeliveryEntity convertChild(DeliveryForm form, MeetingEntity meetingEntity) {
-        DeliveryEntity entity = new DeliveryEntity(meetingEntity);
+    public List<String> getFieldsToEscape() {
+        return this.fieldsToEscape;
+    }
+
+    @Override
+    public DeliveryEntity convert(DeliveryForm form) {
+        DeliveryEntity entity = new DeliveryEntity();
         if(!fieldsToEscape.contains("orderId")) {
             entity.setOrderId(form.getOrderId());
         }

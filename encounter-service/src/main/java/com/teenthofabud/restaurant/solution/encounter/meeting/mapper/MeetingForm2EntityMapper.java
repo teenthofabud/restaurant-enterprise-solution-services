@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Slf4j
 public abstract class MeetingForm2EntityMapper<T extends MeetingEntity, U extends MeetingForm>
-        implements DualChannelMapper<MeetingEntity, MeetingForm> {
+        implements DualChannelMapper<T, U> {
 
     private List<String> fieldsToEscape;
 
@@ -21,9 +21,7 @@ public abstract class MeetingForm2EntityMapper<T extends MeetingEntity, U extend
         this.fieldsToEscape = fieldsToEscape;
     }
 
-    @Override
-    public Optional<MeetingEntity> compareAndMap(MeetingEntity actualEntity, MeetingForm form) {
-        MeetingEntity expectedEntity = new MeetingEntity();
+    protected Optional<T> compareAndMap(T actualEntity, T expectedEntity, U form) {
         boolean changeSW = false;
 
         // direct copy
@@ -52,16 +50,6 @@ public abstract class MeetingForm2EntityMapper<T extends MeetingEntity, U extend
             expectedEntity.setAccountId(actualEntity.getAccountId());
             log.debug("MeetingForm.accountId: is unchanged");
         }
-
-        if(changeSW) {
-            Optional<MeetingEntity> optionalExpectedEntity = this.compareAndMap(expectedEntity, (T) actualEntity, (U) form);
-            return optionalExpectedEntity.isPresent() ? optionalExpectedEntity : Optional.empty();
-        } else {
-            return Optional.empty();
-        }
-
+        return changeSW ? Optional.of(expectedEntity) : Optional.empty();
     }
-
-    protected abstract Optional<MeetingEntity> compareAndMap(MeetingEntity parent, T checkInEntityChild, U checkInFormChild);
-
 }

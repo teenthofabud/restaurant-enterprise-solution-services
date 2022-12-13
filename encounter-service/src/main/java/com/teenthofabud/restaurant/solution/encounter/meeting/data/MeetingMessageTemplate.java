@@ -14,8 +14,10 @@ public enum MeetingMessageTemplate {
     MSG_TEMPLATE_MEETING_CASCADE_LEVEL_EMPTY("MEETING  cascadeLevel is empty"),
     MSG_TEMPLATE_MEETING_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE("Checking Meeting existence by accountId: {} and sequence: {}"),
     MSG_TEMPLATE_MEETING_EXISTS_BY_ACCOUNT_ID_AND_SEQUENCE("Meeting exists between accountId: {} and sequence: {}"),
-    MSG_TEMPLATE_MEETING_NON_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE("No Meeting exists between accountId: {} and sequence: {}");
-
+    MSG_TEMPLATE_MEETING_NON_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE("No Meeting exists between accountId: {} and sequence: {}"),
+    MSG_TEMPLATE_MEETING_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN("Checking CheckIn existence by accountId: {}, sequence: {}, start: {} and end: {}"),
+    MSG_TEMPLATE_MEETING_EXISTS_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN("CheckIn exists between accountId: {}, sequence: {}, start: {} and end: {}"),
+    MSG_TEMPLATE_MEETING_NON_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN("No CheckIn exists between accountId: {}, sequence: {}, start: {} and end: {}");
     private String value;
 
     private MeetingMessageTemplate(String value) {

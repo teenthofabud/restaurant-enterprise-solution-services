@@ -2,6 +2,7 @@ package com.teenthofabud.restaurant.solution.encounter.delivery.converter;
 
 import com.teenthofabud.restaurant.solution.encounter.delivery.data.DeliveryEntity;
 import com.teenthofabud.restaurant.solution.encounter.delivery.data.DeliveryVo;
+import com.teenthofabud.restaurant.solution.encounter.meeting.constants.MeetingType;
 import com.teenthofabud.restaurant.solution.encounter.meeting.converter.MeetingEntity2VoConverter;
 import com.teenthofabud.restaurant.solution.encounter.meeting.data.MeetingVo;
 import lombok.extern.slf4j.Slf4j;
@@ -31,4 +32,13 @@ public class DeliveryEntity2VoConverter extends MeetingEntity2VoConverter<Delive
         return vo;
     }
 
+    @Override
+    public List<String> getFieldsToEscape() {
+        return this.fieldsToEscape;
+    }
+
+    @Override
+    protected MeetingType getContextualMeetingType() {
+        return MeetingType.DELIVERY;
+    }
 }

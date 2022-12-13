@@ -7,6 +7,7 @@ import com.teenthofabud.core.common.error.TOABErrorCode;
 import com.teenthofabud.core.common.error.TOABSystemException;
 import com.teenthofabud.restaurant.solution.encounter.integration.customer.data.AccountVo;
 import com.teenthofabud.restaurant.solution.encounter.integration.customer.proxy.CustomerServiceClient;
+import com.teenthofabud.restaurant.solution.encounter.meeting.constants.MeetingType;
 import com.teenthofabud.restaurant.solution.encounter.meeting.data.MeetingEntity;
 import com.teenthofabud.restaurant.solution.encounter.meeting.data.MeetingVo;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +46,9 @@ public abstract class MeetingEntity2VoConverter<T extends MeetingEntity, U exten
         if(!fieldsToEscape.contains("accountId")) {
             this.expandSecondLevelFields(entity, vo, "accountId");
         }
+        TOABRequestContextHolder.setCascadeLevelContext(TOABCascadeLevel.TWO);
+        super.expandAuditFields(entity, vo);
+        TOABRequestContextHolder.clearCascadeLevelContext();
         U child = this.convertChild((T) entity, (U) vo);
         super.expandAuditFields(entity, child);
         log.debug("Converted {} to {} ", entity, child);
@@ -81,5 +85,9 @@ public abstract class MeetingEntity2VoConverter<T extends MeetingEntity, U exten
         }
     }
 
-    protected abstract U convertChild(T checkInEntityChild, MeetingVo checkInVo);
+    protected abstract MeetingType getContextualMeetingType();
+
+    protected abstract U convertChild(T meetingEntityChild, MeetingVo meetingVo);
+
+    public abstract List<String> getFieldsToEscape();
 }

@@ -10,6 +10,8 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 @EnableEurekaClient
 public class EncounterServiceApplication {
     public static void main(String[] args) {
+
+        System.out.println(System.getProperty("ENCOUNTER_SPRING_CLOUD_CONFIG_ENABLED"));
         SpringApplication.run(EncounterServiceApplication.class);
     }
 }
