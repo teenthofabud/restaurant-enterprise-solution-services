@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j
-public abstract class CheckInForm2EntityMapper<T extends CheckInEntity, U extends CheckInForm> implements DualChannelMapper<CheckInEntity, CheckInForm> {
+public abstract class CheckInForm2EntityMapper<T extends CheckInEntity, U extends CheckInForm> implements DualChannelMapper<T, U> {
 
     private List<String> fieldsToEscape;
 
@@ -19,9 +19,7 @@ public abstract class CheckInForm2EntityMapper<T extends CheckInEntity, U extend
         this.fieldsToEscape = fieldsToEscape;
     }
 
-    @Override
-    public Optional<CheckInEntity> compareAndMap(CheckInEntity actualEntity, CheckInForm form) {
-        CheckInEntity expectedEntity = new CheckInEntity();
+    protected Optional<T> compareAndMap(T actualEntity, T expectedEntity, U form) {
         boolean changeSW = false;
         // direct copy
         expectedEntity.setId(actualEntity.getId());
@@ -31,22 +29,6 @@ public abstract class CheckInForm2EntityMapper<T extends CheckInEntity, U extend
         expectedEntity.setActive(actualEntity.getActive());
         log.debug("Directly copying CheckInEntity.active: {} from actualEntity to expectedEntity", actualEntity.getActive());
         // comparative copy
-
-        /*if(!fieldsToEscape.contains("status") && StringUtils.hasText(StringUtils.trimWhitespace(form.getStatus()))) {
-            CheckInStatus expectedStatus = CheckInStatus.valueOf(form.getStatus());
-            CheckInHistoryDocument checkInHistoryDocument = actualEntity.getStatusHistory().get(actualEntity.getStatusHistory().size() - 1);
-            if(expectedStatus.compareTo(checkInHistoryDocument.getStatus()) != 0) {
-                expectedEntity.addStatus(expectedStatus);
-                changeSW = true;
-                log.debug("CheckInForm.status: {} is different as CheckInEntity.status: {}", form.getStatus(), checkInHistoryDocument.getStatus());
-            } else {
-                expectedEntity.setStatusHistory(actualEntity.getStatusHistory());
-                log.debug("CheckInForm.status: is unchanged");
-            }
-        } else {
-            expectedEntity.setStatusHistory(actualEntity.getStatusHistory());
-            log.debug("CheckInForm.status: is unchanged");
-        }*/
 
         if(!fieldsToEscape.contains("sequence") && form.getSequence() != null && form.getSequence().compareTo(actualEntity.getSequence()) != 0) {
             expectedEntity.setSequence(form.getSequence());
@@ -86,15 +68,8 @@ public abstract class CheckInForm2EntityMapper<T extends CheckInEntity, U extend
             log.debug("CheckInForm.notes: is unchanged");
         }
 
-        if(changeSW) {
-            Optional<CheckInEntity> optionalExpectedEntity = this.compareAndMap(expectedEntity, (T) actualEntity, (U) form);
-            return optionalExpectedEntity.isPresent() ? optionalExpectedEntity : Optional.empty();
-        } else {
-            return Optional.empty();
-        }
+        return changeSW ? Optional.of(expectedEntity) : Optional.empty();
 
     }
-
-    protected abstract Optional<CheckInEntity> compareAndMap(CheckInEntity parent, T checkInEntityChild, U checkInFormChild);
 
 }

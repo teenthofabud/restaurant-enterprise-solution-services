@@ -17,7 +17,7 @@ import java.util.Optional;
 @Slf4j
 public class ReservationDto2EntityConverter extends CheckInDto2EntityConverter<ReservationDto, ReservationEntity> {
 
-    private static final Integer NO_OF_COMPARABLE_AND_MAPPABLE_FIELDS = 10;
+    private static final Integer NO_OF_COMPARABLE_AND_MAPPABLE_FIELDS = 2;
 
     private List<String> fieldsToEscape;
     private String reservationDateFormat;
@@ -60,6 +60,11 @@ public class ReservationDto2EntityConverter extends CheckInDto2EntityConverter<R
         }
 
         log.debug("Not all provided ReservationDto attributes are valid");
+    }
+
+    @Override
+    public List<String> getFieldsToEscape() {
+        return this.fieldsToEscape;
     }
 
 }

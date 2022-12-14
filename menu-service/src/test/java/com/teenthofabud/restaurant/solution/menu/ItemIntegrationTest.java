@@ -914,11 +914,11 @@ public class ItemIntegrationTest extends MenuIntegrationBaseTest {
         Assertions.assertEquals(itemVo1.getImageUrl(), om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getImageUrl());
         Assertions.assertEquals(itemVo1.getIsVegeterian(), om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getIsVegeterian());
         Assertions.assertEquals(itemVo1.getCategoryId(), om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getCategoryId());
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getCreatedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getModifiedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getCreatedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getModifiedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getActive()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getCreatedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getModifiedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getCreatedOn()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getModifiedOn()));
+        Assertions.assertFalse(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ItemVo.class).getActive()));
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.factory;
 
+import com.teenthofabud.restaurant.solution.engagement.checkin.constants.CheckInType;
 import com.teenthofabud.restaurant.solution.engagement.checkin.converter.*;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInEntity;
 import com.teenthofabud.restaurant.solution.engagement.checkin.mapper.*;
@@ -7,9 +8,9 @@ import com.teenthofabud.restaurant.solution.engagement.checkin.repository.CheckI
 import com.teenthofabud.restaurant.solution.engagement.checkin.repository.ReservationRepository;
 import com.teenthofabud.restaurant.solution.engagement.checkin.repository.WalkInRepository;
 import com.teenthofabud.restaurant.solution.engagement.checkin.validator.*;
-import com.teenthofabud.restaurant.solution.engagement.constants.CheckInType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;

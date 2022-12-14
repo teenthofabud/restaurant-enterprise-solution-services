@@ -51,7 +51,6 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 
 @Slf4j
-@Component
 public class DeliveryServiceImpl implements DeliveryService{
 
     private TOABBaseService toabBaseService;

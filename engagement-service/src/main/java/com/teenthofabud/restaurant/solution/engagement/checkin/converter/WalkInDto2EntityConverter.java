@@ -14,7 +14,7 @@ import java.util.Optional;
 @Slf4j
 public class WalkInDto2EntityConverter extends CheckInDto2EntityConverter<WalkInDto, WalkInEntity> {
 
-    private static final Integer NO_OF_COMPARABLE_AND_MAPPABLE_FIELDS = 10;
+    private static final Integer NO_OF_COMPARABLE_AND_MAPPABLE_FIELDS = 3;
 
     private List<String> fieldsToEscape;
 
@@ -50,6 +50,11 @@ public class WalkInDto2EntityConverter extends CheckInDto2EntityConverter<WalkIn
             log.debug("WalkInDto.phoneNumber is valid");
         }
         log.debug("Not all provided WalkInDto attributes are valid");
+    }
+
+    @Override
+    public List<String> getFieldsToEscape() {
+        return this.fieldsToEscape;
     }
 
 }

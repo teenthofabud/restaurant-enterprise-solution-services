@@ -10,7 +10,7 @@ import javax.persistence.*;
 @Setter
 @AllArgsConstructor
 @ToString(onlyExplicitlyIncluded = true)
-@Entity
+@Entity(name = "pickUp")
 @Table(name = "pick_up")
 @EntityListeners(AuditingEntityListener.class)
 @Inheritance(

@@ -610,11 +610,11 @@ public class DeviceIntegrationTest extends SettingsIntegrationBaseTest {
         Assertions.assertEquals(deviceVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), DeviceVo.class).getId());
         Assertions.assertEquals(deviceVo1.getName(), om.readValue(mvcResult.getResponse().getContentAsString(), DeviceVo.class).getName());
         Assertions.assertEquals(deviceVo1.getDescription(), om.readValue(mvcResult.getResponse().getContentAsString(), DeviceVo.class).getDescription());
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeviceVo.class).getCreatedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeviceVo.class).getModifiedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeviceVo.class).getCreatedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeviceVo.class).getModifiedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeviceVo.class).getActive()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeviceVo.class).getCreatedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeviceVo.class).getModifiedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeviceVo.class).getCreatedOn()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeviceVo.class).getModifiedOn()));
+        Assertions.assertFalse(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DeviceVo.class).getActive()));
     }
 
     @Test

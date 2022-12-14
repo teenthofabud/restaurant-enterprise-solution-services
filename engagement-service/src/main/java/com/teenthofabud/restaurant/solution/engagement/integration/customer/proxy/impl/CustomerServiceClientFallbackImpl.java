@@ -17,6 +17,12 @@ public class CustomerServiceClientFallbackImpl implements CustomerServiceClient 
     }
 
     @Override
+    public AccountVo getAccountDetailsById(String id, String cascadeUntilLevel) {
+        log.debug("Falling back to default implementation of getting account details by id and cascadeUntilLevel");
+        return new AccountVo();
+    }
+
+    @Override
     public HealthVo health(String status) {
         log.debug("Falling back to default implementation of querying health status: {}", status);
         return new HealthVo();

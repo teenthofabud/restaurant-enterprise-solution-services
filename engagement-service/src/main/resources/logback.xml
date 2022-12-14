@@ -60,7 +60,7 @@
         </if>
     </root>
 
-    <logger name="com.teenthofabud.restaurant.solution.enngagement" level="${logback.logging.level}" additivity="false">
+    <logger name="com.teenthofabud.restaurant.solution.engagement" level="${logback.logging.level}" additivity="false">
         <appender-ref ref="RollingFile" />
         <appender-ref ref="Console" />
         <if condition='&quot;${logstash.enabled}&quot;.equals(&quot;true&quot;)'>

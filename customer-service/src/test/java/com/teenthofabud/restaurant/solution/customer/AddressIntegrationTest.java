@@ -1111,11 +1111,11 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertEquals(addressVo1.getStateId(), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getStateId());
         Assertions.assertEquals(addressVo1.getCountryId(), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getCountryId());
         Assertions.assertEquals(addressVo1.getAccountId(), om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getAccountId());
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getCreatedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getModifiedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getCreatedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getModifiedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getActive()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getCreatedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getModifiedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getCreatedOn()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getModifiedOn()));
+        Assertions.assertFalse(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AddressVo.class).getActive()));
     }
 
     @Test

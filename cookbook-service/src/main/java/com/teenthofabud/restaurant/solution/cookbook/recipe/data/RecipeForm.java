@@ -1,6 +1,5 @@
 package com.teenthofabud.restaurant.solution.cookbook.recipe.data;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 

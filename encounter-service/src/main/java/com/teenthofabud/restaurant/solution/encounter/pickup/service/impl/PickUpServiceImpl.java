@@ -52,7 +52,6 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 
 @Slf4j
-@Component
 public class PickUpServiceImpl implements PickUpService {
 
     private TOABBaseService toabBaseService;
@@ -82,52 +81,52 @@ public class PickUpServiceImpl implements PickUpService {
     }
     @Override
     public String getContextMeetingType() {
-        return MeetingType.DELIVERY.name();
+        return MeetingType.PICK_UP.name();
     }
 
     @Override
     public PickUpFormValidator getMeetingFormValidator() {
-        return (PickUpFormValidator) this.meetingBeanFactory.getMeetingFormValidator(MeetingType.PICK_UP.name()).get();
+        return (PickUpFormValidator) this.meetingBeanFactory.getMeetingFormValidator(getContextMeetingType()).get();
     }
 
     @Override
     public PickUpFormRelaxedValidator getMeetingFormRelaxedValidator() {
-        return (PickUpFormRelaxedValidator) this.meetingBeanFactory.getMeetingFormRelaxedValidator(MeetingType.PICK_UP.name()).get();
+        return (PickUpFormRelaxedValidator) this.meetingBeanFactory.getMeetingFormRelaxedValidator(getContextMeetingType()).get();
     }
 
     @Override
     public PickUpDtoValidator getMeetingDtoValidator() {
-        return (PickUpDtoValidator) this.meetingBeanFactory.getMeetingDtoValidator(MeetingType.PICK_UP.name()).get();
+        return (PickUpDtoValidator) this.meetingBeanFactory.getMeetingDtoValidator(getContextMeetingType()).get();
     }
 
     @Override
     public PickUpRepository getMeetingRepository() {
-        return (PickUpRepository) this.meetingBeanFactory.getMeetingRepository(MeetingType.PICK_UP.name()).get();
+        return (PickUpRepository) this.meetingBeanFactory.getMeetingRepository(getContextMeetingType()).get();
     }
 
     @Override
     public PickUpEntitySelfMapper getMeetingEntitySelfMapper() {
-        return (PickUpEntitySelfMapper) this.meetingBeanFactory.getMeetingEntitySelfMapper(MeetingType.PICK_UP.name()).get();
+        return (PickUpEntitySelfMapper) this.meetingBeanFactory.getMeetingEntitySelfMapper(getContextMeetingType()).get();
     }
 
     @Override
     public PickUpForm2EntityMapper getMeetingForm2EntityMapper() {
-        return (PickUpForm2EntityMapper) this.meetingBeanFactory.getMeetingForm2EntityMapper(MeetingType.PICK_UP.name()).get();
+        return (PickUpForm2EntityMapper) this.meetingBeanFactory.getMeetingForm2EntityMapper(getContextMeetingType()).get();
     }
 
     @Override
     public PickUpForm2EntityConverter getMeetingForm2EntityConverter() {
-        return (PickUpForm2EntityConverter) this.meetingBeanFactory.getMeetingForm2EntityConverter(MeetingType.PICK_UP.name()).get();
+        return (PickUpForm2EntityConverter) this.meetingBeanFactory.getMeetingForm2EntityConverter(getContextMeetingType()).get();
     }
 
     @Override
     public PickUpEntity2VoConverter getMeetingEntity2VoConverter() {
-        return (PickUpEntity2VoConverter) this.meetingBeanFactory.getMeetingEntity2VoConverter(MeetingType.PICK_UP.name()).get();
+        return (PickUpEntity2VoConverter) this.meetingBeanFactory.getMeetingEntity2VoConverter(getContextMeetingType()).get();
     }
 
     @Override
     public PickUpDto2EntityConverter getMeetingDto2EntityConverter() {
-        return (PickUpDto2EntityConverter) this.meetingBeanFactory.getMeetingDto2EntityConverter(MeetingType.PICK_UP.name()).get();
+        return (PickUpDto2EntityConverter) this.meetingBeanFactory.getMeetingDto2EntityConverter(getContextMeetingType()).get();
     }
 
     @Override

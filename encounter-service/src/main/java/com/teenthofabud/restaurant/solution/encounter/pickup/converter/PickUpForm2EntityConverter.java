@@ -29,6 +29,7 @@ public class PickUpForm2EntityConverter extends MeetingForm2EntityConverter<Pick
     @Override
     public PickUpEntity convert(PickUpForm form) {
         PickUpEntity entity = new PickUpEntity();
+        super.convert(form, entity);
         if(!fieldsToEscape.contains("name")) {
             entity.setName(form.getName());
         }

@@ -8,21 +8,16 @@ import org.springframework.util.StringUtils;
 import java.util.Optional;
 
 @Slf4j
-public abstract class CheckInEntitySelfMapper<T extends CheckInEntity> implements SingleChannelMapper<CheckInEntity> {
+public abstract class CheckInEntitySelfMapper<T extends CheckInEntity> implements SingleChannelMapper<T> {
 
     @Override
-    public Optional<CheckInEntity> compareAndMap(CheckInEntity source, CheckInEntity target) {
+    public Optional<T> compareAndMap(T source, T target) {
         boolean changeSW = false;
         if(source.getId() != null && source.getId().compareTo(target.getId()) != 0) {
             target.setId(source.getId());
             changeSW = true;
             log.debug("Source CheckInEntity.id is valid");
         }
-        /*if(source.getTableId() != null && StringUtils.hasText(StringUtils.trimWhitespace(source.getTableId())) && source.getTableId().compareTo(target.getTableId()) != 0) {
-            target.setTableId(source.getTableId());
-            changeSW = true;
-            log.debug("Source CheckInEntity.tableId is valid");
-        }*/
         if(source.getNoOfPersons() != null && source.getNoOfPersons().compareTo(target.getNoOfPersons()) != 0) {
             target.setNoOfPersons(source.getNoOfPersons());
             changeSW = true;

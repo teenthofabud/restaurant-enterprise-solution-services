@@ -1,5 +1,6 @@
 package com.teenthofabud.restaurant.solution.encounter.integration.customer.validator;
 
+import com.teenthofabud.core.common.constant.TOABCascadeLevel;
 import com.teenthofabud.restaurant.solution.encounter.integration.customer.data.AccountVo;
 import com.teenthofabud.restaurant.solution.encounter.integration.customer.proxy.CustomerServiceClient;
 import constants.EncounterErrorCode;
@@ -33,7 +34,7 @@ public class AccountIdValidator implements Validator {
         log.debug("Validating accountId: {}", accountId);
         AccountVo accountVo = null;
         log.info("Requesting details of account with id: {}", accountId);
-        accountVo = customerServiceClient.getAccountDetailsById(accountId);
+        accountVo = customerServiceClient.getAccountDetailsById(accountId, TOABCascadeLevel.TWO.getLevelCode());
         log.info("Retrieved account: {} by id", accountVo);
         if(accountVo == null) {
             errors.reject(EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID.name());

@@ -1,5 +1,6 @@
 package com.teenthofabud.restaurant.solution.engagement.integration.establishmentarea.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.teenthofabud.core.common.data.vo.TOABBaseVo;
 import lombok.*;
@@ -10,6 +11,7 @@ import lombok.*;
 @AllArgsConstructor
 @ToString(onlyExplicitlyIncluded = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class TableVo extends TOABBaseVo implements Comparable<TableVo> {
 

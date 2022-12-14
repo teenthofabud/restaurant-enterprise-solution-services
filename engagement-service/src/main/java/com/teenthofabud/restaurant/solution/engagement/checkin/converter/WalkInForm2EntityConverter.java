@@ -19,8 +19,14 @@ public class WalkInForm2EntityConverter extends CheckInForm2EntityConverter<Walk
     }
 
     @Override
-    protected WalkInEntity convertChild(WalkInForm form, CheckInEntity checkInEntity) {
-        WalkInEntity entity = new WalkInEntity(checkInEntity);
+    public List<String> getFieldsToEscape() {
+        return this.fieldsToEscape;
+    }
+
+    @Override
+    public WalkInEntity convert(WalkInForm form) {
+        WalkInEntity entity = new WalkInEntity();
+        super.convert(form, entity);
         if(!fieldsToEscape.contains("name")) {
             entity.setName(form.getName());
         }
@@ -34,5 +40,4 @@ public class WalkInForm2EntityConverter extends CheckInForm2EntityConverter<Walk
         log.debug("Converting {} to {}", form, entity);
         return entity;
     }
-
 }

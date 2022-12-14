@@ -25,6 +25,11 @@ public class DeliveryFormValidator extends MeetingFormValidator {
     }
 
     @Override
+    public List<String> getFieldsToEscape() {
+        return fieldsToEscape;
+    }
+
+    @Override
     protected void validate(Optional<? extends MeetingForm> optionalMeetingForm, Errors errors) {
         if(optionalMeetingForm.isEmpty()) {
             log.debug("No DeliveryForm available");

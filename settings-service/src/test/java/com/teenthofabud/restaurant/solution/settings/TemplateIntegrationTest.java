@@ -630,11 +630,11 @@ public class TemplateIntegrationTest extends SettingsIntegrationBaseTest {
         Assertions.assertEquals(templateVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), TemplateVo.class).getId());
         Assertions.assertEquals(templateVo1.getName(), om.readValue(mvcResult.getResponse().getContentAsString(), TemplateVo.class).getName());
         Assertions.assertEquals(templateVo1.getDescription(), om.readValue(mvcResult.getResponse().getContentAsString(), TemplateVo.class).getDescription());
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), TemplateVo.class).getCreatedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), TemplateVo.class).getModifiedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), TemplateVo.class).getCreatedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), TemplateVo.class).getModifiedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), TemplateVo.class).getActive()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), TemplateVo.class).getCreatedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), TemplateVo.class).getModifiedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), TemplateVo.class).getCreatedOn()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), TemplateVo.class).getModifiedOn()));
+        Assertions.assertFalse(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), TemplateVo.class).getActive()));
     }
 
     @Test

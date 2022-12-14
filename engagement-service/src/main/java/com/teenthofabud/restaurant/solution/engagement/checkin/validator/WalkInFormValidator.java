@@ -1,5 +1,6 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.validator;
 
+import com.teenthofabud.restaurant.solution.engagement.checkin.constants.CheckInType;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInForm;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.WalkInForm;
 import com.teenthofabud.restaurant.solution.engagement.constants.EngagementErrorCode;
@@ -52,6 +53,16 @@ public class WalkInFormValidator extends CheckInFormValidator {
             return;
         }
         log.debug("WalkInForm.phoneNumber is invalid");
+    }
+
+    @Override
+    public List<String> getFieldsToEscape() {
+        return this.fieldsToEscape;
+    }
+
+    @Override
+    protected CheckInType getCheckInTypeInContext() {
+        return CheckInType.WALK_IN;
     }
 
 }

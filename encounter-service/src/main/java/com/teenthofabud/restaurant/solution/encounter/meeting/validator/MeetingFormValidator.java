@@ -17,13 +17,9 @@ import java.util.Optional;
 @Slf4j
 public abstract class MeetingFormValidator implements Validator {
 
-    private List<String> fieldsToEscape;
     private Validator accountIdValidator;
 
-    @Value("#{'${res.encounter.meeting.fields-to-escape}'.split(',')}")
-    public void setFieldsToEscape(List<String> fieldsToEscape) {
-        this.fieldsToEscape = fieldsToEscape;
-    }
+    public abstract List<String> getFieldsToEscape();
 
     @Autowired
     @Qualifier("accountIdValidator")
@@ -40,18 +36,18 @@ public abstract class MeetingFormValidator implements Validator {
     public void validate(Object target, Errors errors) {
         MeetingForm form = (MeetingForm) target;
 
-        if(!fieldsToEscape.contains("sequence") && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getSequence()))) {
+        if(!getFieldsToEscape().contains("sequence") && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getSequence()))) {
             errors.rejectValue("sequence", EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID.name());
             log.debug("MeetingForm.sequence is invalid");
             return;
         }
         log.debug("MeetingForm.sequence is valid");
 
-        if(!fieldsToEscape.contains("accountId") && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getAccountId()))) {
+        if(!getFieldsToEscape().contains("accountId") && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getAccountId()))) {
             log.debug("MeetingForm.accountId is empty");
             errors.rejectValue("accountId", EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID.name());
             return;
-        } else if(!fieldsToEscape.contains("accountId") && StringUtils.hasText(StringUtils.trimWhitespace(form.getAccountId()))){
+        } else if(!getFieldsToEscape().contains("accountId") && StringUtils.hasText(StringUtils.trimWhitespace(form.getAccountId()))){
             Errors err = new DirectFieldBindingResult(form.getAccountId(), "MeetingForm");
             accountIdValidator.validate(form.getAccountId(), err);
             if(err.hasErrors()) {
