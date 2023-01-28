@@ -22,13 +22,7 @@ import java.util.concurrent.*;
 public abstract class MeetingEntity2VoConverter<T extends MeetingEntity, U extends MeetingVo>
         extends TOABBaseEntity2VoConverter<MeetingEntity, MeetingVo> {
 
-    private List<String> fieldsToEscape;
     private CustomerServiceClient customerServiceClient;
-
-    @Value("#{'${res.engagement.checkIn.fields-to-escape}'.split(',')}")
-    public void setFieldsToEscape(List<String> fieldsToEscape) {
-        this.fieldsToEscape = fieldsToEscape;
-    }
 
     @Autowired
     public void setCustomerServiceClient(CustomerServiceClient customerServiceClient) {
@@ -37,13 +31,13 @@ public abstract class MeetingEntity2VoConverter<T extends MeetingEntity, U exten
 
     public U convert(T entity) {
         MeetingVo vo = new MeetingVo();
-        if(!fieldsToEscape.contains("id")) {
+        if(!getFieldsToEscape().contains("id")) {
             vo.setId(entity.getId().toString());
         }
-        if(!fieldsToEscape.contains("sequence")) {
+        if(!getFieldsToEscape().contains("sequence")) {
             vo.setSequence(entity.getSequence());
         }
-        if(!fieldsToEscape.contains("accountId")) {
+        if(!getFieldsToEscape().contains("accountId")) {
             this.expandSecondLevelFields(entity, vo, "accountId");
         }
         TOABRequestContextHolder.setCascadeLevelContext(TOABCascadeLevel.TWO);
@@ -59,18 +53,17 @@ public abstract class MeetingEntity2VoConverter<T extends MeetingEntity, U exten
         TOABCascadeLevel cascadeLevel = TOABRequestContextHolder.getCascadeLevelContext();
         switch(cascadeLevel) {
             case TWO:
-                if(!fieldsToEscape.contains("accountId") && fieldName.compareTo("accountId") == 0) {
+                if(!getFieldsToEscape().contains("accountId") && fieldName.compareTo("accountId") == 0) {
                     Callable<AccountVo> accountEntity2VoConversion = () -> {
-                        AccountVo accountVo = customerServiceClient.getAccountDetailsById(entity.getAccountId());
-                        return accountVo;
+                        return customerServiceClient.getAccountDetailsById(entity.getAccountId(), TOABCascadeLevel.TWO.getLevelCode());
                     };
                     String tName = "accountEntity2VoConversion";
                     ExecutorService executorService = Executors.newFixedThreadPool(1, new CustomizableThreadFactory(tName + "-"));
                     Future<AccountVo> accountEntity2VoConversionResult = executorService.submit(accountEntity2VoConversion);
                     try {
-                        AccountVo accountVo = accountEntity2VoConversionResult.get();
-                        vo.setAccountVo(accountVo);
-                        log.debug("Retrieved {} for accountId: {}", accountVo, entity.getAccountId());
+                        AccountVo account = accountEntity2VoConversionResult.get();
+                        vo.setAccount(account);
+                        log.debug("Retrieved {} for accountId: {}", account, entity.getAccountId());
                     } catch (InterruptedException | ExecutionException e) {
                         String msg = "Unable to perform " + tName;
                         log.error(msg, e);

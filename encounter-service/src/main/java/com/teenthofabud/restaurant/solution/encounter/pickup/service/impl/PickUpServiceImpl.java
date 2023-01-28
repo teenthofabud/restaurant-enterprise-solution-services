@@ -36,8 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
@@ -60,8 +58,8 @@ public class PickUpServiceImpl implements PickUpService {
 
     private String pickUpTimeFormat;
 
-    @Value("${res.encounter.meeting.timestamp.format}")
-    public void setWalkInTimeFormat(String pickUpTimeFormat) {
+    @Value("${res.encounter.meeting.date.format}")
+    public void setPickUpTimeFormat(String pickUpTimeFormat) {
         this.pickUpTimeFormat = pickUpTimeFormat;
     }
 
@@ -79,6 +77,7 @@ public class PickUpServiceImpl implements PickUpService {
     public void setToabBaseService(TOABBaseService toabBaseService) {
         this.toabBaseService = toabBaseService;
     }
+
     @Override
     public String getContextMeetingType() {
         return MeetingType.PICK_UP.name();
@@ -152,10 +151,10 @@ public class PickUpServiceImpl implements PickUpService {
     @Override
     public Set<PickUpVo> retrieveAllByNaturalOrdering() {
         log.info("Requesting all PickUpEntity by their natural ordering");
-        List<PickUpEntity> deliveryEntityList = this.getMeetingRepository().findAll();
-        List<PickUpVo> deliveryVoList = encounterServiceHelper.deliveryEntity2DetailedVo(deliveryEntityList);
+        List<PickUpEntity> pickUpEntityList = this.getMeetingRepository().findAll();
+        List<PickUpVo> pickUpVoList = encounterServiceHelper.pickUpEntity2DetailedVo(pickUpEntityList);
         Set<PickUpVo> naturallyOrderedSet = new TreeSet<>(getMeetingVoTypeComparator());
-        naturallyOrderedSet.addAll(deliveryVoList);
+        naturallyOrderedSet.addAll(pickUpVoList);
         log.info("{} PickUpVo available", naturallyOrderedSet.size());
         return naturallyOrderedSet;
     }
@@ -192,7 +191,7 @@ public class PickUpServiceImpl implements PickUpService {
         List<PickUpVo> matchedPickUpList = new LinkedList<>();
         Map<String, String> providedFilters = new LinkedHashMap<>();
         PickUpEntity entity = new PickUpEntity();
-        ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll();
+        ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll().withIgnorePaths("id").withIgnoreNullValues();
         if(StringUtils.hasText(StringUtils.trimWhitespace(accountId))) {
             log.debug("accountId {} is valid", accountId);
             providedFilters.put("accountId", accountId);
@@ -210,17 +209,21 @@ public class PickUpServiceImpl implements PickUpService {
         } else {
             log.debug("search parameters {} are valid", providedFilters);
         }
-        Example<PickUpEntity> deliveryEntityExample = Example.of(entity, matcherCriteria);
-        List<PickUpEntity> deliveryEntityList = this.getMeetingRepository().findAll(deliveryEntityExample);
-        matchedPickUpList = encounterServiceHelper.deliveryEntity2DetailedVo(deliveryEntityList);
-        log.info("Found {} PickUpVo matching with provided parameters : {}", matchedPickUpList.size(), providedFilters);
-        log.info("No PickUpVo available matching with provided parameters : {}", matchedPickUpList.size(), providedFilters);
+        Example<PickUpEntity> pickUpEntityExample = Example.of(entity, matcherCriteria);
+        List<PickUpEntity> pickUpEntityList = this.getMeetingRepository().findAll(pickUpEntityExample);
+        matchedPickUpList = encounterServiceHelper.pickUpEntity2DetailedVo(pickUpEntityList);
+
+        if(matchedPickUpList.isEmpty()){
+            log.info("Found {} PickUpVo matching with provided parameters : {}", matchedPickUpList.size(), providedFilters);
+        }else{
+            log.info("No PickUpVo available matching with provided parameters : {}", providedFilters);
+        }
         return matchedPickUpList;
     }
 
     @Override
     public PickUpVo retrieveMatchingDetailsBySequenceOnDate(String sequence, String date) throws MeetingException {
-        Long seq = 0l;
+        Long seq = 0L;
         LocalDate dt = LocalDate.now();
         LocalDateTime start = LocalDateTime.now();
         LocalDateTime end = LocalDateTime.now();
@@ -244,15 +247,54 @@ public class PickUpServiceImpl implements PickUpService {
         end = LocalDateTime.of(dt, LocalTime.of(23,59, 59));
 
         log.info("Requesting PickUpEntity by sequence: {} between timestamps: {} and {}", seq, start, end);
-        Optional<PickUpEntity> optEntity = this.getMeetingRepository().findBySequenceAndCreatedOnBetween(seq, start, end);
+        Optional<PickUpEntity> optEntity = this.getMeetingRepository().findBySequenceAndCreatedOnBetween(seq.toString(), start, end);
         if(optEntity.isEmpty()) {
             log.debug("No PickUpEntity found by sequence: {} between timestamps: {} and {}", seq, start, end);
             throw new MeetingException(EncounterErrorCode.ENCOUNTER_NOT_FOUND, new Object[] { "seq: " + seq, ", date: " + date });
         }
         log.info("Found PickUpVo by sequence: {} between timestamps: {} and {}", seq, start, end);
         PickUpEntity entity = optEntity.get();
-        PickUpVo vo = encounterServiceHelper.pickUpEntity2DetailedVo(entity);
-        return vo;
+        return encounterServiceHelper.pickUpEntity2DetailedVo(entity);
+    }
+
+    @Override
+    public List<PickUpVo> retrieveAllMatchingPickUpDetailsByCriteria(Optional<String> optionalName, Optional<String> optionalPhoneNumber)
+            throws MeetingException {
+        if(optionalName.isEmpty() && optionalPhoneNumber.isEmpty()) {
+            log.debug("No search parameters provided");
+        }
+        String name = optionalName.isPresent() ? optionalName.get() : "";
+        String phoneNumber = optionalPhoneNumber.isPresent() ? optionalPhoneNumber.get() : "";
+        if(StringUtils.isEmpty(StringUtils.trimWhitespace(name)) && StringUtils.isEmpty(StringUtils.trimWhitespace(phoneNumber))) {
+            log.debug("All search parameters are empty");
+        }
+        List<PickUpVo> matchedPickUpList = new LinkedList<>();
+        Map<String, String> providedFilters = new LinkedHashMap<>();
+        PickUpEntity entity = new PickUpEntity(new MeetingEntity());
+        ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll().withIgnorePaths("id","sequence","accountId").withIgnoreNullValues();
+        if(StringUtils.hasText(StringUtils.trimWhitespace(name))) {
+            log.debug("name {} is valid", name);
+            providedFilters.put("name", name);
+            entity.setName(name);
+            matcherCriteria = matcherCriteria.withMatcher("name", match -> match.exact());
+        }
+        if(StringUtils.hasText(StringUtils.trimWhitespace(phoneNumber))) {
+            log.debug("phoneNumber {} is valid", phoneNumber);
+            providedFilters.put("phoneNumber", phoneNumber);
+            entity.setPhoneNo(phoneNumber);
+            matcherCriteria = matcherCriteria.withMatcher("phoneNumber", match -> match.exact());
+        }
+        if(providedFilters.isEmpty()) {
+            log.debug("search parameters are not valid");
+        } else {
+            log.debug("search parameters {} are valid", providedFilters);
+        }
+        Example<PickUpEntity> pickUpEntityExample = Example.of(entity, matcherCriteria);
+        List<PickUpEntity> pickUpEntityList = this.getMeetingRepository().findAll(pickUpEntityExample);
+        matchedPickUpList = encounterServiceHelper.pickUpEntity2DetailedVo(pickUpEntityList);
+        log.info("Found {} PickUpVo matching with provided parameters : {}", matchedPickUpList.size(), providedFilters);
+        log.info("No PickUpVo available matching with provided parameters : {}", matchedPickUpList.size(), providedFilters);
+        return matchedPickUpList;
     }
 
     @Override
@@ -428,8 +470,8 @@ public class PickUpServiceImpl implements PickUpService {
         PickUpDto patchedPickUpForm = new PickUpDto();
         try {
             log.debug("Preparing patch list items for Meeting");
-            JsonNode deliveryDtoTree = OBJECT_MAPPER.convertValue(patches, JsonNode.class);
-            JsonPatch checkInPatch = JsonPatch.fromJson(deliveryDtoTree);
+            JsonNode pickUpDtoTree = OBJECT_MAPPER.convertValue(patches, JsonNode.class);
+            JsonPatch checkInPatch = JsonPatch.fromJson(pickUpDtoTree);
             log.debug("Prepared patch list items for Meeting");
             JsonNode blankPickUpDtoTree = OBJECT_MAPPER.convertValue(new PickUpDto(), JsonNode.class);
             JsonNode patchedPickUpFormTree = checkInPatch.apply(blankPickUpDtoTree);
@@ -467,7 +509,7 @@ public class PickUpServiceImpl implements PickUpService {
 
         log.debug("Comparatively copying patched attributes from PickUpDto to PickUpEntity");
         try {
-            this.getMeetingDto2EntityConverter().compareAndMap(patchedPickUpForm, actualEntity);
+            this.getMeetingDto2EntityConverter().compareAndMapChild(patchedPickUpForm, actualEntity);
         } catch (TOABBaseException e) {
             throw (MeetingException) e;
         }
@@ -482,45 +524,5 @@ public class PickUpServiceImpl implements PickUpService {
                     new Object[]{ "patching", "unable to patch currency checkIn details with id:" + id });
         }
         log.info("Patched PickUpEntity with id:{}", id);
-    }
-
-    @Override
-    public List<PickUpVo> retrieveAllMatchingPickUpDetailsByCriteria(Optional<String> optionalName, Optional<String> optionalPhoneNumber)
-            throws MeetingException {
-        if(optionalName.isEmpty() && optionalPhoneNumber.isEmpty()) {
-            log.debug("No search parameters provided");
-        }
-        String name = optionalName.isPresent() ? optionalName.get() : "";
-        String phoneNumber = optionalPhoneNumber.isPresent() ? optionalPhoneNumber.get() : "";
-        if(StringUtils.isEmpty(StringUtils.trimWhitespace(name)) && StringUtils.isEmpty(StringUtils.trimWhitespace(phoneNumber))) {
-            log.debug("All search parameters are empty");
-        }
-        List<PickUpVo> matchedPickUpList = new LinkedList<>();
-        Map<String, String> providedFilters = new LinkedHashMap<>();
-        PickUpEntity entity = new PickUpEntity(new MeetingEntity());
-        ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll();
-        if(StringUtils.hasText(StringUtils.trimWhitespace(name))) {
-            log.debug("name {} is valid", name);
-            providedFilters.put("name", name);
-            entity.setName(name);
-            matcherCriteria = matcherCriteria.withMatcher("name", match -> match.exact());
-        }
-        if(StringUtils.hasText(StringUtils.trimWhitespace(phoneNumber))) {
-            log.debug("phoneNumber {} is valid", name);
-            providedFilters.put("phoneNumber", name);
-            entity.setPhoneNo(phoneNumber);
-            matcherCriteria = matcherCriteria.withMatcher("phoneNumber", match -> match.exact());
-        }
-        if(providedFilters.isEmpty()) {
-            log.debug("search parameters are not valid");
-        } else {
-            log.debug("search parameters {} are valid", providedFilters);
-        }
-        Example<PickUpEntity> pickUpEntityExample = Example.of(entity, matcherCriteria);
-        List<PickUpEntity> pickUpEntityList = this.getMeetingRepository().findAll(pickUpEntityExample);
-        matchedPickUpList = encounterServiceHelper.pickUpEntity2DetailedVo(pickUpEntityList);
-        log.info("Found {} PickUpVo matching with provided parameters : {}", matchedPickUpList.size(), providedFilters);
-        log.info("No PickUpVo available matching with provided parameters : {}", matchedPickUpList.size(), providedFilters);
-        return matchedPickUpList;
     }
 }

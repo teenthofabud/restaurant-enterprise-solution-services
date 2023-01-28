@@ -25,6 +25,11 @@ public class DeliveryFormRelaxedValidator extends MeetingFormRelaxedValidator {
     }
 
     @Override
+    public List<String> getFieldsToEscape() {
+        return this.fieldsToEscape;
+    }
+
+    @Override
     public Boolean validateLoosely(Optional<? extends MeetingForm> optionalMeetingForm, Errors errors) {
         if(optionalMeetingForm.isEmpty()) {
             log.debug("No DeliveryForm available");

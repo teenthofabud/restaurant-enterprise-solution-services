@@ -23,6 +23,11 @@ public class PickUpForm2EntityMapper extends MeetingForm2EntityMapper<PickUpEnti
     }
 
     @Override
+    public List<String> getFieldsToEscape() {
+        return this.fieldsToEscape;
+    }
+
+    @Override
     public Optional<PickUpEntity> compareAndMap(PickUpEntity pickUpEntity, PickUpForm pickUpForm) {
         boolean changeSW = false;
         // direct copy of common attributes handled in parent
@@ -31,6 +36,11 @@ public class PickUpForm2EntityMapper extends MeetingForm2EntityMapper<PickUpEnti
         expectedEntity.setId(pickUpEntity.getId());
         log.debug("Directly copying PickUpEntity.id: {} from pickUpEntity to expectedEntity", pickUpEntity.getId());
 
+        // parent copy
+        Optional<PickUpEntity> optionalExpectedEntity = super.compareAndMap(pickUpEntity, expectedEntity, pickUpForm);
+        if(optionalExpectedEntity.isPresent()) {
+            expectedEntity = optionalExpectedEntity.get();
+        }
 
         if(!fieldsToEscape.contains("name") && StringUtils.hasText(StringUtils.trimWhitespace(pickUpForm.getName())) && pickUpForm.getName().compareTo(pickUpEntity.getName()) != 0) {
             expectedEntity.setName(pickUpForm.getName());

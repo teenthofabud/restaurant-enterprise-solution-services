@@ -17,14 +17,9 @@ import java.util.Optional;
 @Slf4j
 public abstract class MeetingDtoValidator implements Validator {
 
-    private List<String> fieldsToEscape;
+    public abstract List<String> getFieldsToEscape();
     //private Validator tableIdValidator;
     private Validator accountIdValidator;
-
-    @Value("#{'${res.encounter.meeting.fields-to-escape}'.split(',')}")
-    public void setFieldsToEscape(List<String> fieldsToEscape) {
-        this.fieldsToEscape = fieldsToEscape;
-    }
 
     @Autowired
     @Qualifier("accountIdValidator")
@@ -42,18 +37,18 @@ public abstract class MeetingDtoValidator implements Validator {
         MeetingDto dto = (MeetingDto) target;
 
         Optional<String> optSequence = dto.getSequence();
-        if(!fieldsToEscape.contains("sequence") && optSequence.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optSequence.get()))) {
+        if(optSequence.isPresent() && !getFieldsToEscape().contains("sequence") && StringUtils.isEmpty(StringUtils.trimWhitespace(optSequence.get()))) {
             errors.rejectValue("sequence", EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID.name());
             log.debug("MeetingDto.sequence is invalid");
             return;
         }
 
         Optional<String> optAccountId = dto.getAccountId();
-        if(!fieldsToEscape.contains("accountId") && optAccountId.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optAccountId.get()))) {
+        if(optAccountId.isPresent() && !getFieldsToEscape().contains("accountId") && StringUtils.isEmpty(StringUtils.trimWhitespace(optAccountId.get()))) {
             errors.rejectValue("accountId", EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID.name());
             log.debug("MeetingDto.accountId is invalid");
             return;
-        } else if(!fieldsToEscape.contains("accountId") && optAccountId.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optAccountId.get()))) {
+        } else if(!getFieldsToEscape().contains("accountId") && optAccountId.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optAccountId.get()))) {
             String accountId = optAccountId.get();
             Errors err = new DirectFieldBindingResult(accountId, "MeetingDto");
             accountIdValidator.validate(accountId, err);
@@ -67,7 +62,7 @@ public abstract class MeetingDtoValidator implements Validator {
         }
 
         Optional<String> optActive = dto.getActive();
-        if(!fieldsToEscape.contains("active") && optActive.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optActive.get()))) {
+        if(optActive.isPresent() && !getFieldsToEscape().contains("active") && StringUtils.hasText(StringUtils.trimWhitespace(optActive.get()))) {
             boolean trueSW = optActive.get().equalsIgnoreCase(Boolean.TRUE.toString());
             boolean falseSW = optActive.get().equalsIgnoreCase(Boolean.FALSE.toString());
             if(!trueSW && !falseSW) {

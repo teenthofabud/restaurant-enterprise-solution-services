@@ -82,7 +82,7 @@ public class EngagementServiceHelper<T extends CheckInForm, U extends CheckInVo,
     }
 
     public ReservationVo reservationEntity2DetailedVo(ReservationEntity reservationEntity) {
-        Optional<? extends CheckInEntity2VoConverter> optionalCheckInEntity2VoConverter = this.checkInBeanFactory.getCheckInEntity2VoConverter(CheckInType.WALK_IN.name());
+        Optional<? extends CheckInEntity2VoConverter> optionalCheckInEntity2VoConverter = this.checkInBeanFactory.getCheckInEntity2VoConverter(CheckInType.RESERVATION.name());
         ReservationEntity2VoConverter reservationEntity2VoConverter = (ReservationEntity2VoConverter) optionalCheckInEntity2VoConverter.get();
         if(reservationEntity != null) {
             ReservationVo vo = reservationEntity2VoConverter.convert(reservationEntity);

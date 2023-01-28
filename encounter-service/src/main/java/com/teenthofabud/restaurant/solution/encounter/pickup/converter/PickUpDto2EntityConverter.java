@@ -26,11 +26,11 @@ public class PickUpDto2EntityConverter extends MeetingDto2EntityConverter<PickUp
     }
 
     @Override
-    protected void compareAndMapChild(PickUpDto dto, PickUpEntity actualEntity) throws TOABBaseException {
+    public void compareAndMapChild(PickUpDto dto, PickUpEntity actualEntity) throws TOABBaseException {
         boolean[] changeSW = new boolean[NO_OF_COMPARABLE_AND_MAPPABLE_FIELDS]; // size = number of attributes in dto
         Arrays.fill(changeSW, Boolean.FALSE);
         int i = 0;
-
+        super.compareAndMap(dto,actualEntity);
         Optional<String> optName = dto.getName();
         if(!fieldsToEscape.contains("name") && optName.isPresent()) {
             actualEntity.setName(optName.get());

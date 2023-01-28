@@ -30,15 +30,15 @@ public class MeetingEntity extends TOABBaseEntity implements Comparable<MeetingE
     private String sequence;
 
     public MeetingEntity() {
-        this.id = 0l;
+        this.id = 0L;
         this.accountId = "";
         this.sequence = "";
     }
 
-    public MeetingEntity(MeetingEntity checkInEntity) {
-        this.id = checkInEntity.getId();
-        this.accountId = checkInEntity.getAccountId();
-        this.sequence = checkInEntity.getSequence();
+    public MeetingEntity(MeetingEntity meetingEntity) {
+        this.id = meetingEntity.getId();
+        this.accountId = meetingEntity.getAccountId();
+        this.sequence = meetingEntity.getSequence();
     }
 
     @Override

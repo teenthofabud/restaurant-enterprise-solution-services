@@ -20,13 +20,6 @@ public abstract class MeetingDto2EntityConverter<T extends MeetingDto, U extends
 
     private static final Integer NO_OF_COMPARABLE_AND_MAPPABLE_FIELDS = 3;
 
-    private List<String> fieldsToEscape;
-
-    @Value("#{'${res.encounter.meeting.fields-to-escape}'.split(',')}")
-    public void setFieldsToEscape(List<String> fieldsToEscape) {
-        this.fieldsToEscape = fieldsToEscape;
-    }
-
     public abstract List<String> getFieldsToEscape();
 
     @Override
@@ -36,21 +29,21 @@ public abstract class MeetingDto2EntityConverter<T extends MeetingDto, U extends
         int i = 0;
 
         Optional<String> optSequence = dto.getSequence();
-        if(!fieldsToEscape.contains("sequence") && optSequence.isPresent()) {
+        if(!getFieldsToEscape().contains("sequence") && optSequence.isPresent()) {
             actualEntity.setSequence(optSequence.get());
             changeSW[i++] = true;
             log.debug("MeetingDto.sequence is valid");
         }
 
         Optional<String> optAccountId = dto.getAccountId();
-        if(!fieldsToEscape.contains("accountId") && optAccountId.isPresent()) {
+        if(!getFieldsToEscape().contains("accountId") && optAccountId.isPresent()) {
             actualEntity.setAccountId(optAccountId.get());
             changeSW[i++] = true;
             log.debug("MeetingDto.accountId is valid");
         }
 
         Optional<String> optActive = dto.getActive();
-        if(!fieldsToEscape.contains("active") && optActive.isPresent()) {
+        if(!getFieldsToEscape().contains("active") && optActive.isPresent()) {
             actualEntity.setActive(Boolean.valueOf(optActive.get()));
             changeSW[i++] = true;
             log.debug("MeetingDto.active is valid");
@@ -58,12 +51,12 @@ public abstract class MeetingDto2EntityConverter<T extends MeetingDto, U extends
 
         if(Collections.frequency(Arrays.asList(changeSW), Boolean.TRUE) >= 1) {
             log.debug("All provided MeetingDto attributes are valid");
-            this.compareAndMap(dto, actualEntity);
+            //this.compareAndMap(dto, actualEntity);
             actualEntity.setModifiedOn(LocalDateTime.now(ZoneOffset.UTC));
             return;
         }
         log.debug("Not all provided MeetingDto attributes are valid");
     }
 
-    protected abstract void compareAndMapChild(T checkInDtoChild, U checkInEntityChild) throws TOABBaseException;
+    public abstract void compareAndMapChild(T checkInDtoChild, U checkInEntityChild) throws TOABBaseException;
 }

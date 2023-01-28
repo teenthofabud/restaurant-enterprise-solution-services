@@ -16,6 +16,7 @@ import javax.persistence.*;
 @Inheritance(
         strategy = InheritanceType.JOINED
 )
+@PrimaryKeyJoinColumn(name = "encounter_meeting_id")
 @NoArgsConstructor
 public class DeliveryEntity extends MeetingEntity {
 

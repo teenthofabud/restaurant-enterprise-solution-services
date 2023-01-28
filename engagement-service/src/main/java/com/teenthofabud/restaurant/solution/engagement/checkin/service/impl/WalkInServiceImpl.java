@@ -579,14 +579,14 @@ public class WalkInServiceImpl implements WalkInService {
             matcherCriteria = matcherCriteria.withMatcher("name", match -> match.exact());
         }
         if(StringUtils.hasText(StringUtils.trimWhitespace(phoneNumber))) {
-            log.debug("phoneNumber {} is valid", name);
-            providedFilters.put("phoneNumber", name);
+            log.debug("phoneNumber {} is valid", phoneNumber);
+            providedFilters.put("phoneNumber", phoneNumber);
             entity.setPhoneNumber(phoneNumber);
             matcherCriteria = matcherCriteria.withMatcher("phoneNumber", match -> match.exact());
         }
         if(StringUtils.hasText(StringUtils.trimWhitespace(emailId))) {
-            log.debug("emailId {} is valid", name);
-            providedFilters.put("emailId", name);
+            log.debug("emailId {} is valid", emailId);
+            providedFilters.put("emailId", emailId);
             entity.setEmailId(emailId);
             matcherCriteria = matcherCriteria.withMatcher("emailId", match -> match.contains());
         }

@@ -10,7 +10,7 @@ public interface MeetingRepository<T extends MeetingEntity> extends TOABSimpleEn
 
     public Boolean existsByAccountIdAndSequenceAndCreatedOnBetween(String accountId, String sequence, LocalDateTime start, LocalDateTime end);
 
-    public Optional<T> findBySequenceAndCreatedOnBetween(Long sequence, LocalDateTime start, LocalDateTime end);
+    public Optional<T> findBySequenceAndCreatedOnBetween(String sequence, LocalDateTime start, LocalDateTime end);
 
     public Boolean existsByAccountIdAndSequence(String accountId, String sequence);
 }

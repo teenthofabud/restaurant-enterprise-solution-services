@@ -13,9 +13,6 @@ import lombok.*;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper=false)
 public class PickUpVo extends MeetingVo {
 
-    @EqualsAndHashCode.Include
-    @ToString.Include
-    private String id;
     @ToString.Include
     private String phoneNo;
     @ToString.Include
@@ -23,7 +20,6 @@ public class PickUpVo extends MeetingVo {
 
     public PickUpVo(MeetingVo vo) {
         super(vo);
-        this.id = "";
         this.name = "";
         this.phoneNo = "";
     }

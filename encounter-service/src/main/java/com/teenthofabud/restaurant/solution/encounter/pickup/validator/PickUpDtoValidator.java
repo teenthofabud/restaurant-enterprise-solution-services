@@ -24,6 +24,11 @@ public class PickUpDtoValidator extends MeetingDtoValidator {
     }
 
     @Override
+    public List<String> getFieldsToEscape() {
+        return this.fieldsToEscape;
+    }
+
+    @Override
     protected void validate(Optional<? extends MeetingDto> optionalMeetingDto, Errors errors) {
         if(optionalMeetingDto.isEmpty()) {
             log.debug("No PickUpDto available");
@@ -33,14 +38,14 @@ public class PickUpDtoValidator extends MeetingDtoValidator {
         PickUpDto dto = (PickUpDto) checkInDto;
 
         Optional<String> optName = dto.getName();
-        if(!fieldsToEscape.contains("name") && optName.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optName.get()))) {
+        if(optName.isPresent() && !fieldsToEscape.contains("name") && StringUtils.isEmpty(StringUtils.trimWhitespace(optName.get()))) {
             errors.rejectValue("name", EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID.name());
             log.debug("PickUpDto.name is invalid");
             return;
         }
 
         Optional<String> optPhoneNumber = dto.getPhoneNo();
-        if(!fieldsToEscape.contains("phoneNo") && optPhoneNumber.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optPhoneNumber.get()))) {
+        if(optPhoneNumber.isPresent() && !fieldsToEscape.contains("phoneNo") && StringUtils.isEmpty(StringUtils.trimWhitespace(optPhoneNumber.get()))) {
             errors.rejectValue("phoneNo", EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID.name());
             log.debug("PickUpDto.phoneNo is invalid");
             return;

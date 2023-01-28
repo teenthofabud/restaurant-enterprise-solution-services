@@ -12,18 +12,11 @@ import java.util.List;
 public abstract class MeetingForm2EntityConverter<T extends MeetingForm, U extends MeetingEntity>
         implements Converter<T, U> {
 
-    public List<String> fieldsToEscape;
-
-    @Value("#{'${res.encounter.meeting.fields-to-escape}'.split(',')}")
-    public void setFieldsToEscape(List<String> fieldsToEscape) {
-        this.fieldsToEscape = fieldsToEscape;
-    }
-
     protected U convert(T form, U entity) {
-        if(!fieldsToEscape.contains("sequence")) {
+        if(!getFieldsToEscape().contains("sequence")) {
             entity.setSequence(form.getSequence());
         }
-        if(!fieldsToEscape.contains("accountId")) {
+        if(!getFieldsToEscape().contains("accountId")) {
             entity.setAccountId(form.getAccountId());
         }
         entity.setActive(Boolean.TRUE);

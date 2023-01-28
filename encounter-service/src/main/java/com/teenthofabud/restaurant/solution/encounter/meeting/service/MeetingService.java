@@ -1,6 +1,7 @@
 package com.teenthofabud.restaurant.solution.encounter.meeting.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.teenthofabud.core.common.constant.TOABCascadeLevel;
 import com.teenthofabud.core.common.data.form.PatchOperationForm;
 import com.teenthofabud.restaurant.solution.encounter.meeting.converter.MeetingDto2EntityConverter;
@@ -31,7 +32,7 @@ public interface MeetingService<T extends MeetingForm, V extends MeetingVo,
         D extends MeetingRepository, E extends MeetingEntitySelfMapper, F extends MeetingForm2EntityMapper,
         G extends MeetingForm2EntityConverter, H extends MeetingEntity2VoConverter, I extends MeetingDto2EntityConverter> {
 
-    static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().registerModule(new Jdk8Module());
 
     static Logger LOGGER = LoggerFactory.getLogger(MeetingService.class);
 

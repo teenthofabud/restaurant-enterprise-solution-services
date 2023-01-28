@@ -22,7 +22,7 @@ public class MeetingVo extends TOABBaseVo implements Comparable<MeetingVo> {
     @ToString.Include
     private String accountId;
     @ToString.Include
-    private AccountVo accountVo;
+    private AccountVo account;
 
 
     @Override
@@ -31,8 +31,13 @@ public class MeetingVo extends TOABBaseVo implements Comparable<MeetingVo> {
     }
 
     public MeetingVo(MeetingVo vo) {
+        super.setCreatedBy(vo.getCreatedBy());
+        super.setModifiedBy(vo.getModifiedBy());
+        super.setCreatedOn(vo.getCreatedOn());
+        super.setModifiedOn(vo.getModifiedOn());
+        super.setActive(vo.getActive());
         this.accountId = vo.getAccountId();
-        this.accountVo = vo.getAccountVo();
+        this.account = vo.getAccount();
         this.id = vo.getId();
         this.sequence = vo.getSequence();
     }

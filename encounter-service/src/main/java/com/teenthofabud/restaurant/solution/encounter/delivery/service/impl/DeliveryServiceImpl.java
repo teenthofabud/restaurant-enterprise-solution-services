@@ -36,7 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
@@ -59,8 +58,8 @@ public class DeliveryServiceImpl implements DeliveryService{
 
     private String deliveryTimeFormat;
 
-    @Value("${res.encounter.meeting.timestamp.format}")
-    public void setWalkInTimeFormat(String pickUpTimeFormat) {
+    @Value("${res.encounter.meeting.date.format}")
+    public void setDeliveryTimeFormat(String deliveryTimeFormat) {
         this.deliveryTimeFormat = deliveryTimeFormat;
     }
 
@@ -85,80 +84,47 @@ public class DeliveryServiceImpl implements DeliveryService{
 
     @Override
     public DeliveryFormValidator getMeetingFormValidator() {
-        return (DeliveryFormValidator) this.meetingBeanFactory.getMeetingFormValidator(MeetingType.DELIVERY.name()).get();
+        return (DeliveryFormValidator) this.meetingBeanFactory.getMeetingFormValidator(getContextMeetingType()).get();
     }
 
     @Override
     public DeliveryFormRelaxedValidator getMeetingFormRelaxedValidator() {
-        return (DeliveryFormRelaxedValidator) this.meetingBeanFactory.getMeetingFormRelaxedValidator(MeetingType.DELIVERY.name()).get();
+        return (DeliveryFormRelaxedValidator) this.meetingBeanFactory.getMeetingFormRelaxedValidator(getContextMeetingType()).get();
     }
 
     @Override
     public DeliveryDtoValidator getMeetingDtoValidator() {
-        return (DeliveryDtoValidator) this.meetingBeanFactory.getMeetingDtoValidator(MeetingType.DELIVERY.name()).get();
+        return (DeliveryDtoValidator) this.meetingBeanFactory.getMeetingDtoValidator(getContextMeetingType()).get();
     }
 
     @Override
     public DeliveryRepository getMeetingRepository() {
-        return (DeliveryRepository) this.meetingBeanFactory.getMeetingRepository(MeetingType.DELIVERY.name()).get();
+        return (DeliveryRepository) this.meetingBeanFactory.getMeetingRepository(getContextMeetingType()).get();
     }
 
     @Override
     public DeliveryEntitySelfMapper getMeetingEntitySelfMapper() {
-        return (DeliveryEntitySelfMapper) this.meetingBeanFactory.getMeetingEntitySelfMapper(MeetingType.DELIVERY.name()).get();
+        return (DeliveryEntitySelfMapper) this.meetingBeanFactory.getMeetingEntitySelfMapper(getContextMeetingType()).get();
     }
 
     @Override
     public DeliveryForm2EntityMapper getMeetingForm2EntityMapper() {
-        return (DeliveryForm2EntityMapper) this.meetingBeanFactory.getMeetingForm2EntityMapper(MeetingType.DELIVERY.name()).get();
+        return (DeliveryForm2EntityMapper) this.meetingBeanFactory.getMeetingForm2EntityMapper(getContextMeetingType()).get();
     }
 
     @Override
     public DeliveryForm2EntityConverter getMeetingForm2EntityConverter() {
-        return (DeliveryForm2EntityConverter) this.meetingBeanFactory.getMeetingForm2EntityConverter(MeetingType.DELIVERY.name()).get();
+        return (DeliveryForm2EntityConverter) this.meetingBeanFactory.getMeetingForm2EntityConverter(getContextMeetingType()).get();
     }
 
     @Override
     public DeliveryEntity2VoConverter getMeetingEntity2VoConverter() {
-        return (DeliveryEntity2VoConverter) this.meetingBeanFactory.getMeetingEntity2VoConverter(MeetingType.DELIVERY.name()).get();
+        return (DeliveryEntity2VoConverter) this.meetingBeanFactory.getMeetingEntity2VoConverter(getContextMeetingType()).get();
     }
 
     @Override
     public DeliveryDto2EntityConverter getMeetingDto2EntityConverter() {
-        return (DeliveryDto2EntityConverter) this.meetingBeanFactory.getMeetingDto2EntityConverter(MeetingType.DELIVERY.name()).get();
-    }
-
-    @Override
-    public List<DeliveryVo> retrieveAllMatchingDeliveryDetailsByCriteria(Optional<String> optionalOrderId) 
-            throws MeetingException {
-        if(optionalOrderId.isEmpty()) {
-            log.debug("No search parameters provided");
-        }
-        String orderId = optionalOrderId.isPresent() ? optionalOrderId.get() : "";
-        if(StringUtils.isEmpty(StringUtils.trimWhitespace(orderId))) {
-            log.debug("All search parameters are empty");
-        }
-        List<DeliveryVo> matchedDeliveryList = new LinkedList<>();
-        Map<String, String> providedFilters = new LinkedHashMap<>();
-        DeliveryEntity entity = new DeliveryEntity(new MeetingEntity());
-        ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll();
-        if(StringUtils.hasText(StringUtils.trimWhitespace(orderId))) {
-            log.debug("orderId {} is valid", orderId);
-            providedFilters.put("orderId", orderId);
-            entity.setOrderId(orderId);
-            matcherCriteria = matcherCriteria.withMatcher("orderId", match -> match.exact());
-        }
-        if(providedFilters.isEmpty()) {
-            log.debug("search parameters are not valid");
-        } else {
-            log.debug("search parameters {} are valid", providedFilters);
-        }
-        Example<DeliveryEntity> deliveryEntityExample = Example.of(entity, matcherCriteria);
-        List<DeliveryEntity> deliveryEntityList = this.getMeetingRepository().findAll(deliveryEntityExample);
-        matchedDeliveryList = encounterServiceHelper.deliveryEntity2DetailedVo(deliveryEntityList);
-        log.info("Found {} DeliveryVo matching with provided parameters : {}", matchedDeliveryList.size(), providedFilters);
-        log.info("No DeliveryVo available matching with provided parameters : {}", providedFilters);
-        return matchedDeliveryList;
+        return (DeliveryDto2EntityConverter) this.meetingBeanFactory.getMeetingDto2EntityConverter(getContextMeetingType()).get();
     }
 
     @Override
@@ -179,6 +145,39 @@ public class DeliveryServiceImpl implements DeliveryService{
                 }
             }
         };
+    }
+
+    @Override
+    public List<DeliveryVo> retrieveAllMatchingDeliveryDetailsByCriteria(Optional<String> optionalOrderId)
+            throws MeetingException {
+        if(optionalOrderId.isEmpty()) {
+            log.debug("No search parameters provided");
+        }
+        String orderId = optionalOrderId.isPresent() ? optionalOrderId.get() : "";
+        if(StringUtils.isEmpty(StringUtils.trimWhitespace(orderId))) {
+            log.debug("All search parameters are empty");
+        }
+        List<DeliveryVo> matchedDeliveryList = new LinkedList<>();
+        Map<String, String> providedFilters = new LinkedHashMap<>();
+        DeliveryEntity entity = new DeliveryEntity(new MeetingEntity());
+        ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll().withIgnorePaths("id","sequence","accountId").withIgnoreNullValues();
+        if(StringUtils.hasText(StringUtils.trimWhitespace(orderId))) {
+            log.debug("orderId {} is valid", orderId);
+            providedFilters.put("orderId", orderId);
+            entity.setOrderId(orderId);
+            matcherCriteria = matcherCriteria.withMatcher("orderId", match -> match.exact());
+        }
+        if(providedFilters.isEmpty()) {
+            log.debug("search parameters are not valid");
+        } else {
+            log.debug("search parameters {} are valid", providedFilters);
+        }
+        Example<DeliveryEntity> deliveryEntityExample = Example.of(entity, matcherCriteria);
+        List<DeliveryEntity> deliveryEntityList = this.getMeetingRepository().findAll(deliveryEntityExample);
+        matchedDeliveryList = encounterServiceHelper.deliveryEntity2DetailedVo(deliveryEntityList);
+        log.info("Found {} DeliveryVo matching with provided parameters : {}", matchedDeliveryList.size(), providedFilters);
+        log.info("No DeliveryVo available matching with provided parameters : {}", providedFilters);
+        return matchedDeliveryList;
     }
 
     @Override
@@ -224,7 +223,7 @@ public class DeliveryServiceImpl implements DeliveryService{
         List<DeliveryVo> matchedDeliveryList = new LinkedList<>();
         Map<String, String> providedFilters = new LinkedHashMap<>();
         DeliveryEntity entity = new DeliveryEntity();
-        ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll();
+        ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll().withIgnorePaths("id").withIgnoreNullValues();
         if(StringUtils.hasText(StringUtils.trimWhitespace(accountId))) {
             log.debug("accountId {} is valid", accountId);
             providedFilters.put("accountId", accountId);
@@ -245,8 +244,13 @@ public class DeliveryServiceImpl implements DeliveryService{
         Example<DeliveryEntity> deliveryEntityExample = Example.of(entity, matcherCriteria);
         List<DeliveryEntity> deliveryEntityList = this.getMeetingRepository().findAll(deliveryEntityExample);
         matchedDeliveryList = encounterServiceHelper.deliveryEntity2DetailedVo(deliveryEntityList);
-        log.info("Found {} DeliveryVo matching with provided parameters : {}", matchedDeliveryList.size(), providedFilters);
-        log.info("No DeliveryVo available matching with provided parameters : {}", providedFilters);
+
+        if(matchedDeliveryList.isEmpty()){
+            log.info("Found {} DeliveryVo matching with provided parameters : {}", matchedDeliveryList.size(), providedFilters);
+        }else{
+            log.info("No DeliveryVo available matching with provided parameters : {}", providedFilters);
+        }
+
         return matchedDeliveryList;
     }
 
@@ -276,7 +280,7 @@ public class DeliveryServiceImpl implements DeliveryService{
         end = LocalDateTime.of(dt, LocalTime.of(23,59, 59));
 
         log.info("Requesting DeliveryEntity by sequence: {} between timestamps: {} and {}", seq, start, end);
-        Optional<DeliveryEntity> optEntity = this.getMeetingRepository().findBySequenceAndCreatedOnBetween(seq, start, end);
+        Optional<DeliveryEntity> optEntity = this.getMeetingRepository().findBySequenceAndCreatedOnBetween(seq.toString(), start, end);
         if(optEntity.isEmpty()) {
             log.debug("No DeliveryEntity found by sequence: {} between timestamps: {} and {}", seq, start, end);
             throw new MeetingException(EncounterErrorCode.ENCOUNTER_NOT_FOUND, new Object[] { "seq: " + seq, ", date: " + date });
@@ -285,7 +289,6 @@ public class DeliveryServiceImpl implements DeliveryService{
         DeliveryEntity entity = optEntity.get();
         return encounterServiceHelper.deliveryEntity2DetailedVo(entity);
     }
-
 
     @Override
     public String createMeeting(DeliveryForm form) throws MeetingException {
@@ -497,7 +500,7 @@ public class DeliveryServiceImpl implements DeliveryService{
 
         log.debug("Comparatively copying patched attributes from DeliveryDto to DeliveryEntity");
         try {
-            this.getMeetingDto2EntityConverter().compareAndMap(patchedDeliveryForm, actualEntity);
+            this.getMeetingDto2EntityConverter().compareAndMapChild(patchedDeliveryForm, actualEntity);
         } catch (TOABBaseException e) {
             throw (MeetingException) e;
         }

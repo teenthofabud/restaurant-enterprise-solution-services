@@ -13,9 +13,8 @@ import javax.persistence.*;
 @Entity(name = "pickUp")
 @Table(name = "pick_up")
 @EntityListeners(AuditingEntityListener.class)
-@Inheritance(
-        strategy = InheritanceType.JOINED
-)
+@Inheritance(strategy = InheritanceType.JOINED)
+@PrimaryKeyJoinColumn(name = "encounter_meeting_id")
 @NoArgsConstructor
 public class PickUpEntity extends MeetingEntity {
 

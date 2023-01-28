@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 java \
--agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:6331 \
+-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:6332 \
 -jar \
 -DENCOUNTER_SPRING_PROFILES_ACTIVE=local \
 -DENCOUNTER_SERVER_PORT=23001 \

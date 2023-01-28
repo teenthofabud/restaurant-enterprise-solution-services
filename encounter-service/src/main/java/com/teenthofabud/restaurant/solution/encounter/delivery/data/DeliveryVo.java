@@ -13,15 +13,11 @@ import lombok.*;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper=false)
 public class DeliveryVo extends MeetingVo {
 
-    @EqualsAndHashCode.Include
-    @ToString.Include
-    private String id;
     @ToString.Include
     private String orderId;
 
     public DeliveryVo(MeetingVo vo) {
         super(vo);
         this.orderId = "";
-        this.id = "";
     }
 }

@@ -24,6 +24,11 @@ public class DeliveryDtoValidator extends MeetingDtoValidator {
     }
 
     @Override
+    public List<String> getFieldsToEscape() {
+        return this.fieldsToEscape;
+    }
+
+    @Override
     protected void validate(Optional<? extends MeetingDto> optionalMeetingDto, Errors errors) {
         if(optionalMeetingDto.isEmpty()) {
             log.debug("No DeliveryDto available");

@@ -14,12 +14,7 @@ import java.util.Optional;
 public abstract class MeetingForm2EntityMapper<T extends MeetingEntity, U extends MeetingForm>
         implements DualChannelMapper<T, U> {
 
-    private List<String> fieldsToEscape;
-
-    @Value("#{'${res.encounter.meeting.fields-to-escape}'.split(',')}")
-    public void setFieldsToEscape(List<String> fieldsToEscape) {
-        this.fieldsToEscape = fieldsToEscape;
-    }
+    public abstract List<String> getFieldsToEscape();
 
     protected Optional<T> compareAndMap(T actualEntity, T expectedEntity, U form) {
         boolean changeSW = false;
@@ -33,7 +28,7 @@ public abstract class MeetingForm2EntityMapper<T extends MeetingEntity, U extend
         log.debug("Directly copying MeetingEntity.active: {} from actualEntity to expectedEntity", actualEntity.getActive());
 
         // comparative copy
-        if(!fieldsToEscape.contains("sequence") && form.getSequence() != null && form.getSequence().compareTo(actualEntity.getSequence()) != 0) {
+        if(!getFieldsToEscape().contains("sequence") && form.getSequence() != null && form.getSequence().compareTo(actualEntity.getSequence()) != 0) {
             expectedEntity.setSequence(form.getSequence());
             changeSW = true;
             log.debug("MeetingForm.sequence: {} is different as MeetingEntity.sequence: {}", form.getSequence(), actualEntity.getSequence());
@@ -41,7 +36,7 @@ public abstract class MeetingForm2EntityMapper<T extends MeetingEntity, U extend
             expectedEntity.setSequence(actualEntity.getSequence());
             log.debug("MeetingForm.sequence: is unchanged");
         }
-        if(!fieldsToEscape.contains("accountId") && StringUtils.hasText(StringUtils.trimWhitespace(form.getAccountId()))
+        if(!getFieldsToEscape().contains("accountId") && StringUtils.hasText(StringUtils.trimWhitespace(form.getAccountId()))
                 && form.getAccountId().compareTo(actualEntity.getAccountId()) != 0) {
             expectedEntity.setAccountId(form.getAccountId());
             changeSW = true;
