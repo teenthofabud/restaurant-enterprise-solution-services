@@ -247,7 +247,7 @@ public class PickUpServiceImpl implements PickUpService {
         end = LocalDateTime.of(dt, LocalTime.of(23,59, 59));
 
         log.info("Requesting PickUpEntity by sequence: {} between timestamps: {} and {}", seq, start, end);
-        Optional<PickUpEntity> optEntity = this.getMeetingRepository().findBySequenceAndCreatedOnBetween(seq.toString(), start, end);
+        Optional<PickUpEntity> optEntity = this.getMeetingRepository().findBySequenceAndCreatedOnBetween(seq.toString()d, start, end);
         if(optEntity.isEmpty()) {
             log.debug("No PickUpEntity found by sequence: {} between timestamps: {} and {}", seq, start, end);
             throw new MeetingException(EncounterErrorCode.ENCOUNTER_NOT_FOUND, new Object[] { "seq: " + seq, ", date: " + date });
