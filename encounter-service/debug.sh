@@ -1,11 +1,11 @@
 #!/usr/bin/env zsh
 java \
--agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:6332 \
+-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:6338 \
 -jar \
 -DENCOUNTER_SPRING_PROFILES_ACTIVE=local \
 -DENCOUNTER_SERVER_PORT=23001 \
 -DENCOUNTER_EUREKA_CLIENT_ENABLED=true \
--DENCOUNTER_SPRING_CLOUD_CONFIG_ENABLED=true \
+-DENCOUNTER_SPRING_CLOUD_CONFIG_ENABLED=false \
 -DENCOUNTER_ZIPKIN_CLIENT_ENABLED=false \
 -DENCOUNTER_LOGSTASH_ENABLED=false \
 -DENCOUNTER_SWAGGER_ENABLED=true \

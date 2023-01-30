@@ -30,7 +30,7 @@ import com.teenthofabud.restaurant.solution.encounter.meeting.data.MeetingExcept
 import com.teenthofabud.restaurant.solution.encounter.meeting.data.MeetingMessageTemplate;
 import com.teenthofabud.restaurant.solution.encounter.meeting.factory.MeetingBeanFactory;
 import com.teenthofabud.restaurant.solution.encounter.utils.EncounterServiceHelper;
-import constants.EncounterErrorCode;
+import com.teenthofabud.restaurant.solution.encounter.constants.EncounterErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -313,6 +313,13 @@ public class DeliveryServiceImpl implements DeliveryService{
         log.debug("All attributes of DeliveryForm are valid");
 
         DeliveryEntity expectedEntity = this.getMeetingForm2EntityConverter().convert(form);
+
+        log.debug(MeetingMessageTemplate.MSG_TEMPLATE_MEETING_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE.getValue(), form.getAccountId(), form.getSequence());
+        if(this.getMeetingRepository().existsByAccountIdAndSequence(expectedEntity.getAccountId(), expectedEntity.getSequence())) {
+            log.debug(MeetingMessageTemplate.MSG_TEMPLATE_MEETING_EXISTS_BY_ACCOUNT_ID_AND_SEQUENCE.getValue(), expectedEntity.getAccountId(), expectedEntity.getSequence());
+            throw new MeetingException(EncounterErrorCode.ENCOUNTER_EXISTS, new Object[]{ "accountId: " + form.getAccountId(), "sequence: " + form.getSequence() });
+        }
+        log.debug(MeetingMessageTemplate.MSG_TEMPLATE_MEETING_NON_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE.getValue(), expectedEntity.getAccountId(), expectedEntity.getSequence());
 
         log.debug("Saving {}", expectedEntity);
         DeliveryEntity actualEntity = this.getMeetingRepository().save(expectedEntity);

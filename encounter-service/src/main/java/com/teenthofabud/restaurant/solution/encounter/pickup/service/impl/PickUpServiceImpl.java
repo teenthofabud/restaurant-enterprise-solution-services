@@ -30,7 +30,7 @@ import com.teenthofabud.restaurant.solution.encounter.pickup.validator.PickUpDto
 import com.teenthofabud.restaurant.solution.encounter.pickup.validator.PickUpFormRelaxedValidator;
 import com.teenthofabud.restaurant.solution.encounter.pickup.validator.PickUpFormValidator;
 import com.teenthofabud.restaurant.solution.encounter.utils.EncounterServiceHelper;
-import constants.EncounterErrorCode;
+import com.teenthofabud.restaurant.solution.encounter.constants.EncounterErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -247,7 +247,7 @@ public class PickUpServiceImpl implements PickUpService {
         end = LocalDateTime.of(dt, LocalTime.of(23,59, 59));
 
         log.info("Requesting PickUpEntity by sequence: {} between timestamps: {} and {}", seq, start, end);
-        Optional<PickUpEntity> optEntity = this.getMeetingRepository().findBySequenceAndCreatedOnBetween(seq.toString()d, start, end);
+        Optional<PickUpEntity> optEntity = this.getMeetingRepository().findBySequenceAndCreatedOnBetween(seq.toString(), start, end);
         if(optEntity.isEmpty()) {
             log.debug("No PickUpEntity found by sequence: {} between timestamps: {} and {}", seq, start, end);
             throw new MeetingException(EncounterErrorCode.ENCOUNTER_NOT_FOUND, new Object[] { "seq: " + seq, ", date: " + date });
@@ -320,6 +320,13 @@ public class PickUpServiceImpl implements PickUpService {
         log.debug("All attributes of PickUpForm are valid");
 
         PickUpEntity expectedEntity = this.getMeetingForm2EntityConverter().convert(form);
+
+        log.debug(MeetingMessageTemplate.MSG_TEMPLATE_MEETING_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE.getValue(), form.getAccountId(), form.getSequence());
+        if(this.getMeetingRepository().existsByAccountIdAndSequence(expectedEntity.getAccountId(), expectedEntity.getSequence())) {
+            log.debug(MeetingMessageTemplate.MSG_TEMPLATE_MEETING_EXISTS_BY_ACCOUNT_ID_AND_SEQUENCE.getValue(), expectedEntity.getAccountId(), expectedEntity.getSequence());
+            throw new MeetingException(EncounterErrorCode.ENCOUNTER_EXISTS, new Object[]{ "accountId" + form.getAccountId(), "sequence" + form.getSequence() });
+        }
+        log.debug(MeetingMessageTemplate.MSG_TEMPLATE_MEETING_NON_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE.getValue(), expectedEntity.getAccountId(), expectedEntity.getSequence());
 
         log.debug("Saving {}", expectedEntity);
         PickUpEntity actualEntity = this.getMeetingRepository().save(expectedEntity);

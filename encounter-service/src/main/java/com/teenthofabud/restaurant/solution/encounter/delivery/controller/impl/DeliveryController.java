@@ -11,7 +11,7 @@ import com.teenthofabud.restaurant.solution.encounter.delivery.data.DeliveryVo;
 import com.teenthofabud.restaurant.solution.encounter.delivery.service.impl.DeliveryServiceImpl;
 import com.teenthofabud.restaurant.solution.encounter.meeting.data.MeetingException;
 import com.teenthofabud.restaurant.solution.encounter.meeting.data.MeetingMessageTemplate;
-import constants.EncounterErrorCode;
+import com.teenthofabud.restaurant.solution.encounter.constants.EncounterErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
