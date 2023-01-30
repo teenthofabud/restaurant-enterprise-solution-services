@@ -1,7 +1,6 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.data;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.teenthofabud.restaurant.solution.engagement.checkin.constants.CheckInType;
 import lombok.*;
 
 @NoArgsConstructor
@@ -26,6 +25,5 @@ public class CheckInForm {
         this.notes = form.getNotes();
         this.type = form.getType();
     }
-
 
 }

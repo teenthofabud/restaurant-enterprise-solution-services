@@ -1,8 +1,6 @@
 package com.teenthofabud.restaurant.solution.engagement;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.specto.hoverfly.junit.core.Hoverfly;
 import io.specto.hoverfly.junit.core.HoverflyConfig;
 import io.specto.hoverfly.junit.core.HoverflyMode;
@@ -23,13 +21,13 @@ import java.util.stream.Collectors;
 
 public abstract class EngagementIntegrationBaseTest {
 
-    protected ObjectMapper om;
+    protected ObjectMapper objectMapper;
     protected MockMvc mockMvc;
     private Hoverfly hoverfly;
 
     @Autowired
-    public void setOm(ObjectMapper om) {
-        this.om = om;
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
     }
 
     @Autowired
@@ -39,9 +37,6 @@ public abstract class EngagementIntegrationBaseTest {
 
     @BeforeAll
     private void setUp() throws URISyntaxException {
-        om.registerModule(new Jdk8Module());
-        om.registerModule(new JavaTimeModule());
-
         LocalHoverflyConfig localHoverflyConfig = HoverflyConfig.localConfigs();
 
         Optional<String> optSimulationBaseLocation = Optional.empty();

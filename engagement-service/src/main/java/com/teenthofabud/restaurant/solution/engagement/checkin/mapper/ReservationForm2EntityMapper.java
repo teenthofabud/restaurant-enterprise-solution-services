@@ -21,6 +21,11 @@ public class ReservationForm2EntityMapper extends CheckInForm2EntityMapper<Reser
     private String reservationTimeFormat;
     private String reservationDateFormat;
 
+    @Override
+    public List<String> getFieldsToEscape() {
+        return this.fieldsToEscape;
+    }
+
     @Value("#{'${res.engagement.checkIn.reservation.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
@@ -35,51 +40,6 @@ public class ReservationForm2EntityMapper extends CheckInForm2EntityMapper<Reser
     public void setReservationDateFormat(String reservationDateFormat) {
         this.reservationDateFormat = reservationDateFormat;
     }
-
-    /*@Override
-    protected Optional<ReservationEntity> compareAndMap(ReservationEntity parent, ReservationEntity checkInEntityChild, ReservationForm checkInFormChild) {
-        ReservationEntity actualEntity = checkInEntityChild;
-        ReservationForm form = checkInFormChild;
-        boolean changeSW = false;
-
-        ReservationEntity expectedEntity = new ReservationEntity(parent);
-        // direct copy
-        expectedEntity.setId(actualEntity.getId());
-        log.debug("Directly copying ReservationEntity.id: {} from actualEntity to expectedEntity", actualEntity.getId());
-
-
-        if(!fieldsToEscape.contains("date") && StringUtils.hasText(StringUtils.trimWhitespace(form.getDate()))) {
-            LocalDate date = LocalDate.parse(form.getDate(), DateTimeFormatter.ofPattern(reservationDateFormat));
-            if(date.compareTo(actualEntity.getDate()) != 0) {
-                expectedEntity.setDate(date);
-                changeSW = true;
-                log.debug("ReservationForm.date: {} is different as ReservationEntity.date: {}", form.getDate(), actualEntity.getDate());
-            } else {
-                expectedEntity.setDate(actualEntity.getDate());
-                log.debug("ReservationForm.date: is unchanged");
-            }
-        } else {
-            expectedEntity.setDate(actualEntity.getDate());
-            log.debug("ReservationForm.date: is unchanged");
-        }
-
-        if(!fieldsToEscape.contains("time") && StringUtils.hasText(StringUtils.trimWhitespace(form.getTime()))) {
-            LocalTime time = LocalTime.parse(form.getDate(), DateTimeFormatter.ofPattern(reservationTimeFormat));
-            if(time.compareTo(actualEntity.getTime()) != 0) {
-                expectedEntity.setTime(time);
-                changeSW = true;
-                log.debug("ReservationForm.time: {} is different as ReservationEntity.time: {}", form.getTime(), actualEntity.getTime());
-            } else {
-                expectedEntity.setDate(actualEntity.getDate());
-                log.debug("ReservationForm.time: is unchanged");
-            }
-        } else {
-            expectedEntity.setTime(actualEntity.getTime());
-            log.debug("ReservationForm.time: is unchanged");
-        }
-
-        return changeSW ? Optional.of(expectedEntity) : Optional.empty();
-    }*/
 
     @Override
     public Optional<ReservationEntity> compareAndMap(ReservationEntity actualEntity, ReservationForm form) {
@@ -112,13 +72,13 @@ public class ReservationForm2EntityMapper extends CheckInForm2EntityMapper<Reser
         }
 
         if(!fieldsToEscape.contains("time") && StringUtils.hasText(StringUtils.trimWhitespace(form.getTime()))) {
-            LocalTime time = LocalTime.parse(form.getDate(), DateTimeFormatter.ofPattern(reservationTimeFormat));
+            LocalTime time = LocalTime.parse(form.getTime(), DateTimeFormatter.ofPattern(reservationTimeFormat));
             if(time.compareTo(actualEntity.getTime()) != 0) {
                 expectedEntity.setTime(time);
                 changeSW = true;
                 log.debug("ReservationForm.time: {} is different as ReservationEntity.time: {}", form.getTime(), actualEntity.getTime());
             } else {
-                expectedEntity.setDate(actualEntity.getDate());
+                expectedEntity.setTime(actualEntity.getTime());
                 log.debug("ReservationForm.time: is unchanged");
             }
         } else {

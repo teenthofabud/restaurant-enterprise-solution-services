@@ -2,10 +2,7 @@ package com.teenthofabud.restaurant.solution.engagement.checkin.data;
 
 import com.teenthofabud.core.common.data.entity.TOABBaseEntity;
 import com.teenthofabud.restaurant.solution.engagement.tableallocation.data.TableAllocationEntity;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.util.CollectionUtils;
 
@@ -17,6 +14,7 @@ import java.util.Optional;
 
 @Getter
 @Setter
+@NoArgsConstructor
 @AllArgsConstructor
 @ToString(onlyExplicitlyIncluded = true)
 @Entity(name = "checkIn")
@@ -27,24 +25,12 @@ import java.util.Optional;
 )
 public class CheckInEntity extends TOABBaseEntity implements Comparable<CheckInEntity> {
 
-    public CheckInEntity() {
-        this.id = 0l;
-        this.accountId = "";
-        this.sequence = "";
-        this.noOfPersons = 0;
-        //this.statusHistory = new LinkedList<>();
-        this.notes = "";
-        this.tableAllocations = new ArrayList<>();
-        this.active = false;
-    }
-
     public CheckInEntity(CheckInEntity checkInEntity) {
         this.id = checkInEntity.getId();
         this.accountId = checkInEntity.getAccountId();
         this.sequence = checkInEntity.getSequence();
         this.notes = checkInEntity.getNotes();
         this.noOfPersons = checkInEntity.getNoOfPersons();
-        this.tableAllocations = new ArrayList<>();
         this.active = checkInEntity.getActive();
     }
 
@@ -68,6 +54,9 @@ public class CheckInEntity extends TOABBaseEntity implements Comparable<CheckInE
     private List<TableAllocationEntity> tableAllocations;
 
     public void addTableAllocation(TableAllocationEntity tableAllocation) {
+        if(CollectionUtils.isEmpty(this.tableAllocations)) {
+            this.tableAllocations = new ArrayList<>();
+        }
         this.tableAllocations.add(tableAllocation);
     }
 

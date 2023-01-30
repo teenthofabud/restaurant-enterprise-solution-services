@@ -46,13 +46,12 @@ public abstract class CheckInEntitySelfMapper<T extends CheckInEntity> implement
         }*/
         if(changeSW) {
             log.debug("All provided CheckInEntity attributes are valid");
-            this.compareAndMapChild((T) source, (T) target);
             return Optional.of(target);
         } else {
             log.debug("Not all provided CheckInEntity attributes are valid");
             return Optional.empty();
         }
     }
-    protected abstract void compareAndMapChild(T source, T target);
+    public abstract void compareAndMapChild(T source, T target);
 
 }

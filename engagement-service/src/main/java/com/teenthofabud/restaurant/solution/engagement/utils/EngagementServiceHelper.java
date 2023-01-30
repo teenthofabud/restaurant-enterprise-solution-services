@@ -12,12 +12,15 @@ import com.teenthofabud.restaurant.solution.engagement.tableallocation.converter
 import com.teenthofabud.restaurant.solution.engagement.tableallocation.data.TableAllocationEntity;
 import com.teenthofabud.restaurant.solution.engagement.tableallocation.data.TableAllocationVo;
 import lombok.extern.slf4j.Slf4j;
+import org.reflections.ReflectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Field;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @Component
@@ -82,7 +85,7 @@ public class EngagementServiceHelper<T extends CheckInForm, U extends CheckInVo,
     }
 
     public ReservationVo reservationEntity2DetailedVo(ReservationEntity reservationEntity) {
-        Optional<? extends CheckInEntity2VoConverter> optionalCheckInEntity2VoConverter = this.checkInBeanFactory.getCheckInEntity2VoConverter(CheckInType.WALK_IN.name());
+        Optional<? extends CheckInEntity2VoConverter> optionalCheckInEntity2VoConverter = this.checkInBeanFactory.getCheckInEntity2VoConverter(CheckInType.RESERVATION.name());
         ReservationEntity2VoConverter reservationEntity2VoConverter = (ReservationEntity2VoConverter) optionalCheckInEntity2VoConverter.get();
         if(reservationEntity != null) {
             ReservationVo vo = reservationEntity2VoConverter.convert(reservationEntity);

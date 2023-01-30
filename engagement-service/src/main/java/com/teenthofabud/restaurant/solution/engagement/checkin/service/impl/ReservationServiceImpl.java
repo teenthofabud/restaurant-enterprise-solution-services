@@ -1,6 +1,7 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.teenthofabud.core.common.constant.TOABBaseMessageTemplate;
@@ -26,11 +27,12 @@ import com.teenthofabud.restaurant.solution.engagement.checkin.validator.Reserva
 import com.teenthofabud.restaurant.solution.engagement.constants.EngagementErrorCode;
 import com.teenthofabud.restaurant.solution.engagement.utils.EngagementServiceHelper;
 import lombok.extern.slf4j.Slf4j;
+import org.reflections.ReflectionUtils;
+import org.reflections.Reflections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
@@ -50,8 +52,8 @@ public class ReservationServiceImpl implements ReservationService {
     private String reservationDateFormat;
     private CheckInBeanFactory checkInBeanFactory;
     private EngagementServiceHelper engagementServiceHelper;
-
     private TOABBaseService toabBaseService;
+    private ObjectMapper objectMapper;
 
     @Override
     @Value("${res.engagement.checkIn.reservation.time.format}")
@@ -63,6 +65,11 @@ public class ReservationServiceImpl implements ReservationService {
     @Value("${res.engagement.checkIn.reservation.date.format}")
     public void setReservationDateFormat(String reservationDateFormat) {
         this.reservationDateFormat = reservationDateFormat;
+    }
+
+    @Autowired
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
     }
 
     @Autowired
@@ -255,7 +262,7 @@ public class ReservationServiceImpl implements ReservationService {
         List<ReservationVo> matchedReservationList = new LinkedList<>();
         Map<String, String> providedFilters = new LinkedHashMap<>();
         ReservationEntity entity = new ReservationEntity();
-        ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll();
+        ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll().withIgnoreNullValues();
         if(StringUtils.hasText(StringUtils.trimWhitespace(accountId))) {
             log.debug("accountId {} is valid", accountId);
             providedFilters.put("accountId", accountId);
@@ -424,7 +431,7 @@ public class ReservationServiceImpl implements ReservationService {
 
         this.checkUniquenessOfCheckIn(form, actualEntity);
 
-        this.getCheckInEntitySelfMapper().compareAndMap(expectedEntity, actualEntity);
+        this.getCheckInEntitySelfMapper().compareAndMapChild(expectedEntity, actualEntity);
         log.debug("Compared and copied attributes from ReservationEntity to ReservationForm");
         actualEntity.setModifiedOn(LocalDateTime.now(ZoneOffset.UTC));
 
@@ -507,16 +514,16 @@ public class ReservationServiceImpl implements ReservationService {
 
 
         log.debug("Patching list items to ReservationDto");
-        ReservationDto patchedReservationForm = new ReservationDto();
+        ReservationDto patchedReservationDto = new ReservationDto();
         try {
             log.debug("Preparing patch list items for CheckIn");
-            JsonNode reservationDtoTree = OBJECT_MAPPER.convertValue(patches, JsonNode.class);
+            JsonNode reservationDtoTree = objectMapper.convertValue(patches, JsonNode.class);
             JsonPatch checkInPatch = JsonPatch.fromJson(reservationDtoTree);
             log.debug("Prepared patch list items for CheckIn");
-            JsonNode blankReservationDtoTree = OBJECT_MAPPER.convertValue(new ReservationDto(), JsonNode.class);
+            JsonNode blankReservationDtoTree = objectMapper.convertValue(new ReservationDto(), JsonNode.class);
             JsonNode patchedReservationFormTree = checkInPatch.apply(blankReservationDtoTree);
             log.debug("Applying patch list items to ReservationDto");
-            patchedReservationForm = OBJECT_MAPPER.treeToValue(patchedReservationFormTree, ReservationDto.class);
+            patchedReservationDto = objectMapper.treeToValue(patchedReservationFormTree, ReservationDto.class);
             log.debug("Applied patch list items to ReservationDto");
         } catch (JsonPatchException e) {
             log.debug("Failed to patch list items to ReservationDto: {}", e);
@@ -535,8 +542,8 @@ public class ReservationServiceImpl implements ReservationService {
         log.debug("Successfully to patch list items to ReservationDto");
 
         log.debug("Validating patched ReservationDto");
-        Errors err = new DirectFieldBindingResult(patchedReservationForm, patchedReservationForm.getClass().getSimpleName());
-        this.getCheckInDtoValidator().validate(patchedReservationForm, err);
+        Errors err = new DirectFieldBindingResult(patchedReservationDto, patchedReservationDto.getClass().getSimpleName());
+        this.getCheckInDtoValidator().validate(patchedReservationDto, err);
         if(err.hasErrors()) {
             log.debug("Patched ReservationDto has {} errors", err.getErrorCount());
             EngagementErrorCode ec = EngagementErrorCode.valueOf(err.getFieldError().getCode());
@@ -545,11 +552,11 @@ public class ReservationServiceImpl implements ReservationService {
         }
         log.debug("All attributes of patched ReservationDto are valid");
 
-        this.checkUniquenessOfCheckIn(patchedReservationForm, actualEntity);
+        this.checkUniquenessOfCheckIn(patchedReservationDto, actualEntity);
 
         log.debug("Comparatively copying patched attributes from ReservationDto to ReservationEntity");
         try {
-            this.getCheckInDto2EntityConverter().compareAndMap(patchedReservationForm, actualEntity);
+            this.getCheckInDto2EntityConverter().compareAndMapChild(patchedReservationDto, actualEntity);
         } catch (TOABBaseException e) {
             throw (CheckInException) e;
         }
@@ -565,56 +572,4 @@ public class ReservationServiceImpl implements ReservationService {
         }
         log.info("Patched ReservationEntity with id:{}", id);
     }
-
-    /*private void checkUniquenessOfCheckIn(ReservationDto patchedReservationForm, ReservationEntity actualEntity) throws CheckInException {
-        List<Boolean> similaritySwitchesCollection = new ArrayList<>(2);
-        if(patchedReservationForm.getAccountId().isPresent()) {
-            similaritySwitchesCollection.add(patchedReservationForm.getAccountId().get().compareTo(actualEntity.getAccountId()) == 0);
-        }
-        if(patchedReservationForm.getSequence().isPresent()) {
-            similaritySwitchesCollection.add(patchedReservationForm.getSequence().get().compareTo(actualEntity.getSequence()) == 0);
-        }
-        if(!similaritySwitchesCollection.isEmpty()) {
-            String accountId = patchedReservationForm.getAccountId().isPresent() ? patchedReservationForm.getAccountId().get() : actualEntity.getAccountId();
-            String sequence = patchedReservationForm.getSequence().isPresent() ? patchedReservationForm.getSequence().get() : actualEntity.getSequence();
-            LocalDate dt = LocalDate.now();
-            LocalDateTime start = LocalDateTime.of(dt, LocalTime.of(0,0, 0));
-            LocalDateTime end = LocalDateTime.of(dt, LocalTime.of(23,59, 59));
-            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence, start, end);
-            boolean sameEntitySw = similaritySwitchesCollection.stream().allMatch(Boolean::valueOf);
-            boolean duplicateEntitySw =  this.getCheckInRepository().existsByAccountIdAndSequenceAndCreatedOnBetween(accountId, sequence, start, end);
-            if(sameEntitySw || duplicateEntitySw) {
-                log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTS_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence, start, end);
-                throw new CheckInException(EngagementErrorCode.ENGAGEMENT_EXISTS, new Object[]{ "accountId: " + accountId, "sequence: " + sequence + ", start: " + start + ", end: " + end });
-            }
-            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_NON_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence, start, end);
-
-        }
-    }
-
-    private void checkUniquenessOfCheckIn(ReservationForm reservationForm, ReservationEntity actualEntity) throws CheckInException {
-        List<Boolean> similaritySwitchesCollection = new ArrayList<>(3);
-        if(StringUtils.hasText(StringUtils.trimWhitespace(reservationForm.getAccountId()))) {
-            similaritySwitchesCollection.add(reservationForm.getAccountId().compareTo(actualEntity.getAccountId()) == 0);
-        }
-        if(!ObjectUtils.isEmpty(reservationForm.getSequence())) {
-            similaritySwitchesCollection.add(reservationForm.getSequence().compareTo(actualEntity.getSequence()) == 0);
-        }
-        if(!similaritySwitchesCollection.isEmpty()) {
-            String accountId = StringUtils.hasText(StringUtils.trimWhitespace(reservationForm.getAccountId())) ? reservationForm.getAccountId() : actualEntity.getAccountId();
-            String sequence = !ObjectUtils.isEmpty(reservationForm.getSequence()) ? reservationForm.getSequence() : actualEntity.getSequence();
-            LocalDate dt = LocalDate.now();
-            LocalDateTime start = LocalDateTime.of(dt, LocalTime.of(0,0, 0));
-            LocalDateTime end = LocalDateTime.of(dt, LocalTime.of(23,59, 59));
-            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence, start, end);
-            boolean sameEntitySw = similaritySwitchesCollection.stream().allMatch(Boolean::valueOf);
-            boolean duplicateEntitySw =  this.getCheckInRepository().existsByAccountIdAndSequenceAndCreatedOnBetween(accountId, sequence, start, end);
-            if(sameEntitySw || duplicateEntitySw) {
-                log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTS_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence, start, end);
-                throw new CheckInException(EngagementErrorCode.ENGAGEMENT_EXISTS, new Object[]{ "accountId: " + accountId, "sequence: " + sequence + ", start: " + start + ", end: " + end });
-            }
-            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_NON_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence, start, end);
-
-        }
-    }*/
 }

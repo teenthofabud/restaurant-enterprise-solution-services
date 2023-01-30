@@ -24,10 +24,12 @@ public class WalkInDto2EntityConverter extends CheckInDto2EntityConverter<WalkIn
     }
 
     @Override
-    protected void compareAndMapChild(WalkInDto dto, WalkInEntity actualEntity) throws TOABBaseException {
+    public void compareAndMapChild(WalkInDto dto, WalkInEntity actualEntity) throws TOABBaseException {
         boolean[] changeSW = new boolean[NO_OF_COMPARABLE_AND_MAPPABLE_FIELDS]; // size = number of attributes in dto
         Arrays.fill(changeSW, Boolean.FALSE);
         int i = 0;
+
+        super.compareAndMap(dto, actualEntity);
 
         Optional<String> optName = dto.getName();
         if(!fieldsToEscape.contains("name") && optName.isPresent()) {

@@ -5,7 +5,6 @@ import com.teenthofabud.core.common.error.TOABBaseException;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInEntity;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInDto;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -74,12 +73,12 @@ public abstract class CheckInDto2EntityConverter<T extends CheckInDto, U extends
 
         if(Collections.frequency(Arrays.asList(changeSW), Boolean.TRUE) >= 1) {
             log.debug("All provided CheckInDto attributes are valid");
-            this.compareAndMap(dto, actualEntity);
+            //this.compareAndMap(dto, actualEntity);
             actualEntity.setModifiedOn(LocalDateTime.now(ZoneOffset.UTC));
             return;
         }
         log.debug("Not all provided CheckInDto attributes are valid");
     }
 
-    protected abstract void compareAndMapChild(T checkInDtoChild, U checkInEntityChild) throws TOABBaseException;
+    public abstract void compareAndMapChild(T checkInDtoChild, U checkInEntityChild) throws TOABBaseException;
 }
