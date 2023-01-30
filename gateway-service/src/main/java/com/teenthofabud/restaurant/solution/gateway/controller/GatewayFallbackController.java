@@ -1,24 +1,13 @@
 package com.teenthofabud.restaurant.solution.gateway.controller;
 
-import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Mono;
 
 @RestController
 public class GatewayFallbackController {
-
-//@GetMapping("/establishmentServiceFallBack")
-//public ErrorVo establishmentServiceFallBackMethod(){
-//    ErrorVo vo = new ErrorVo();
-//    vo.setCode("404");
-//    vo.setMessage("establishmentService is taking longer than expected, please try again later!!!");
-//    return vo;
-//}
 
     @GetMapping("/establishmentAreaServiceFallBack")
     public String establishmentServiceFallBackMethod(){
@@ -63,6 +52,11 @@ public class GatewayFallbackController {
     @GetMapping("/encounterServiceFallBack")
     public String encounterServiceFallBack(){
         return "encounterService is taking longer than expected, please try again later!!!";
+    }
+
+    @GetMapping("/encounterServiceFallBack")
+    public String engagementServiceFallBack(){
+        return "engagementService is taking longer than expected, please try again later!!!";
     }
 
 //    @Bean
@@ -121,9 +115,14 @@ public class GatewayFallbackController {
                 .uri("lb://customer-service"))
 
             .route("encounter-service", r -> r.path("/encounter/**")
-                    .filters(f -> f.circuitBreaker(c -> c.setName("customer").setFallbackUri("forward:/encounterServiceFallBack"))
+                    .filters(f -> f.circuitBreaker(c -> c.setName("encounter").setFallbackUri("forward:/encounterServiceFallBack"))
                             .rewritePath("/encounter/(?<remaining>.*)", "/${remaining}"))
                     .uri("lb://encounter-service"))
+
+            .route("engagement-service", r -> r.path("/engagement/**")
+                    .filters(f -> f.circuitBreaker(c -> c.setName("engagement").setFallbackUri("forward:/engagementServiceFallBack"))
+                            .rewritePath("/engagement/(?<remaining>.*)", "/${remaining}"))
+                    .uri("lb://engagement-service"))
         .build();
     }
 }
