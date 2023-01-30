@@ -3,7 +3,7 @@ package com.teenthofabud.restaurant.solution.encounter.integration.customer.vali
 import com.teenthofabud.core.common.constant.TOABCascadeLevel;
 import com.teenthofabud.restaurant.solution.encounter.integration.customer.data.AccountVo;
 import com.teenthofabud.restaurant.solution.encounter.integration.customer.proxy.CustomerServiceClient;
-import constants.EncounterErrorCode;
+import com.teenthofabud.restaurant.solution.encounter.constants.EncounterErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

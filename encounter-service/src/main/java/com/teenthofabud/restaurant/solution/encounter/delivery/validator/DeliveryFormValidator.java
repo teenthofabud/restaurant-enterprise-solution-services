@@ -3,7 +3,7 @@ package com.teenthofabud.restaurant.solution.encounter.delivery.validator;
 import com.teenthofabud.restaurant.solution.encounter.delivery.data.DeliveryForm;
 import com.teenthofabud.restaurant.solution.encounter.meeting.data.MeetingForm;
 import com.teenthofabud.restaurant.solution.encounter.meeting.validator.MeetingFormValidator;
-import constants.EncounterErrorCode;
+import com.teenthofabud.restaurant.solution.encounter.constants.EncounterErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

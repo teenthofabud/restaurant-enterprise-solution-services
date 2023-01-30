@@ -1,4 +1,4 @@
-package constants;
+package com.teenthofabud.restaurant.solution.encounter.constants;
 
 import com.teenthofabud.core.common.error.TOABError;
 

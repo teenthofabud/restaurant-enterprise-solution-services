@@ -10,7 +10,7 @@ import com.teenthofabud.restaurant.solution.encounter.pickup.controller.PickUpAP
 import com.teenthofabud.restaurant.solution.encounter.pickup.data.PickUpForm;
 import com.teenthofabud.restaurant.solution.encounter.pickup.data.PickUpVo;
 import com.teenthofabud.restaurant.solution.encounter.pickup.service.impl.PickUpServiceImpl;
-import constants.EncounterErrorCode;
+import com.teenthofabud.restaurant.solution.encounter.constants.EncounterErrorCode;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

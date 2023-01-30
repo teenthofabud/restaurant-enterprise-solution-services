@@ -14,7 +14,7 @@ import com.teenthofabud.restaurant.solution.encounter.meeting.repository.Meeting
 import com.teenthofabud.restaurant.solution.encounter.meeting.validator.MeetingDtoValidator;
 import com.teenthofabud.restaurant.solution.encounter.meeting.validator.MeetingFormRelaxedValidator;
 import com.teenthofabud.restaurant.solution.encounter.meeting.validator.MeetingFormValidator;
-import constants.EncounterErrorCode;
+import com.teenthofabud.restaurant.solution.encounter.constants.EncounterErrorCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

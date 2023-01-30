@@ -1,11 +1,10 @@
 package com.teenthofabud.restaurant.solution.encounter.meeting.validator;
 
 import com.teenthofabud.restaurant.solution.encounter.meeting.data.MeetingDto;
-import constants.EncounterErrorCode;
+import com.teenthofabud.restaurant.solution.encounter.constants.EncounterErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
