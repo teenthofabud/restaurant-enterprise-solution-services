@@ -43,6 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @ContextConfiguration(classes = { EngagementServiceApplication.class })
+@TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
 
     private static final String MEDIA_TYPE_APPLICATION_JSON_PATCH = "application/json-patch+json";
