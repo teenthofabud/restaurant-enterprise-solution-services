@@ -15,7 +15,12 @@ import com.teenthofabud.restaurant.solution.engagement.checkin.constants.CheckIn
 import com.teenthofabud.restaurant.solution.engagement.checkin.converter.ReservationDto2EntityConverter;
 import com.teenthofabud.restaurant.solution.engagement.checkin.converter.ReservationEntity2VoConverter;
 import com.teenthofabud.restaurant.solution.engagement.checkin.converter.ReservationForm2EntityConverter;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.*;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInException;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInMessageTemplate;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.ReservationDto;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.ReservationEntity;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.ReservationForm;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.ReservationVo;
 import com.teenthofabud.restaurant.solution.engagement.checkin.factory.CheckInBeanFactory;
 import com.teenthofabud.restaurant.solution.engagement.checkin.mapper.ReservationEntitySelfMapper;
 import com.teenthofabud.restaurant.solution.engagement.checkin.mapper.ReservationForm2EntityMapper;
@@ -27,12 +32,11 @@ import com.teenthofabud.restaurant.solution.engagement.checkin.validator.Reserva
 import com.teenthofabud.restaurant.solution.engagement.constants.EngagementErrorCode;
 import com.teenthofabud.restaurant.solution.engagement.utils.EngagementServiceHelper;
 import lombok.extern.slf4j.Slf4j;
-import org.reflections.ReflectionUtils;
-import org.reflections.Reflections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
@@ -44,7 +48,16 @@ import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 
 @Slf4j
 public class ReservationServiceImpl implements ReservationService {
@@ -175,16 +188,15 @@ public class ReservationServiceImpl implements ReservationService {
         }
         List<ReservationVo> matchedReservationList = new LinkedList<>();
         Map<String, String> providedFilters = new LinkedHashMap<>();
-        ReservationEntity entity = new ReservationEntity(new ReservationEntity());
-        ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll();
+        List<Specification<ReservationEntity>> reservationEntitySpecificationCollection = new ArrayList<>(2);
         if(StringUtils.hasText(StringUtils.trimWhitespace(date))) {
             try {
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern(reservationDateFormat);
                 LocalDate dt = LocalDate.parse(date, dtf);
                 log.debug("date {} is valid", date);
                 providedFilters.put("date", date);
-                entity.setDate(dt);
-                matcherCriteria = matcherCriteria.withMatcher("date", match -> match.exact());
+                Specification<ReservationEntity> dateEquals = (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("date"), dt);
+                reservationEntitySpecificationCollection.add(dateEquals);
             } catch (DateTimeParseException e) {
                 log.error("Unable to parse date", e);
                 log.debug("Reservation date: {} is invalid", date);
@@ -194,25 +206,37 @@ public class ReservationServiceImpl implements ReservationService {
         if(StringUtils.hasText(StringUtils.trimWhitespace(time))) {
             try {
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern(reservationTimeFormat);
-                LocalTime t = LocalTime.parse(date, dtf);
-                log.debug("time {} is valid", date);
-                providedFilters.put("time", date);
-                entity.setTime(t);
-                matcherCriteria = matcherCriteria.withMatcher("time", match -> match.exact());
+                LocalTime t = LocalTime.parse(time, dtf);
+                log.debug("time {} is valid", time);
+                LocalTime start = LocalTime.of(t.getHour(), t.getMinute(), 0);
+                LocalTime end = LocalTime.of(t.getHour(), t.getMinute(), 59);
+                providedFilters.put("time:start", start.format(DateTimeFormatter.ofPattern(reservationTimeFormat)));
+                providedFilters.put("time:end", end.format(DateTimeFormatter.ofPattern(reservationTimeFormat)));
+                Specification<ReservationEntity> timeBetween = (root, query, criteriaBuilder) -> criteriaBuilder.between(root.get("time"), start, end);
+                reservationEntitySpecificationCollection.add(timeBetween);
             } catch (DateTimeParseException e) {
                 log.error("Unable to parse time", e);
-                log.debug("Reservation time: {} is invalid", date);
-                throw new CheckInException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID, new Object[] { "time", date });
+                log.debug("Reservation time: {} is invalid", time);
+                throw new CheckInException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID, new Object[] { "time", time });
             }
         }
+        Specification<ReservationEntity> reservationEntitySpecification = null;
         if(providedFilters.isEmpty()) {
             log.debug("search parameters are not valid");
         } else {
+            for(int  i = 0 ; i < reservationEntitySpecificationCollection.size() ; i++) {
+                Specification<ReservationEntity> entitySpecification = reservationEntitySpecificationCollection.get(i);
+                if(i == 0) {
+                    reservationEntitySpecification = Specification.where(entitySpecification);
+                } else {
+                    reservationEntitySpecification = reservationEntitySpecification.and(entitySpecification);
+                }
+            }
             log.debug("search parameters {} are valid", providedFilters);
+            List<ReservationEntity> reservationEntityList = this.getCheckInRepository().findAll(reservationEntitySpecification);
+            matchedReservationList = this.engagementServiceHelper.reservationEntity2DetailedVo(reservationEntityList);
+            Collections.sort(matchedReservationList, getCheckInVoTypeComparator());
         }
-        Example<ReservationEntity> reservationEntityExample = Example.of(entity, matcherCriteria);
-        List<ReservationEntity> reservationEntityList = this.getCheckInRepository().findAll(reservationEntityExample);
-        matchedReservationList = this.engagementServiceHelper.reservationEntity2DetailedVo(reservationEntityList);
         log.info("Found {} ReservationVo matching with provided parameters : {}", matchedReservationList.size(), providedFilters);
         log.info("No ReservationVo available matching with provided parameters : {}", matchedReservationList.size(), providedFilters);
         return matchedReservationList;
@@ -289,6 +313,7 @@ public class ReservationServiceImpl implements ReservationService {
         Example<ReservationEntity> reservationEntityExample = Example.of(entity, matcherCriteria);
         List<ReservationEntity> reservationEntityList = this.getCheckInRepository().findAll(reservationEntityExample);
         matchedReservationList = engagementServiceHelper.reservationEntity2DetailedVo(reservationEntityList);
+        Collections.sort(matchedReservationList, getCheckInVoTypeComparator());
         log.info("Found {} ReservationVo matching with provided parameters : {}", matchedReservationList.size(), providedFilters);
         log.info("No ReservationVo available matching with provided parameters : {}", matchedReservationList.size(), providedFilters);
         return matchedReservationList;

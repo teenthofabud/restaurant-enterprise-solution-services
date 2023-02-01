@@ -48,8 +48,10 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
 
     private static final String MEDIA_TYPE_APPLICATION_JSON_PATCH = "application/json-patch+json";
     private static final String RESERVATION_URI = "/checkIn/reservation";
-    private static final String RESERVATION_URI_BY_ID = "/checkIn/reservation/{id}";
-    private static final String RESERVATION_URI_PRIMARY_FILTER = "/checkIn/reservation/primaryFilter";
+    private static final String RESERVATION_URI_BY_ID = String.join("/", RESERVATION_URI, "{id}");
+    private static final String RESERVATION_URI_BY_SEQUENCE = String.join("/", RESERVATION_URI, "sequence", "{sequence}");
+    private static final String RESERVATION_URI_PRIMARY_FILTER = String.join("/", RESERVATION_URI, "primaryFilter");
+    private static final String RESERVATION_URI_SECONDARY_FILTER = String.join("/", RESERVATION_URI, "secondaryFilter");
 
     private ReservationRepository reservationRepository;
 
@@ -156,23 +158,23 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
                 new PatchOperationForm("replace", "/accountId", "4"),
                 new PatchOperationForm("replace", "/notes", "patched notes"));
 
-        reservationEntity1 = this.reservationEntity(accountVo1.getId(), UUID.randomUUID().toString(), 2, "reservation 1 notes", true, LocalDate.now(), LocalTime.now());
+        reservationEntity1 = this.reservationEntity(accountVo1.getId(), UUID.randomUUID().toString(), 2, "reservation 1 notes", true, LocalDate.now().plusDays(1), LocalTime.now().plusHours(1));
         reservationEntity1 = reservationRepository.save(reservationEntity1);
         reservationVo1 = this.reservationEntity2VoConverter.convert(reservationEntity1);
 
-        reservationEntity2 = this.reservationEntity(accountVo2.getId(), UUID.randomUUID().toString(), 21, "reservation 2 notes", true, LocalDate.now(), LocalTime.now());
+        reservationEntity2 = this.reservationEntity(accountVo2.getId(), UUID.randomUUID().toString(), 21, "reservation 2 notes", true, LocalDate.now().plusDays(2), LocalTime.now().plusHours(2));
         reservationEntity2 = reservationRepository.save(reservationEntity2);
         reservationVo2 = this.reservationEntity2VoConverter.convert(reservationEntity2);
 
-        reservationEntity3 = this.reservationEntity(accountVo1.getId(), UUID.randomUUID().toString(), 28, "reservation 3 notes", true, LocalDate.now(), LocalTime.now());
+        reservationEntity3 = this.reservationEntity(accountVo1.getId(), UUID.randomUUID().toString(), 28, "reservation 3 notes", true, LocalDate.now().plusDays(3), LocalTime.now().plusHours(3));
         reservationEntity3 = reservationRepository.save(reservationEntity3);
         reservationVo3 = this.reservationEntity2VoConverter.convert(reservationEntity3);
 
-        reservationEntity4 = this.reservationEntity(accountVo22.getId(), UUID.randomUUID().toString(), 12, "reservation 4 notes", false, LocalDate.now(), LocalTime.now());
+        reservationEntity4 = this.reservationEntity(accountVo22.getId(), UUID.randomUUID().toString(), 12, "reservation 4 notes", false, LocalDate.now().plusDays(4), LocalTime.now().plusHours(4));
         reservationEntity4 = reservationRepository.save(reservationEntity4);
         reservationVo4 = this.reservationEntity2VoConverter.convert(reservationEntity4);
 
-        reservationEntity5 = this.reservationEntity(accountVo4.getId(), UUID.randomUUID().toString(), 244, "reservation 5 notes", true, LocalDate.now(), LocalTime.now());
+        reservationEntity5 = this.reservationEntity(accountVo4.getId(), UUID.randomUUID().toString(), 244, "reservation 5 notes", true, LocalDate.now().plusDays(5), LocalTime.now().plusHours(5));
         reservationEntity5 = reservationRepository.save(reservationEntity5);
         reservationVo5 = this.reservationEntity2VoConverter.convert(reservationEntity5);
 
@@ -288,10 +290,10 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "", " " })
-    public void test_Reservation_Get_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequestedBy_EmptyAccountIdOnly(String accountId) throws Exception {
+    public void test_Reservation_Get_Primary_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequestedBy_EmptyAccountIdOnly(String accountId) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldAccountId = "filters";
+        String field = "filters";
 
         mvcResult = this.mockMvc.perform(get(RESERVATION_URI_PRIMARY_FILTER).queryParam("accountId", accountId))
                 .andDo(print())
@@ -300,15 +302,15 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
-        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldAccountId));
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field));
     }
 
     @ParameterizedTest
     @ValueSource(strings = { "", " " })
-    public void test_Reservation_Get_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequestedBy_EmptyNotesOnly(String notes) throws Exception {
+    public void test_Reservation_Get_Primary_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequestedBy_EmptyNotesOnly(String notes) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldAccountId = "filters";
+        String field = "filters";
 
         mvcResult = this.mockMvc.perform(get(RESERVATION_URI_PRIMARY_FILTER).queryParam("notes", notes))
                 .andDo(print())
@@ -317,11 +319,28 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
-        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldAccountId));
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "", " " })
+    public void test_Reservation_Get_Primary_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequestedBy_EmptySequenceOnly(String sequence) throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String field = "filters";
+
+        mvcResult = this.mockMvc.perform(get(RESERVATION_URI_PRIMARY_FILTER).queryParam("sequence", sequence))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field));
     }
 
     @Test
-    public void test_Reservation_Get_ShouldReturn_200Response_And_EmptyReservationList_WhenRequestedBy_AbsentAccountId() throws Exception {
+    public void test_Reservation_Get_Primary_ShouldReturn_200Response_And_EmptyReservationList_WhenRequestedBy_AbsentAccountId() throws Exception {
         MvcResult mvcResult = null;
 
         mvcResult = this.mockMvc.perform(get(RESERVATION_URI_PRIMARY_FILTER).queryParam("accountId", "Hey"))
@@ -334,7 +353,7 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
     }
 
     @Test
-    public void test_Reservation_Get_ShouldReturn_200Response_And_EmptyReservationList_WhenRequestedBy_AbsentNotes() throws Exception {
+    public void test_Reservation_Get_Primary_ShouldReturn_200Response_And_EmptyReservationList_WhenRequestedBy_AbsentNotes() throws Exception {
         MvcResult mvcResult = null;
 
         mvcResult = this.mockMvc.perform(get(RESERVATION_URI_PRIMARY_FILTER).queryParam("notes", "Hey"))
@@ -347,7 +366,20 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
     }
 
     @Test
-    public void test_Reservation_Get_ShouldReturn_200Response_And_ReservationListNaturallyOrdered_WhenRequested_ForReservations_WithAccountId() throws Exception {
+    public void test_Reservation_Get_Primary_ShouldReturn_200Response_And_EmptyReservationList_WhenRequestedBy_AbsentSequence() throws Exception {
+        MvcResult mvcResult = null;
+
+        mvcResult = this.mockMvc.perform(get(RESERVATION_URI_PRIMARY_FILTER).queryParam("sequence", "Hey"))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(0, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ReservationVo[].class).length);
+    }
+
+    @Test
+    public void test_Reservation_Get_Primary_ShouldReturn_200Response_And_ReservationListNaturallyOrdered_WhenRequested_ForReservations_WithAccountId() throws Exception {
         MvcResult mvcResult = null;
         List<ReservationVo> reservationList = new ArrayList<>(Arrays.asList(reservationVo5));
 
@@ -362,7 +394,7 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
     }
 
     @Test
-    public void test_Reservation_Get_ShouldReturn_200Response_And_ReservationListNaturallyOrdered_WhenRequested_ForReservations_WithNotes() throws Exception {
+    public void test_Reservation_Get_Primary_ShouldReturn_200Response_And_ReservationListNaturallyOrdered_WhenRequested_ForReservations_WithNotes() throws Exception {
         MvcResult mvcResult = null;
         List<ReservationVo> reservationList = new ArrayList<>(Arrays.asList(reservationVo2));
 
@@ -377,13 +409,12 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
     }
 
     @Test
-    public void test_Reservation_Get_ShouldReturn_200Response_And_ReservationListNaturallyOrdered_WhenRequested_ForReservations_WithAccountIdAndNotes() throws Exception {
+    public void test_Reservation_Get_Primary_ShouldReturn_200Response_And_ReservationListNaturallyOrdered_WhenRequested_ForReservations_WithSequence() throws Exception {
         MvcResult mvcResult = null;
-        Set<ReservationVo> reservationList = new TreeSet<>(Arrays.asList(reservationVo1));
+        List<ReservationVo> reservationList = new ArrayList<>(Arrays.asList(reservationVo2));
 
         mvcResult = this.mockMvc.perform(get(RESERVATION_URI_PRIMARY_FILTER)
-                        .queryParam("accountId", "4")
-                        .queryParam("notes", "5 notes"))
+                        .queryParam("sequence",  reservationVo2.getSequence()))
                 .andDo(print())
                 .andReturn();
 
@@ -393,12 +424,77 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
     }
 
     @Test
-    public void test_Reservation_Get_ShouldReturn_200Response_And_EmptyReservationList_WhenRequested_ForReservations_WithAbsent_WithAccountIdAndNotes() throws Exception {
+    public void test_Reservation_Get_Primary_ShouldReturn_200Response_And_ReservationListNaturallyOrdered_WhenRequested_ForReservations_WithAccountIdAndNotes() throws Exception {
+        MvcResult mvcResult = null;
+        Set<ReservationVo> reservationList = new TreeSet<>(Arrays.asList(reservationVo1));
+
+        mvcResult = this.mockMvc.perform(get(RESERVATION_URI_PRIMARY_FILTER)
+                        .queryParam("accountId", reservationVo1.getAccountId())
+                        .queryParam("notes", "1 notes"))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(reservationList.size(), objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ReservationVo[].class).length);
+    }
+
+    @Test
+    public void test_Reservation_Get_Primary_ShouldReturn_200Response_And_ReservationListNaturallyOrdered_WhenRequested_ForReservations_WithAccountIdAndSequence() throws Exception {
+        MvcResult mvcResult = null;
+        Set<ReservationVo> reservationList = new TreeSet<>(Arrays.asList(reservationVo1));
+
+        mvcResult = this.mockMvc.perform(get(RESERVATION_URI_PRIMARY_FILTER)
+                        .queryParam("accountId", reservationVo1.getAccountId())
+                        .queryParam("sequence", reservationVo1.getSequence()))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(reservationList.size(), objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ReservationVo[].class).length);
+    }
+
+    @Test
+    public void test_Reservation_Get_Primary_ShouldReturn_200Response_And_ReservationListNaturallyOrdered_WhenRequested_ForReservations_WithSequenceAndNotes() throws Exception {
+        MvcResult mvcResult = null;
+        Set<ReservationVo> reservationList = new TreeSet<>(Arrays.asList(reservationVo1));
+
+        mvcResult = this.mockMvc.perform(get(RESERVATION_URI_PRIMARY_FILTER)
+                        .queryParam("sequence", reservationVo1.getSequence())
+                        .queryParam("notes", "1 notes"))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(reservationList.size(), objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ReservationVo[].class).length);
+    }
+
+    @Test
+    public void test_Reservation_Get_Primary_ShouldReturn_200Response_And_ReservationListNaturallyOrdered_WhenRequested_ForReservations_WithAccountIdAndSequenceAndNotes() throws Exception {
+        MvcResult mvcResult = null;
+        Set<ReservationVo> reservationList = new TreeSet<>(Arrays.asList(reservationVo1));
+
+        mvcResult = this.mockMvc.perform(get(RESERVATION_URI_PRIMARY_FILTER)
+                        .queryParam("accountId", reservationVo1.getAccountId())
+                        .queryParam("sequence", reservationVo1.getSequence())
+                        .queryParam("notes", "1 notes"))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(reservationList.size(), objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ReservationVo[].class).length);
+    }
+
+    @Test
+    public void test_Reservation_Get_Primary_ShouldReturn_200Response_And_EmptyReservationList_WhenRequested_ForReservations_WithAbsent_WithAccountIdAndNotes() throws Exception {
         MvcResult mvcResult = null;
         Set<ReservationVo> reservationList = new TreeSet<>();
 
         mvcResult = this.mockMvc.perform(get(RESERVATION_URI_PRIMARY_FILTER)
-                        .queryParam("accountId", "Reservation 1")
+                        .queryParam("accountId", "4")
                         .queryParam("notes", UUID.randomUUID().toString()))
                 .andDo(print())
                 .andReturn();
@@ -407,6 +503,215 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(reservationList.size(), objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ReservationVo[].class).length);
     }
+
+    @Test
+    public void test_Reservation_Get_Primary_ShouldReturn_200Response_And_EmptyReservationList_WhenRequested_ForReservations_WithAbsent_WithAccountIdAndSequence() throws Exception {
+        MvcResult mvcResult = null;
+        Set<ReservationVo> reservationList = new TreeSet<>();
+
+        mvcResult = this.mockMvc.perform(get(RESERVATION_URI_PRIMARY_FILTER)
+                        .queryParam("accountId", "4")
+                        .queryParam("sequence", "Reservation 1"))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(reservationList.size(), objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ReservationVo[].class).length);
+    }
+
+    @Test
+    public void test_Reservation_Get_Primary_ShouldReturn_200Response_And_EmptyReservationList_WhenRequested_ForReservations_WithAbsent_WithSequenceAndNotes() throws Exception {
+        MvcResult mvcResult = null;
+        Set<ReservationVo> reservationList = new TreeSet<>();
+
+        mvcResult = this.mockMvc.perform(get(RESERVATION_URI_PRIMARY_FILTER)
+                        .queryParam("notes", "5 notes")
+                        .queryParam("sequence", "Reservation 1"))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(reservationList.size(), objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ReservationVo[].class).length);
+    }
+
+    @Test
+    public void test_Reservation_Get_Primary_ShouldReturn_200Response_And_EmptyReservationList_WhenRequested_ForReservations_WithAbsent_WithAccountIdAndSequenceAndNotes() throws Exception {
+        MvcResult mvcResult = null;
+        Set<ReservationVo> reservationList = new TreeSet<>();
+
+        mvcResult = this.mockMvc.perform(get(RESERVATION_URI_PRIMARY_FILTER)
+                        .queryParam("accountId", "4")
+                        .queryParam("notes", UUID.randomUUID().toString())
+                        .queryParam("sequence", "1 notes"))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(reservationList.size(), objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ReservationVo[].class).length);
+    }
+
+    /**
+     *
+     */
+
+    @ParameterizedTest
+    @ValueSource(strings = { "", " " })
+    public void test_Reservation_Get_Secondary_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequestedBy_EmptyDateOnly(String date) throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldDate = "filters";
+
+        mvcResult = this.mockMvc.perform(get(RESERVATION_URI_SECONDARY_FILTER).queryParam("date", date))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldDate));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "", " " })
+    public void test_Reservation_Get_Secondary_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequestedBy_EmptyTimeOnly(String time) throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldTime = "filters";
+
+        mvcResult = this.mockMvc.perform(get(RESERVATION_URI_SECONDARY_FILTER).queryParam("time", time))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldTime));
+    }
+
+    @Test
+    public void test_Reservation_Get_Secondary_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequestedBy_InvalidDate() throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldDate = "date";
+
+        mvcResult = this.mockMvc.perform(get(RESERVATION_URI_SECONDARY_FILTER).queryParam("date", "Hey"))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldDate));
+    }
+
+    @Test
+    public void test_Reservation_Get_Secondary_ShouldReturn_200Response_And_EmptyReservationList_WhenRequestedBy_AbsentDate() throws Exception {
+        MvcResult mvcResult = null;
+
+        mvcResult = this.mockMvc.perform(get(RESERVATION_URI_SECONDARY_FILTER).queryParam("date", "12-09-1976"))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(0, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ReservationVo[].class).length);
+    }
+
+    @Test
+    public void test_Reservation_Get_Secondary_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequestedBy_InvalidTime() throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldDate = "time";
+
+        mvcResult = this.mockMvc.perform(get(RESERVATION_URI_SECONDARY_FILTER).queryParam("time", "Hey"))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldDate));
+    }
+
+    @Test
+    public void test_Reservation_Get_Secondary_ShouldReturn_200Response_And_EmptyReservationList_WhenRequestedBy_AbsentTime() throws Exception {
+        MvcResult mvcResult = null;
+
+        mvcResult = this.mockMvc.perform(get(RESERVATION_URI_SECONDARY_FILTER).queryParam("time", "06:00"))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(0, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ReservationVo[].class).length);
+    }
+
+    @Test
+    public void test_Reservation_Get_Secondary_ShouldReturn_200Response_And_ReservationListNaturallyOrdered_WhenRequested_ForReservations_WithDate() throws Exception {
+        MvcResult mvcResult = null;
+        List<ReservationVo> reservationList = new ArrayList<>(Arrays.asList(reservationVo5));
+
+        mvcResult = this.mockMvc.perform(get(RESERVATION_URI_SECONDARY_FILTER).queryParam("date", reservationVo5.getDate()))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(reservationList.size(), objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ReservationVo[].class).length);
+    }
+
+    @Test
+    public void test_Reservation_Get_Secondary_ShouldReturn_200Response_And_ReservationListNaturallyOrdered_WhenRequested_ForReservations_WithTime() throws Exception {
+        MvcResult mvcResult = null;
+        List<ReservationVo> reservationList = new ArrayList<>(Arrays.asList(reservationVo2));
+
+        mvcResult = this.mockMvc.perform(get(RESERVATION_URI_SECONDARY_FILTER).queryParam("time", reservationVo2.getTime()))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(reservationList.size(), objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ReservationVo[].class).length);
+    }
+
+    @Test
+    public void test_Reservation_Get_Secondary_ShouldReturn_200Response_And_ReservationListNaturallyOrdered_WhenRequested_ForReservations_WithDateAndTime() throws Exception {
+        MvcResult mvcResult = null;
+        Set<ReservationVo> reservationList = new TreeSet<>(Arrays.asList(reservationVo1));
+
+        mvcResult = this.mockMvc.perform(get(RESERVATION_URI_SECONDARY_FILTER)
+                        .queryParam("date", reservationVo1.getDate())
+                        .queryParam("time", reservationVo1.getTime()))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(reservationList.size(), objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ReservationVo[].class).length);
+    }
+
+    @Test
+    public void test_Reservation_Get_Secondary_ShouldReturn_200Response_And_EmptyReservationList_WhenRequested_ForReservations_WithAbsent_WithDateAndTime() throws Exception {
+        MvcResult mvcResult = null;
+        Set<ReservationVo> reservationList = new TreeSet<>();
+
+        mvcResult = this.mockMvc.perform(get(RESERVATION_URI_SECONDARY_FILTER)
+                        .queryParam("date", "22-06-2006")
+                        .queryParam("time", "15:45"))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(reservationList.size(), objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ReservationVo[].class).length);
+    }
+
+    /**
+     *
+     */
 
     @Test
     public void test_Reservation_Get_ShouldReturn_200Response_And_ReservationDetails_WhenRequested_ById() throws Exception {
@@ -441,7 +746,7 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
     }
 
     @Test
-    public void test_Reservation_Get_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_002_WhenRequested_ByAbsentId() throws Exception {
+    public void test_Reservation_Get_ShouldReturn_404Response_And_ErrorCode_RES_ENGMNT_002_WhenRequested_ByAbsentId() throws Exception {
         String id = "5";
         MvcResult mvcResult = null;
         String errorCode = EngagementErrorCode.ENGAGEMENT_NOT_FOUND.getErrorCode();
@@ -532,7 +837,7 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
     }
 
     @Test
-    public void test_Reservation_Delete_ShouldReturn_422Response_And_ErrorCode_RES_ENGMNT_003_WhenDeleted_ByInvalidId() throws Exception {
+    public void test_Reservation_Delete_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_003_WhenDeleted_ByInvalidId() throws Exception {
         String id = " ";
         MvcResult mvcResult = null;
         String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
@@ -549,7 +854,7 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
     }
 
     @Test
-    public void test_Reservation_Delete_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_005_WhenDeleted_ByInactiveId() throws Exception {
+    public void test_Reservation_Delete_ShouldReturn_422Response_And_ErrorCode_RES_ENGMNT_005_WhenDeleted_ByInactiveId() throws Exception {
         String id = reservationEntity4.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = EngagementErrorCode.ENGAGEMENT_INACTIVE.getErrorCode();
@@ -559,7 +864,7 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
                 .andReturn();
 
         Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(HttpStatus.UNPROCESSABLE_ENTITY.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(id.toString()));
     }
@@ -585,7 +890,7 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
     public void test_Reservation_Put_ShouldReturn_204Response_And_NoResponseBody_WhenUpdated_ById_AndReservationDetails() throws Exception {
         String id = reservationEntity1.getId().toString();
         MvcResult mvcResult = null;
-        reservationForm.setAccountId(accountVo1.getId());
+        reservationForm.setAccountId(accountVo4.getId());
 
         mvcResult = this.mockMvc.perform(put(RESERVATION_URI_BY_ID, id)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -638,7 +943,7 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
     }
 
     @Test
-    public void test_Reservation_Put_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_005_WhenUpdated_ByInactiveId_AndReservationDetails() throws Exception {
+    public void test_Reservation_Put_ShouldReturn_422Response_And_ErrorCode_RES_ENGMNT_005_WhenUpdated_ByInactiveId_AndReservationDetails() throws Exception {
         String id = reservationEntity4.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = EngagementErrorCode.ENGAGEMENT_INACTIVE.getErrorCode();
@@ -650,7 +955,7 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
                 .andReturn();
 
         Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(HttpStatus.UNPROCESSABLE_ENTITY.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(id.toString()));
     }

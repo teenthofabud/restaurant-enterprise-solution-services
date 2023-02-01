@@ -19,13 +19,17 @@ import java.time.LocalTime;
 @Table(name = "reservation")
 @EntityListeners(AuditingEntityListener.class)
 @PrimaryKeyJoinColumn(name = "engagement_check_in_id")
-@NoArgsConstructor
 public class ReservationEntity extends CheckInEntity {
 
     public ReservationEntity(CheckInEntity parent) {
         super(parent);
         this.date = LocalDate.now();
         this.time = LocalTime.now();
+    }
+
+    public ReservationEntity() {
+        this.date = null;
+        this.time = null;
     }
 
     @ToString.Include
