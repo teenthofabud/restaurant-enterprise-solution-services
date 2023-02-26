@@ -321,18 +321,10 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public ReservationVo retrieveMatchingDetailsByCriteria(String sequence, String date) throws CheckInException {
-        Long seq = 0l;
         LocalDate dt = LocalDate.now();
         LocalDateTime start = LocalDateTime.now();
         LocalDateTime end = LocalDateTime.now();
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern(reservationTimeFormat);
-
-        try {
-            seq = Long.parseLong(sequence);
-        } catch (NumberFormatException e) {
-            log.debug("Sequence: {} format is invalid", sequence);
-            throw new CheckInException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID, new Object[] { "sequence", sequence });
-        }
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern(reservationDateFormat);
 
         try {
             dt = LocalDate.parse(date, dtf);
@@ -344,13 +336,13 @@ public class ReservationServiceImpl implements ReservationService {
         start = LocalDateTime.of(dt, LocalTime.of(0,0, 0));
         end = LocalDateTime.of(dt, LocalTime.of(23,59, 59));
 
-        log.info("Requesting ReservationEntity by sequence: {} between timestamps: {} and {}", seq, start, end);
-        Optional<ReservationEntity> optEntity = this.getCheckInRepository().findBySequenceAndCreatedOnBetween(seq, start, end);
+        log.info("Requesting ReservationEntity by sequence: {} between timestamps: {} and {}", sequence, start, end);
+        Optional<ReservationEntity> optEntity = this.getCheckInRepository().findBySequenceAndCreatedOnBetween(sequence, start, end);
         if(optEntity.isEmpty()) {
-            log.debug("No ReservationEntity found by sequence: {} between timestamps: {} and {}", seq, start, end);
-            throw new CheckInException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "seq: " + seq, ", date: " + date });
+            log.debug("No ReservationEntity found by sequence: {} between timestamps: {} and {}", sequence, start, end);
+            throw new CheckInException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "sequence: " + sequence, ", date: " + date });
         }
-        log.info("Found ReservationVo by sequence: {} between timestamps: {} and {}", seq, start, end);
+        log.info("Found ReservationVo by sequence: {} between timestamps: {} and {}", sequence, start, end);
         ReservationEntity entity = optEntity.get();
         ReservationVo vo = engagementServiceHelper.reservationEntity2DetailedVo(entity);
         return vo;

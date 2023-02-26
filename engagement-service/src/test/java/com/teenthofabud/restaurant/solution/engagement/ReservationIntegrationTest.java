@@ -12,7 +12,13 @@ import com.teenthofabud.restaurant.solution.engagement.checkin.data.ReservationV
 import com.teenthofabud.restaurant.solution.engagement.checkin.repository.ReservationRepository;
 import com.teenthofabud.restaurant.solution.engagement.constants.EngagementErrorCode;
 import com.teenthofabud.restaurant.solution.engagement.integration.customer.data.AccountVo;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +38,18 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.UUID;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @AutoConfigureMockMvc
@@ -216,12 +231,186 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
         Assertions.assertTrue(StringUtils.hasText(mvcResult.getResponse().getContentAsString()));
     }
 
-    @Test
-    public void test_Reservation_Post_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequested_WithEmptyAccountId() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = { "", " " })
+    public void test_Reservation_Post_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequested_WithEmptyAccountId(String accountId) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
         String fieldAccountId = "accountId";
-        reservationForm.setAccountId("");
+        reservationForm.setAccountId(accountId);
+
+        mvcResult = mockMvc.perform(post(RESERVATION_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reservationForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldAccountId));
+
+    }
+
+    @Test
+    public void test_Reservation_Post_ShouldReturn_500Response_And_ErrorCode_RES_CUST_001_WhenRequested_WithInvalidAccountId() throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = "RES-CUST-001";
+        String field = "id";
+        String message = "invalid";
+        reservationForm.setAccountId("r");
+
+        mvcResult = mockMvc.perform(post(RESERVATION_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reservationForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field));
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
+
+    }
+
+    @Test
+    public void test_Reservation_Post_ShouldReturn_500Response_And_ErrorCode_RES_CUST_003_WhenRequested_WithAbsentAccountId() throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = "RES-CUST-002";
+        String field = "id";
+        String message = "unavailable";
+        reservationForm.setAccountId("3");
+
+        mvcResult = mockMvc.perform(post(RESERVATION_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reservationForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field));
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
+
+    }
+
+    @Test
+    public void test_Reservation_Post_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequested_WithInactiveAccountId() throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String field = "accountId";
+        String message = "invalid";
+        reservationForm.setAccountId("22");
+
+        mvcResult = mockMvc.perform(post(RESERVATION_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reservationForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field));
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
+
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "", " " })
+    public void test_Reservation_Post_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequested_WithEmptySequence(String sequence) throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldAccountId = "sequence";
+        reservationForm.setSequence(sequence);
+
+        mvcResult = mockMvc.perform(post(RESERVATION_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reservationForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldAccountId));
+
+    }
+
+    @Test
+    public void test_Reservation_Post_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequested_WithEmptyNoOfPersons() throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String field = "noOfPersons";
+        String message = "invalid";
+        reservationForm.setNoOfPersons(null);
+
+        mvcResult = mockMvc.perform(post(RESERVATION_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reservationForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field));
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
+
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 0, -1 })
+    public void test_Reservation_Post_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequested_WithInvalidNoOfPersons(Integer noOfPersons) throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldAccountId = "noOfPersons";
+        reservationForm.setNoOfPersons(noOfPersons);
+
+        mvcResult = mockMvc.perform(post(RESERVATION_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reservationForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldAccountId));
+
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "", "" })
+    public void test_Reservation_Post_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequested_WithEmptyType(String type) throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String field = "type";
+        String message = "invalid";
+        reservationForm.setType(type);
+
+        mvcResult = mockMvc.perform(post(RESERVATION_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reservationForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field));
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
+
+    }
+
+    @Test
+    public void test_Reservation_Post_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequested_WithInvalidType() throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldAccountId = "type";
+        reservationForm.setType("type");
 
         mvcResult = mockMvc.perform(post(RESERVATION_URI)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -251,6 +440,118 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.CREATED.value(), mvcResult.getResponse().getStatus());
         Assertions.assertTrue(StringUtils.hasText(mvcResult.getResponse().getContentAsString()));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "", "" })
+    public void test_Reservation_Post_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequested_WithEmptyDate(String date) throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String field = "date";
+        String message = "invalid";
+        reservationForm.setDate(date);
+
+        mvcResult = mockMvc.perform(post(RESERVATION_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reservationForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field));
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
+
+    }
+
+    @Test
+    public void test_Reservation_Post_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequested_WithInvalidDate() throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldAccountId = "date";
+        reservationForm.setDate("type");
+
+        mvcResult = mockMvc.perform(post(RESERVATION_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reservationForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldAccountId));
+
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "", "" })
+    public void test_Reservation_Post_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequested_WithEmptyTime(String time) throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String field = "time";
+        String message = "invalid";
+        reservationForm.setTime(time);
+
+        mvcResult = mockMvc.perform(post(RESERVATION_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reservationForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field));
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
+
+    }
+
+    @Test
+    public void test_Reservation_Post_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequested_WithInvalidTime() throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldAccountId = "time";
+        reservationForm.setTime("type");
+
+        mvcResult = mockMvc.perform(post(RESERVATION_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reservationForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldAccountId));
+
+    }
+
+    @Test
+    public void test_Reservation_Post_ShouldReturn_409Response_And_ErrorCode_RES_ENGMNT_004_WhenPosted_WithDuplicateReservation() throws Exception {
+        String id = reservationEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_EXISTS.getErrorCode();
+        String fieldAccountId = "accountId";
+        String fieldSequence = "sequence";
+        String message = "already exists";
+        reservationForm.setAccountId(reservationEntity1.getAccountId());
+        reservationForm.setSequence(reservationEntity1.getSequence());
+
+        mvcResult = mockMvc.perform(post(RESERVATION_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reservationForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.CONFLICT.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldAccountId));
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldSequence));
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
+
     }
 
     @Test
@@ -551,6 +852,118 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(reservationList.size(), objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ReservationVo[].class).length);
+    }
+
+    /**
+     *
+     */
+
+    @ParameterizedTest
+    @ValueSource(strings = { " " })
+    public void test_Reservation_Get_Sequence_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequestedBy_EmptySequence_AndDate(String sequence) throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldSequence = "sequence";
+        String date = LocalDate.now().format(DateTimeFormatter.ofPattern(reservationDateFormat));
+
+        mvcResult = this.mockMvc.perform(get(RESERVATION_URI_BY_SEQUENCE, sequence).queryParam("date", date))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldSequence));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "", " " })
+    public void test_Reservation_Get_Sequence_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequestedBy_SequenceAnd_EmptyDate(String date) throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldDate = "date";
+        String sequence = UUID.randomUUID().toString();
+
+        mvcResult = this.mockMvc.perform(get(RESERVATION_URI_BY_SEQUENCE, sequence).queryParam("date", date))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldDate));
+    }
+
+    @Test
+    public void test_Reservation_Get_Sequence_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequestedBy_SequenceAnd_InvalidDate() throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldDate = "date";
+        String sequence = UUID.randomUUID().toString();
+        String date = "Hey";
+
+        mvcResult = this.mockMvc.perform(get(RESERVATION_URI_BY_SEQUENCE, sequence).queryParam("date", date))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldDate));
+    }
+
+    @Test
+    public void test_Reservation_Get_Sequence_ShouldReturn_404Response_And_ErrorCode_RES_ENGMNT_002_WhenRequested_ByAbsentSequence_AndDate() throws Exception {
+        String id = "5";
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_NOT_FOUND.getErrorCode();
+        String fieldSequence = "sequence";
+        String sequence = UUID.randomUUID().toString();
+        String date = reservationEntity1.getCreatedOn().format(DateTimeFormatter.ofPattern(reservationDateFormat));
+
+        mvcResult = this.mockMvc.perform(get(RESERVATION_URI_BY_SEQUENCE, sequence).queryParam("date", date))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldSequence));
+    }
+
+    @Test
+    public void test_Reservation_Get_Sequence_ShouldReturn_404Response_And_ErrorCode_RES_ENGMNT_002_WhenRequested_BySequence_AndAbsentDate() throws Exception {
+        String id = "5";
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_NOT_FOUND.getErrorCode();
+        String fieldDate = "date";
+        String sequence = reservationEntity1.getSequence();
+        String date = LocalDate.now().plusDays(2).format(DateTimeFormatter.ofPattern(reservationDateFormat));
+
+        mvcResult = this.mockMvc.perform(get(RESERVATION_URI_BY_SEQUENCE, sequence).queryParam("date", date))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldDate));
+    }
+
+    @Test
+    public void test_Reservation_Get_Sequence_ShouldReturn_200Response_And_ReservationListNaturallyOrdered_WhenRequested_ForReservations_WithSequenceAndDate() throws Exception {
+        MvcResult mvcResult = null;
+        String sequence = reservationEntity1.getSequence();
+        String date = reservationEntity1.getCreatedOn().format(DateTimeFormatter.ofPattern(reservationDateFormat));
+
+        mvcResult = this.mockMvc.perform(get(RESERVATION_URI_BY_SEQUENCE, sequence).queryParam("date", date))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(objectMapper.writeValueAsString(reservationVo1), mvcResult.getResponse().getContentAsString());
+        Assertions.assertEquals(reservationVo1.getId(), objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ReservationVo.class).getId());
     }
 
     /**
@@ -923,6 +1336,26 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
     }
 
     @Test
+    public void test_Reservation_Put_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenUpdated_ByInvalidId_AndReservationDetails() throws Exception {
+        String id = "id";
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldAccountId = "id";
+
+        mvcResult = this.mockMvc.perform(put(RESERVATION_URI_BY_ID, id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reservationForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldAccountId));
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(id.toString()));
+    }
+
+    @Test
     public void test_Reservation_Put_ShouldReturn_404Response_And_ErrorCode_RES_ENGMNT_002_WhenUpdated_ByAbsentId_AndReservationDetails() throws Exception {
         String id = "5";
         MvcResult mvcResult = null;
@@ -981,7 +1414,33 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
     }
 
     @Test
-    public void test_Reservation_Put_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequested_ById_AndInvalidAccountId() throws Exception {
+    public void test_Reservation_Put_ShouldReturn_409Response_And_ErrorCode_RES_ENGMNT_004_WhenUpdated_ById_AndDuplicateReservationDetails() throws Exception {
+        String id = reservationEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_EXISTS.getErrorCode();
+        String fieldAccountId = "accountId";
+        String fieldSequence = "sequence";
+        String message = "already exists";
+        reservationForm.setAccountId(reservationEntity1.getAccountId());
+        reservationForm.setSequence(reservationEntity1.getSequence());
+
+        mvcResult = this.mockMvc.perform(put(RESERVATION_URI_BY_ID, id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reservationForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.CONFLICT.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldAccountId));
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldSequence));
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { " ", "", "r", "3", "22" })
+    public void test_Reservation_Put_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequested_ById_AndInvalidAccountId(String accountId) throws Exception {
         String id = reservationEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
@@ -1007,6 +1466,110 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
         String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
         String fieldAccountId = "notes";
         reservationForm.setNotes("");
+
+        mvcResult = mockMvc.perform(put(RESERVATION_URI_BY_ID, id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reservationForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldAccountId));
+    }
+
+    @Test
+    public void test_Reservation_Put_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequested_ById_AndInvalidSequence() throws Exception {
+        String id = reservationEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldAccountId = "sequence";
+        reservationForm.setSequence("");
+
+        mvcResult = mockMvc.perform(put(RESERVATION_URI_BY_ID, id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reservationForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldAccountId));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 0, -1 })
+    public void test_Reservation_Put_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequested_ById_AndInvalidNoOfPersons(Integer noOfPersons) throws Exception {
+        String id = reservationEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldAccountId = "noOfPersons";
+        reservationForm.setNoOfPersons(noOfPersons);
+
+        mvcResult = mockMvc.perform(put(RESERVATION_URI_BY_ID, id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reservationForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldAccountId));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "", " ", "r" })
+    public void test_Reservation_Put_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequested_ById_AndInvalidEmptyType(String type) throws Exception {
+        String id = reservationEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldAccountId = "type";
+        reservationForm.setType(type);
+
+        mvcResult = mockMvc.perform(put(RESERVATION_URI_BY_ID, id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reservationForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldAccountId));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "", " ", "r" })
+    public void test_Reservation_Put_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequested_ById_AndInvalidEmptyDate(String date) throws Exception {
+        String id = reservationEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldAccountId = "date";
+        reservationForm.setDate(date);
+
+        mvcResult = mockMvc.perform(put(RESERVATION_URI_BY_ID, id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reservationForm)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldAccountId));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "", " ", "r" })
+    public void test_Reservation_Put_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequested_ById_AndInvalidEmptyTime(String time) throws Exception {
+        String id = reservationEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldAccountId = "time";
+        reservationForm.setTime(time);
 
         mvcResult = mockMvc.perform(put(RESERVATION_URI_BY_ID, id)
                         .contentType(MediaType.APPLICATION_JSON)

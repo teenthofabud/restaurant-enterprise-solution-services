@@ -24,8 +24,8 @@ public class EngagementIntegrationConfiguration {
 
     @Bean
     public ErrorDecoder errorDecoder() {
-        String[] feignBasePackages = { "com.teenthofabud.restaurant.solution.engagement.integration.establishmentarea.error",
-                "com.teenthofabud.restaurant.solution.engagement.integration.customer.error" };
+        String[] feignBasePackages = { "com.teenthofabud.restaurant.solution.engagement.integration.establishmentarea.proxy",
+                "com.teenthofabud.restaurant.solution.engagement.integration.customer.proxy" };
         return new TOABFeignErrorDecoderFactory(applicationContext, feignBasePackages);
     }
 }
