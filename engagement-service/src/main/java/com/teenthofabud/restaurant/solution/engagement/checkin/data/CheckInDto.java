@@ -18,7 +18,7 @@ public class CheckInDto {
     @ToString.Include
     private Optional<String> sequence;
     @ToString.Include
-    private Optional<Integer> noOfPersons;
+    private Optional<String> noOfPersons;
     /*@ToString.Include
     private Optional<String> status;*/
     @ToString.Include

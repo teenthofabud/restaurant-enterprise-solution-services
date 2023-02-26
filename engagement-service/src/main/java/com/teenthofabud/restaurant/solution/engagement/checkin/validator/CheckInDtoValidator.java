@@ -50,11 +50,20 @@ public abstract class CheckInDtoValidator implements Validator {
             return;
         }
 
-        Optional<Integer> optNoOfPersons = dto.getNoOfPersons();
-        if(!getFieldsToEscape().contains("noOfPersons") && optNoOfPersons.isPresent() && optNoOfPersons.get() <= 0) {
+        Optional<String> optNoOfPersons = dto.getNoOfPersons();
+                if(!getFieldsToEscape().contains("noOfPersons") && optNoOfPersons.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optNoOfPersons.get()))) {
             errors.rejectValue("noOfPersons", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             log.debug("CheckInDto.noOfPersons is invalid");
             return;
+        } else if(!getFieldsToEscape().contains("status") && optNoOfPersons.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optNoOfPersons.get()))) {
+            String noOfPersons = optNoOfPersons.get();
+            try {
+                Integer.parseInt(noOfPersons);
+            } catch (NumberFormatException e) {
+                log.debug("CheckInDto.noOfPersons is invalid");
+                errors.rejectValue("noOfPersons", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
+                return;
+            }
         }
 
         /*Optional<String> optStatus = dto.getStatus();

@@ -36,9 +36,9 @@ public abstract class CheckInDto2EntityConverter<T extends CheckInDto, U extends
             log.debug("CheckInDto.status is valid");
         }*/
 
-        Optional<Integer> optNoOfPersons = dto.getNoOfPersons();
+        Optional<String> optNoOfPersons = dto.getNoOfPersons();
         if(!getFieldsToEscape().contains("noOfPersons") && optNoOfPersons.isPresent()) {
-            actualEntity.setNoOfPersons(optNoOfPersons.get());
+            actualEntity.setNoOfPersons(Integer.parseInt(optNoOfPersons.get()));
             changeSW[i++] = true;
             log.debug("CheckInDto.noOfPersons is valid");
         }

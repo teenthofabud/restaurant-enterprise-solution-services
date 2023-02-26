@@ -1604,13 +1604,14 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
         Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
     }
 
+    /**
+     * Patch
+     */
+
     @Test
     public void test_Reservation_Patch_ShouldReturn_204Response_And_NoResponseBody_WhenUpdated_ById_AndReservationDetails() throws Exception {
         String id = reservationEntity4.getId().toString();
         MvcResult mvcResult = null;
-        /*patches = Arrays.asList(
-                new PatchOperationForm("replace", "/accountId", "5"),
-                new PatchOperationForm("replace", "/notes", "patched notes"));*/
 
         mvcResult = this.mockMvc.perform(patch(RESERVATION_URI_BY_ID, id)
                         .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
@@ -1642,8 +1643,53 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
     }
 
     @Test
+    public void test_Reservation_Patch_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenUpdated_ByInvalidId_AndReservationDetails() throws Exception {
+        String id = "x";
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldId = "id";
+        String message = "invalid";
+        patches = Arrays.asList(
+                new PatchOperationForm("replace", "/accountId", "2"));
+
+        mvcResult = this.mockMvc.perform(patch(RESERVATION_URI_BY_ID, id)
+                        .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
+                        .content(objectMapper.writeValueAsString(patches)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldId));
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
+    }
+
+    @Test
     public void test_Reservation_Patch_ShouldReturn_404Response_And_ErrorCode_RES_ENGMNT_002_WhenUpdated_ByAbsentId_AndReservationDetails() throws Exception {
         String id = "5";
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_NOT_FOUND.getErrorCode();
+        String fieldAccountId = "id";
+        patches = Arrays.asList(
+                new PatchOperationForm("replace", "/accountId", "2"));
+
+        mvcResult = this.mockMvc.perform(patch(RESERVATION_URI_BY_ID, id)
+                        .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
+                        .content(objectMapper.writeValueAsString(patches)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldAccountId));
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(id.toString()));
+    }
+
+    @Test
+    public void test_Reservation_Patch_ShouldReturn_404Response_And_ErrorCode_RES_ENGMNT_002_WhenUpdated_ByInactiveId_AndReservationDetails() throws Exception {
+        String id = "4";
         MvcResult mvcResult = null;
         String errorCode = EngagementErrorCode.ENGAGEMENT_NOT_FOUND.getErrorCode();
         String fieldAccountId = "id";
@@ -1705,7 +1751,7 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
     }
 
     @Test
-    public void test_Reservation_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndInvalidAccountId() throws Exception {
+    public void test_Reservation_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndEmptyAccountId() throws Exception {
         String id = reservationEntity1.getId().toString();
         MvcResult mvcResult = null;
         String errorCode = TOABErrorCode.PATCH_ATTRIBUTE_INVALID.getErrorCode();
@@ -1727,13 +1773,64 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
     }
 
     @Test
-    public void test_Reservation_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndEmptyRate() throws Exception {
+    public void test_Reservation_Patch_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_ById_AndInvalidAccountId() throws Exception {
         String id = reservationEntity1.getId().toString();
         MvcResult mvcResult = null;
-        String errorCode = TOABErrorCode.PATCH_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldAccountId = "value";
+        String errorCode = "RES-CUST-001";
+        String fieldId = "id";
+        String message = "invalid";
         patches = Arrays.asList(
-                new PatchOperationForm("replace", "/rate", " "));
+                new PatchOperationForm("replace", "/accountId", "r"));
+
+        mvcResult = mockMvc.perform(patch(RESERVATION_URI_BY_ID, id)
+                        .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
+                        .content(objectMapper.writeValueAsString(patches)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldId));
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
+
+    }
+
+    @Test
+    public void test_Reservation_Patch_ShouldReturn_400Response_And_ErrorCode_RES_CUST_002_WhenRequested_ById_AndAbsentAccountId() throws Exception {
+        String id = reservationEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = "RES-CUST-002";
+        String fieldId = "id";
+        String accountId = "3";
+        String message = "unavailable";
+        patches = Arrays.asList(
+                new PatchOperationForm("replace", "/accountId", accountId));
+
+        mvcResult = mockMvc.perform(patch(RESERVATION_URI_BY_ID, id)
+                        .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
+                        .content(objectMapper.writeValueAsString(patches)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldId));
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(accountId));
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
+
+    }
+
+    @Test
+    public void test_Reservation_Patch_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequested_ById_AndInactiveAccountId() throws Exception {
+        String id = reservationEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode. ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldAccountId = "accountId";
+        String message = "invalid";
+        patches = Arrays.asList(
+                new PatchOperationForm("replace", "/accountId", "22"));
 
         mvcResult = mockMvc.perform(patch(RESERVATION_URI_BY_ID, id)
                         .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
@@ -1745,7 +1842,78 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldAccountId));
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
 
+    }
+
+    @Test
+    public void test_Reservation_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndEmptySequence() throws Exception {
+        String id = reservationEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = TOABErrorCode.PATCH_ATTRIBUTE_INVALID.getErrorCode();
+        String field = "value";
+        String message = "invalid";
+        patches = Arrays.asList(
+                new PatchOperationForm("replace", "/sequence", " "));
+
+        mvcResult = mockMvc.perform(patch(RESERVATION_URI_BY_ID, id)
+                        .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
+                        .content(objectMapper.writeValueAsString(patches)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field));
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
+
+    }
+
+    @Test
+    public void test_Reservation_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenRequested_ById_AndEmptyNoOfPersons() throws Exception {
+        String id = reservationEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = TOABErrorCode.PATCH_ATTRIBUTE_INVALID.getErrorCode();
+        String field = "value";
+        String message = "invalid";
+        patches = Arrays.asList(
+                new PatchOperationForm("replace", "/noOfPersons", " "));
+
+        mvcResult = mockMvc.perform(patch(RESERVATION_URI_BY_ID, id)
+                        .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
+                        .content(objectMapper.writeValueAsString(patches)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field));
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
+    }
+
+    @Test
+    public void test_Reservation_Patch_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequested_ById_AndInvalidNoOfPersons() throws Exception {
+        String id = reservationEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String field = "noOfPersons";
+        String message = "invalid";
+        patches = Arrays.asList(
+                new PatchOperationForm("replace", "/noOfPersons", "x"));
+
+        mvcResult = mockMvc.perform(patch(RESERVATION_URI_BY_ID, id)
+                        .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
+                        .content(objectMapper.writeValueAsString(patches)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(field));
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
     }
 
     @Test
