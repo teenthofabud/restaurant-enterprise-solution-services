@@ -208,7 +208,8 @@ public class WalkInController extends WalkInAPI implements ApplicationContextAwa
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("secondaryFilter")
     @Override
-    public List<WalkInVo> getAllWalkInsByWalkInFilters(String name, String phoneNumber, String emailId) throws CheckInException {
+    public List<WalkInVo> getAllWalkInsByWalkInFilters(@RequestParam(required = false) String name, @RequestParam(required = false) String phoneNumber,
+                                                       @RequestParam(required = false) String emailId) throws CheckInException {
         log.debug("Requesting all available walkIns with given filters");
         boolean emptyName = !StringUtils.hasText(StringUtils.trimWhitespace(name));
         boolean emptyPhoneNumber = !StringUtils.hasText(StringUtils.trimWhitespace(phoneNumber));
@@ -217,7 +218,7 @@ public class WalkInController extends WalkInAPI implements ApplicationContextAwa
             Optional<String> optName = emptyName ? Optional.empty() : Optional.of(name);
             Optional<String> optPhoneNumber = emptyPhoneNumber ? Optional.empty() : Optional.of(phoneNumber);
             Optional<String> optEmailId = emptyEmailId ? Optional.empty() : Optional.of(emailId);
-            List<WalkInVo> matchedByFilter = this.getCheckInService().retrieveAllMatchingWalkInDetailsByCriteria(optEmailId, optName, optPhoneNumber);
+            List<WalkInVo> matchedByFilter = this.getCheckInService().retrieveAllMatchingWalkInDetailsByCriteria(optName, optPhoneNumber, optEmailId);
             log.debug("Responding with all available walkIns with given filters");
             return matchedByFilter;
         }

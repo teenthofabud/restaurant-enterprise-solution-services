@@ -15,12 +15,7 @@ import com.teenthofabud.restaurant.solution.engagement.checkin.constants.CheckIn
 import com.teenthofabud.restaurant.solution.engagement.checkin.converter.WalkInDto2EntityConverter;
 import com.teenthofabud.restaurant.solution.engagement.checkin.converter.WalkInEntity2VoConverter;
 import com.teenthofabud.restaurant.solution.engagement.checkin.converter.WalkInForm2EntityConverter;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInException;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInMessageTemplate;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.WalkInDto;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.WalkInEntity;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.WalkInForm;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.WalkInVo;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.*;
 import com.teenthofabud.restaurant.solution.engagement.checkin.factory.CheckInBeanFactory;
 import com.teenthofabud.restaurant.solution.engagement.checkin.mapper.WalkInEntitySelfMapper;
 import com.teenthofabud.restaurant.solution.engagement.checkin.mapper.WalkInForm2EntityMapper;
@@ -32,6 +27,7 @@ import com.teenthofabud.restaurant.solution.engagement.checkin.validator.WalkInF
 import com.teenthofabud.restaurant.solution.engagement.constants.EngagementErrorCode;
 import com.teenthofabud.restaurant.solution.engagement.utils.EngagementServiceHelper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
@@ -57,6 +53,12 @@ public class WalkInServiceImpl implements WalkInService {
     private EngagementServiceHelper engagementServiceHelper;
     private String walkInTimeFormat;
     private ObjectMapper objectMapper;
+    private String phoneNumberRegex;
+
+    @Value("${res.engagement.checkIn.walkIn.phoneNumber.regex}")
+    public void setPhoneNumberRegex(String phoneNumberRegex) {
+        this.phoneNumberRegex = phoneNumberRegex;
+    }
 
     @Override
     @Value("${res.engagement.checkIn.walkIn.timestamp.format}")
@@ -530,16 +532,27 @@ public class WalkInServiceImpl implements WalkInService {
             matcherCriteria = matcherCriteria.withMatcher("name", match -> match.exact());
         }
         if(StringUtils.hasText(StringUtils.trimWhitespace(phoneNumber))) {
-            log.debug("phoneNumber {} is valid", name);
-            providedFilters.put("phoneNumber", name);
-            entity.setPhoneNumber(phoneNumber);
-            matcherCriteria = matcherCriteria.withMatcher("phoneNumber", match -> match.exact());
+            if(phoneNumber.matches(phoneNumberRegex)) {
+                log.debug("phoneNumber {} is valid", phoneNumber);
+                providedFilters.put("phoneNumber", phoneNumber);
+                entity.setPhoneNumber(phoneNumber);
+                matcherCriteria = matcherCriteria.withMatcher("phoneNumber", match -> match.exact());
+            } else {
+                log.debug("WalkIn phoneNumber: {} is invalid", phoneNumber);
+                throw new CheckInException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID, new Object[] { "phoneNumber", phoneNumber });
+            }
         }
         if(StringUtils.hasText(StringUtils.trimWhitespace(emailId))) {
-            log.debug("emailId {} is valid", name);
-            providedFilters.put("emailId", name);
-            entity.setEmailId(emailId);
-            matcherCriteria = matcherCriteria.withMatcher("emailId", match -> match.contains());
+            if(EmailValidator.getInstance().isValid(emailId)) {
+                log.debug("emailId {} is valid", emailId);
+                providedFilters.put("emailId", emailId);
+                entity.setEmailId(emailId);
+                matcherCriteria = matcherCriteria.withMatcher("emailId", match -> match.contains());
+            } else {
+                log.debug("WalkIn emailId: {} is invalid", phoneNumber);
+                throw new CheckInException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID, new Object[] { "emailId", emailId });
+            }
+
         }
         if(providedFilters.isEmpty()) {
             log.debug("search parameters are not valid");

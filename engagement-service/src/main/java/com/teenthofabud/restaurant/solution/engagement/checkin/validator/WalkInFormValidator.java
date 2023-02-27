@@ -5,6 +5,7 @@ import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInForm;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.WalkInForm;
 import com.teenthofabud.restaurant.solution.engagement.constants.EngagementErrorCode;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -18,6 +19,13 @@ import java.util.Optional;
 public class WalkInFormValidator extends CheckInFormValidator {
 
     private List<String> fieldsToEscape;
+
+    private String phoneNumberRegex;
+
+    @Value("${res.engagement.checkIn.walkIn.phoneNumber.regex}")
+    public void setPhoneNumberRegex(String phoneNumberRegex) {
+        this.phoneNumberRegex = phoneNumberRegex;
+    }
 
     @Value("#{'${res.engagement.checkIn.walkIn.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
@@ -44,11 +52,19 @@ public class WalkInFormValidator extends CheckInFormValidator {
             log.debug("WalkInForm.emailId is empty");
             errors.rejectValue("emailId", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             return;
+        } else if(!fieldsToEscape.contains("emailId") && StringUtils.hasText(StringUtils.trimWhitespace(form.getEmailId())) && !EmailValidator.getInstance().isValid(form.getEmailId())) {
+            log.debug("WalkInForm.emailId is invalid");
+            errors.rejectValue("emailId", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
+            return;
         }
         log.debug("WalkInForm.emailId is invalid");
 
         if(!fieldsToEscape.contains("phoneNumber") && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getPhoneNumber()))) {
             log.debug("WalkInForm.phoneNumber is empty");
+            errors.rejectValue("phoneNumber", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
+            return;
+        } else if(!fieldsToEscape.contains("phoneNumber") && StringUtils.hasText(StringUtils.trimWhitespace(form.getEmailId())) && !form.getPhoneNumber().matches(phoneNumberRegex)) {
+            log.debug("WalkInForm.phoneNumber is invalid");
             errors.rejectValue("phoneNumber", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             return;
         }

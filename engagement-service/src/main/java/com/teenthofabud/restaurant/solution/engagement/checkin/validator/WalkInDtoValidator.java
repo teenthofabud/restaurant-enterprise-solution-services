@@ -5,6 +5,7 @@ import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInDto;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.WalkInDto;
 import com.teenthofabud.restaurant.solution.engagement.constants.EngagementErrorCode;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -18,6 +19,13 @@ import java.util.Optional;
 public class WalkInDtoValidator extends CheckInDtoValidator {
 
     private List<String> fieldsToEscape;
+    private String phoneNumberRegex;
+
+    @Value("${res.engagement.checkIn.walkIn.phoneNumber.regex}")
+    public void setPhoneNumberRegex(String phoneNumberRegex) {
+        this.phoneNumberRegex = phoneNumberRegex;
+    }
+
     @Value("#{'${res.engagement.checkIn.walkIn.fields-to-escape}'.split(',')}")
     public void setFieldsToEscape(List<String> fieldsToEscape) {
         this.fieldsToEscape = fieldsToEscape;
@@ -42,12 +50,22 @@ public class WalkInDtoValidator extends CheckInDtoValidator {
         Optional<String> optEmailId = dto.getEmailId();
         if(!fieldsToEscape.contains("emailId") && optEmailId.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optEmailId.get()))) {
             errors.rejectValue("emailId", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
+            log.debug("WalkInDto.emailId is empty");
+            return;
+        } else if(!fieldsToEscape.contains("emailId") && optEmailId.isPresent()
+                && StringUtils.hasText(StringUtils.trimWhitespace(optEmailId.get())) && !EmailValidator.getInstance().isValid(optEmailId.get())) {
+            errors.rejectValue("emailId", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             log.debug("WalkInDto.emailId is invalid");
             return;
         }
 
         Optional<String> optPhoneNumber = dto.getPhoneNumber();
-        if(!fieldsToEscape.contains("phoneNumber") && optName.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optPhoneNumber.get()))) {
+        if(!fieldsToEscape.contains("phoneNumber") && optPhoneNumber.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optPhoneNumber.get()))) {
+            errors.rejectValue("phoneNumber", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
+            log.debug("WalkInDto.phoneNumber is empty");
+            return;
+        } else if(!fieldsToEscape.contains("phoneNumber") && optPhoneNumber.isPresent()
+                && StringUtils.hasText(StringUtils.trimWhitespace(optPhoneNumber.get())) && !optPhoneNumber.get().matches(phoneNumberRegex)) {
             errors.rejectValue("phoneNumber", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             log.debug("WalkInDto.phoneNumber is invalid");
             return;
