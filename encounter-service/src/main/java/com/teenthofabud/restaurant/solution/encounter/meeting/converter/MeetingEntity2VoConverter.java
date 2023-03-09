@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -83,4 +84,24 @@ public abstract class MeetingEntity2VoConverter<T extends MeetingEntity, U exten
     protected abstract U convertChild(T meetingEntityChild, MeetingVo meetingVo);
 
     public abstract List<String> getFieldsToEscape();
+
+    @Override
+    public void expandAuditFields(MeetingEntity entity, MeetingVo vo) {
+        TOABCascadeLevel cascadeLevel = TOABRequestContextHolder.getCascadeLevelContext();
+        switch (cascadeLevel) {
+            case ONE:
+                vo.setActive(entity.getActive());
+                break;
+            case TWO:
+                vo.setActive(entity.getActive());
+                vo.setModifiedOn(entity.getModifiedOn().truncatedTo(ChronoUnit.MILLIS));
+                vo.setCreatedOn(entity.getCreatedOn().truncatedTo(ChronoUnit.MILLIS ));
+                vo.setModifiedBy(entity.getModifiedBy());
+                vo.setCreatedBy(entity.getCreatedBy());
+                break;
+            default:
+                log.debug("No eligible fields available in {} to perform two level cascading in target type");
+                break;
+        }
+    }
 }
