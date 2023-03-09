@@ -11,6 +11,7 @@ import com.teenthofabud.restaurant.solution.encounter.meeting.constants.MeetingT
 import com.teenthofabud.restaurant.solution.encounter.meeting.data.MeetingEntity;
 import com.teenthofabud.restaurant.solution.encounter.meeting.data.MeetingVo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.SystemUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
@@ -85,23 +86,4 @@ public abstract class MeetingEntity2VoConverter<T extends MeetingEntity, U exten
 
     public abstract List<String> getFieldsToEscape();
 
-    @Override
-    public void expandAuditFields(MeetingEntity entity, MeetingVo vo) {
-        TOABCascadeLevel cascadeLevel = TOABRequestContextHolder.getCascadeLevelContext();
-        switch (cascadeLevel) {
-            case ONE:
-                vo.setActive(entity.getActive());
-                break;
-            case TWO:
-                vo.setActive(entity.getActive());
-                vo.setModifiedOn(entity.getModifiedOn().truncatedTo(ChronoUnit.MILLIS));
-                vo.setCreatedOn(entity.getCreatedOn().truncatedTo(ChronoUnit.MILLIS ));
-                vo.setModifiedBy(entity.getModifiedBy());
-                vo.setCreatedBy(entity.getCreatedBy());
-                break;
-            default:
-                log.debug("No eligible fields available in {} to perform two level cascading in target type");
-                break;
-        }
-    }
 }
