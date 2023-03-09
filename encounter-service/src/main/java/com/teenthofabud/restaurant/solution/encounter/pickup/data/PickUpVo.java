@@ -8,7 +8,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true, callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper=false)
 public class PickUpVo extends MeetingVo {

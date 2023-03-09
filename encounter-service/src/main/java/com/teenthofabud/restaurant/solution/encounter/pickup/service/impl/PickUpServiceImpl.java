@@ -32,6 +32,7 @@ import com.teenthofabud.restaurant.solution.encounter.pickup.validator.PickUpFor
 import com.teenthofabud.restaurant.solution.encounter.utils.EncounterServiceHelper;
 import com.teenthofabud.restaurant.solution.encounter.constants.EncounterErrorCode;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
@@ -223,18 +224,10 @@ public class PickUpServiceImpl implements PickUpService {
 
     @Override
     public PickUpVo retrieveMatchingDetailsBySequenceOnDate(String sequence, String date) throws MeetingException {
-        Long seq = 0L;
         LocalDate dt = LocalDate.now();
         LocalDateTime start = LocalDateTime.now();
         LocalDateTime end = LocalDateTime.now();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern(pickUpTimeFormat);
-
-        try {
-            seq = Long.parseLong(sequence);
-        } catch (NumberFormatException e) {
-            log.debug("Sequence: {} format is invalid", sequence);
-            throw new MeetingException(EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID, new Object[] { "sequence", sequence });
-        }
 
         try {
             dt = LocalDate.parse(date, dtf);
@@ -246,13 +239,13 @@ public class PickUpServiceImpl implements PickUpService {
         start = LocalDateTime.of(dt, LocalTime.of(0,0, 0));
         end = LocalDateTime.of(dt, LocalTime.of(23,59, 59));
 
-        log.info("Requesting PickUpEntity by sequence: {} between timestamps: {} and {}", seq, start, end);
-        Optional<PickUpEntity> optEntity = this.getMeetingRepository().findBySequenceAndCreatedOnBetween(seq.toString(), start, end);
+        log.info("Requesting PickUpEntity by sequence: {} between timestamps: {} and {}", sequence, start, end);
+        Optional<PickUpEntity> optEntity = this.getMeetingRepository().findBySequenceAndCreatedOnBetween(sequence, start, end);
         if(optEntity.isEmpty()) {
-            log.debug("No PickUpEntity found by sequence: {} between timestamps: {} and {}", seq, start, end);
-            throw new MeetingException(EncounterErrorCode.ENCOUNTER_NOT_FOUND, new Object[] { "seq: " + seq, ", date: " + date });
+            log.debug("No PickUpEntity found by sequence: {} between timestamps: {} and {}", sequence, start, end);
+            throw new MeetingException(EncounterErrorCode.ENCOUNTER_NOT_FOUND, new Object[] { "sequence: " + sequence, ", date: " + date });
         }
-        log.info("Found PickUpVo by sequence: {} between timestamps: {} and {}", seq, start, end);
+        log.info("Found PickUpVo by sequence: {} between timestamps: {} and {}", sequence, start, end);
         PickUpEntity entity = optEntity.get();
         return encounterServiceHelper.pickUpEntity2DetailedVo(entity);
     }
@@ -260,9 +253,6 @@ public class PickUpServiceImpl implements PickUpService {
     @Override
     public List<PickUpVo> retrieveAllMatchingPickUpDetailsByCriteria(Optional<String> optionalName, Optional<String> optionalPhoneNumber)
             throws MeetingException {
-        if(optionalName.isEmpty() && optionalPhoneNumber.isEmpty()) {
-            log.debug("No search parameters provided");
-        }
         String name = optionalName.isPresent() ? optionalName.get() : "";
         String phoneNumber = optionalPhoneNumber.isPresent() ? optionalPhoneNumber.get() : "";
         if(StringUtils.isEmpty(StringUtils.trimWhitespace(name)) && StringUtils.isEmpty(StringUtils.trimWhitespace(phoneNumber))) {
@@ -272,13 +262,13 @@ public class PickUpServiceImpl implements PickUpService {
         Map<String, String> providedFilters = new LinkedHashMap<>();
         PickUpEntity entity = new PickUpEntity(new MeetingEntity());
         ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll().withIgnorePaths("id","sequence","accountId").withIgnoreNullValues();
-        if(StringUtils.hasText(StringUtils.trimWhitespace(name))) {
+        if(StringUtils.hasText(StringUtils.trimWhitespace(name)) && org.apache.commons.lang3.StringUtils.isAlphaSpace(StringUtils.trimWhitespace(name))) {
             log.debug("name {} is valid", name);
             providedFilters.put("name", name);
             entity.setName(name);
             matcherCriteria = matcherCriteria.withMatcher("name", match -> match.exact());
         }
-        if(StringUtils.hasText(StringUtils.trimWhitespace(phoneNumber))) {
+        if(StringUtils.hasText(StringUtils.trimWhitespace(phoneNumber)) && NumberUtils.isDigits(StringUtils.trimWhitespace(phoneNumber))) {
             log.debug("phoneNumber {} is valid", phoneNumber);
             providedFilters.put("phoneNumber", phoneNumber);
             entity.setPhoneNo(phoneNumber);
@@ -286,15 +276,19 @@ public class PickUpServiceImpl implements PickUpService {
         }
         if(providedFilters.isEmpty()) {
             log.debug("search parameters are not valid");
+            throw new MeetingException(EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID,
+                    new Object[]{ "name, phoneNumber", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
         } else {
             log.debug("search parameters {} are valid", providedFilters);
+            Example<PickUpEntity> pickUpEntityExample = Example.of(entity, matcherCriteria);
+            List<PickUpEntity> pickUpEntityList = this.getMeetingRepository().findAll(pickUpEntityExample);
+            matchedPickUpList = encounterServiceHelper.pickUpEntity2DetailedVo(pickUpEntityList);
+            if(!matchedPickUpList.isEmpty())
+                log.info("Found {} PickUpVo matching with provided parameters : {}", matchedPickUpList.size(), providedFilters);
+            else
+                log.info("No PickUpVo available matching with provided parameters : {}", providedFilters);
+            return matchedPickUpList;
         }
-        Example<PickUpEntity> pickUpEntityExample = Example.of(entity, matcherCriteria);
-        List<PickUpEntity> pickUpEntityList = this.getMeetingRepository().findAll(pickUpEntityExample);
-        matchedPickUpList = encounterServiceHelper.pickUpEntity2DetailedVo(pickUpEntityList);
-        log.info("Found {} PickUpVo matching with provided parameters : {}", matchedPickUpList.size(), providedFilters);
-        log.info("No PickUpVo available matching with provided parameters : {}", matchedPickUpList.size(), providedFilters);
-        return matchedPickUpList;
     }
 
     @Override

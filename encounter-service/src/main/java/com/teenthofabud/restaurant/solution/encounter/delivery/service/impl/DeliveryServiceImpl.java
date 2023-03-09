@@ -32,6 +32,7 @@ import com.teenthofabud.restaurant.solution.encounter.meeting.factory.MeetingBea
 import com.teenthofabud.restaurant.solution.encounter.utils.EncounterServiceHelper;
 import com.teenthofabud.restaurant.solution.encounter.constants.EncounterErrorCode;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
@@ -150,34 +151,38 @@ public class DeliveryServiceImpl implements DeliveryService{
     @Override
     public List<DeliveryVo> retrieveAllMatchingDeliveryDetailsByCriteria(Optional<String> optionalOrderId)
             throws MeetingException {
-        if(optionalOrderId.isEmpty()) {
+        if (optionalOrderId.isEmpty()) {
             log.debug("No search parameters provided");
         }
         String orderId = optionalOrderId.isPresent() ? optionalOrderId.get() : "";
-        if(StringUtils.isEmpty(StringUtils.trimWhitespace(orderId))) {
+        if (StringUtils.isEmpty(StringUtils.trimWhitespace(orderId))) {
             log.debug("All search parameters are empty");
         }
         List<DeliveryVo> matchedDeliveryList = new LinkedList<>();
         Map<String, String> providedFilters = new LinkedHashMap<>();
         DeliveryEntity entity = new DeliveryEntity(new MeetingEntity());
-        ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll().withIgnorePaths("id","sequence","accountId").withIgnoreNullValues();
-        if(StringUtils.hasText(StringUtils.trimWhitespace(orderId))) {
+        ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll().withIgnorePaths("id", "sequence", "accountId").withIgnoreNullValues();
+        if (StringUtils.hasText(StringUtils.trimWhitespace(orderId)) && NumberUtils.isDigits(StringUtils.trimWhitespace(orderId))) {
             log.debug("orderId {} is valid", orderId);
             providedFilters.put("orderId", orderId);
             entity.setOrderId(orderId);
             matcherCriteria = matcherCriteria.withMatcher("orderId", match -> match.exact());
         }
-        if(providedFilters.isEmpty()) {
+        if (providedFilters.isEmpty()) {
             log.debug("search parameters are not valid");
+            throw new MeetingException(EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID,
+                    new Object[]{"orderId", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED});
         } else {
             log.debug("search parameters {} are valid", providedFilters);
+            Example<DeliveryEntity> deliveryEntityExample = Example.of(entity, matcherCriteria);
+            List<DeliveryEntity> deliveryEntityList = this.getMeetingRepository().findAll(deliveryEntityExample);
+            matchedDeliveryList = encounterServiceHelper.deliveryEntity2DetailedVo(deliveryEntityList);
+            if (!matchedDeliveryList.isEmpty())
+                log.info("Found {} DeliveryVo matching with provided parameters : {}", matchedDeliveryList.size(), providedFilters);
+            else
+                log.info("No DeliveryVo available matching with provided parameters : {}", providedFilters);
+            return matchedDeliveryList;
         }
-        Example<DeliveryEntity> deliveryEntityExample = Example.of(entity, matcherCriteria);
-        List<DeliveryEntity> deliveryEntityList = this.getMeetingRepository().findAll(deliveryEntityExample);
-        matchedDeliveryList = encounterServiceHelper.deliveryEntity2DetailedVo(deliveryEntityList);
-        log.info("Found {} DeliveryVo matching with provided parameters : {}", matchedDeliveryList.size(), providedFilters);
-        log.info("No DeliveryVo available matching with provided parameters : {}", providedFilters);
-        return matchedDeliveryList;
     }
 
     @Override

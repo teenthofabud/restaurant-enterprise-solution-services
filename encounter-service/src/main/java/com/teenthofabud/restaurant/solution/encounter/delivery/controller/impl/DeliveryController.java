@@ -61,9 +61,11 @@ public class DeliveryController extends DeliveryAPI implements ApplicationContex
             CreatedVo createdVo = new CreatedVo();
             createdVo.setId(id);
             return createdVo;
+        } else {
+            log.debug("DeliveryForm is null");
+            throw new MeetingException(EncounterErrorCode.ENCOUNTER_ATTRIBUTE_UNEXPECTED,
+                    new Object[]{"form", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED});
         }
-        log.debug("DeliveryForm is null");
-        throw new MeetingException(EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID, new Object[]{"form", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED});
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -82,7 +84,7 @@ public class DeliveryController extends DeliveryAPI implements ApplicationContex
                 return;
             }
             log.debug("DeliveryForm is null");
-            throw new MeetingException(EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID,
+            throw new MeetingException(EncounterErrorCode.ENCOUNTER_ATTRIBUTE_UNEXPECTED,
                     new Object[]{ "form", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
         }
         log.debug(MeetingMessageTemplate.MSG_TEMPLATE_MEETING_ID_EMPTY.getValue());
@@ -209,7 +211,7 @@ public class DeliveryController extends DeliveryAPI implements ApplicationContex
                 return;
             }
             log.debug("pickUp patch document is null");
-            throw new MeetingException(EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID,
+            throw new MeetingException(EncounterErrorCode.ENCOUNTER_ATTRIBUTE_UNEXPECTED,
                     new Object[]{ "patch", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
         }
         log.debug(MeetingMessageTemplate.MSG_TEMPLATE_MEETING_ID_EMPTY.getValue());
@@ -236,8 +238,9 @@ public class DeliveryController extends DeliveryAPI implements ApplicationContex
             List<DeliveryVo> matchedByFilter = this.getMeetingService().retrieveAllMatchingDeliveryDetailsByCriteria(optOrderId);
             log.debug("Responding with all available deliveries with given filters");
             return matchedByFilter;
+        }else {
+            log.debug("deliveries filters are empty");
+            throw new MeetingException(EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID, new Object[]{"filters"});
         }
-        log.debug("deliveries filters are empty");
-        throw new MeetingException(EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID, new Object[] { "filters" });
     }
 }

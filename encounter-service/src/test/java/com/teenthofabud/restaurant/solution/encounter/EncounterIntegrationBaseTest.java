@@ -28,8 +28,8 @@ public abstract class EncounterIntegrationBaseTest {
     private Hoverfly hoverfly;
 
     @Autowired
-    public void setOm(ObjectMapper om) {
-        this.om = om;
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        this.om = objectMapper;
     }
 
     @Autowired
@@ -39,8 +39,6 @@ public abstract class EncounterIntegrationBaseTest {
 
     @BeforeAll
     private void setUp() throws URISyntaxException {
-        om.registerModule(new Jdk8Module());
-        om.registerModule(new JavaTimeModule());
 
         LocalHoverflyConfig localHoverflyConfig = HoverflyConfig.localConfigs();
 

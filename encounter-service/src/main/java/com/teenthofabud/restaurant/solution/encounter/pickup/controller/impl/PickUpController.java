@@ -54,13 +54,13 @@ public class PickUpController extends PickUpAPI implements ApplicationContextAwa
         boolean emptyName = !StringUtils.hasText(StringUtils.trimWhitespace(name));
         boolean emptyPhoneNumber = !StringUtils.hasText(StringUtils.trimWhitespace(phoneNumber));
         if(!emptyName || !emptyPhoneNumber) {
-            Optional<String> optName = emptyName ? Optional.empty() : Optional.of(name);
-            Optional<String> optPhoneNumber = emptyPhoneNumber ? Optional.empty() : Optional.of(phoneNumber);
+            Optional<String> optName = !emptyName ? Optional.of(name) : Optional.empty();
+            Optional<String> optPhoneNumber = !emptyPhoneNumber ? Optional.of(phoneNumber) : Optional.empty();
             List<PickUpVo> matchedByFilter = this.getMeetingService().retrieveAllMatchingPickUpDetailsByCriteria(optName, optPhoneNumber);
             log.debug("Responding with all available pickUps with given filters");
             return matchedByFilter;
         }
-        log.debug("pickUps filters are empty");
+        log.debug("PickUps filters are empty");
         throw new MeetingException(EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID, new Object[] { "filters" });
     }
 
@@ -78,10 +78,11 @@ public class PickUpController extends PickUpAPI implements ApplicationContextAwa
             CreatedVo createdVo = new CreatedVo();
             createdVo.setId(id);
             return createdVo;
+        } else {
+            log.debug("PickUpForm is null");
+            throw new MeetingException(EncounterErrorCode.ENCOUNTER_ATTRIBUTE_UNEXPECTED, new Object[]{"form",
+                    TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED});
         }
-        log.debug("PickUpForm is null");
-        throw new MeetingException(EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID, new Object[]{ "form",
-                TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -98,13 +99,15 @@ public class PickUpController extends PickUpAPI implements ApplicationContextAwa
                 this.getMeetingService().updateMeeting(id, form);
                 log.debug("Responding with successful updation of attributes for existing pickUp");
                 return;
+            } else {
+                log.debug("PickUpForm is null");
+                throw new MeetingException(EncounterErrorCode.ENCOUNTER_NOT_FOUND,
+                        new Object[]{"form", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED});
             }
-            log.debug("PickUpForm is null");
-            throw new MeetingException(EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID,
-                    new Object[]{ "form", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
+        } else{
+            log.debug(MeetingMessageTemplate.MSG_TEMPLATE_MEETING_ID_EMPTY.getValue());
+            throw new MeetingException(EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID, new Object[] { "id", id });
         }
-        log.debug(MeetingMessageTemplate.MSG_TEMPLATE_MEETING_ID_EMPTY.getValue());
-        throw new MeetingException(EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID, new Object[] { "id", id });
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -134,7 +137,7 @@ public class PickUpController extends PickUpAPI implements ApplicationContextAwa
                 return;
             }
             log.debug("pickUp patch document is null");
-            throw new MeetingException(EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID,
+            throw new MeetingException(EncounterErrorCode.ENCOUNTER_ATTRIBUTE_UNEXPECTED,
                     new Object[]{ "patch", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
         }
         log.debug(MeetingMessageTemplate.MSG_TEMPLATE_MEETING_ID_EMPTY.getValue());
@@ -156,7 +159,7 @@ public class PickUpController extends PickUpAPI implements ApplicationContextAwa
     }
 
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Retrieve all available PickUps and their details by accountId, sequence and notes",
+            @ApiResponse(responseCode = "200", description = "Retrieve all available PickUps and their details by accountId, sequence",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
                             schema = @Schema(implementation = PickUpVo.class)))})})
     @ResponseStatus(HttpStatus.OK)
@@ -192,10 +195,10 @@ public class PickUpController extends PickUpAPI implements ApplicationContextAwa
             log.debug("Responding with all available pickUps with given sequence and date");
         } else if(StringUtils.isEmpty(StringUtils.trimWhitespace(sequence))) {
             log.debug("pickUp sequence is empty");
-            throw new MeetingException(EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID, new Object[] { "sequence", sequence });
+            throw new MeetingException(EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID, new Object[] { "sequence" });
         } else if(StringUtils.isEmpty(StringUtils.trimWhitespace(date))) {
             log.debug("pickUp date is empty");
-            throw new MeetingException(EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID, new Object[] { "date", date });
+            throw new MeetingException(EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID, new Object[] { "date" });
         }
         return matchedBySequenceAndDate;
     }
