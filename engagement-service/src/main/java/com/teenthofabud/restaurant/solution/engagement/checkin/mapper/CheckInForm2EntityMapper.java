@@ -44,6 +44,10 @@ public abstract class CheckInForm2EntityMapper<T extends CheckInEntity, U extend
             log.debug("CheckInForm.noOfPersons: is unchanged");
         }
 
+        /**
+         * No update against type attribute of CheckIn possible
+         */
+
         if(!getFieldsToEscape().contains("accountId") && StringUtils.hasText(StringUtils.trimWhitespace(form.getAccountId()))
                 && form.getAccountId().compareTo(actualEntity.getAccountId()) != 0) {
             expectedEntity.setAccountId(form.getAccountId());

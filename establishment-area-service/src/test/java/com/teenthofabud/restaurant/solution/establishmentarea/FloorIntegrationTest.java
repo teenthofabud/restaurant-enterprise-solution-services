@@ -223,13 +223,13 @@ public class FloorIntegrationTest extends EstablishmentAreaIntegrationBaseTest {
         tableForm = new TableForm();
         tableForm.setTableName("New Table");
         tableForm.setDescription("New Table Description");
-        tableForm.setCapacity("12");
+        tableForm.setCapacity(12);
         tableForm.setFloorId(floorEntity1.getFlrId().toString());
 
         tableEntity1 = new TableEntity();
         tableEntity1.setTableName("Table 1 Name");
         tableEntity1.setDescription("Table 1 Description");
-        tableEntity1.setCapacity("1");
+        tableEntity1.setCapacity(1);
         tableEntity1.setActive(Boolean.TRUE);
         tableEntity1.setFloor(floorEntity1);
 
@@ -244,7 +244,7 @@ public class FloorIntegrationTest extends EstablishmentAreaIntegrationBaseTest {
         tableEntity2 = new TableEntity();
         tableEntity2.setTableName("Table 2 Name");
         tableEntity2.setDescription("Table 2 Description");
-        tableEntity2.setCapacity("2");
+        tableEntity2.setCapacity(2);
         tableEntity2.setActive(Boolean.TRUE);
         tableEntity2.setFloor(floorEntity2);
 
@@ -259,7 +259,7 @@ public class FloorIntegrationTest extends EstablishmentAreaIntegrationBaseTest {
         tableEntity3 = new TableEntity();
         tableEntity3.setTableName("Table 3 Name");
         tableEntity3.setDescription("Table 3 Description");
-        tableEntity3.setCapacity("3");
+        tableEntity3.setCapacity(3);
         tableEntity3.setActive(Boolean.TRUE);
         tableEntity3.setFloor(floorEntity1);
 
@@ -274,7 +274,7 @@ public class FloorIntegrationTest extends EstablishmentAreaIntegrationBaseTest {
         tableEntity4 = new TableEntity();
         tableEntity4.setTableName("Table 4 Name");
         tableEntity4.setDescription("Table 4 Description");
-        tableEntity4.setCapacity("4");
+        tableEntity4.setCapacity(4);
         tableEntity4.setActive(Boolean.TRUE);
         tableEntity4.setFloor(floorEntity1);
 

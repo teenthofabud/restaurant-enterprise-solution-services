@@ -1,6 +1,7 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.mapper;
 
 import com.teenthofabud.core.common.error.TOABBaseException;
+import com.teenthofabud.restaurant.solution.engagement.checkin.constants.CheckInType;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

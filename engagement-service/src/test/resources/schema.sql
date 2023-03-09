@@ -2,6 +2,7 @@ create table if not exists check_in (
     id identity not null,
     customer_account_id varchar(100) not null,
     sequence varchar(200) not null,
+    type varchar(100) not null,
     number_of_persons int not null,
     notes varchar(200),
     created_on datetime default current_timestamp,
@@ -11,10 +12,11 @@ create table if not exists check_in (
     active_sw boolean default true,
     version int default 0,
     constraint pk_engagement_check_in primary key (id),
-    constraint uq_engagement_check_in_customer_account_id_sequence_created_on unique (customer_account_id, sequence, created_on)
+    constraint uq_engagement_check_in_customer_account_id_sequence_created_on unique (customer_account_id, sequence, type, created_on)
 );
 create index if not exists idx_engagement_check_in_customer_account_id on check_in(customer_account_id);
 create index if not exists idx_engagement_check_in_sequence on check_in(sequence);
+create index if not exists idx_engagement_check_in_type on check_in(type);
 alter table check_in alter column id restart with 1;
 
 create table if not exists walk_in (

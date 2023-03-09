@@ -40,7 +40,7 @@ public class EngagementServiceHelper<T extends CheckInForm, U extends CheckInVo,
         this.checkInBeanFactory = checkInBeanFactory;
     }
 
-    public List<CheckInVo> checkInEntity2DetailedVo(List<? extends CheckInEntity> checkInEntityList) {
+    /*public List<CheckInVo> checkInEntity2DetailedVo(List<? extends CheckInEntity> checkInEntityList) {
         List<CheckInVo> checkInDetailsList = new LinkedList<>();
         if(checkInEntityList != null && !checkInEntityList.isEmpty()) {
             for(CheckInEntity entity : checkInEntityList) {
@@ -49,15 +49,15 @@ public class EngagementServiceHelper<T extends CheckInForm, U extends CheckInVo,
             }
         }
         return checkInDetailsList;
-    }
+    }*/
 
-    public CheckInVo checkInEntity2DetailedVo(CheckInEntity checkInEntity) {
-        Optional<? extends CheckInEntity2VoConverter> optionalCheckInEntity2VoConverter = this.checkInBeanFactory.getCheckInEntity2VoConverter("");
+    public Optional<? extends CheckInVo> checkInEntity2DetailedVo(CheckInEntity checkInEntity) {
+        Optional<? extends CheckInEntity2VoConverter> optionalCheckInEntity2VoConverter = this.checkInBeanFactory.getCheckInEntity2VoConverter(checkInEntity.getType().name());
         CheckInEntity2VoConverter checkInEntity2VoConverter = optionalCheckInEntity2VoConverter.get();
         if(checkInEntity != null) {
-            CheckInVo vo = checkInEntity2VoConverter.convert(checkInEntity);
-            log.debug("Converting {} to {}", checkInEntity, vo);
-            return vo;
+            Optional<? extends CheckInVo> optionalCheckInVo = Optional.of(checkInEntity2VoConverter.convert(checkInEntity));
+            log.debug("Converting {} to {}", checkInEntity, optionalCheckInVo.get());
+            return optionalCheckInVo;
         }
         throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "checkIn entity is null" });
     }

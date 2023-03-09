@@ -1,6 +1,8 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.data;
 
 import com.teenthofabud.core.common.data.entity.TOABBaseEntity;
+import com.teenthofabud.restaurant.solution.engagement.checkin.constants.CheckInType;
+import com.teenthofabud.restaurant.solution.engagement.checkin.converter.CheckInTypeConverter;
 import com.teenthofabud.restaurant.solution.engagement.tableallocation.data.TableAllocationEntity;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -49,6 +51,10 @@ public class CheckInEntity extends TOABBaseEntity implements Comparable<CheckInE
     //private List<CheckInHistoryDocument> statusHistory;
     @ToString.Include
     private String notes;
+
+    @ToString.Include
+    @Convert(converter = CheckInTypeConverter.class)
+    private CheckInType type;
 
     @OneToMany(mappedBy = "checkIn", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TableAllocationEntity> tableAllocations;

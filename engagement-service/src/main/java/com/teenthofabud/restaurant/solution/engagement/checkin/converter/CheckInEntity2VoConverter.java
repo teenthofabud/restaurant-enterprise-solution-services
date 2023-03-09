@@ -62,6 +62,7 @@ public abstract class CheckInEntity2VoConverter<T extends CheckInEntity, U exten
         TOABRequestContextHolder.setCascadeLevelContext(TOABCascadeLevel.TWO);
         super.expandAuditFields(entity, vo);
         TOABRequestContextHolder.clearCascadeLevelContext();
+        Object f = this.convertChild((T) entity, (U) vo);
         U child = this.convertChild((T) entity, (U) vo);
         log.debug("Converted {} to {} ", entity, child);
         return child;

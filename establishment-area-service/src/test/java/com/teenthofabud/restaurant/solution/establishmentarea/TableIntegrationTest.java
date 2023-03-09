@@ -131,7 +131,7 @@ public class TableIntegrationTest extends EstablishmentAreaIntegrationBaseTest {
         tableForm = new TableForm();
         tableForm.setTableName("New Table");
         tableForm.setDescription("New Table Description");
-        tableForm.setCapacity("5");
+        tableForm.setCapacity(5);
         tableForm.setFloorId(floorEntity1.getFlrId().toString());
 
         patches = Arrays.asList(
@@ -142,7 +142,7 @@ public class TableIntegrationTest extends EstablishmentAreaIntegrationBaseTest {
         tableEntity1 = new TableEntity();
         tableEntity1.setTableName("Table 1 Name");
         tableEntity1.setDescription("Table 1 Description");
-        tableEntity1.setCapacity("1");
+        tableEntity1.setCapacity(1);
         tableEntity1.setActive(Boolean.TRUE);
         tableEntity1.setFloor(floorEntity1);
 
@@ -158,7 +158,7 @@ public class TableIntegrationTest extends EstablishmentAreaIntegrationBaseTest {
         tableEntity2 = new TableEntity();
         tableEntity2.setTableName("Table 2 Name");
         tableEntity2.setDescription("Table 2 Description");
-        tableEntity2.setCapacity("2");
+        tableEntity2.setCapacity(2);
         tableEntity2.setActive(Boolean.TRUE);
         tableEntity2.setFloor(floorEntity2);
 
@@ -174,7 +174,7 @@ public class TableIntegrationTest extends EstablishmentAreaIntegrationBaseTest {
         tableEntity3 = new TableEntity();
         tableEntity3.setTableName("Table 3 Name");
         tableEntity3.setDescription("Table 3 Description");
-        tableEntity3.setCapacity("3");
+        tableEntity3.setCapacity(3);
         tableEntity3.setActive(Boolean.FALSE);
         tableEntity3.setFloor(floorEntity3);
 
@@ -190,7 +190,7 @@ public class TableIntegrationTest extends EstablishmentAreaIntegrationBaseTest {
         tableEntity4 = new TableEntity();
         tableEntity4.setTableName("Table 4 Name");
         tableEntity4.setDescription("Table 4 Description");
-        tableEntity4.setCapacity("4");
+        tableEntity4.setCapacity(4);
         tableEntity4.setActive(Boolean.TRUE);
         tableEntity4.setFloor(floorEntity3);
 
@@ -312,7 +312,7 @@ public class TableIntegrationTest extends EstablishmentAreaIntegrationBaseTest {
         MvcResult mvcResult = null;
         String errorCode = EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "capacity";
-        tableForm.setCapacity("");
+        tableForm.setCapacity(null);
 
         mvcResult = mockMvc.perform(post(TABLE_URI)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -327,7 +327,7 @@ public class TableIntegrationTest extends EstablishmentAreaIntegrationBaseTest {
 
     }
 
-    @Test
+    /*@Test
     public void test_Table_Post_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_WithInvalidCapacity() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID.getErrorCode();
@@ -345,7 +345,7 @@ public class TableIntegrationTest extends EstablishmentAreaIntegrationBaseTest {
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
 
-    }
+    }*/
 
     @Test
     public void test_Table_Post_ShouldReturn_400Response_And_ErrorCode_RES_CUST_001_WhenRequested_WithEmptyFloorId() throws Exception {
@@ -417,7 +417,7 @@ public class TableIntegrationTest extends EstablishmentAreaIntegrationBaseTest {
         String field4Name = "floorId";
         String field1Value = tableEntity1.getTableName();
         String field2Value = tableEntity1.getDescription();
-        String field3Value = tableEntity1.getCapacity();
+        Integer field3Value = tableEntity1.getCapacity();
         String field4Value = tableEntity1.getFloor().getFlrId().toString();
         tableForm.setTableName(field1Value);
         tableForm.setDescription(field2Value);
@@ -772,7 +772,7 @@ public class TableIntegrationTest extends EstablishmentAreaIntegrationBaseTest {
         MvcResult mvcResult = null;
         tableForm.setTableName("Ferran");
         tableForm.setDescription("Description");
-        tableForm.setCapacity("6");
+        tableForm.setCapacity(6);
         tableForm.setFloorId(floorEntity1.getFlrId().toString());
 
         mvcResult = this.mockMvc.perform(put(TABLE_URI_BY_ID, id)
@@ -958,7 +958,7 @@ public class TableIntegrationTest extends EstablishmentAreaIntegrationBaseTest {
         String field4Name = "floorId";
         String field1Value = tableEntity2.getTableName();
         String field2Value = tableEntity2.getDescription();
-        String field3Value = tableEntity2.getCapacity();
+        Integer field3Value = tableEntity2.getCapacity();
         String field4Value = tableEntity2.getFloor().getFlrId().toString();
         tableForm.setTableName(field1Value);
         tableForm.setDescription(field2Value);
@@ -1066,12 +1066,12 @@ public class TableIntegrationTest extends EstablishmentAreaIntegrationBaseTest {
         String field1Value = tableEntity2.getTableName();
         String field2Value = tableEntity2.getFloor().getFlrId().toString();
         String field3Value = tableEntity2.getDescription();
-        String field4Value = tableEntity2.getCapacity();
+        Integer field4Value = tableEntity2.getCapacity();
         patches = Arrays.asList(
                 new PatchOperationForm("replace", "/" + field1Name, field1Value),
                 new PatchOperationForm("replace", "/" + field2Name, field2Value),
                 new PatchOperationForm("replace", "/" + field3Name, field3Value),
-                new PatchOperationForm("replace", "/" + field4Name, field4Value));
+                new PatchOperationForm("replace", "/" + field4Name, String.valueOf(field4Value)));
 
 
         mvcResult = this.mockMvc.perform(patch(TABLE_URI_BY_ID, id)

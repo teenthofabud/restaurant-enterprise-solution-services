@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface TableAllocationRepository<T extends TableAllocationEntity> extends TOABSimpleEntityBaseRepository<T> {
+public interface TableAllocationRepository extends TOABSimpleEntityBaseRepository<TableAllocationEntity> {
 
     public List<TableAllocationEntity> findByCheckInId(String checkInId);
 

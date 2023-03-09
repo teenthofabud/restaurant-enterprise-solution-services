@@ -36,6 +36,10 @@ public abstract class CheckInDto2EntityConverter<T extends CheckInDto, U extends
             log.debug("CheckInDto.status is valid");
         }*/
 
+        /**
+         * No update against type attribute of CheckIn possible
+         */
+
         Optional<String> optNoOfPersons = dto.getNoOfPersons();
         if(!getFieldsToEscape().contains("noOfPersons") && optNoOfPersons.isPresent()) {
             actualEntity.setNoOfPersons(Integer.parseInt(optNoOfPersons.get()));

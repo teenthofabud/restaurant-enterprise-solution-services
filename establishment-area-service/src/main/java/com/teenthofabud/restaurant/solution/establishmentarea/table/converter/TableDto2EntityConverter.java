@@ -60,7 +60,7 @@ public class TableDto2EntityConverter implements ComparativePatchConverter<Table
 
         Optional<String> optCapacity = dto.getCapacity();
         if(!fieldsToEscape.contains("capacity") && optCapacity.isPresent()) {
-            actualEntity.setCapacity(optCapacity.get());
+            actualEntity.setCapacity(Integer.parseInt(optCapacity.get()));
             changeSW[i++] = true;
             log.debug("TableDto.capacity is valid");
         }

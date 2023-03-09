@@ -1,9 +1,11 @@
-package com.teenthofabud.restaurant.solution.engagement;
+package com.teenthofabud.restaurant.solution.engagement.checkin;
 
 import com.teenthofabud.core.common.constant.TOABCascadeLevel;
 import com.teenthofabud.core.common.data.form.PatchOperationForm;
 import com.teenthofabud.core.common.data.vo.ErrorVo;
 import com.teenthofabud.core.common.error.TOABErrorCode;
+import com.teenthofabud.restaurant.solution.engagement.EngagementIntegrationBaseTest;
+import com.teenthofabud.restaurant.solution.engagement.EngagementServiceApplication;
 import com.teenthofabud.restaurant.solution.engagement.checkin.constants.CheckInType;
 import com.teenthofabud.restaurant.solution.engagement.checkin.converter.ReservationEntity2VoConverter;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.ReservationEntity;
@@ -123,7 +125,7 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
 
     private List<PatchOperationForm> patches;
 
-    private AccountVo accountVo(String id, String firstName, String lastName, boolean active) {
+    /*private AccountVo accountVo(String id, String firstName, String lastName, boolean active) {
         AccountVo accountVo = new AccountVo();
         accountVo.setActive(active);
         accountVo.setId(id);
@@ -142,7 +144,7 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
         reservationEntity.setAccountId(accountId);
         reservationEntity.setActive(active);
         return reservationEntity;
-    }
+    }*/
 
     @BeforeEach
     private void init() {
@@ -209,11 +211,21 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
 
     @AfterEach
     private void destroy() {
-        reservationRepository.deleteById(reservationEntity1.getId());
-        reservationRepository.deleteById(reservationEntity2.getId());
-        reservationRepository.deleteById(reservationEntity3.getId());
-        reservationRepository.deleteById(reservationEntity4.getId());
-        reservationRepository.deleteById(reservationEntity5.getId());
+        if(reservationEntity1 != null && reservationEntity1.getId() != null) {
+            reservationRepository.deleteById(reservationEntity1.getId());
+        }
+        if(reservationEntity2 != null && reservationEntity2.getId() != null) {
+            reservationRepository.deleteById(reservationEntity2.getId());
+        }
+        if(reservationEntity3 != null && reservationEntity3.getId() != null) {
+            reservationRepository.deleteById(reservationEntity3.getId());
+        }
+        if(reservationEntity4 != null && reservationEntity4.getId() != null) {
+            reservationRepository.deleteById(reservationEntity4.getId());
+        }
+        if(reservationEntity5 != null && reservationEntity5.getId() != null) {
+            reservationRepository.deleteById(reservationEntity5.getId());
+        }
     }
 
     @Test

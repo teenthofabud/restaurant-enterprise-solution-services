@@ -1,5 +1,6 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.converter;
 
+import com.teenthofabud.restaurant.solution.engagement.checkin.constants.CheckInType;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInEntity;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInForm;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,9 @@ public abstract class CheckInForm2EntityConverter<T extends CheckInForm, U exten
         }
         if(!getFieldsToEscape().contains("notes")) {
             entity.setNotes(form.getNotes());
+        }
+        if(!getFieldsToEscape().contains("type")) {
+            entity.setType(CheckInType.valueOf(form.getType()));
         }
         entity.setActive(Boolean.TRUE);
         log.debug("Converting {} to {}", form, entity);

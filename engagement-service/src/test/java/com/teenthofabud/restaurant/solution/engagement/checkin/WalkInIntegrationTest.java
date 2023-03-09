@@ -1,9 +1,11 @@
-package com.teenthofabud.restaurant.solution.engagement;
+package com.teenthofabud.restaurant.solution.engagement.checkin;
 
 import com.teenthofabud.core.common.constant.TOABCascadeLevel;
 import com.teenthofabud.core.common.data.form.PatchOperationForm;
 import com.teenthofabud.core.common.data.vo.ErrorVo;
 import com.teenthofabud.core.common.error.TOABErrorCode;
+import com.teenthofabud.restaurant.solution.engagement.EngagementIntegrationBaseTest;
+import com.teenthofabud.restaurant.solution.engagement.EngagementServiceApplication;
 import com.teenthofabud.restaurant.solution.engagement.checkin.constants.CheckInType;
 import com.teenthofabud.restaurant.solution.engagement.checkin.converter.WalkInEntity2VoConverter;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.WalkInEntity;
@@ -99,7 +101,7 @@ public class WalkInIntegrationTest extends EngagementIntegrationBaseTest {
 
     private List<PatchOperationForm> patches;
 
-    private AccountVo accountVo(String id, String firstName, String lastName, boolean active) {
+    /*private AccountVo accountVo(String id, String firstName, String lastName, boolean active) {
         AccountVo accountVo = new AccountVo();
         accountVo.setActive(active);
         accountVo.setId(id);
@@ -119,19 +121,7 @@ public class WalkInIntegrationTest extends EngagementIntegrationBaseTest {
         walkInEntity.setAccountId(accountId);
         walkInEntity.setActive(active);
         return walkInEntity;
-    }
-
-    private String name() {
-        return String.join(" ", "Name", UUID.randomUUID().toString());
-    }
-
-    private String phoneNumber() {
-        return String.valueOf(System.currentTimeMillis());
-    }
-
-    private String emailId() {
-        return String.join("@", String.valueOf(System.nanoTime()), "email.com");
-    }
+    }*/
 
     @BeforeEach
     private void init() {
@@ -200,11 +190,21 @@ public class WalkInIntegrationTest extends EngagementIntegrationBaseTest {
 
     @AfterEach
     private void destroy() {
-        walkInRepository.deleteById(walkInEntity1.getId());
-        walkInRepository.deleteById(walkInEntity2.getId());
-        walkInRepository.deleteById(walkInEntity3.getId());
-        walkInRepository.deleteById(walkInEntity4.getId());
-        walkInRepository.deleteById(walkInEntity5.getId());
+        if(walkInEntity1 != null && walkInEntity1.getId() != null) {
+            walkInRepository.deleteById(walkInEntity1.getId());
+        }
+        if(walkInEntity2 != null && walkInEntity2.getId() != null) {
+            walkInRepository.deleteById(walkInEntity2.getId());
+        }
+        if(walkInEntity3 != null && walkInEntity3.getId() != null) {
+            walkInRepository.deleteById(walkInEntity3.getId());
+        }
+        if(walkInEntity4 != null && walkInEntity4.getId() != null) {
+            walkInRepository.deleteById(walkInEntity4.getId());
+        }
+        if(walkInEntity5 != null && walkInEntity5.getId() != null) {
+            walkInRepository.deleteById(walkInEntity5.getId());
+        }
     }
 
     @Test

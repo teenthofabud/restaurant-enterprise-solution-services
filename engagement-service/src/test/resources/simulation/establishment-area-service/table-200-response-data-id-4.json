@@ -1,5 +1,6 @@
 {
-  "tableId":"3",
+  "tableId":"4",
   "active":true,
-  "tableName":"Table 3"
+  "tableName":"Table 4",
+  "capacity": 4
 }

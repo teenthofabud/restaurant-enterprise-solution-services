@@ -55,7 +55,7 @@ public abstract class CheckInDtoValidator implements Validator {
             errors.rejectValue("noOfPersons", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             log.debug("CheckInDto.noOfPersons is invalid");
             return;
-        } else if(!getFieldsToEscape().contains("status") && optNoOfPersons.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optNoOfPersons.get()))) {
+        } else if(!getFieldsToEscape().contains("noOfPersons") && optNoOfPersons.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optNoOfPersons.get()))) {
             String noOfPersons = optNoOfPersons.get();
             try {
                 Integer.parseInt(noOfPersons);
@@ -65,6 +65,11 @@ public abstract class CheckInDtoValidator implements Validator {
                 return;
             }
         }
+
+        /**
+         * No update against type attribute of CheckIn possible
+         */
+
 
         /*Optional<String> optStatus = dto.getStatus();
         if(!getFieldsToEscape().contains("status") && optStatus.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optStatus.get()))) {

@@ -30,7 +30,7 @@ public class TableEntity extends TOABBaseEntity implements Comparable<TableEntit
 	private String description;
 
 	@Column(name = "capacity")
-	private String capacity;
+	private Integer capacity;
 	
 	@ManyToOne(targetEntity = FloorEntity.class, fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
 	@JoinColumn(name = "floor_id")
