@@ -1,7 +1,7 @@
 package com.teenthofabud.restaurant.solution.cookbook.recipe.converter;
 
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.data.CuisineEntity;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.repository.CuisineRepository;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.repository.CuisineJPARepository;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeEntity;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeForm;
 import lombok.extern.slf4j.Slf4j;
@@ -24,10 +24,10 @@ public class RecipeForm2EntityConverter implements Converter<RecipeForm, RecipeE
         this.fieldsToEscape = fieldsToEscape;
     }
 
-    private CuisineRepository cuisineRepository;
+    private CuisineJPARepository cuisineRepository;
 
     @Autowired
-    public void setCuisineRepository(CuisineRepository cuisineRepository) {
+    public void setCuisineRepository(CuisineJPARepository cuisineRepository) {
         this.cuisineRepository = cuisineRepository;
     }
 

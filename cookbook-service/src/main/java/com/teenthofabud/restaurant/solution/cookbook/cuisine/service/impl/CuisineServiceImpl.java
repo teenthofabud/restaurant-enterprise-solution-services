@@ -16,7 +16,7 @@ import com.teenthofabud.restaurant.solution.cookbook.cuisine.converter.CuisineFo
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.data.*;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.mapper.CuisineEntitySelfMapper;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.mapper.CuisineForm2EntityMapper;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.repository.CuisineRepository;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.repository.CuisineJPARepository;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.service.CuisineService;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.validator.CuisineDtoValidator;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.validator.CuisineFormRelaxedValidator;
@@ -25,7 +25,6 @@ import com.teenthofabud.restaurant.solution.cookbook.error.CookbookErrorCode;
 import com.teenthofabud.restaurant.solution.cookbook.utils.CookbookServiceHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Component;
@@ -36,11 +35,8 @@ import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 
 @Component
@@ -58,7 +54,7 @@ public class CuisineServiceImpl implements CuisineService {
     private CuisineFormValidator formValidator;
     private CuisineFormRelaxedValidator relaxedFormValidator;
     private CuisineDtoValidator dtoValidator;
-    private CuisineRepository repository;
+    private CuisineJPARepository repository;
     private CookbookServiceHelper cookbookServiceHelper;
     private TOABBaseService toabBaseService;
     private ObjectMapper om;
@@ -114,7 +110,7 @@ public class CuisineServiceImpl implements CuisineService {
     }
 
     @Autowired
-    public void setRepository(CuisineRepository repository) {
+    public void setRepository(CuisineJPARepository repository) {
         this.repository = repository;
     }
 

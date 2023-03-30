@@ -75,7 +75,7 @@ public class TableAllocationEntity2VoConverter extends TOABBaseEntity2VoConverte
             case TWO:
                 if(!fieldsToEscape.contains("tableId") && fieldName.compareTo("tableId") == 0) {
                     Callable<TableVo> tableEntity2VoConversion = () -> {
-                        TableVo tableVo = establishmentAreaServiceClient.getTableDetailsById(entity.getTableId());
+                        TableVo tableVo = establishmentAreaServiceClient.getTableDetailsById(entity.getTableId(), TOABCascadeLevel.TWO.getLevelCode());
                         return tableVo;
                     };
                     String tName = "tableEntity2VoConversion";
@@ -102,9 +102,9 @@ public class TableAllocationEntity2VoConverter extends TOABBaseEntity2VoConverte
                     ExecutorService executorService = Executors.newFixedThreadPool(1, new CustomizableThreadFactory("checkInEntity2VoConversion-"));
                     Future<CheckInVo> checkInEntity2VoConversionResult = executorService.submit(checkInEntity2VoConversion);
                     try {
-                        CheckInVo CheckInVo = checkInEntity2VoConversionResult.get();
-                        vo.setCheckIn(CheckInVo);
-                        log.debug("Retrieved {} for CheckInId: {}", CheckInVo, entity.getCheckIn().getId());
+                        CheckInVo checkInVo = checkInEntity2VoConversionResult.get();
+                        vo.setCheckIn(checkInVo);
+                        log.debug("Retrieved {} for checkInId: {}", checkInVo, entity.getCheckIn().getId());
                     } catch (InterruptedException | ExecutionException e) {
                         log.error("Unable to perform checkInEntity2VoConversion", e);
                         e.printStackTrace();
@@ -116,7 +116,7 @@ public class TableAllocationEntity2VoConverter extends TOABBaseEntity2VoConverte
             default:
                 vo.setTableId(entity.getTableId());
                 vo.setCheckInId(entity.getCheckIn().getId().toString());
-                log.debug("only first level cascaded for booking over tableId");
+                log.debug("only first level cascaded for booking over tableId: {}", entity.getTableId());
                 break;
         }
     }

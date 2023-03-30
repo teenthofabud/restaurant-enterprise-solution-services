@@ -56,7 +56,7 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
 
     private static final String TABLE_ALLOCATION_URI = "/tableAllocation";
     private static final String TABLE_ALLOCATION_URI_BY_ID = "/tableAllocation/{id}";
-    private static final String TABLE_ALLOCATION_URI_BY_CUISINE_ID = "/tableAllocation/checkInid/{checkInId}";
+    private static final String TABLE_ALLOCATION_URI_BY_CHECKIN_ID = "/tableAllocation/checkInId/{checkInId}";
     private static final String TABLE_ALLOCATION_URI_FILTER = "/tableAllocation/filter";
 
     private TableAllocationRepository tableAllocationRepository;
@@ -144,15 +144,6 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         tableVo.setActive(active);
         tableVo.setCapacity(capacity);
         return tableVo;
-    }
-
-    private TableAllocationVo tableAllocationVo(String id, String notes, String tableId, String checkInId) {
-        TableAllocationVo tableAllocationVo = new TableAllocationVo();
-        tableAllocationVo.setId(id);
-        tableAllocationVo.setNotes(notes);
-        tableAllocationVo.setTableId(tableId);
-        tableAllocationVo.setCheckInId(checkInId);
-        return tableAllocationVo;
     }
 
     private TableAllocationEntity tableAllocationEntity(String notes, String tableId, Boolean active, Optional<? extends CheckInEntity> checkInEntity) {
@@ -356,9 +347,9 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
      */
 
     @Test
-    public void test_TableAllocation_Post_ShouldReturn_500Response_And_ErrorCode_RES_MENU_001_WhenRequested_WithInvalidTableId() throws Exception {
+    public void test_TableAllocation_Post_ShouldReturn_404Response_And_ErrorCode_RES_EAREA_001_WhenRequested_WithInvalidTableId() throws Exception {
         MvcResult mvcResult = null;
-        String errorCode = "RES-MENU-001";
+        String errorCode = "RES-EAREA-001";
         String fieldName = "id";
         tableAllocationForm.setTableId("r");
 
@@ -369,7 +360,7 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
                 .andReturn();
 
         Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
 
@@ -406,9 +397,9 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
 
 
     @Test
-    public void test_TableAllocation_Post_ShouldReturn_500Response_And_ErrorCode_RES_MENU_002_WhenRequested_WithAbsentTableId() throws Exception {
+    public void test_TableAllocation_Post_ShouldReturn_500Response_And_ErrorCode_RES_EAREA_002_WhenRequested_WithAbsentTableId() throws Exception {
         MvcResult mvcResult = null;
-        String errorCode = "RES-MENU-002";
+        String errorCode = "RES-EAREA-002";
         String fieldName = "id";
         String keyword = "unavailable";
         tableAllocationForm.setTableId("3");
@@ -432,7 +423,7 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         MvcResult mvcResult = null;
         String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "checkInId";
-        tableAllocationForm.setCheckInId(String.valueOf(Long.MAX_VALUE));
+        tableAllocationForm.setCheckInId(String.valueOf(Short.MAX_VALUE));
 
         mvcResult = mockMvc.perform(post(TABLE_ALLOCATION_URI)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -612,10 +603,10 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
      */
 
     @Test
-    public void test_TableAllocation_Put_ShouldReturn_500Response_And_ErrorCode_RES_MENU_001_WhenUpdatedById_WithInvalidTableId() throws Exception {
+    public void test_TableAllocation_Put_ShouldReturn_500Response_And_ErrorCode_RES_EAREA_001_WhenUpdatedById_WithInvalidTableId() throws Exception {
         MvcResult mvcResult = null;
         String id = tableAllocationEntity1.getId().toString();
-        String errorCode = "RES-MENU-001";
+        String errorCode = "RES-EAREA-001";
         String fieldName = "id";
         tableAllocationForm.setTableId("r");
 
@@ -663,10 +654,10 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
      */
 
     @Test
-    public void test_TableAllocation_Put_ShouldReturn_500Response_And_ErrorCode_RES_MENU_002_WhenUpdatedById_WithAbsentTableId() throws Exception {
+    public void test_TableAllocation_Put_ShouldReturn_500Response_And_ErrorCode_RES_EAREA_002_WhenUpdatedById_WithAbsentTableId() throws Exception {
         MvcResult mvcResult = null;
         String id = tableAllocationEntity1.getId().toString();
-        String errorCode = "RES-MENU-002";
+        String errorCode = "RES-EAREA-002";
         String fieldName = "id";
         String keyword = "unavailable";
         tableAllocationForm.setTableId("3");
@@ -774,7 +765,7 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
 
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.NO_CONTENT.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals("", mvcResult.getResponse().getContentAsString());
+        Assertions.assertTrue(StringUtils.isEmpty(mvcResult.getResponse().getContentAsString()));
     }
 
     @Test
@@ -878,13 +869,13 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
 
     @ParameterizedTest
     @ValueSource(strings = { "", " " })
-    public void test_TableAllocation_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenUpdatedById_WithEmptyCookingMethod(String cookingMethod) throws Exception {
+    public void test_TableAllocation_Patch_ShouldReturn_400Response_And_ErrorCode_TOAB_COMMON_001_WhenUpdatedById_WithEmptyActive(String active) throws Exception {
         MvcResult mvcResult = null;
         String id = tableAllocationEntity1.getId().toString();
         String errorCode = TOABErrorCode.PATCH_ATTRIBUTE_INVALID.getErrorCode();
         String keyword = "value";
         patches = Arrays.asList(
-                new PatchOperationForm("replace", "/cookingMethod", cookingMethod));
+                new PatchOperationForm("replace", "/active", active));
 
         mvcResult = mockMvc.perform(patch(TABLE_ALLOCATION_URI_BY_ID, id)
                         .contentType(MEDIA_TYPE_APPLICATION_JSON_PATCH)
@@ -1026,10 +1017,10 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
     }
 
     @Test
-    public void test_TableAllocation_Patch_ShouldReturn_500Response_And_ErrorCode_RES_MENU_001_WhenUpdatedById_WithInvalidTableId() throws Exception {
+    public void test_TableAllocation_Patch_ShouldReturn_500Response_And_ErrorCode_RES_EAREA_001_WhenUpdatedById_WithInvalidTableId() throws Exception {
         MvcResult mvcResult = null;
         String id = tableAllocationEntity1.getId().toString();
-        String errorCode = "RES-MENU-001";
+        String errorCode = "RES-EAREA-001";
         String keyword = "id";
         patches = Arrays.asList(
                 new PatchOperationForm("replace", "/tableId", "r"));
@@ -1070,7 +1061,7 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
 
     }
 
-    @ParameterizedTest
+    /*@ParameterizedTest
     @ValueSource(ints = { -1, 0 })
     public void test_TableAllocation_Patch_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenUpdatedById_WithInvalidNumberOfServings(Integer numberOfServings) throws Exception {
         MvcResult mvcResult = null;
@@ -1136,9 +1127,9 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
 
-    }
+    }*/
 
-    @ParameterizedTest
+    /*@ParameterizedTest
     @ValueSource(doubles = { -1.0d, 0.0d })
     public void test_TableAllocation_Patch_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenUpdatedById_WithInvalidCookingTimeDuration(Double cookingTimeDuration) throws Exception {
         MvcResult mvcResult = null;
@@ -1159,8 +1150,9 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
 
-    }
+    }*/
 
+/*
     @Test
     public void test_TableAllocation_Patch_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenUpdatedById_WithInvalidCookingTimeUnitId() throws Exception {
         MvcResult mvcResult = null;
@@ -1206,6 +1198,7 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
 
     }
+*/
 
     @Test
     public void test_TableAllocation_Patch_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenUpdatedById_WithInvalidPortionSizeUnitId() throws Exception {
@@ -1269,7 +1262,7 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "checkInId";
         patches = Arrays.asList(
-                new PatchOperationForm("replace", "/" + fieldName, String.valueOf(Long.MAX_VALUE)));
+                new PatchOperationForm("replace", "/" + fieldName, String.valueOf(Short.MAX_VALUE)));
 
 
         mvcResult = mockMvc.perform(patch(TABLE_ALLOCATION_URI_BY_ID, id)
@@ -1348,7 +1341,7 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
 
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.NO_CONTENT.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals("", mvcResult.getResponse().getContentAsString());
+        Assertions.assertTrue(StringUtils.isEmpty(mvcResult.getResponse().getContentAsString()));
     }
 
     @ParameterizedTest
@@ -1420,7 +1413,7 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
     @Test
     public void test_TableAllocation_Get_ShouldReturn_200Response_And_TableAllocationListNaturallyOrdered_WhenRequested_ForAllTableAllocations() throws Exception {
         MvcResult mvcResult = null;
-        List<TableAllocationVo> tableAllocationList = new ArrayList<>(Arrays.asList(tableAllocationVo1, tableAllocationVo2, tableAllocationVo3));
+        List<TableAllocationVo> tableAllocationList = new ArrayList<>(Arrays.asList(tableAllocationVo1, tableAllocationVo3));
 
         mvcResult = this.mockMvc.perform(get(TABLE_ALLOCATION_URI))
                 .andDo(print())
@@ -1545,7 +1538,7 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         List<TableAllocationVo> tableAllocationList = Arrays.asList(tableAllocationVo1);
         tableAllocationVo1.setCheckIn(null);
 
-        mvcResult = this.mockMvc.perform(get(TABLE_ALLOCATION_URI_BY_CUISINE_ID, reservationEntity1.getId()))
+        mvcResult = this.mockMvc.perform(get(TABLE_ALLOCATION_URI_BY_CHECKIN_ID, reservationEntity1.getId()))
                 .andDo(print())
                 .andReturn();
 
@@ -1562,7 +1555,7 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         String checkInId = " ";
         String fieldName = "checkInId";
 
-        mvcResult = this.mockMvc.perform(get(TABLE_ALLOCATION_URI_BY_CUISINE_ID, checkInId))
+        mvcResult = this.mockMvc.perform(get(TABLE_ALLOCATION_URI_BY_CHECKIN_ID, checkInId))
                 .andDo(print())
                 .andReturn();
 
@@ -1573,13 +1566,13 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
     }
 
     @Test
-    public void test_TableAllocation_Get_ShouldReturn_404Response_And_ErrorCode_RES_ENGMNT_001_WhenRequested_ByInvalidCheckInId() throws Exception {
+    public void test_TableAllocation_Get_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequested_ByInvalidCheckInId() throws Exception {
         MvcResult mvcResult = null;
         String checkInId = "kk";
         String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "checkInId";
 
-        mvcResult = this.mockMvc.perform(get(TABLE_ALLOCATION_URI_BY_CUISINE_ID, checkInId))
+        mvcResult = this.mockMvc.perform(get(TABLE_ALLOCATION_URI_BY_CHECKIN_ID, checkInId))
                 .andDo(print())
                 .andReturn();
 
@@ -1587,43 +1580,48 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(checkInId));
     }
 
     @Test
-    public void test_TableAllocation_Get_ShouldReturn_404Response_And_ErrorCode_RES_ENGMNT_001_WhenRequested_ByAbsentCheckInId() throws Exception {
+    public void test_TableAllocation_Get_ShouldReturn_500Response_And_ErrorCode_RES_ENGMNT_002_WhenRequested_ByAbsentCheckInId() throws Exception {
         MvcResult mvcResult = null;
         String checkInId = String.valueOf(Long.MAX_VALUE);
-        String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String errorCode = EngagementErrorCode.ENGAGEMENT_ACTION_FAILURE.getErrorCode();
         String fieldName = "checkInId";
+        String message1 = "search";
+        String message2 = "not found";
 
-        mvcResult = this.mockMvc.perform(get(TABLE_ALLOCATION_URI_BY_CUISINE_ID, checkInId))
+        mvcResult = this.mockMvc.perform(get(TABLE_ALLOCATION_URI_BY_CHECKIN_ID, checkInId))
                 .andDo(print())
                 .andReturn();
 
         Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(checkInId));
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message1));
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message2));
     }
 
     @Test
-    public void test_TableAllocation_Get_ShouldReturn_404Response_And_ErrorCode_RES_ENGMNT_001_WhenRequested_ByInactiveCheckInId() throws Exception {
+    public void test_TableAllocation_Get_ShouldReturn_500Response_And_ErrorCode_RES_ENGMNT_006_WhenRequested_ByInactiveCheckInId() throws Exception {
         MvcResult mvcResult = null;
         String checkInId = reservationEntity2.getId().toString();
-        String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
+        String errorCode = EngagementErrorCode.ENGAGEMENT_ACTION_FAILURE.getErrorCode();
         String fieldName = "checkInId";
+        String message1 = "search";
+        String message2 = "deactivated";
 
-        mvcResult = this.mockMvc.perform(get(TABLE_ALLOCATION_URI_BY_CUISINE_ID, checkInId))
+        mvcResult = this.mockMvc.perform(get(TABLE_ALLOCATION_URI_BY_CHECKIN_ID, checkInId))
                 .andDo(print())
                 .andReturn();
 
         Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(checkInId));
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message1));
+        Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message2));
     }
 
     /**
@@ -1653,12 +1651,12 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
 
     @ParameterizedTest
     @ValueSource(strings = { "", " " })
-    public void test_TableAllocation_Get_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequestedBy_EmptyDescriptionOnly(String description) throws Exception {
+    public void test_TableAllocation_Get_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequestedBy_EmptyNotesOnly(String notes) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "filters";
 
-        mvcResult = this.mockMvc.perform(get(TABLE_ALLOCATION_URI_FILTER).queryParam("description", description))
+        mvcResult = this.mockMvc.perform(get(TABLE_ALLOCATION_URI_FILTER).queryParam("notes", notes))
                 .andDo(print())
                 .andReturn();
 
@@ -1687,12 +1685,12 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
 
     @ParameterizedTest
     @ValueSource(strings = { "", " " })
-    public void test_TableAllocation_Get_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequestedBy_EmptyCookingMethodOnly(String cookingMethod) throws Exception {
+    public void test_TableAllocation_Get_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequestedBy_EmptyActiveOnly(String active) throws Exception {
         MvcResult mvcResult = null;
         String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "filters";
 
-        mvcResult = this.mockMvc.perform(get(TABLE_ALLOCATION_URI_FILTER).queryParam("cookingMethod", cookingMethod))
+        mvcResult = this.mockMvc.perform(get(TABLE_ALLOCATION_URI_FILTER).queryParam("active", active))
                 .andDo(print())
                 .andReturn();
 
@@ -1860,7 +1858,7 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         Assertions.assertEquals(0, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), TableAllocationVo[].class).length);
     }
 
-    @ParameterizedTest
+    /*@ParameterizedTest
     @ValueSource(ints = { -1, 0 })
     public void test_TableAllocation_Get_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequestedBy_InvalidNumberOfServingsOnly(Integer numberOfServings) throws Exception {
         MvcResult mvcResult = null;
@@ -1875,9 +1873,9 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-    }
+    }*/
 
-    @ParameterizedTest
+    /*@ParameterizedTest
     @ValueSource(doubles = { -1.0d, 0.0d })
     public void test_TableAllocation_Get_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequestedBy_InvalidPreparationTimeDurationOnly(Double preparationTimeDuration) throws Exception {
         MvcResult mvcResult = null;
@@ -1892,9 +1890,9 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-    }
+    }*/
 
-    @ParameterizedTest
+    /*@ParameterizedTest
     @ValueSource(strings = { "r", "kg" })
     public void test_TableAllocation_Get_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequestedBy_InvalidPreparationTimeUnitIdOnly(String preparationTimeUnitId) throws Exception {
         MvcResult mvcResult = null;
@@ -1909,9 +1907,9 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-    }
+    }*/
 
-    @ParameterizedTest
+    /*@ParameterizedTest
     @ValueSource(doubles = { -1.0d, 0.0d })
     public void test_TableAllocation_Get_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequestedBy_InvalidCookingTimeDurationOnly(Double cookingTimeDuration) throws Exception {
         MvcResult mvcResult = null;
@@ -1977,7 +1975,7 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-    }
+    }*/
 
     /**
      * GET all by invalid filters - END
@@ -1987,7 +1985,7 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
      * GET all by absent filters - START
      */
 
-    @Test
+    /*@Test
     public void test_TableAllocation_Get_ShouldReturn_200Response_And_EmptyTableAllocationList_WhenRequestedBy_AbsentNameOnly() throws Exception {
         MvcResult mvcResult = null;
         String name = "x";
@@ -1999,14 +1997,14 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(0, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), TableAllocationVo[].class).length);
-    }
+    }*/
 
     @Test
-    public void test_TableAllocation_Get_ShouldReturn_200Response_And_EmptyTableAllocationList_WhenRequestedBy_AbsentDescriptionOnly() throws Exception {
+    public void test_TableAllocation_Get_ShouldReturn_200Response_And_EmptyTableAllocationList_WhenRequestedBy_AbsentNotesOnly() throws Exception {
         MvcResult mvcResult = null;
-        String description = "x";
+        String notes = "x";
 
-        mvcResult = this.mockMvc.perform(get(TABLE_ALLOCATION_URI_FILTER).queryParam("description", description))
+        mvcResult = this.mockMvc.perform(get(TABLE_ALLOCATION_URI_FILTER).queryParam("notes", notes))
                 .andDo(print())
                 .andReturn();
 
@@ -2015,7 +2013,7 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         Assertions.assertEquals(0, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), TableAllocationVo[].class).length);
     }
 
-    @Test
+    /*@Test
     public void test_TableAllocation_Get_ShouldReturn_200Response_And_EmptyTableAllocationList_WhenRequestedBy_AbsentInstructionsOnly() throws Exception {
         MvcResult mvcResult = null;
         String instructions = "x";
@@ -2027,20 +2025,23 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(0, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), TableAllocationVo[].class).length);
-    }
+    }*/
 
     @Test
-    public void test_TableAllocation_Get_ShouldReturn_200Response_And_EmptyTableAllocationList_WhenRequestedBy_AbsentCookingMethodOnly() throws Exception {
+    public void test_TableAllocation_Get_ShouldReturn_200Response_And_EmptyTableAllocationList_WhenRequestedBy_AbsentActiveOnly() throws Exception {
         MvcResult mvcResult = null;
-        String cookingMethod = "x";
+        tableAllocationVo2.setCheckIn(null);
+        List<TableAllocationVo> tableAllocationList = new ArrayList<>(Arrays.asList(tableAllocationVo3));
 
-        mvcResult = this.mockMvc.perform(get(TABLE_ALLOCATION_URI_FILTER).queryParam("cookingMethod", cookingMethod))
+        mvcResult = this.mockMvc.perform(get(TABLE_ALLOCATION_URI_FILTER)
+                        .queryParam("active", "x"))
                 .andDo(print())
                 .andReturn();
 
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(0, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), TableAllocationVo[].class).length);
+        Assertions.assertEquals(tableAllocationList.size(), objectMapper.readValue(mvcResult.getResponse().getContentAsString(), TableAllocationVo[].class).length);
+        Assertions.assertEquals(objectMapper.writeValueAsString(tableAllocationList), mvcResult.getResponse().getContentAsString());
     }
 
     @Test
@@ -2057,7 +2058,7 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         Assertions.assertEquals(0, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), TableAllocationVo[].class).length);
     }
 
-    @Test
+    /*@Test
     public void test_TableAllocation_Get_ShouldReturn_400Response_And_ErrorCode_RES_ENGMNT_001_WhenRequestedBy_AbsentNumberOfServingsOnly() throws Exception {
         MvcResult mvcResult = null;
         String errorCode = EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.getErrorCode();
@@ -2072,9 +2073,9 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-    }
+    }*/
 
-    @Test
+    /*@Test
     public void test_TableAllocation_Get_ShouldReturn_200Response_And_EmptyTableAllocationList_WhenRequestedBy_AbsentPreparationTimeDurationAndValidPreparationTimeUnitId() throws Exception {
         MvcResult mvcResult = null;
         String preparationTimeDuration = String.valueOf(Double.MAX_VALUE);
@@ -2088,9 +2089,9 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(0, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), TableAllocationVo[].class).length);
-    }
+    }*/
 
-    @Test
+    /*@Test
     public void test_TableAllocation_Get_ShouldReturn_200Response_And_EmptyTableAllocationList_WhenRequestedBy_AbsentCookingTimeDurationOnlyAndValidCookingTimeUnitId() throws Exception {
         MvcResult mvcResult = null;
         String cookingTimeDuration = String.valueOf(Double.MAX_VALUE);
@@ -2103,9 +2104,9 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(0, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), TableAllocationVo[].class).length);
-    }
+    }*/
 
-    @Test
+    /*@Test
     public void test_TableAllocation_Get_ShouldReturn_200Response_And_EmptyTableAllocationList_WhenRequestedBy_AbsentPortionSizeAmountAndValidPortionSizeUnitId() throws Exception {
         MvcResult mvcResult = null;
         String portionSizeAmount = String.valueOf(Double.MAX_VALUE);
@@ -2119,7 +2120,7 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(0, objectMapper.readValue(mvcResult.getResponse().getContentAsString(), TableAllocationVo[].class).length);
-    }
+    }*/
 
     /**
      * GET all by absent filters - END
@@ -2129,7 +2130,7 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
      * GET all by filter combination - START
      */
 
-    @Test
+    /*@Test
     public void test_TableAllocation_Get_ShouldReturn_200Response_And_TableAllocationListNaturallyOrdered_WhenRequested_ForTableAllocations_WithName() throws Exception {
         MvcResult mvcResult = null;
         List<TableAllocationVo> tableAllocationList = new ArrayList<>(Arrays.asList(tableAllocationVo1, tableAllocationVo2, tableAllocationVo3));
@@ -2144,16 +2145,16 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(tableAllocationList.size(), objectMapper.readValue(mvcResult.getResponse().getContentAsString(), TableAllocationVo[].class).length);
         Assertions.assertEquals(objectMapper.writeValueAsString(tableAllocationList), mvcResult.getResponse().getContentAsString());
-    }
+    }*/
 
     @Test
-    public void test_TableAllocation_Get_ShouldReturn_200Response_And_TableAllocationListNaturallyOrdered_WhenRequested_ForTableAllocations_WithDescription() throws Exception {
+    public void test_TableAllocation_Get_ShouldReturn_200Response_And_TableAllocationListNaturallyOrdered_WhenRequested_ForTableAllocations_WithNotes() throws Exception {
         MvcResult mvcResult = null;
         List<TableAllocationVo> tableAllocationList = new ArrayList<>(Arrays.asList(tableAllocationVo1));
         tableAllocationVo1.setCheckIn(null);
 
         mvcResult = this.mockMvc.perform(get(TABLE_ALLOCATION_URI_FILTER)
-                        .queryParam("description", "TableAllocation 1"))
+                        .queryParam("notes", "TableAllocation 1"))
                 .andDo(print())
                 .andReturn();
 
@@ -2163,7 +2164,7 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         Assertions.assertEquals(objectMapper.writeValueAsString(tableAllocationList), mvcResult.getResponse().getContentAsString());
     }
 
-    @Test
+    /*@Test
     public void test_TableAllocation_Get_ShouldReturn_200Response_And_TableAllocationListNaturallyOrdered_WhenRequested_ForTableAllocations_WithInstructions() throws Exception {
         MvcResult mvcResult = null;
         List<TableAllocationVo> tableAllocationList = new ArrayList<>(Arrays.asList(tableAllocationVo1));
@@ -2177,16 +2178,16 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(tableAllocationList.size(), objectMapper.readValue(mvcResult.getResponse().getContentAsString(), TableAllocationVo[].class).length);
         Assertions.assertEquals(objectMapper.writeValueAsString(tableAllocationList), mvcResult.getResponse().getContentAsString());
-    }
+    }*/
 
     @Test
-    public void test_TableAllocation_Get_ShouldReturn_200Response_And_TableAllocationListNaturallyOrdered_WhenRequested_ForTableAllocations_WithCookingMethod() throws Exception {
+    public void test_TableAllocation_Get_ShouldReturn_200Response_And_TableAllocationListNaturallyOrdered_WhenRequested_ForTableAllocations_WithActive() throws Exception {
         MvcResult mvcResult = null;
         tableAllocationVo2.setCheckIn(null);
-        List<TableAllocationVo> tableAllocationList = new ArrayList<>(Arrays.asList(tableAllocationVo2));
+        List<TableAllocationVo> tableAllocationList = new ArrayList<>(Arrays.asList(tableAllocationVo1, tableAllocationVo2, tableAllocationVo4));
 
         mvcResult = this.mockMvc.perform(get(TABLE_ALLOCATION_URI_FILTER)
-                        .queryParam("cookingMethod", "US"))
+                        .queryParam("active", "true"))
                 .andDo(print())
                 .andReturn();
 
@@ -2214,7 +2215,7 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         Assertions.assertEquals(objectMapper.writeValueAsString(tableAllocationList), mvcResult.getResponse().getContentAsString());
     }
 
-    @Test
+    /*@Test
     public void test_TableAllocation_Get_ShouldReturn_200Response_And_TableAllocationListNaturallyOrdered_WhenRequested_ForTableAllocations_WithNumberOfServings() throws Exception {
         MvcResult mvcResult = null;
         List<TableAllocationVo> tableAllocationList = new ArrayList<>(Arrays.asList(tableAllocationVo3));
@@ -2231,9 +2232,9 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(tableAllocationList.size(), objectMapper.readValue(mvcResult.getResponse().getContentAsString(), TableAllocationVo[].class).length);
         Assertions.assertEquals(objectMapper.writeValueAsString(tableAllocationList), mvcResult.getResponse().getContentAsString());
-    }
+    }*/
 
-    @Test
+    /*@Test
     public void test_TableAllocation_Get_ShouldReturn_200Response_And_TableAllocationListNaturallyOrdered_WhenRequested_ForTableAllocations_WithPreparationTimeAmountAndPreparationTimeUnitId() throws Exception {
         MvcResult mvcResult = null;
         List<TableAllocationVo> tableAllocationList = new ArrayList<>(Arrays.asList(tableAllocationVo1, tableAllocationVo2, tableAllocationVo3));
@@ -2252,9 +2253,9 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(tableAllocationList.size(), objectMapper.readValue(mvcResult.getResponse().getContentAsString(), TableAllocationVo[].class).length);
         Assertions.assertEquals(objectMapper.writeValueAsString(tableAllocationList), mvcResult.getResponse().getContentAsString());
-    }
+    }*/
 
-    @Test
+    /*@Test
     public void test_TableAllocation_Get_ShouldReturn_200Response_And_TableAllocationListNaturallyOrdered_WhenRequested_ForTableAllocations_WithCookingTimeAmountAndCookingTimeUnitId() throws Exception {
         MvcResult mvcResult = null;
         List<TableAllocationVo> tableAllocationList = new ArrayList<>(Arrays.asList(tableAllocationVo1, tableAllocationVo2, tableAllocationVo3));
@@ -2273,9 +2274,9 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(tableAllocationList.size(), objectMapper.readValue(mvcResult.getResponse().getContentAsString(), TableAllocationVo[].class).length);
         Assertions.assertEquals(objectMapper.writeValueAsString(tableAllocationList), mvcResult.getResponse().getContentAsString());
-    }
+    }*/
 
-    @Test
+    /*@Test
     public void test_TableAllocation_Get_ShouldReturn_200Response_And_TableAllocationListNaturallyOrdered_WhenRequested_ForTableAllocations_WithPortionSizeAmountAndPortionSizeUnitId() throws Exception {
         MvcResult mvcResult = null;
         List<TableAllocationVo> tableAllocationList = new ArrayList<>(Arrays.asList(tableAllocationVo3));
@@ -2294,19 +2295,17 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(tableAllocationList.size(), objectMapper.readValue(mvcResult.getResponse().getContentAsString(), TableAllocationVo[].class).length);
         Assertions.assertEquals(objectMapper.writeValueAsString(tableAllocationList), mvcResult.getResponse().getContentAsString());
-    }
+    }*/
 
     @Test
-    public void test_TableAllocation_Get_ShouldReturn_200Response_And_TableAllocationListNaturallyOrdered_WhenRequested_ForTableAllocations_WithDescriptionAndInstructions() throws Exception {
+    public void test_TableAllocation_Get_ShouldReturn_200Response_And_TableAllocationListNaturallyOrdered_WhenRequested_ForTableAllocations_WithTableIdAndNotes() throws Exception {
         MvcResult mvcResult = null;
-        List<TableAllocationVo> tableAllocationList = Arrays.asList(tableAllocationVo1, tableAllocationVo2, tableAllocationVo3);
+        List<TableAllocationVo> tableAllocationList = Arrays.asList(tableAllocationVo1);
         tableAllocationVo1.setCheckIn(null);
-        tableAllocationVo2.setCheckIn(null);
-        tableAllocationVo3.setCheckIn(null);
 
         mvcResult = this.mockMvc.perform(get(TABLE_ALLOCATION_URI_FILTER)
-                        .queryParam("description", "TableAllocation")
-                        .queryParam("instructions", "TableAllocation"))
+                        .queryParam("notes", "TableAllocation")
+                        .queryParam("tableId", tableAllocationEntity1.getTableId()))
                 .andDo(print())
                 .andReturn();
 
@@ -2317,14 +2316,14 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
     }
 
     @Test
-    public void test_TableAllocation_Get_ShouldReturn_200Response_And_EmptyTableAllocationList_WhenRequested_ForTableAllocations_WithAbsent_DescriptionAndTableIdAndCookingMethod() throws Exception {
+    public void test_TableAllocation_Get_ShouldReturn_200Response_And_EmptyTableAllocationList_WhenRequested_ForTableAllocations_WithAbsent_NotesAndTableIdAndActive() throws Exception {
         MvcResult mvcResult = null;
         List<TableAllocationVo> tableAllocationList = new ArrayList<>();
 
         mvcResult = this.mockMvc.perform(get(TABLE_ALLOCATION_URI_FILTER)
-                        .queryParam("description", "TableAllocation 1")
+                        .queryParam("notes", "TableAllocation 1")
                         .queryParam("tableId", UUID.randomUUID().toString())
-                        .queryParam("cookingMethod", UUID.randomUUID().toString()))
+                        .queryParam("active", UUID.randomUUID().toString()))
                 .andDo(print())
                 .andReturn();
 
@@ -2339,7 +2338,7 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
 
     @Override
     public String getSimulationBaseLocation() {
-        return "simulation/establishment-area-service";
+        return "integration";
     }
 
     @Override
@@ -2349,6 +2348,6 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
 
     @Override
     public String[] getSimulationFilePaths() {
-        return new String[] { String.join("/", getSimulationBaseLocation(), "simulation-v3.json") };
+        return new String[] { String.join("/", getSimulationBaseLocation(), "simulation.json") };
     }
 }

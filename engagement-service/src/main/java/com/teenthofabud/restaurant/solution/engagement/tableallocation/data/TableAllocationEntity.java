@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true, callSuper = true)
 @Entity(name = "tableAllocation")
 @Table(name = "table_allocation")
 @EntityListeners(AuditingEntityListener.class)
@@ -19,14 +19,18 @@ public class TableAllocationEntity extends TOABBaseEntity implements Comparable<
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ToString.Include
     private Long id;
     @Column(name = "establishmentarea_table_id")
+    @ToString.Include
     private String tableId;
     //private List<CheckInHistoryDocument> statusHistory;
+    @ToString.Include
     private String notes;
 
-    @ManyToOne(targetEntity = CheckInEntity.class, fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @ManyToOne(targetEntity = CheckInEntity.class, fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinColumn(name = "engagement_check_in_id")
+    @ToString.Include
     private CheckInEntity checkIn;
 
     /*public void addStatus(CheckInStatus status) {

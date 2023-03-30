@@ -1,5 +1,6 @@
 package com.teenthofabud.restaurant.solution.engagement.utils;
 
+import com.teenthofabud.core.common.constant.TOABCascadeLevel;
 import com.teenthofabud.core.common.error.TOABErrorCode;
 import com.teenthofabud.core.common.error.TOABSystemException;
 import com.teenthofabud.restaurant.solution.engagement.checkin.constants.CheckInType;
@@ -8,6 +9,8 @@ import com.teenthofabud.restaurant.solution.engagement.checkin.converter.Reserva
 import com.teenthofabud.restaurant.solution.engagement.checkin.converter.WalkInEntity2VoConverter;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.*;
 import com.teenthofabud.restaurant.solution.engagement.checkin.factory.CheckInBeanFactory;
+import com.teenthofabud.restaurant.solution.engagement.checkin.service.CheckInService;
+import com.teenthofabud.restaurant.solution.engagement.constants.EngagementErrorCode;
 import com.teenthofabud.restaurant.solution.engagement.tableallocation.converter.TableAllocationEntity2VoConverter;
 import com.teenthofabud.restaurant.solution.engagement.tableallocation.data.TableAllocationEntity;
 import com.teenthofabud.restaurant.solution.engagement.tableallocation.data.TableAllocationVo;
@@ -15,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.reflections.ReflectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.Errors;
 
 import java.lang.reflect.Field;
 import java.util.LinkedList;

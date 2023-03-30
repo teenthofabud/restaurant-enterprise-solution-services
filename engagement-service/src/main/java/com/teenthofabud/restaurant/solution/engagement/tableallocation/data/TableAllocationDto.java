@@ -1,9 +1,6 @@
 package com.teenthofabud.restaurant.solution.engagement.tableallocation.data;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.Optional;
 
@@ -11,6 +8,7 @@ import java.util.Optional;
 @Setter
 @ToString
 @AllArgsConstructor
+@NoArgsConstructor
 public class TableAllocationDto {
 
     @ToString.Include
@@ -25,16 +23,16 @@ public class TableAllocationDto {
     private Optional<String> active;
 
 
-    public TableAllocationDto() {
-        this.tableId = Optional.ofNullable(null);
+    /*public TableAllocationDto() {
+        this.tableId = Optional.empty();
         //this.status = Optional.ofNullable(null);
-        this.notes = Optional.ofNullable(null);
-        this.active = Optional.ofNullable(null);
-        this.checkInId = Optional.ofNullable(null);
-    }
+        this.notes = Optional.empty();
+        this.active = Optional.empty();
+        this.checkInId = Optional.empty();
+    }*/
 
     public TableAllocationDto(TableAllocationDto dto) {
-        this.tableId = Optional.ofNullable(null);
+        this.tableId = dto.getTableId();
         //this.status = Optional.ofNullable(null);
         this.notes = dto.getNotes();
         this.active = dto.getActive();

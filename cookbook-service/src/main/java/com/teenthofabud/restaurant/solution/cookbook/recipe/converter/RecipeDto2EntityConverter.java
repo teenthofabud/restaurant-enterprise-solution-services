@@ -3,7 +3,7 @@ package com.teenthofabud.restaurant.solution.cookbook.recipe.converter;
 import com.teenthofabud.core.common.converter.ComparativePatchConverter;
 import com.teenthofabud.core.common.error.TOABBaseException;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.data.CuisineEntity;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.repository.CuisineRepository;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.repository.CuisineJPARepository;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeDto;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeEntity;
 import com.teenthofabud.restaurant.solution.cookbook.utils.CookbookServiceHelper;
@@ -33,10 +33,10 @@ public class RecipeDto2EntityConverter implements ComparativePatchConverter<Reci
         this.fieldsToEscape = fieldsToEscape;
     }
 
-    private CuisineRepository cuisineRepository;
+    private CuisineJPARepository cuisineRepository;
 
     @Autowired
-    public void setCuisineRepository(CuisineRepository cuisineRepository) {
+    public void setCuisineRepository(CuisineJPARepository cuisineRepository) {
         this.cuisineRepository = cuisineRepository;
     }
 

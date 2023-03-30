@@ -17,11 +17,10 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class TableAllocationFormRelaxedValidator implements RelaxedValidator<TableAllocationForm>  {
+public class TableAllocationFormRelaxedValidator extends TableAllocationValidator implements RelaxedValidator<TableAllocationForm>  {
 
 
     private Validator tableIdValidator;
-    private Validator accountIdValidator;
 
     @Autowired
     @Qualifier("tableIdValidator")
@@ -39,7 +38,7 @@ public class TableAllocationFormRelaxedValidator implements RelaxedValidator<Tab
     @Override
     public Boolean validateLoosely(TableAllocationForm form, Errors errors) {
 
-        if(fieldsToEscape.contains("notes") && form.getNotes() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getNotes()))) {
+        if(!fieldsToEscape.contains("notes") && form.getNotes() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getNotes()))) {
             errors.rejectValue("notes", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             log.debug("TableAllocationForm.notes is empty");
             return false;
@@ -61,11 +60,11 @@ public class TableAllocationFormRelaxedValidator implements RelaxedValidator<Tab
         }
         log.debug("TableAllocationForm.timestamp is valid");*/
 
-        if(fieldsToEscape.contains("tableId") && form.getTableId() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getTableId()))) {
+        if(!fieldsToEscape.contains("tableId") && form.getTableId() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getTableId()))) {
             log.debug("TableAllocationForm.tableId is empty");
             errors.rejectValue("tableId", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             return false;
-        } else if(fieldsToEscape.contains("tableId") && form.getTableId() != null && StringUtils.hasText(StringUtils.trimWhitespace(form.getTableId()))){
+        } else if(!fieldsToEscape.contains("tableId") && form.getTableId() != null && StringUtils.hasText(StringUtils.trimWhitespace(form.getTableId()))){
             Errors err = new DirectFieldBindingResult(form.getTableId(), "TableAllocationForm");
             tableIdValidator.validate(form.getTableId(), err);
             if(err.hasErrors()) {
@@ -77,6 +76,18 @@ public class TableAllocationFormRelaxedValidator implements RelaxedValidator<Tab
             }
         }
         log.debug("TableAllocationForm.tableId is valid");
+
+        if(!fieldsToEscape.contains("checkInId") && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getCheckInId()))) {
+            log.debug("TableAllocationForm.checkInId is empty");
+            errors.rejectValue("checkInId", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
+            return false;
+        } else if(!fieldsToEscape.contains("checkInId") && StringUtils.hasText(StringUtils.trimWhitespace(form.getCheckInId()))){
+            boolean flag = super.validateCheckInId(form.getCheckInId(), errors);
+            if(!flag) {
+                return false;
+            }
+        }
+        log.debug("TableAllocationForm.checkInId is valid");
 
         return true;
     }

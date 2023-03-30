@@ -6,7 +6,7 @@ import com.teenthofabud.core.common.data.vo.ErrorVo;
 import com.teenthofabud.core.common.error.TOABErrorCode;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.data.CuisineEntity;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.data.CuisineVo;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.repository.CuisineRepository;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.repository.CuisineJPARepository;
 import com.teenthofabud.restaurant.solution.cookbook.integration.menu.data.ItemVo;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeEntity;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeForm;
@@ -56,7 +56,7 @@ public class RecipeIntegrationTest extends CookbookIntegrationBaseTest {
     private static final String RECIPE_URI_FILTER = "/recipe/filter";
 
     private RecipeRepository recipeRepository;
-    private CuisineRepository cuisineRepository;
+    private CuisineJPARepository cuisineRepository;
 
     private int integrationServicePort;
 
@@ -71,7 +71,7 @@ public class RecipeIntegrationTest extends CookbookIntegrationBaseTest {
     }
 
     @Autowired
-    public void setCuisineRepository(CuisineRepository cuisineRepository) {
+    public void setCuisineRepository(CuisineJPARepository cuisineRepository) {
         this.cuisineRepository = cuisineRepository;
     }
 

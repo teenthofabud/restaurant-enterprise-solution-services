@@ -11,6 +11,7 @@ import io.github.resilience4j.feign.Resilience4jFeign;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.cloud.openfeign.loadbalancer.FeignBlockingLoadBalancerClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
@@ -40,7 +41,7 @@ public class EstablishmentAreaServiceIntegrationConfiguration {
                 .withCircuitBreaker(circuitBreaker)
                 .withFallback(tableServiceClientFallback, CallNotPermittedException.class)
                 .build();
-        return Resilience4jFeign.builder(decorators);
+        return Resilience4jFeign.builder(decorators).client(new FeignBlockingLoadBalancerClient());
     }
 
 }

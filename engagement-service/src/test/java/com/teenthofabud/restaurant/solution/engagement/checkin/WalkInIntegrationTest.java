@@ -2087,7 +2087,7 @@ public class WalkInIntegrationTest extends EngagementIntegrationBaseTest {
 
     @Override
     public String getSimulationBaseLocation() {
-        return "simulation/customer-service";
+        return "integration";
     }
 
     @Override
@@ -2097,6 +2097,6 @@ public class WalkInIntegrationTest extends EngagementIntegrationBaseTest {
 
     @Override
     public String[] getSimulationFilePaths() {
-        return new String[] { String.join("/", getSimulationBaseLocation(), "simulation-v3.json") };
+        return new String[] { String.join("/", getSimulationBaseLocation(), "simulation.json") };
     }
 }

@@ -94,7 +94,7 @@ public interface TableAllocationAPI {
 
     @Operation(summary = "Get all TableAllocation details")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Retrieve all available TableAllocations and their details ordered by accountId, sequence",
+            @ApiResponse(responseCode = "200", description = "Retrieve all available TableAllocations and their details ordered by tableId, createdOn",
                     content = {
                     @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -107,9 +107,9 @@ public interface TableAllocationAPI {
     })
     public Set<TableAllocationVo> getAllTableAllocationNaturallyOrdered() ;
 
-    @Operation(summary = "Get all TableAllocation details by accountId, sequence, notes")
+    @Operation(summary = "Get all TableAllocation details by tableId, active, notes")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Retrieve all available TableAllocations and their details ordered by accountId, sequence",
+            @ApiResponse(responseCode = "200", description = "Retrieve all available TableAllocations and their details ordered by tableId, active and notes",
                     content = {
                             @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -126,8 +126,8 @@ public interface TableAllocationAPI {
             @ApiResponse(responseCode = "404", description = "No TableAllocations available by the given filters",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
-    public List<TableAllocationVo> getAllTableAllocationsByFilters(@Parameter(in = ParameterIn.QUERY, name = "accountId", description = "TableAllocation made with accountId") String accountId,
-                                           @Parameter(in = ParameterIn.QUERY, name = "sequence", description = "TableAllocation sequence number for a day") String sequence,
+    public List<TableAllocationVo> getAllTableAllocationsByFilters(@Parameter(in = ParameterIn.QUERY, name = "tableId", description = "TableAllocation made with tableId") String tableId,
+                                           @Parameter(in = ParameterIn.QUERY, name = "active", description = "TableAllocation is expired or not") String active,
                                            @Parameter(in = ParameterIn.QUERY, name = "notes", description = "TableAllocation has notes") String notes) throws TableAllocationException ;
 
     @Operation(summary = "Get TableAllocation details by checkInId")
@@ -149,7 +149,9 @@ public interface TableAllocationAPI {
             @ApiResponse(responseCode = "404", description = "No TableAllocations available with the given checkInId",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
-    public List<TableAllocationVo> getTableAllocationByCheckInId(@Parameter(in = ParameterIn.PATH, name = "checkInId", description = "checkInId having tables allocated") String checkInId) throws TableAllocationException;
+    public List<TableAllocationVo> getTableAllocationByCheckInId(@Parameter(in = ParameterIn.PATH, name = "checkInId", description = "checkInId having tables allocated") String checkInId,
+                                                                 @io.swagger.v3.oas.annotations.Parameter(in = ParameterIn.QUERY, description = "levels of nested fields to be unfolded within the response body")
+                                                                 String cascadeUntilLevel) throws TableAllocationException;
 
     @Operation(summary = "Get TableAllocation details by id")
     @ApiResponses(value = {

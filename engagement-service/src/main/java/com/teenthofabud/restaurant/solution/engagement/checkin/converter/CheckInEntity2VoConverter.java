@@ -12,9 +12,9 @@ import com.teenthofabud.restaurant.solution.engagement.integration.customer.data
 import com.teenthofabud.restaurant.solution.engagement.integration.customer.proxy.CustomerServiceClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 
+import java.lang.reflect.ParameterizedType;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -62,11 +62,14 @@ public abstract class CheckInEntity2VoConverter<T extends CheckInEntity, U exten
         TOABRequestContextHolder.setCascadeLevelContext(TOABCascadeLevel.TWO);
         super.expandAuditFields(entity, vo);
         TOABRequestContextHolder.clearCascadeLevelContext();
-        Object f = this.convertChild((T) entity, (U) vo);
-        U child = this.convertChild((T) entity, (U) vo);
+        Class<T> unproxiedClass = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+        T unproxiedEntity = super.renderInstanceOfType(entity, unproxiedClass);
+        U child = this.convertChild(unproxiedEntity, (U) vo);
         log.debug("Converted {} to {} ", entity, child);
         return child;
     }
+
+
 
     protected abstract CheckInType getContextualCheckInType();
 

@@ -257,7 +257,8 @@ public class ReservationServiceImpl implements ReservationService {
     public ReservationVo retrieveDetailsById(String id, Optional<TOABCascadeLevel> optionalCascadeLevel) throws CheckInException {
         log.info("Requesting ReservationEntity by id: {}", id);
         Long idL = this.parsePK(id);
-        Optional<ReservationEntity> optEntity = this.getCheckInRepository().findById(idL);
+        ReservationRepository reservationRepository = this.getCheckInRepository();
+        Optional<ReservationEntity> optEntity = reservationRepository.findById(idL);
         if(optEntity.isEmpty()) {
             log.debug("No ReservationEntity found by id: {}", id);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "id", String.valueOf(id) });

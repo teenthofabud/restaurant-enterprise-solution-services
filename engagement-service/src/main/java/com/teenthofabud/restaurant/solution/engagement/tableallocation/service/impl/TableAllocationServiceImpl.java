@@ -11,6 +11,7 @@ import com.teenthofabud.core.common.data.form.PatchOperationForm;
 import com.teenthofabud.core.common.error.TOABBaseException;
 import com.teenthofabud.core.common.error.TOABSystemException;
 import com.teenthofabud.core.common.service.TOABBaseService;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInEntity;
 import com.teenthofabud.restaurant.solution.engagement.constants.EngagementErrorCode;
 import com.teenthofabud.restaurant.solution.engagement.tableallocation.converter.TableAllocationDto2EntityConverter;
 import com.teenthofabud.restaurant.solution.engagement.tableallocation.converter.TableAllocationEntity2VoConverter;
@@ -39,17 +40,18 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
-public class TableAllocationServiceImpl implements InitializingBean, TableAllocationService {
+public class TableAllocationServiceImpl implements TableAllocationService {
 
-    private static final Comparator<TableAllocationVo> CMP_BY_TABLE_ID_AND_ACTIVE_AND_CREATED_ON = (s1, s2) -> {
-        return Integer.compare(s1.getTableId().compareTo(s2.getTableId()), s1.getCreatedOn().compareTo(s2.getCreatedOn()));
+    private static final Comparator<TableAllocationVo> CMP_BY_CREATED_ON_AND_TABLE_ID = (s1, s2) -> {
+        return Integer.compare(s1.getCreatedOn().compareTo(s2.getCreatedOn()), s1.getTable().getTableId().compareTo(s2.getTable().getTableId()));
     };
 
 
-    private ObjectMapper om;
+    private ObjectMapper objectMapper;
 
     private TOABBaseService toabBaseService;
 
@@ -129,6 +131,10 @@ public class TableAllocationServiceImpl implements InitializingBean, TableAlloca
         this.engagementServiceHelper = engagementServiceHelper;
     }
 
+    @Autowired
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     private Long parsePK(String id) throws TableAllocationException {
         Long tableAllocationId = -1L;
@@ -150,10 +156,12 @@ public class TableAllocationServiceImpl implements InitializingBean, TableAlloca
     public Set<TableAllocationVo> retrieveAllByNaturalOrdering() {
         log.info("Requesting all TableAllocationEntity by their natural ordering");
         List<TableAllocationEntity> tableAllocationEntityList = tableAllocationRepository.findAll();
+        TOABRequestContextHolder.setCascadeLevelContext(TOABCascadeLevel.TWO);
         List<TableAllocationVo> tableAllocationVoList = engagementServiceHelper.tableAllocationEntity2DetailedVo(tableAllocationEntityList);
-        Set<TableAllocationVo> naturallyOrderedSet = new TreeSet<>(CMP_BY_TABLE_ID_AND_ACTIVE_AND_CREATED_ON);
+        Set<TableAllocationVo> naturallyOrderedSet = new TreeSet<>(CMP_BY_CREATED_ON_AND_TABLE_ID);
         naturallyOrderedSet.addAll(tableAllocationVoList);
         log.info("{} TableAllocationVo available", naturallyOrderedSet.size());
+        TOABRequestContextHolder.clearCascadeLevelContext();
         return naturallyOrderedSet;
     }
 
@@ -226,25 +234,44 @@ public class TableAllocationServiceImpl implements InitializingBean, TableAlloca
     }
 
     @Override
-    public List<TableAllocationVo> retrieveAllMatchingDetailsByCheckInId(String checkInId) throws TableAllocationException {
+    public List<TableAllocationVo> retrieveAllMatchingDetailsByCheckInId(String checkInId, Optional<TOABCascadeLevel> optionalCascadeLevel) throws TableAllocationException {
         List<TableAllocationVo> tableAllocationVos = new ArrayList<>();
+        Long checkInIdLong = -1l;
+
         log.debug("Validating checkInId: {}", checkInId);
         if(StringUtils.isEmpty(StringUtils.trimWhitespace(checkInId))) {
             log.debug("checkInId: {} is empty", checkInId);
             throw new TableAllocationException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID, new Object[] { "checkInId", checkInId });
+        } else {
+            try {
+                checkInIdLong = Long.parseLong(checkInId);
+            } catch (NumberFormatException e) {
+                log.debug("checkInId: {} is invalid", checkInId);
+                throw new TableAllocationException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID, new Object[] { "checkInId", checkInId });
+            }
         }
         log.debug("checkInId: {} is valid", checkInId);
 
         log.info("Requesting all TableAllocationEntity by checkInId {}", checkInId);
-        List<TableAllocationEntity> tableAllocationEntityList = tableAllocationRepository.findByCheckInId(checkInId);
+        List<TableAllocationEntity> tableAllocationEntityList = tableAllocationRepository.findByCheckInId(checkInIdLong);
         if(tableAllocationEntityList.isEmpty()) {
-            log.debug("No TableAllocationEntity found by checkInId {}", checkInId);
-            throw new TableAllocationException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "checkInId", checkInId });
+
+            log.debug("checkInId {} is not active", checkInIdLong);
+            throw new TableAllocationException(EngagementErrorCode.ENGAGEMENT_ACTION_FAILURE, new Object[] { "search", "checkInId not found" });
+        } else {
+            CheckInEntity checkInEntity = tableAllocationEntityList.stream().findFirst().get().getCheckIn();
+            if(!checkInEntity.getActive()) {
+                log.debug("checkInId {} is not active", checkInIdLong);
+                throw new TableAllocationException(EngagementErrorCode.ENGAGEMENT_ACTION_FAILURE, new Object[] { "search", "checkInId is deactivated" });
+            }
         }
-        log.info("Found TableAllocationVo by checkInId {}", checkInId);
+        log.info("Found TableAllocationVo by checkInId {}", checkInIdLong);
+        TOABCascadeLevel cascadeLevel = optionalCascadeLevel.isPresent() ? optionalCascadeLevel.get() : TOABCascadeLevel.ZERO;
+        TOABRequestContextHolder.setCascadeLevelContext(cascadeLevel);
         List<TableAllocationVo> tableAllocationVoList = engagementServiceHelper.tableAllocationEntity2DetailedVo(tableAllocationEntityList);
-        Collections.sort(tableAllocationVoList, CMP_BY_TABLE_ID_AND_ACTIVE_AND_CREATED_ON);
+        Collections.sort(tableAllocationVoList, CMP_BY_CREATED_ON_AND_TABLE_ID);
         log.info("{} TableAllocationVo available", tableAllocationVoList.size());
+        TOABRequestContextHolder.clearCascadeLevelContext();
         return tableAllocationVoList;
     }
 
@@ -432,13 +459,13 @@ public class TableAllocationServiceImpl implements InitializingBean, TableAlloca
         TableAllocationDto patchedTableAllocationForm = new TableAllocationDto();
         try {
             log.debug("Preparing patch list items for TableAllocation");
-            JsonNode tableAllocationDtoTree = om.convertValue(patches, JsonNode.class);
+            JsonNode tableAllocationDtoTree = objectMapper.convertValue(patches, JsonNode.class);
             JsonPatch tableAllocationPatch = JsonPatch.fromJson(tableAllocationDtoTree);
             log.debug("Prepared patch list items for TableAllocation");
-            JsonNode blankTableAllocationDtoTree = om.convertValue(new TableAllocationDto(), JsonNode.class);
+            JsonNode blankTableAllocationDtoTree = objectMapper.convertValue(new TableAllocationDto(), JsonNode.class);
             JsonNode patchedTableAllocationFormTree = tableAllocationPatch.apply(blankTableAllocationDtoTree);
             log.debug("Applying patch list items to TableAllocationDto");
-            patchedTableAllocationForm = om.treeToValue(patchedTableAllocationFormTree, TableAllocationDto.class);
+            patchedTableAllocationForm = objectMapper.treeToValue(patchedTableAllocationFormTree, TableAllocationDto.class);
             log.debug("Applied patch list items to TableAllocationDto");
         } catch (JsonPatchException e) {
             log.debug("Failed to patch list items to TableAllocationDto: {}", e);
@@ -534,10 +561,5 @@ public class TableAllocationServiceImpl implements InitializingBean, TableAlloca
             log.debug(TableAllocationMessageTemplate.MSG_TEMPLATE_TABLE_ALLOCATION_NON_EXISTENCE_BY_CHECK_IN_ID_AND_TABLE_ID_AND_ACTIVE.getValue(), checkInId, tableId, active);
 
         }
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        this.om = new ObjectMapper();
     }
 }
