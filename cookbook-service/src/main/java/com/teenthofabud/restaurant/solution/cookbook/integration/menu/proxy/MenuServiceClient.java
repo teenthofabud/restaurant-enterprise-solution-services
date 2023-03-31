@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(value = MenuServiceClient.SERVICE_CLIENT_NAME, url = "${cookbook.menu.service.url}", configuration = MenuServiceIntegrationConfiguration.class)
+@FeignClient(value = MenuServiceClient.SERVICE_CLIENT_NAME, url = "${res.cookbook.menu.service.url}", configuration = MenuServiceIntegrationConfiguration.class)
 public interface MenuServiceClient {
 
     public static final String SERVICE_CLIENT_NAME = "menu-service";
 
-    @GetMapping("/menu/item/{id}")
+    @GetMapping("/item/{id}")
     @TOABFeignErrorHandler(MenuServiceClientExceptionHandler.class)
     @CircuitBreaker(name = SERVICE_CLIENT_NAME)
     public ItemVo getItemDetailsById(@PathVariable(required = true) String id);

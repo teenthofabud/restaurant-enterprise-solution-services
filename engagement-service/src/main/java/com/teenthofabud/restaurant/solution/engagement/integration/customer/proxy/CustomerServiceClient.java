@@ -6,12 +6,14 @@ import com.teenthofabud.restaurant.solution.engagement.integration.customer.conf
 import com.teenthofabud.restaurant.solution.engagement.integration.customer.data.AccountVo;
 import com.teenthofabud.restaurant.solution.engagement.integration.customer.error.CustomerServiceClientExceptionHandler;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClient;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(value = CustomerServiceClient.SERVICE_CLIENT_NAME, /*url = "${res.engagement.customer.service.url}",*/ configuration = CustomerServiceIntegrationConfiguration.class)
+@FeignClient(value = CustomerServiceClient.SERVICE_CLIENT_NAME, url = "${res.engagement.customer.service.url}", configuration = CustomerServiceIntegrationConfiguration.class)
+@LoadBalancerClient(value = CustomerServiceClient.SERVICE_CLIENT_NAME)
 public interface CustomerServiceClient {
 
     public static final String SERVICE_CLIENT_NAME = "customer-service";

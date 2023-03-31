@@ -46,8 +46,12 @@ import java.util.stream.Collectors;
 @Slf4j
 public class TableAllocationServiceImpl implements TableAllocationService {
 
-    private static final Comparator<TableAllocationVo> CMP_BY_CREATED_ON_AND_TABLE_ID = (s1, s2) -> {
+    /*private static final Comparator<TableAllocationVo> CMP_BY_CREATED_ON_AND_TABLE_ID = (s1, s2) -> {
         return Integer.compare(s1.getCreatedOn().compareTo(s2.getCreatedOn()), s1.getTable().getTableId().compareTo(s2.getTable().getTableId()));
+    };*/
+
+    private static final Comparator<TableAllocationVo> CMP_BY_TABLE_ALLOCATION_ID = (s1, s2) -> {
+        return s1.getId().compareTo(s2.getId());
     };
 
 
@@ -158,7 +162,7 @@ public class TableAllocationServiceImpl implements TableAllocationService {
         List<TableAllocationEntity> tableAllocationEntityList = tableAllocationRepository.findAll();
         TOABRequestContextHolder.setCascadeLevelContext(TOABCascadeLevel.TWO);
         List<TableAllocationVo> tableAllocationVoList = engagementServiceHelper.tableAllocationEntity2DetailedVo(tableAllocationEntityList);
-        Set<TableAllocationVo> naturallyOrderedSet = new TreeSet<>(CMP_BY_CREATED_ON_AND_TABLE_ID);
+        Set<TableAllocationVo> naturallyOrderedSet = new TreeSet<>(CMP_BY_TABLE_ALLOCATION_ID);
         naturallyOrderedSet.addAll(tableAllocationVoList);
         log.info("{} TableAllocationVo available", naturallyOrderedSet.size());
         TOABRequestContextHolder.clearCascadeLevelContext();
@@ -269,7 +273,7 @@ public class TableAllocationServiceImpl implements TableAllocationService {
         TOABCascadeLevel cascadeLevel = optionalCascadeLevel.isPresent() ? optionalCascadeLevel.get() : TOABCascadeLevel.ZERO;
         TOABRequestContextHolder.setCascadeLevelContext(cascadeLevel);
         List<TableAllocationVo> tableAllocationVoList = engagementServiceHelper.tableAllocationEntity2DetailedVo(tableAllocationEntityList);
-        Collections.sort(tableAllocationVoList, CMP_BY_CREATED_ON_AND_TABLE_ID);
+        Collections.sort(tableAllocationVoList, CMP_BY_TABLE_ALLOCATION_ID);
         log.info("{} TableAllocationVo available", tableAllocationVoList.size());
         TOABRequestContextHolder.clearCascadeLevelContext();
         return tableAllocationVoList;
@@ -305,7 +309,7 @@ public class TableAllocationServiceImpl implements TableAllocationService {
             log.debug(TableAllocationMessageTemplate.MSG_TEMPLATE_TABLE_ALLOCATION_EXISTS_BY_CHECK_IN_ID_AND_TABLE_ID_AND_ACTIVE.getValue(),
                     expectedEntity.getTableId(), expectedEntity.getTableId(), active);
             throw new TableAllocationException(EngagementErrorCode.ENGAGEMENT_EXISTS,
-                    new Object[]{"tableId: " + form.getTableId(), ", sequence: " + form.getTableId() + ", active: " + active }  );
+                    new Object[]{"tableId: " + form.getTableId(), ", checkInId: " + form.getCheckInId() + ", active: " + active }  );
         }
         log.debug(TableAllocationMessageTemplate.MSG_TEMPLATE_TABLE_ALLOCATION_NON_EXISTENCE_BY_CHECK_IN_ID_AND_TABLE_ID_AND_ACTIVE.getValue(), expectedEntity.getCheckIn().getId().toString(), expectedEntity.getTableId(), active);
 

@@ -41,7 +41,7 @@ public class EstablishmentAreaServiceIntegrationConfiguration {
                 .withCircuitBreaker(circuitBreaker)
                 .withFallback(tableServiceClientFallback, CallNotPermittedException.class)
                 .build();
-        return Resilience4jFeign.builder(decorators).client(new FeignBlockingLoadBalancerClient());
+        return Resilience4jFeign.builder(decorators);//.client(new FeignBlockingLoadBalancerClient());
     }
 
 }

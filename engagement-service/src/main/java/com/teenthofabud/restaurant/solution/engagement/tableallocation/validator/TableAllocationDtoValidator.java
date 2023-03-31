@@ -93,8 +93,9 @@ public class TableAllocationDtoValidator extends TableAllocationValidator implem
             errors.rejectValue("checkInId", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             return;
         } else if(!fieldsToEscape.contains("checkInId") && optCheckInId.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optCheckInId.get()))){
-            boolean flag = super.validateCheckInId(optCheckInId.get(), errors);
+            boolean flag = super.validateCheckInId(optCheckInId.get(), dto.getClass());
             if(!flag) {
+                errors.rejectValue("checkInId", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
                 return;
             }
         }

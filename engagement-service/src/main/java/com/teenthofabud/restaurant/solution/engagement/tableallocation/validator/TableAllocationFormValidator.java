@@ -89,8 +89,9 @@ public class TableAllocationFormValidator extends TableAllocationValidator imple
             errors.rejectValue("checkInId", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             return;
         } else if(!fieldsToEscape.contains("checkInId") && StringUtils.hasText(StringUtils.trimWhitespace(form.getCheckInId()))){
-            boolean flag = super.validateCheckInId(form.getCheckInId(), errors);
+            boolean flag = super.validateCheckInId(form.getCheckInId(), form.getClass());
             if(!flag) {
+                errors.rejectValue("checkInId", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
                 return;
             }
         }

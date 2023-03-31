@@ -16,7 +16,7 @@ import com.teenthofabud.restaurant.solution.cookbook.cuisine.converter.CuisineFo
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.data.*;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.mapper.CuisineEntitySelfMapper;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.mapper.CuisineForm2EntityMapper;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.repository.CuisineJPARepository;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.repository.CuisineRepository;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.service.CuisineService;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.validator.CuisineDtoValidator;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.validator.CuisineFormRelaxedValidator;
@@ -54,7 +54,7 @@ public class CuisineServiceImpl implements CuisineService {
     private CuisineFormValidator formValidator;
     private CuisineFormRelaxedValidator relaxedFormValidator;
     private CuisineDtoValidator dtoValidator;
-    private CuisineJPARepository repository;
+    private CuisineRepository repository;
     private CookbookServiceHelper cookbookServiceHelper;
     private TOABBaseService toabBaseService;
     private ObjectMapper om;
@@ -110,7 +110,7 @@ public class CuisineServiceImpl implements CuisineService {
     }
 
     @Autowired
-    public void setRepository(CuisineJPARepository repository) {
+    public void setRepository(CuisineRepository repository) {
         this.repository = repository;
     }
 

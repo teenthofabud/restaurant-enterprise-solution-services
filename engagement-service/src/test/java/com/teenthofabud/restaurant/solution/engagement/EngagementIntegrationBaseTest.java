@@ -136,7 +136,7 @@ public abstract class EngagementIntegrationBaseTest {
     }
 
     protected String phoneNumber() {
-        return String.valueOf(System.currentTimeMillis());
+        return String.valueOf(System.nanoTime());
     }
 
     protected String emailId() {

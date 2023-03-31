@@ -49,7 +49,7 @@ public class TableIdValidator implements Validator {
             return;
         }
         if(emptyTableId) {
-            log.debug(objectName + ".table.tableId is invalid");
+            log.debug(objectName + ".table.tableId is empty");
             errors.reject(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             return;
         }

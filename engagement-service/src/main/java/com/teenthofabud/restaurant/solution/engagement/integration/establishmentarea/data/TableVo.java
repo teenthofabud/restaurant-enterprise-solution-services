@@ -26,6 +26,8 @@ public class TableVo extends TOABBaseVo implements Comparable<TableVo> {
     private Integer capacity;
     @ToString.Include
     private String floorId;
+    @ToString.Include
+    private Boolean active;
 
     @Override
     public int compareTo(TableVo o) {

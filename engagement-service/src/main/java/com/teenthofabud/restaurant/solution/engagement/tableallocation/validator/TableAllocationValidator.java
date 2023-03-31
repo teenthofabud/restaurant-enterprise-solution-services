@@ -10,6 +10,7 @@ import com.teenthofabud.restaurant.solution.engagement.constants.EngagementError
 import com.teenthofabud.restaurant.solution.engagement.utils.EngagementServiceHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
 
 import java.util.Optional;
@@ -37,32 +38,29 @@ public abstract class TableAllocationValidator {
         this.engagementServiceHelper = engagementServiceHelper;
     }
 
-    public boolean validateCheckInId(String checkInId, Errors errors) {
+    public boolean validateCheckInId(String checkInId, Class<?> type) {
         boolean flag = true;
-        boolean reservationFlag = this.validateCheckInId(checkInId, reservationService, errors);
-        boolean walkInFlag = this.validateCheckInId(checkInId, walkInService, errors);
-        if(!reservationFlag && !walkInFlag) {
-            log.debug("{}.checkInId does not match for both Reservation and WalkIn", errors.getObjectName());
+        Errors reservationErrors = new DirectFieldBindingResult(checkInId, type.getSimpleName());
+        Errors walkInErrors = new DirectFieldBindingResult(checkInId, type.getSimpleName());
+        this.validateCheckInId(checkInId, reservationService, reservationErrors);
+        this.validateCheckInId(checkInId, walkInService, walkInErrors);
+        if(reservationErrors.getErrorCount() > 0 && walkInErrors.getErrorCount() > 0) {
+            log.debug("{}.checkInId does not match for both Reservation and WalkIn", type.getSimpleName());
             flag = false;
         }
         return flag;
     }
 
-    private boolean validateCheckInId(String checkInId, CheckInService checkInService, Errors errors) {
-        boolean flag = true;
+    private void validateCheckInId(String checkInId, CheckInService checkInService, Errors errors) {
         try {
             CheckInVo checkInVo = checkInService.retrieveDetailsById(checkInId, Optional.of(TOABCascadeLevel.TWO));
             if(!checkInVo.getActive()) {
                 log.debug("{}.checkInId is inactive", errors.getObjectName());
-                errors.rejectValue("checkInId", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
-                flag = false;
+                errors.reject("checkInId", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             }
         } catch (CheckInException e) {
-            log.debug("{}.checkInId is invalid", errors.getObjectName());
-            errors.rejectValue("checkInId", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
-            flag = false;
-        } finally {
-            return flag;
+            log.error("{}.checkInId of {} is invalid", errors.getObjectName(), checkInService.getContextCheckInType(), e);
+            errors.reject("checkInId", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
         }
     }
 

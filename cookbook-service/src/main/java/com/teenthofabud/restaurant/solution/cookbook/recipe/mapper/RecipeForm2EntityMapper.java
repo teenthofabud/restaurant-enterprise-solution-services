@@ -2,7 +2,7 @@ package com.teenthofabud.restaurant.solution.cookbook.recipe.mapper;
 
 import com.teenthofabud.core.common.mapper.DualChannelMapper;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.data.CuisineEntity;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.repository.CuisineJPARepository;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.repository.CuisineRepository;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeEntity;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeForm;
 import lombok.extern.slf4j.Slf4j;
@@ -25,10 +25,10 @@ public class RecipeForm2EntityMapper implements DualChannelMapper<RecipeEntity, 
         this.fieldsToEscape = fieldsToEscape;
     }
 
-    private CuisineJPARepository cuisineRepository;
+    private CuisineRepository cuisineRepository;
 
     @Autowired
-    public void setCuisineRepository(CuisineJPARepository cuisineRepository) {
+    public void setCuisineRepository(CuisineRepository cuisineRepository) {
         this.cuisineRepository = cuisineRepository;
     }
 
