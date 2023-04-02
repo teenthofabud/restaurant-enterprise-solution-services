@@ -6,7 +6,7 @@
           "path": [
             {
               "matcher": "exact",
-              "value": "/actuator/health"
+              "value": "/metadata/actuator/health"
             }
           ],
           "method": [
@@ -51,7 +51,7 @@
           "path": [
             {
               "matcher": "exact",
-              "value": "/actuator/health"
+              "value": "/metadata/actuator/health"
             }
           ],
           "method": [
