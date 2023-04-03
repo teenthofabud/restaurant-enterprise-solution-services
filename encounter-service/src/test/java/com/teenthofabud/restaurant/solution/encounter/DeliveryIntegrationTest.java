@@ -11,6 +11,7 @@ import com.teenthofabud.restaurant.solution.encounter.delivery.data.DeliveryForm
 import com.teenthofabud.restaurant.solution.encounter.delivery.data.DeliveryVo;
 import com.teenthofabud.restaurant.solution.encounter.delivery.repository.DeliveryRepository;
 import com.teenthofabud.restaurant.solution.encounter.integration.customer.data.AccountVo;
+import com.teenthofabud.restaurant.solution.encounter.pickup.data.PickUpVo;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -27,6 +28,8 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -478,7 +481,7 @@ public class DeliveryIntegrationTest extends EncounterIntegrationBaseTest {
     public void test_Delivery_Get_Secondary_ShouldReturn_200Response_And_EmptyDeliveryList_WhenRequestedBy_AbsentOrderId() throws Exception {
         MvcResult mvcResult = null;
 
-        mvcResult = this.mockMvc.perform(get(DELIVERY_URI_SECONDARY_FILTER).queryParam("orderId", "sss"))
+        mvcResult = this.mockMvc.perform(get(DELIVERY_URI_SECONDARY_FILTER).queryParam("orderId", "2222222222222"))
                 .andDo(print())
                 .andReturn();
 
@@ -983,7 +986,114 @@ public class DeliveryIntegrationTest extends EncounterIntegrationBaseTest {
         Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldAccountId));
+    }
 
+    @Test
+    public void test_PickUp_Get_ShouldReturn_200Response_And_PickUpDetails_WhenRequested_ByValid_SequenceAndCreatedDate() throws Exception {
+        String sequence = deliveryEntity1.getSequence();
+        MvcResult mvcResult = null;
+        String strDate = LocalDate.now().format(DateTimeFormatter.ofPattern(deliveryDateFormat));
+
+        mvcResult = this.mockMvc.perform(get(DELIVERY_URI_BY_SEQUENCE, sequence)
+                        .queryParam("date", strDate))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(om.writeValueAsString(deliveryVo1), mvcResult.getResponse().getContentAsString());
+        Assertions.assertEquals(deliveryVo1.getSequence(), om.readValue(mvcResult.getResponse().getContentAsString(), DeliveryVo.class).getSequence());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { " " })
+    public void test_PickUp_Get_Sequence_ShouldReturn_400Response_And_ErrorCode_RES_ENCTR_001_WhenRequestedBy_EmptySequence_AndDate(String sequence) throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldSequence = "sequence";
+        String date = LocalDate.now().format(DateTimeFormatter.ofPattern(deliveryDateFormat));
+
+        mvcResult = this.mockMvc.perform(get(DELIVERY_URI_BY_SEQUENCE, sequence).queryParam("date", date))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldSequence));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "", " " })
+    public void test_PickUp_Get_Sequence_ShouldReturn_400Response_And_ErrorCode_RES_ENCTR_001_WhenRequestedBy_SequenceAnd_EmptyDate(String date) throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldDate = "date";
+        String sequence = UUID.randomUUID().toString();
+
+        mvcResult = this.mockMvc.perform(get(DELIVERY_URI_BY_SEQUENCE, sequence).queryParam("date", date))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldDate));
+    }
+
+    @Test
+    public void test_PickUp_Get_Sequence_ShouldReturn_400Response_And_ErrorCode_RES_ENCTR_001_WhenRequestedBy_SequenceAnd_InvalidDate() throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldDate = "date";
+        String sequence = UUID.randomUUID().toString();
+        String date = "Hey";
+
+        mvcResult = this.mockMvc.perform(get(DELIVERY_URI_BY_SEQUENCE, sequence).queryParam("date", date))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldDate));
+    }
+
+    @Test
+    public void test_PickUp_Get_Sequence_ShouldReturn_404Response_And_ErrorCode_RES_ENCTR_002_WhenRequested_ByAbsentSequence_AndDate() throws Exception {
+        String id = "5";
+        MvcResult mvcResult = null;
+        String errorCode = EncounterErrorCode.ENCOUNTER_NOT_FOUND.getErrorCode();
+        String fieldSequence = "sequence";
+        String sequence = UUID.randomUUID().toString();
+        String date = deliveryEntity1.getCreatedOn().format(DateTimeFormatter.ofPattern(deliveryDateFormat));
+
+        mvcResult = this.mockMvc.perform(get(DELIVERY_URI_BY_SEQUENCE, sequence).queryParam("date", date))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldSequence));
+    }
+
+    @Test
+    public void test_PickUp_Get_Sequence_ShouldReturn_404Response_And_ErrorCode_RES_ENCTR_002_WhenRequested_BySequence_AndAbsentDate() throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = EncounterErrorCode.ENCOUNTER_NOT_FOUND.getErrorCode();
+        String fieldDate = "date";
+        String sequence = deliveryEntity1.getSequence();
+        String date = LocalDate.now().plusDays(2).format(DateTimeFormatter.ofPattern(deliveryDateFormat));
+
+        mvcResult = this.mockMvc.perform(get(DELIVERY_URI_BY_SEQUENCE, sequence).queryParam("date", date))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldDate));
     }
 
     @Override

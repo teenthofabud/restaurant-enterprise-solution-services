@@ -1066,9 +1066,6 @@ public class PickUpIntegrationTest extends EncounterIntegrationBaseTest {
         String sequence = pickUpEntity1.getSequence();
         MvcResult mvcResult = null;
         String strDate = LocalDate.now().format(DateTimeFormatter.ofPattern(pickUpDateFormat));
-//        LocalDate dt = pickUpVo1.getCreatedOn().toLocalDate();
-//        DateTimeFormatter dtf = DateTimeFormatter.ofPattern(pickUpDateFormat);
-//        dt = LocalDate.parse(strDate, dtf);
 
         mvcResult = this.mockMvc.perform(get(PICK_UP_URI_BY_SEQUENCE, sequence)
                 .queryParam("date", strDate))

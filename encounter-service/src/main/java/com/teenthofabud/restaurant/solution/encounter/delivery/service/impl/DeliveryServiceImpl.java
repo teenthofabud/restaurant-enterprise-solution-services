@@ -149,8 +149,7 @@ public class DeliveryServiceImpl implements DeliveryService{
     }
 
     @Override
-    public List<DeliveryVo> retrieveAllMatchingDeliveryDetailsByCriteria(Optional<String> optionalOrderId)
-            throws MeetingException {
+    public List<DeliveryVo> retrieveAllMatchingDeliveryDetailsByCriteria(Optional<String> optionalOrderId) throws MeetingException {
         if (optionalOrderId.isEmpty()) {
             log.debug("No search parameters provided");
         }
@@ -261,18 +260,10 @@ public class DeliveryServiceImpl implements DeliveryService{
 
     @Override
     public DeliveryVo retrieveMatchingDetailsBySequenceOnDate(String sequence, String date) throws MeetingException {
-        Long seq = 0L;
         LocalDate dt = LocalDate.now();
         LocalDateTime start = LocalDateTime.now();
         LocalDateTime end = LocalDateTime.now();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern(deliveryTimeFormat);
-
-        try {
-            seq = Long.parseLong(sequence);
-        } catch (NumberFormatException e) {
-            log.debug("Sequence: {} format is invalid", sequence);
-            throw new MeetingException(EncounterErrorCode.ENCOUNTER_ATTRIBUTE_INVALID, new Object[] { "sequence", sequence });
-        }
 
         try {
             dt = LocalDate.parse(date, dtf);
@@ -284,13 +275,13 @@ public class DeliveryServiceImpl implements DeliveryService{
         start = LocalDateTime.of(dt, LocalTime.of(0,0, 0));
         end = LocalDateTime.of(dt, LocalTime.of(23,59, 59));
 
-        log.info("Requesting DeliveryEntity by sequence: {} between timestamps: {} and {}", seq, start, end);
-        Optional<DeliveryEntity> optEntity = this.getMeetingRepository().findBySequenceAndCreatedOnBetween(seq.toString(), start, end);
+        log.info("Requesting DeliveryEntity by sequence: {} between timestamps: {} and {}", sequence, start, end);
+        Optional<DeliveryEntity> optEntity = this.getMeetingRepository().findBySequenceAndCreatedOnBetween(sequence, start, end);
         if(optEntity.isEmpty()) {
-            log.debug("No DeliveryEntity found by sequence: {} between timestamps: {} and {}", seq, start, end);
-            throw new MeetingException(EncounterErrorCode.ENCOUNTER_NOT_FOUND, new Object[] { "seq: " + seq, ", date: " + date });
+            log.debug("No DeliveryEntity found by sequence: {} between timestamps: {} and {}", sequence, start, end);
+            throw new MeetingException(EncounterErrorCode.ENCOUNTER_NOT_FOUND, new Object[] { "sequence: " + sequence, ", date: " + date });
         }
-        log.info("Found DeliveryVo by sequence: {} between timestamps: {} and {}", seq, start, end);
+        log.info("Found DeliveryVo by sequence: {} between timestamps: {} and {}", sequence, start, end);
         DeliveryEntity entity = optEntity.get();
         return encounterServiceHelper.deliveryEntity2DetailedVo(entity);
     }
