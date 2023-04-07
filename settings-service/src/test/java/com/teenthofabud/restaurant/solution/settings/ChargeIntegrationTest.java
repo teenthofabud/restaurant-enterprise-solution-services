@@ -517,11 +517,11 @@ public class ChargeIntegrationTest extends SettingsIntegrationBaseTest {
         Assertions.assertEquals(chargeVo1.getName(), om.readValue(mvcResult.getResponse().getContentAsString(), ChargeVo.class).getName());
         Assertions.assertEquals(chargeVo1.getDescription(), om.readValue(mvcResult.getResponse().getContentAsString(), ChargeVo.class).getDescription());
         Assertions.assertEquals(chargeVo1.getRate(), om.readValue(mvcResult.getResponse().getContentAsString(), ChargeVo.class).getRate());
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ChargeVo.class).getCreatedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ChargeVo.class).getModifiedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ChargeVo.class).getCreatedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ChargeVo.class).getModifiedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ChargeVo.class).getActive()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ChargeVo.class).getCreatedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ChargeVo.class).getModifiedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ChargeVo.class).getCreatedOn()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ChargeVo.class).getModifiedOn()));
+        Assertions.assertFalse(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), ChargeVo.class).getActive()));
     }
 
     @Test

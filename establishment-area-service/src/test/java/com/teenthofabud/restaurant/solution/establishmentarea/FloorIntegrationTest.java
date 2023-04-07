@@ -556,11 +556,11 @@ public class FloorIntegrationTest extends EstablishmentAreaIntegrationBaseTest {
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
         Assertions.assertEquals(floorVo1.getFlrId(), om.readValue(mvcResult.getResponse().getContentAsString(), FloorVo.class).getFlrId());
         Assertions.assertEquals(floorVo1.getFlrName(), om.readValue(mvcResult.getResponse().getContentAsString(), FloorVo.class).getFlrName());
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), FloorVo.class).getCreatedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), FloorVo.class).getModifiedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), FloorVo.class).getCreatedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), FloorVo.class).getModifiedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), FloorVo.class).getActive()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), FloorVo.class).getCreatedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), FloorVo.class).getModifiedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), FloorVo.class).getCreatedOn()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), FloorVo.class).getModifiedOn()));
+        Assertions.assertFalse(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), FloorVo.class).getActive()));
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.validator;
 
+import com.teenthofabud.restaurant.solution.engagement.checkin.constants.CheckInType;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInForm;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.ReservationForm;
 import com.teenthofabud.restaurant.solution.engagement.constants.EngagementErrorCode;
@@ -10,6 +11,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -50,7 +52,7 @@ public class ReservationFormRelaxedValidator extends CheckInFormRelaxedValidator
 
         if (!fieldsToEscape.contains("date") && form.getDate() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getDate()))) {
             errors.rejectValue("date", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
-            log.debug("ReservationForm.date is invalid");
+            log.debug("ReservationForm.date is empty");
             return false;
         } else {
             try {
@@ -65,20 +67,29 @@ public class ReservationFormRelaxedValidator extends CheckInFormRelaxedValidator
 
         if (!fieldsToEscape.contains("time") && form.getTime() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getTime()))) {
             errors.rejectValue("time", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
-            log.debug("ReservationForm.time is invalid");
+            log.debug("ReservationForm.time is empty");
             return false;
         } else {
             try {
-                LocalDate.parse(form.getTime(), DateTimeFormatter.ofPattern(reservationTimeFormat));
+                LocalTime.parse(form.getTime(), DateTimeFormatter.ofPattern(reservationTimeFormat));
             } catch (DateTimeParseException w) {
                 log.debug("ReservationForm.time is invalid");
                 errors.rejectValue("time", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
                 return false;
             }
         }
-        log.debug("ReservationForm.time is invalid");
+        log.debug("ReservationForm.time is valid");
 
         return true;
+    }
+    @Override
+    public List<String> getFieldsToEscape() {
+        return this.fieldsToEscape;
+    }
+
+    @Override
+    protected CheckInType getCheckInTypeInContext() {
+        return CheckInType.RESERVATION;
     }
 
 }

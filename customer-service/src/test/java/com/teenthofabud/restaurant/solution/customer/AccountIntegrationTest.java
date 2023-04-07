@@ -806,11 +806,11 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertEquals(accountVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getId());
         Assertions.assertEquals(accountVo1.getFirstName(), om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getFirstName());
         Assertions.assertEquals(accountVo1.getLastName(), om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getLastName());
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getCreatedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getModifiedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getCreatedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getModifiedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getActive()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getCreatedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getModifiedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getCreatedOn()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getModifiedOn()));
+        Assertions.assertFalse(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), AccountVo.class).getActive()));
     }
 
     @Test

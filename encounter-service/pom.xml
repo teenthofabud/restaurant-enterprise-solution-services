@@ -16,7 +16,6 @@
         <service.prefix>encounter</service.prefix>
     </properties>
 
-    <groupId>com.teenthofabud.restaurant.solution</groupId>
     <artifactId>restaurant-solution-encounter-service</artifactId>
     <version>2022.2-SNAPSHOT</version>
     <packaging>jar</packaging>

@@ -517,11 +517,11 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
         Assertions.assertEquals(discountVo1.getName(), om.readValue(mvcResult.getResponse().getContentAsString(), DiscountVo.class).getName());
         Assertions.assertEquals(discountVo1.getDescription(), om.readValue(mvcResult.getResponse().getContentAsString(), DiscountVo.class).getDescription());
         Assertions.assertEquals(discountVo1.getRate(), om.readValue(mvcResult.getResponse().getContentAsString(), DiscountVo.class).getRate());
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DiscountVo.class).getCreatedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DiscountVo.class).getModifiedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DiscountVo.class).getCreatedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DiscountVo.class).getModifiedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DiscountVo.class).getActive()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DiscountVo.class).getCreatedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DiscountVo.class).getModifiedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DiscountVo.class).getCreatedOn()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DiscountVo.class).getModifiedOn()));
+        Assertions.assertFalse(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), DiscountVo.class).getActive()));
     }
 
     @Test

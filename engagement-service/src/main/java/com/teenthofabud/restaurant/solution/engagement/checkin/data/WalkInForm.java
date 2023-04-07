@@ -5,7 +5,7 @@ import lombok.*;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+@ToString(callSuper = true)
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)

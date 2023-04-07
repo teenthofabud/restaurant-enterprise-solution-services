@@ -4,4 +4,4 @@ java -jar ^
 -DLOGBACK_LOGGING_LEVEL=info ^
 -DCONFIGURATION_LOGSTASH_HOST=localhost ^
 -DCONFIGURATION_LOGSTASH_PORT=4560 ^
-target\naming-app.jar
+target\configuration-app.jar

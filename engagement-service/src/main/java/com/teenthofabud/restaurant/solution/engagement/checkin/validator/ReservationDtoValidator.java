@@ -1,5 +1,6 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.validator;
 
+import com.teenthofabud.restaurant.solution.engagement.checkin.constants.CheckInType;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInDto;
 import com.teenthofabud.restaurant.solution.engagement.checkin.data.ReservationDto;
 import com.teenthofabud.restaurant.solution.engagement.constants.EngagementErrorCode;
@@ -10,6 +11,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -39,6 +41,11 @@ public class ReservationDtoValidator extends CheckInDtoValidator {
     }
 
     @Override
+    public List<String> getFieldsToEscape() {
+        return this.fieldsToEscape;
+    }
+
+    @Override
     protected void validate(Optional<? extends CheckInDto> optionalCheckInDtoParameters, Errors errors) {
         if(optionalCheckInDtoParameters.isEmpty()) {
             log.debug("No ReservationDto available");
@@ -50,7 +57,7 @@ public class ReservationDtoValidator extends CheckInDtoValidator {
         Optional<String> optDate = dto.getDate();
         if(!fieldsToEscape.contains("date") && optDate.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optDate.get()))) {
             errors.rejectValue("date", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
-            log.debug("ReservationDto.date is invalid");
+            log.debug("ReservationDto.date is empty");
             return;
         } else {
             try {
@@ -65,17 +72,22 @@ public class ReservationDtoValidator extends CheckInDtoValidator {
         Optional<String> optTime = dto.getTime();
         if(!fieldsToEscape.contains("time") && optTime.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optTime.get()))) {
             errors.rejectValue("time", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
-            log.debug("ReservationDto.time is invalid");
+            log.debug("ReservationDto.time is empty");
             return;
         } else {
             try {
-                LocalDate.parse(optTime.get(), DateTimeFormatter.ofPattern(reservationTimeFormat));
+                LocalTime.parse(optTime.get(), DateTimeFormatter.ofPattern(reservationTimeFormat));
             } catch (DateTimeParseException w)  {
                 log.debug("ReservationDto.time is invalid");
                 errors.rejectValue("time", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
                 return;
             }
         }
+    }
+
+    @Override
+    protected CheckInType getCheckInTypeInContext() {
+        return CheckInType.RESERVATION;
     }
 
 }

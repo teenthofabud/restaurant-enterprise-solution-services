@@ -631,11 +631,11 @@ public class KitchenIntegrationTest extends EstablishmentAreaIntegrationBaseTest
         Assertions.assertEquals(kitchenVo1.getKitchenName(), om.readValue(mvcResult.getResponse().getContentAsString(), KitchenVo.class).getKitchenName());
         Assertions.assertEquals(kitchenVo1.getDescription(), om.readValue(mvcResult.getResponse().getContentAsString(), KitchenVo.class).getDescription());
         Assertions.assertEquals(kitchenVo1.getFloorId(), om.readValue(mvcResult.getResponse().getContentAsString(), KitchenVo.class).getFloorId());
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), KitchenVo.class).getCreatedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), KitchenVo.class).getModifiedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), KitchenVo.class).getCreatedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), KitchenVo.class).getModifiedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), KitchenVo.class).getActive()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), KitchenVo.class).getCreatedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), KitchenVo.class).getModifiedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), KitchenVo.class).getCreatedOn()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), KitchenVo.class).getModifiedOn()));
+        Assertions.assertFalse(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), KitchenVo.class).getActive()));
     }
 
     @Test

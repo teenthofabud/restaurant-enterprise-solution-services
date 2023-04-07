@@ -2,7 +2,7 @@ package com.teenthofabud.restaurant.solution.engagement.checkin.data;
 
 import com.teenthofabud.core.common.error.TOABBaseException;
 import com.teenthofabud.core.common.error.TOABError;
-import com.teenthofabud.restaurant.solution.engagement.constants.CheckInType;
+import com.teenthofabud.restaurant.solution.engagement.checkin.constants.CheckInType;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
