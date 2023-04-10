@@ -22,7 +22,7 @@ public class TableVo extends TOABBaseVo implements Comparable<TableVo> {
     @ToString.Include
     private String description;
     @ToString.Include
-    private String capacity;
+    private Integer capacity;
     @ToString.Include
     private String floorId;
     @ToString.Include

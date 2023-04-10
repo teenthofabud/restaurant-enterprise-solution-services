@@ -1,5 +1,6 @@
 package com.teenthofabud.restaurant.solution.engagement.integration.establishmentarea.validator;
 
+import com.teenthofabud.core.common.constant.TOABCascadeLevel;
 import com.teenthofabud.restaurant.solution.engagement.constants.EngagementErrorCode;
 import com.teenthofabud.restaurant.solution.engagement.integration.establishmentarea.data.TableVo;
 import com.teenthofabud.restaurant.solution.engagement.integration.establishmentarea.proxy.EstablishmentAreaServiceClient;
@@ -33,7 +34,7 @@ public class TableIdValidator implements Validator {
         log.debug("Validating tableId: {}", tableId);
         TableVo tableVo = null;
         log.info("Requesting details of table with id: {}", tableId);
-        tableVo = establishmentAreaServiceClient.getTableDetailsById(tableId);
+        tableVo = establishmentAreaServiceClient.getTableDetailsById(tableId, TOABCascadeLevel.TWO.getLevelCode());
         log.info("Retrieved table: {} by id", tableVo);
         if(tableVo == null) {
             errors.reject(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
@@ -48,7 +49,7 @@ public class TableIdValidator implements Validator {
             return;
         }
         if(emptyTableId) {
-            log.debug(objectName + ".table.tableId is invalid");
+            log.debug(objectName + ".table.tableId is empty");
             errors.reject(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             return;
         }

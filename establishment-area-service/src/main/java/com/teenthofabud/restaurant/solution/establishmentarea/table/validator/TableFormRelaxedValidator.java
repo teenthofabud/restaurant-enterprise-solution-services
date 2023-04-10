@@ -52,8 +52,7 @@ public class TableFormRelaxedValidator implements RelaxedValidator<TableForm>  {
         }
         log.debug("TableForm.description is valid");
         
-        if(!fieldsToEscape.contains("capacity") && form.getCapacity() != null
-                && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getCapacity()))) {
+        if(!fieldsToEscape.contains("capacity") && form.getCapacity() != null && form.getCapacity() <= 0) {
             errors.rejectValue("capacity", EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID.name());
             log.debug("TableForm.capacity is empty");
             return false;

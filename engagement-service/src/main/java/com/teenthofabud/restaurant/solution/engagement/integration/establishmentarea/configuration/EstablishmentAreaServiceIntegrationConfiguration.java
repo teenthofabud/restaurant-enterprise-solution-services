@@ -11,6 +11,7 @@ import io.github.resilience4j.feign.Resilience4jFeign;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.cloud.openfeign.loadbalancer.FeignBlockingLoadBalancerClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
@@ -19,12 +20,12 @@ import org.springframework.context.annotation.Scope;
 public class EstablishmentAreaServiceIntegrationConfiguration {
 
     private CircuitBreakerRegistry circuitBreakerRegistry;
-    private EstablishmentAreaServiceClientFallbackImpl tableServiceClientFallback;
+    private EstablishmentAreaServiceClientFallbackImpl establishmentAreaServiceClientFallback;
 
     @Autowired
     @Qualifier("establishmentAreaServiceClientFallback")
-    public void setTableServiceClientFallback(EstablishmentAreaServiceClientFallbackImpl tableServiceClientFallback) {
-        this.tableServiceClientFallback = tableServiceClientFallback;
+    public void setEstablishmentAreaServiceClientFallback(EstablishmentAreaServiceClientFallbackImpl establishmentAreaServiceClientFallback) {
+        this.establishmentAreaServiceClientFallback = establishmentAreaServiceClientFallback;
     }
 
     @Autowired
@@ -34,13 +35,13 @@ public class EstablishmentAreaServiceIntegrationConfiguration {
 
     @Bean
     @Scope(scopeName = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public Feign.Builder tableServiceClientFeignBuilder() {
+    public Feign.Builder establishmentAreaServiceClientFeignBuilder() {
         CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker(EstablishmentAreaServiceClient.SERVICE_CLIENT_NAME);
         FeignDecorators decorators = FeignDecorators.builder()
                 .withCircuitBreaker(circuitBreaker)
-                .withFallback(tableServiceClientFallback, CallNotPermittedException.class)
+                .withFallback(establishmentAreaServiceClientFallback, CallNotPermittedException.class)
                 .build();
-        return Resilience4jFeign.builder(decorators);
+        return Resilience4jFeign.builder(decorators);//.client(new FeignBlockingLoadBalancerClient());
     }
 
 }

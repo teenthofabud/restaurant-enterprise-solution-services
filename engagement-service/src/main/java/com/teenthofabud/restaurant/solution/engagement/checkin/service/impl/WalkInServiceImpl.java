@@ -1,6 +1,7 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.teenthofabud.core.common.constant.TOABBaseMessageTemplate;
@@ -14,13 +15,7 @@ import com.teenthofabud.restaurant.solution.engagement.checkin.constants.CheckIn
 import com.teenthofabud.restaurant.solution.engagement.checkin.converter.WalkInDto2EntityConverter;
 import com.teenthofabud.restaurant.solution.engagement.checkin.converter.WalkInEntity2VoConverter;
 import com.teenthofabud.restaurant.solution.engagement.checkin.converter.WalkInForm2EntityConverter;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInEntity;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInException;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInMessageTemplate;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.WalkInDto;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.WalkInEntity;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.WalkInForm;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.WalkInVo;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.*;
 import com.teenthofabud.restaurant.solution.engagement.checkin.factory.CheckInBeanFactory;
 import com.teenthofabud.restaurant.solution.engagement.checkin.mapper.WalkInEntitySelfMapper;
 import com.teenthofabud.restaurant.solution.engagement.checkin.mapper.WalkInForm2EntityMapper;
@@ -32,11 +27,11 @@ import com.teenthofabud.restaurant.solution.engagement.checkin.validator.WalkInF
 import com.teenthofabud.restaurant.solution.engagement.constants.EngagementErrorCode;
 import com.teenthofabud.restaurant.solution.engagement.utils.EngagementServiceHelper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
@@ -57,6 +52,13 @@ public class WalkInServiceImpl implements WalkInService {
     private CheckInBeanFactory checkInBeanFactory;
     private EngagementServiceHelper engagementServiceHelper;
     private String walkInTimeFormat;
+    private ObjectMapper objectMapper;
+    private String phoneNumberRegex;
+
+    @Value("${res.engagement.checkIn.walkIn.phoneNumber.regex}")
+    public void setPhoneNumberRegex(String phoneNumberRegex) {
+        this.phoneNumberRegex = phoneNumberRegex;
+    }
 
     @Override
     @Value("${res.engagement.checkIn.walkIn.timestamp.format}")
@@ -67,6 +69,11 @@ public class WalkInServiceImpl implements WalkInService {
     @Override
     public List<WalkInVo> retrieveAllMatchingWalkInDetailsByName(String name) throws CheckInException {
         return null;
+    }
+
+    @Autowired
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
     }
 
     @Autowired
@@ -232,18 +239,10 @@ public class WalkInServiceImpl implements WalkInService {
 
     @Override
     public WalkInVo retrieveMatchingDetailsByCriteria(String sequence, String date) throws CheckInException {
-        Long seq = 0l;
         LocalDate dt = LocalDate.now();
         LocalDateTime start = LocalDateTime.now();
         LocalDateTime end = LocalDateTime.now();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern(walkInTimeFormat);
-
-        try {
-            seq = Long.parseLong(sequence);
-        } catch (NumberFormatException e) {
-            log.debug("Sequence: {} format is invalid", sequence);
-            throw new CheckInException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID, new Object[] { "sequence", sequence });
-        }
 
         try {
             dt = LocalDate.parse(date, dtf);
@@ -255,13 +254,13 @@ public class WalkInServiceImpl implements WalkInService {
         start = LocalDateTime.of(dt, LocalTime.of(0,0, 0));
         end = LocalDateTime.of(dt, LocalTime.of(23,59, 59));
 
-        log.info("Requesting WalkInEntity by sequence: {} between timestamps: {} and {}", seq, start, end);
-        Optional<WalkInEntity> optEntity = this.getCheckInRepository().findBySequenceAndCreatedOnBetween(seq, start, end);
+        log.info("Requesting WalkInEntity by sequence: {} between timestamps: {} and {}", sequence, start, end);
+        Optional<WalkInEntity> optEntity = this.getCheckInRepository().findBySequenceAndCreatedOnBetween(sequence, start, end);
         if(optEntity.isEmpty()) {
-            log.debug("No WalkInEntity found by sequence: {} between timestamps: {} and {}", seq, start, end);
-            throw new CheckInException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "seq: " + seq, ", date: " + date });
+            log.debug("No WalkInEntity found by sequence: {} between timestamps: {} and {}", sequence, start, end);
+            throw new CheckInException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "sequence: " + sequence, ", date: " + date });
         }
-        log.info("Found WalkInVo by sequence: {} between timestamps: {} and {}", seq, start, end);
+        log.info("Found WalkInVo by sequence: {} between timestamps: {} and {}", sequence, start, end);
         WalkInEntity entity = optEntity.get();
         WalkInVo vo = engagementServiceHelper.walkInEntity2DetailedVo(entity);
         return vo;
@@ -369,7 +368,7 @@ public class WalkInServiceImpl implements WalkInService {
 
         this.checkUniquenessOfCheckIn(form, actualEntity);
 
-        this.getCheckInEntitySelfMapper().compareAndMap(expectedEntity, actualEntity);
+        this.getCheckInEntitySelfMapper().compareAndMapChild(expectedEntity, actualEntity);
         log.debug("Compared and copied attributes from WalkInEntity to WalkInForm");
         actualEntity.setModifiedOn(LocalDateTime.now(ZoneOffset.UTC));
 
@@ -452,16 +451,16 @@ public class WalkInServiceImpl implements WalkInService {
 
 
         log.debug("Patching list items to WalkInDto");
-        WalkInDto patchedWalkInForm = new WalkInDto();
+        WalkInDto patchedWalkInDto = new WalkInDto();
         try {
             log.debug("Preparing patch list items for CheckIn");
-            JsonNode walkInDtoTree = OBJECT_MAPPER.convertValue(patches, JsonNode.class);
+            JsonNode walkInDtoTree = objectMapper.convertValue(patches, JsonNode.class);
             JsonPatch checkInPatch = JsonPatch.fromJson(walkInDtoTree);
             log.debug("Prepared patch list items for CheckIn");
-            JsonNode blankWalkInDtoTree = OBJECT_MAPPER.convertValue(new WalkInDto(), JsonNode.class);
+            JsonNode blankWalkInDtoTree = objectMapper.convertValue(new WalkInDto(), JsonNode.class);
             JsonNode patchedWalkInFormTree = checkInPatch.apply(blankWalkInDtoTree);
             log.debug("Applying patch list items to WalkInDto");
-            patchedWalkInForm = OBJECT_MAPPER.treeToValue(patchedWalkInFormTree, WalkInDto.class);
+            patchedWalkInDto = objectMapper.treeToValue(patchedWalkInFormTree, WalkInDto.class);
             log.debug("Applied patch list items to WalkInDto");
         } catch (JsonPatchException e) {
             log.debug("Failed to patch list items to WalkInDto: {}", e);
@@ -480,8 +479,8 @@ public class WalkInServiceImpl implements WalkInService {
         log.debug("Successfully to patch list items to WalkInDto");
 
         log.debug("Validating patched WalkInDto");
-        Errors err = new DirectFieldBindingResult(patchedWalkInForm, patchedWalkInForm.getClass().getSimpleName());
-        this.getCheckInDtoValidator().validate(patchedWalkInForm, err);
+        Errors err = new DirectFieldBindingResult(patchedWalkInDto, patchedWalkInDto.getClass().getSimpleName());
+        this.getCheckInDtoValidator().validate(patchedWalkInDto, err);
         if(err.hasErrors()) {
             log.debug("Patched WalkInDto has {} errors", err.getErrorCount());
             EngagementErrorCode ec = EngagementErrorCode.valueOf(err.getFieldError().getCode());
@@ -490,11 +489,11 @@ public class WalkInServiceImpl implements WalkInService {
         }
         log.debug("All attributes of patched WalkInDto are valid");
 
-        this.checkUniquenessOfCheckIn(patchedWalkInForm, actualEntity);
+        this.checkUniquenessOfCheckIn(patchedWalkInDto, actualEntity);
 
         log.debug("Comparatively copying patched attributes from WalkInDto to WalkInEntity");
         try {
-            this.getCheckInDto2EntityConverter().compareAndMap(patchedWalkInForm, actualEntity);
+            this.getCheckInDto2EntityConverter().compareAndMapChild(patchedWalkInDto, actualEntity);
         } catch (TOABBaseException e) {
             throw (CheckInException) e;
         }
@@ -510,52 +509,6 @@ public class WalkInServiceImpl implements WalkInService {
         }
         log.info("Patched WalkInEntity with id:{}", id);
     }
-
-    /*private void checkUniquenessOfCheckIn(WalkInDto patchedWalkInForm, WalkInEntity actualEntity) throws CheckInException {
-        List<Boolean> similaritySwitchesCollection = new ArrayList<>(2);
-        if(patchedWalkInForm.getAccountId().isPresent()) {
-            similaritySwitchesCollection.add(patchedWalkInForm.getAccountId().get().compareTo(actualEntity.getAccountId()) == 0);
-        }
-        if(patchedWalkInForm.getSequence().isPresent()) {
-            similaritySwitchesCollection.add(patchedWalkInForm.getSequence().get().compareTo(actualEntity.getSequence()) == 0);
-        }
-        if(!similaritySwitchesCollection.isEmpty()) {
-            String accountId = patchedWalkInForm.getAccountId().isPresent() ? patchedWalkInForm.getAccountId().get() : actualEntity.getAccountId();
-            String sequence = patchedWalkInForm.getSequence().isPresent() ? patchedWalkInForm.getSequence().get() : actualEntity.getSequence();
-            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence);
-            boolean sameEntitySw = similaritySwitchesCollection.stream().allMatch(Boolean::valueOf);
-            boolean duplicateEntitySw =  this.getCheckInRepository().existsByAccountIdAndSequence(accountId, sequence);
-            if(sameEntitySw || duplicateEntitySw) {
-                log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTS_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence);
-                throw new CheckInException(EngagementErrorCode.ENGAGEMENT_EXISTS, new Object[]{ "accountId: " + accountId, "sequence: " + sequence });
-            }
-            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_NON_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence);
-
-        }
-    }
-
-    private void checkUniquenessOfCheckIn(WalkInForm walkInForm, WalkInEntity actualEntity) throws CheckInException {
-        List<Boolean> similaritySwitchesCollection = new ArrayList<>(3);
-        if(StringUtils.hasText(StringUtils.trimWhitespace(walkInForm.getAccountId()))) {
-            similaritySwitchesCollection.add(walkInForm.getAccountId().compareTo(actualEntity.getAccountId()) == 0);
-        }
-        if(!ObjectUtils.isEmpty(walkInForm.getSequence())) {
-            similaritySwitchesCollection.add(walkInForm.getSequence().compareTo(actualEntity.getSequence()) == 0);
-        }
-        if(!similaritySwitchesCollection.isEmpty()) {
-            String accountId = StringUtils.hasText(StringUtils.trimWhitespace(walkInForm.getAccountId())) ? walkInForm.getAccountId() : actualEntity.getAccountId();
-            String sequence = !ObjectUtils.isEmpty(walkInForm.getSequence()) ? walkInForm.getSequence() : actualEntity.getSequence();
-            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence);
-            boolean sameEntitySw = similaritySwitchesCollection.stream().allMatch(Boolean::valueOf);
-            boolean duplicateEntitySw =  this.getCheckInRepository().existsByAccountIdAndSequence(accountId, sequence);
-            if(sameEntitySw || duplicateEntitySw) {
-                log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTS_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence);
-                throw new CheckInException(EngagementErrorCode.ENGAGEMENT_EXISTS, new Object[]{ "accountId: " + accountId, "sequence: " + sequence });
-            }
-            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_NON_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence);
-
-        }
-    }*/
 
     @Override
     public List<WalkInVo> retrieveAllMatchingWalkInDetailsByCriteria(Optional<String> optionalName, Optional<String> optionalPhoneNumber, Optional<String> optionalEmailId) throws CheckInException {
@@ -579,16 +532,27 @@ public class WalkInServiceImpl implements WalkInService {
             matcherCriteria = matcherCriteria.withMatcher("name", match -> match.exact());
         }
         if(StringUtils.hasText(StringUtils.trimWhitespace(phoneNumber))) {
-            log.debug("phoneNumber {} is valid", phoneNumber);
-            providedFilters.put("phoneNumber", phoneNumber);
-            entity.setPhoneNumber(phoneNumber);
-            matcherCriteria = matcherCriteria.withMatcher("phoneNumber", match -> match.exact());
+            if(phoneNumber.matches(phoneNumberRegex)) {
+                log.debug("phoneNumber {} is valid", phoneNumber);
+                providedFilters.put("phoneNumber", phoneNumber);
+                entity.setPhoneNumber(phoneNumber);
+                matcherCriteria = matcherCriteria.withMatcher("phoneNumber", match -> match.exact());
+            } else {
+                log.debug("WalkIn phoneNumber: {} is invalid", phoneNumber);
+                throw new CheckInException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID, new Object[] { "phoneNumber", phoneNumber });
+            }
         }
         if(StringUtils.hasText(StringUtils.trimWhitespace(emailId))) {
-            log.debug("emailId {} is valid", emailId);
-            providedFilters.put("emailId", emailId);
-            entity.setEmailId(emailId);
-            matcherCriteria = matcherCriteria.withMatcher("emailId", match -> match.contains());
+            if(EmailValidator.getInstance().isValid(emailId)) {
+                log.debug("emailId {} is valid", emailId);
+                providedFilters.put("emailId", emailId);
+                entity.setEmailId(emailId);
+                matcherCriteria = matcherCriteria.withMatcher("emailId", match -> match.contains());
+            } else {
+                log.debug("WalkIn emailId: {} is invalid", phoneNumber);
+                throw new CheckInException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID, new Object[] { "emailId", emailId });
+            }
+
         }
         if(providedFilters.isEmpty()) {
             log.debug("search parameters are not valid");

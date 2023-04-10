@@ -18,6 +18,7 @@ import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.*;
 
 
@@ -74,7 +75,7 @@ public class TableAllocationEntity2VoConverter extends TOABBaseEntity2VoConverte
             case TWO:
                 if(!fieldsToEscape.contains("tableId") && fieldName.compareTo("tableId") == 0) {
                     Callable<TableVo> tableEntity2VoConversion = () -> {
-                        TableVo tableVo = establishmentAreaServiceClient.getTableDetailsById(entity.getTableId());
+                        TableVo tableVo = establishmentAreaServiceClient.getTableDetailsById(entity.getTableId(), TOABCascadeLevel.TWO.getLevelCode());
                         return tableVo;
                     };
                     String tName = "tableEntity2VoConversion";
@@ -85,6 +86,7 @@ public class TableAllocationEntity2VoConverter extends TOABBaseEntity2VoConverte
                         vo.setTable(tableVo);
                         log.debug("Retrieved {} for tableId: {}", tableVo, entity.getTableId());
                     } catch (InterruptedException | ExecutionException e) {
+                        e.printStackTrace();
                         String msg = "Unable to perform " + tName;
                         log.error(msg, e);
                         throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, msg, new Object[] { tName + " failure: " + e.getMessage() });
@@ -93,18 +95,19 @@ public class TableAllocationEntity2VoConverter extends TOABBaseEntity2VoConverte
                 if(!fieldsToEscape.contains("checkInId") && fieldName.compareTo("checkInId") == 0) {
                     Callable<CheckInVo> checkInEntity2VoConversion = () -> {
                         TOABRequestContextHolder.setCascadeLevelContext(TOABCascadeLevel.ZERO);
-                        CheckInVo CheckInVo = engagementServiceHelper.checkInEntity2DetailedVo(entity.getCheckIn());
+                        Optional<? extends CheckInVo> optionalCheckInVo = engagementServiceHelper.checkInEntity2DetailedVo(entity.getCheckIn());
                         TOABRequestContextHolder.clearCascadeLevelContext();
-                        return CheckInVo;
+                        return optionalCheckInVo.get();
                     };
                     ExecutorService executorService = Executors.newFixedThreadPool(1, new CustomizableThreadFactory("checkInEntity2VoConversion-"));
                     Future<CheckInVo> checkInEntity2VoConversionResult = executorService.submit(checkInEntity2VoConversion);
                     try {
-                        CheckInVo CheckInVo = checkInEntity2VoConversionResult.get();
-                        vo.setCheckIn(CheckInVo);
-                        log.debug("Retrieved {} for CheckInId: {}", CheckInVo, entity.getCheckIn().getId());
+                        CheckInVo checkInVo = checkInEntity2VoConversionResult.get();
+                        vo.setCheckIn(checkInVo);
+                        log.debug("Retrieved {} for checkInId: {}", checkInVo, entity.getCheckIn().getId());
                     } catch (InterruptedException | ExecutionException e) {
                         log.error("Unable to perform checkInEntity2VoConversion", e);
+                        e.printStackTrace();
                         throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, "Unable to perform checkInEntity2VoConversion",
                                 new Object[] { "checkInEntity2VoConversion failure: " + e.getMessage() });
                     }
@@ -113,7 +116,7 @@ public class TableAllocationEntity2VoConverter extends TOABBaseEntity2VoConverte
             default:
                 vo.setTableId(entity.getTableId());
                 vo.setCheckInId(entity.getCheckIn().getId().toString());
-                log.debug("only first level cascaded for booking over tableId");
+                log.debug("only first level cascaded for booking over tableId: {}", entity.getTableId());
                 break;
         }
     }

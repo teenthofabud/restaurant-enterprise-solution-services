@@ -262,10 +262,18 @@ public class TableServiceImpl implements TableService {
             matcherCriteria = matcherCriteria.withMatcher("description", ExampleMatcher.GenericPropertyMatchers.contains());
         }
         if(StringUtils.hasText(StringUtils.trimWhitespace(capacity))) {
-            log.debug("capacity {} is valid", capacity);
-            providedFilters.put("capacity", capacity);
-            entity.setCapacity(capacity);
-            matcherCriteria = matcherCriteria.withMatcher("capacity", ExampleMatcher.GenericPropertyMatchers.contains());
+            try {
+                Integer cap = Integer.parseInt(capacity);
+                log.debug("capacity {} is valid", capacity);
+                providedFilters.put("capacity", capacity);
+                entity.setCapacity(cap);
+                matcherCriteria = matcherCriteria.withMatcher("capacity", ExampleMatcher.GenericPropertyMatchers.exact());
+            } catch (NumberFormatException e) {
+                log.error("Unable to parse capacity", e);
+                log.debug("capacity: {} is invalid", capacity);
+                throw new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_INVALID, new Object[] { "capacity", capacity });
+            }
+
         }
         Example<TableEntity> accountEntityExample = Example.of(entity, matcherCriteria);
         List<TableEntity> accountEntityList = tableRepository.findAll(accountEntityExample);

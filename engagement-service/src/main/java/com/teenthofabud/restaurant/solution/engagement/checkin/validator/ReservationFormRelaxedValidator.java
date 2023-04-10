@@ -54,7 +54,7 @@ public class ReservationFormRelaxedValidator extends CheckInFormRelaxedValidator
             errors.rejectValue("date", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             log.debug("ReservationForm.date is empty");
             return false;
-        } else {
+        } else if (!fieldsToEscape.contains("date") && form.getDate() != null && StringUtils.hasText(StringUtils.trimWhitespace(form.getDate()))) {
             try {
                 LocalDate.parse(form.getDate(), DateTimeFormatter.ofPattern(reservationDateFormat));
             } catch (DateTimeParseException w) {
@@ -69,7 +69,7 @@ public class ReservationFormRelaxedValidator extends CheckInFormRelaxedValidator
             errors.rejectValue("time", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             log.debug("ReservationForm.time is empty");
             return false;
-        } else {
+        } else if (!fieldsToEscape.contains("time") && form.getTime() != null && StringUtils.hasText(StringUtils.trimWhitespace(form.getTime()))) {
             try {
                 LocalTime.parse(form.getTime(), DateTimeFormatter.ofPattern(reservationTimeFormat));
             } catch (DateTimeParseException w) {

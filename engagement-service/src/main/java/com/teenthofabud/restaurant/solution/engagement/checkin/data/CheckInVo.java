@@ -1,8 +1,9 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.data;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.teenthofabud.core.common.data.vo.TOABBaseVo;
-import com.teenthofabud.restaurant.solution.engagement.checkin.constants.CheckInType;
 import com.teenthofabud.restaurant.solution.engagement.integration.customer.data.AccountVo;
 import lombok.*;
 
@@ -13,6 +14,14 @@ import lombok.*;
 @ToString(onlyExplicitlyIncluded = true, callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "type")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = ReservationVo.class),
+        @JsonSubTypes.Type(value = WalkInVo.class)
+})
 public class CheckInVo extends TOABBaseVo implements Comparable<CheckInVo> {
 
     @EqualsAndHashCode.Include

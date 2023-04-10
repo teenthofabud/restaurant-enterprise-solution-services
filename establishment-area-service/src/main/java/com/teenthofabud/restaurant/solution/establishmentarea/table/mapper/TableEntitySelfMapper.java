@@ -34,9 +34,7 @@ public class TableEntitySelfMapper implements SingleChannelMapper<TableEntity> {
             changeSW = true;
             log.debug("Source TableEntity.description is valid");
         }
-        if(source.getCapacity() != null &&
-                StringUtils.hasText(StringUtils.trimWhitespace(source.getCapacity()))
-                && source.getCapacity().compareTo(target.getCapacity()) != 0) {
+        if(source.getCapacity() != null &&source.getCapacity().compareTo(target.getCapacity()) != 0) {
             target.setCapacity(source.getCapacity());
             changeSW = true;
             log.debug("Source TableEntity.capacity is valid");

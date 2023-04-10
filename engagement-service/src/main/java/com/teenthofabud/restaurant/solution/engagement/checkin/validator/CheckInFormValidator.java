@@ -36,13 +36,6 @@ public abstract class CheckInFormValidator implements Validator {
     public void validate(Object target, Errors errors) {
         CheckInForm form = (CheckInForm) target;
 
-        if(!getFieldsToEscape().contains("notes") && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getNotes()))) {
-            log.debug("CheckInForm.notes is empty");
-            errors.rejectValue("notes", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
-            return;
-        }
-        log.debug("CheckInForm.notes is valid");
-
         /*if(!getFieldsToEscape().contains("status") && form.getStatus() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getStatus()))) {
             errors.rejectValue("status", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             log.debug("CheckInForm.status is invalid");

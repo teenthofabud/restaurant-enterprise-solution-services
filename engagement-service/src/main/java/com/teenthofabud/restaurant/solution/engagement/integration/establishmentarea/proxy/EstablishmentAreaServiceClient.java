@@ -19,7 +19,7 @@ public interface EstablishmentAreaServiceClient {
     @GetMapping("/table/{id}")
     @TOABFeignErrorHandler(EstablishmentAreaServiceClientExceptionHandler.class)
     @CircuitBreaker(name = SERVICE_CLIENT_NAME)
-    public TableVo getTableDetailsById(@PathVariable(required = true) String id);
+    public TableVo getTableDetailsById(@PathVariable(required = true) String id, @RequestParam String cascadeUntilLevel);
 
     @GetMapping("/actuator/health")
     @TOABFeignErrorHandler(EstablishmentAreaServiceClientExceptionHandler.class)

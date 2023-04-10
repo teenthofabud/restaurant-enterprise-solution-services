@@ -60,7 +60,7 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
     private int integrationServicePort;
     private RecipeRepository recipeRepository;
 
-    @Value("${cookbook.integration.service.port}")
+    @Value("${res.cookbook.integration.gateway.port}")
     public void setIntegrationServicePort(int integrationServicePort) {
         this.integrationServicePort = integrationServicePort;
     }

@@ -16,7 +16,7 @@ public interface MetadataServiceClient {
 
     public static final String SERVICE_CLIENT_NAME = "metadata-service";
 
-    @GetMapping("/metadata/gender/{id}")
+    @GetMapping("/gender/{id}")
     @TOABFeignErrorHandler(MetadataServiceClientExceptionHandler.class)
     @CircuitBreaker(name = SERVICE_CLIENT_NAME)
     public GenderVo getGenderDetailsById(@PathVariable(required = true) String id);

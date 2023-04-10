@@ -10,8 +10,10 @@ import org.springframework.util.StringUtils;
 public class WalkInEntitySelfMapper extends CheckInEntitySelfMapper<WalkInEntity> {
 
     @Override
-    protected void compareAndMapChild(WalkInEntity source, WalkInEntity target) {
+    public void compareAndMapChild(WalkInEntity source, WalkInEntity target) {
         boolean changeSW = false;
+
+        super.compareAndMap(source, target);
 
         if(source.getId() != null && source.getId().compareTo(target.getId()) != 0) {
             target.setId(source.getId());

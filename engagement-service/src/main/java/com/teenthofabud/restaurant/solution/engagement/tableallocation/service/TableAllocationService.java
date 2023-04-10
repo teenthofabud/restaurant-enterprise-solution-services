@@ -22,7 +22,7 @@ public interface TableAllocationService {
                                                                 Optional<String> optionalActive,
                                                                 Optional<String> optionalNotes) throws TableAllocationException;
 
-    public List<TableAllocationVo> retrieveAllMatchingDetailsByCheckInId(String checkInId) throws TableAllocationException;
+    public List<TableAllocationVo> retrieveAllMatchingDetailsByCheckInId(String checkInId, Optional<TOABCascadeLevel> optionalCascadeLevel) throws TableAllocationException;
 
     public String createTableAllocation(TableAllocationForm form) throws TableAllocationException;
 

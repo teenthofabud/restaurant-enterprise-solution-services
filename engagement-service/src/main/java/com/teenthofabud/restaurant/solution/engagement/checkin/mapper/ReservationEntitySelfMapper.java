@@ -9,8 +9,10 @@ import org.springframework.stereotype.Component;
 public class ReservationEntitySelfMapper extends CheckInEntitySelfMapper<ReservationEntity> {
 
     @Override
-    protected void compareAndMapChild(ReservationEntity source, ReservationEntity target) {
+    public void compareAndMapChild(ReservationEntity source, ReservationEntity target) {
         boolean changeSW = false;
+
+        super.compareAndMap(source, target);
 
         if(source.getId() != null && source.getId().compareTo(target.getId()) != 0) {
             target.setId(source.getId());

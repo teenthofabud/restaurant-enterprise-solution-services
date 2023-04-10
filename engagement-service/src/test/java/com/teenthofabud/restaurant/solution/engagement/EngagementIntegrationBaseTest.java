@@ -1,8 +1,10 @@
 package com.teenthofabud.restaurant.solution.engagement;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.teenthofabud.restaurant.solution.engagement.checkin.constants.CheckInType;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.ReservationEntity;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.WalkInEntity;
+import com.teenthofabud.restaurant.solution.engagement.integration.customer.data.AccountVo;
 import io.specto.hoverfly.junit.core.Hoverfly;
 import io.specto.hoverfly.junit.core.HoverflyConfig;
 import io.specto.hoverfly.junit.core.HoverflyMode;
@@ -16,20 +18,23 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public abstract class EngagementIntegrationBaseTest {
 
-    protected ObjectMapper om;
+    protected ObjectMapper objectMapper;
     protected MockMvc mockMvc;
     private Hoverfly hoverfly;
 
     @Autowired
-    public void setOm(ObjectMapper om) {
-        this.om = om;
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
     }
 
     @Autowired
@@ -39,9 +44,6 @@ public abstract class EngagementIntegrationBaseTest {
 
     @BeforeAll
     private void setUp() throws URISyntaxException {
-        om.registerModule(new Jdk8Module());
-        om.registerModule(new JavaTimeModule());
-
         LocalHoverflyConfig localHoverflyConfig = HoverflyConfig.localConfigs();
 
         Optional<String> optSimulationBaseLocation = Optional.empty();
@@ -92,5 +94,54 @@ public abstract class EngagementIntegrationBaseTest {
             hoverfly.close();
         }
     }
+
+    protected AccountVo accountVo(String id, String firstName, String lastName, boolean active) {
+        AccountVo accountVo = new AccountVo();
+        accountVo.setActive(active);
+        accountVo.setId(id);
+        accountVo.setFirstName(firstName);
+        accountVo.setLastName(lastName);
+        return accountVo;
+    }
+
+    protected WalkInEntity walkInEntity(String accountId, String sequence, Integer noOfPersons, String notes, boolean active, String name, String phoneNumber, String emailId) {
+        WalkInEntity walkInEntity = new WalkInEntity();
+        walkInEntity.setName(name);
+        walkInEntity.setSequence(sequence);
+        walkInEntity.setPhoneNumber(phoneNumber);
+        walkInEntity.setEmailId(emailId);
+        walkInEntity.setNotes(notes);
+        walkInEntity.setNoOfPersons(noOfPersons);
+        walkInEntity.setAccountId(accountId);
+        walkInEntity.setActive(active);
+        walkInEntity.setType(CheckInType.WALK_IN);
+        return walkInEntity;
+    }
+
+    protected ReservationEntity reservationEntity(String accountId, String sequence, Integer noOfPersons, String notes, boolean active, LocalDate date, LocalTime time) {
+        ReservationEntity reservationEntity = new ReservationEntity();
+        reservationEntity.setTime(time);
+        reservationEntity.setSequence(sequence);
+        reservationEntity.setDate(date);
+        reservationEntity.setNotes(notes);
+        reservationEntity.setNoOfPersons(noOfPersons);
+        reservationEntity.setAccountId(accountId);
+        reservationEntity.setActive(active);
+        reservationEntity.setType(CheckInType.RESERVATION);
+        return reservationEntity;
+    }
+
+    protected String name() {
+        return String.join(" ", "Name", UUID.randomUUID().toString());
+    }
+
+    protected String phoneNumber() {
+        return String.valueOf(System.nanoTime());
+    }
+
+    protected String emailId() {
+        return String.join("@", String.valueOf(System.nanoTime()), "email.com");
+    }
+
 
 }

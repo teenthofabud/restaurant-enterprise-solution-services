@@ -130,19 +130,19 @@ public class TableAllocationController implements ApplicationContextAware, Table
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("primaryFilter")
+    @GetMapping("filter")
     @Override
-    public List<TableAllocationVo> getAllTableAllocationsByFilters(@RequestParam(required = false) String accountId, @RequestParam(required = false) String sequence, 
+    public List<TableAllocationVo> getAllTableAllocationsByFilters(@RequestParam(required = false) String tableId, @RequestParam(required = false) String active,
                                                        @RequestParam(required = false) String notes) throws TableAllocationException {
         log.debug("Requesting all available tableAllocations with given filters");
-        boolean emptyAccountId = !StringUtils.hasText(StringUtils.trimWhitespace(accountId));
-        boolean emptySequence = !StringUtils.hasText(StringUtils.trimWhitespace(sequence));
+        boolean emptyTableId = !StringUtils.hasText(StringUtils.trimWhitespace(tableId));
+        boolean emptyActive = !StringUtils.hasText(StringUtils.trimWhitespace(active));
         boolean emptyNotes = !StringUtils.hasText(StringUtils.trimWhitespace(notes));
-        if(!emptyAccountId || !emptySequence || !emptyNotes) {
-            Optional<String> optAccountId = emptyAccountId ? Optional.empty() : Optional.of(accountId);
-            Optional<String> optSequence = emptySequence ? Optional.empty() : Optional.of(sequence);
+        if(!emptyTableId || !emptyActive || !emptyNotes) {
+            Optional<String> optTableId = emptyTableId ? Optional.empty() : Optional.of(tableId);
+            Optional<String> optActive = emptyActive ? Optional.empty() : Optional.of(active);
             Optional<String> optNotes = emptyNotes ? Optional.empty() : Optional.of(notes);
-            List<TableAllocationVo> matchedByFilter = tableAllocationService.retrieveAllMatchingDetailsByCriteria(optAccountId, optSequence, optNotes);
+            List<TableAllocationVo> matchedByFilter = tableAllocationService.retrieveAllMatchingDetailsByCriteria(optTableId, optActive, optNotes);
             log.debug("Responding with all available tableAllocations with given filters");
             return matchedByFilter;
         }
@@ -153,19 +153,34 @@ public class TableAllocationController implements ApplicationContextAware, Table
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("checkInId/{checkInId}")
     @Override
-    public List<TableAllocationVo> getTableAllocationByCheckInId(String checkInId) throws TableAllocationException {
-        List<TableAllocationVo> matchedByCheckInId = new ArrayList<>();
+    public List<TableAllocationVo> getTableAllocationByCheckInId(@PathVariable String checkInId, @RequestParam(required = false) String cascadeUntilLevel) throws TableAllocationException {
+        List<TableAllocationVo> matchedByCuisineIds = new ArrayList<>();
         log.debug("Requesting all available tableAllocations with given checkInId");
-        if(StringUtils.hasText(StringUtils.trimWhitespace(checkInId)) && StringUtils.hasText(StringUtils.trimWhitespace(checkInId))) {
-            matchedByCheckInId = tableAllocationService.retrieveAllMatchingDetailsByCheckInId(checkInId);
+        if(StringUtils.hasText(StringUtils.trimWhitespace(checkInId)) && StringUtils.isEmpty(StringUtils.trimWhitespace(cascadeUntilLevel))) {
+            matchedByCuisineIds = tableAllocationService.retrieveAllMatchingDetailsByCheckInId(checkInId, Optional.empty());
             log.debug("Responding with all available tableAllocations with given checkInId");
-        } else if(StringUtils.isEmpty(StringUtils.trimWhitespace(checkInId))) {
-            log.debug("tableAllocation checkInId is empty");
-            throw new TableAllocationException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID, new Object[] { "checkInId", checkInId });
+            return matchedByCuisineIds;
+        } else if(StringUtils.hasText(StringUtils.trimWhitespace(checkInId)) && StringUtils.hasText(StringUtils.trimWhitespace(cascadeUntilLevel))) {
+            try {
+                Integer cascadeLevelCode = Integer.parseInt(cascadeUntilLevel);
+                if(cascadeLevelCode < 0) {
+                    throw new NumberFormatException();
+                }
+                log.debug("Requested with cascade level code: {}", cascadeLevelCode);
+                Optional<TOABCascadeLevel> optCascadeLevel = TOABCascadeLevel.findByLevelCode(cascadeUntilLevel);
+                matchedByCuisineIds = tableAllocationService.retrieveAllMatchingDetailsByCheckInId(checkInId, optCascadeLevel);
+                log.debug("Responding with successful retrieval of existing tableAllocation details with given checkInId having fields cascaded to given level");
+                return matchedByCuisineIds;
+            } catch (NumberFormatException e) {
+                log.debug(TableAllocationMessageTemplate.MSG_TEMPLATE_TABLE_ALLOCATION_CASCADE_LEVEL_EMPTY.getValue());
+                throw new TableAllocationException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID, new Object[] { "cascadeUntilLevel", cascadeUntilLevel });
+            }
         }
-        return matchedByCheckInId;
+        log.debug("tableAllocation cuisineId is empty");
+        throw new TableAllocationException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID, new Object[] { "checkInId", checkInId });
     }
 
+    @ResponseStatus(HttpStatus.OK)
     @GetMapping("{id}")
     @Override
     public TableAllocationVo getTableAllocationDetailsById(@PathVariable String id, @RequestParam(required = false) String cascadeUntilLevel) throws TableAllocationException {

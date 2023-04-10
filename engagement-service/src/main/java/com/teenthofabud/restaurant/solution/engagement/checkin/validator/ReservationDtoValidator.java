@@ -59,7 +59,7 @@ public class ReservationDtoValidator extends CheckInDtoValidator {
             errors.rejectValue("date", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             log.debug("ReservationDto.date is empty");
             return;
-        } else {
+        } else if(!fieldsToEscape.contains("date") && optDate.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optDate.get()))) {
             try {
                 LocalDate.parse(optDate.get(), DateTimeFormatter.ofPattern(reservationDateFormat));
             } catch (DateTimeParseException w)  {
@@ -74,7 +74,7 @@ public class ReservationDtoValidator extends CheckInDtoValidator {
             errors.rejectValue("time", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             log.debug("ReservationDto.time is empty");
             return;
-        } else {
+        } else  if(!fieldsToEscape.contains("time") && optTime.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optTime.get()))) {
             try {
                 LocalTime.parse(optTime.get(), DateTimeFormatter.ofPattern(reservationTimeFormat));
             } catch (DateTimeParseException w)  {

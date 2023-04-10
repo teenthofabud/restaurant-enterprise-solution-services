@@ -1,6 +1,7 @@
 package com.teenthofabud.restaurant.solution.engagement.checkin.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.teenthofabud.core.common.constant.TOABBaseMessageTemplate;
@@ -14,7 +15,12 @@ import com.teenthofabud.restaurant.solution.engagement.checkin.constants.CheckIn
 import com.teenthofabud.restaurant.solution.engagement.checkin.converter.ReservationDto2EntityConverter;
 import com.teenthofabud.restaurant.solution.engagement.checkin.converter.ReservationEntity2VoConverter;
 import com.teenthofabud.restaurant.solution.engagement.checkin.converter.ReservationForm2EntityConverter;
-import com.teenthofabud.restaurant.solution.engagement.checkin.data.*;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInException;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.CheckInMessageTemplate;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.ReservationDto;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.ReservationEntity;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.ReservationForm;
+import com.teenthofabud.restaurant.solution.engagement.checkin.data.ReservationVo;
 import com.teenthofabud.restaurant.solution.engagement.checkin.factory.CheckInBeanFactory;
 import com.teenthofabud.restaurant.solution.engagement.checkin.mapper.ReservationEntitySelfMapper;
 import com.teenthofabud.restaurant.solution.engagement.checkin.mapper.ReservationForm2EntityMapper;
@@ -30,7 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.util.ObjectUtils;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
@@ -42,7 +48,16 @@ import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 
 @Slf4j
 public class ReservationServiceImpl implements ReservationService {
@@ -50,8 +65,8 @@ public class ReservationServiceImpl implements ReservationService {
     private String reservationDateFormat;
     private CheckInBeanFactory checkInBeanFactory;
     private EngagementServiceHelper engagementServiceHelper;
-
     private TOABBaseService toabBaseService;
+    private ObjectMapper objectMapper;
 
     @Override
     @Value("${res.engagement.checkIn.reservation.time.format}")
@@ -63,6 +78,11 @@ public class ReservationServiceImpl implements ReservationService {
     @Value("${res.engagement.checkIn.reservation.date.format}")
     public void setReservationDateFormat(String reservationDateFormat) {
         this.reservationDateFormat = reservationDateFormat;
+    }
+
+    @Autowired
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
     }
 
     @Autowired
@@ -168,16 +188,15 @@ public class ReservationServiceImpl implements ReservationService {
         }
         List<ReservationVo> matchedReservationList = new LinkedList<>();
         Map<String, String> providedFilters = new LinkedHashMap<>();
-        ReservationEntity entity = new ReservationEntity(new ReservationEntity());
-        ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll();
+        List<Specification<ReservationEntity>> reservationEntitySpecificationCollection = new ArrayList<>(2);
         if(StringUtils.hasText(StringUtils.trimWhitespace(date))) {
             try {
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern(reservationDateFormat);
                 LocalDate dt = LocalDate.parse(date, dtf);
                 log.debug("date {} is valid", date);
                 providedFilters.put("date", date);
-                entity.setDate(dt);
-                matcherCriteria = matcherCriteria.withMatcher("date", match -> match.exact());
+                Specification<ReservationEntity> dateEquals = (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("date"), dt);
+                reservationEntitySpecificationCollection.add(dateEquals);
             } catch (DateTimeParseException e) {
                 log.error("Unable to parse date", e);
                 log.debug("Reservation date: {} is invalid", date);
@@ -187,25 +206,37 @@ public class ReservationServiceImpl implements ReservationService {
         if(StringUtils.hasText(StringUtils.trimWhitespace(time))) {
             try {
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern(reservationTimeFormat);
-                LocalTime t = LocalTime.parse(date, dtf);
-                log.debug("time {} is valid", date);
-                providedFilters.put("time", date);
-                entity.setTime(t);
-                matcherCriteria = matcherCriteria.withMatcher("time", match -> match.exact());
+                LocalTime t = LocalTime.parse(time, dtf);
+                log.debug("time {} is valid", time);
+                LocalTime start = LocalTime.of(t.getHour(), t.getMinute(), 0);
+                LocalTime end = LocalTime.of(t.getHour(), t.getMinute(), 59);
+                providedFilters.put("time:start", start.format(DateTimeFormatter.ofPattern(reservationTimeFormat)));
+                providedFilters.put("time:end", end.format(DateTimeFormatter.ofPattern(reservationTimeFormat)));
+                Specification<ReservationEntity> timeBetween = (root, query, criteriaBuilder) -> criteriaBuilder.between(root.get("time"), start, end);
+                reservationEntitySpecificationCollection.add(timeBetween);
             } catch (DateTimeParseException e) {
                 log.error("Unable to parse time", e);
-                log.debug("Reservation time: {} is invalid", date);
-                throw new CheckInException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID, new Object[] { "time", date });
+                log.debug("Reservation time: {} is invalid", time);
+                throw new CheckInException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID, new Object[] { "time", time });
             }
         }
+        Specification<ReservationEntity> reservationEntitySpecification = null;
         if(providedFilters.isEmpty()) {
             log.debug("search parameters are not valid");
         } else {
+            for(int  i = 0 ; i < reservationEntitySpecificationCollection.size() ; i++) {
+                Specification<ReservationEntity> entitySpecification = reservationEntitySpecificationCollection.get(i);
+                if(i == 0) {
+                    reservationEntitySpecification = Specification.where(entitySpecification);
+                } else {
+                    reservationEntitySpecification = reservationEntitySpecification.and(entitySpecification);
+                }
+            }
             log.debug("search parameters {} are valid", providedFilters);
+            List<ReservationEntity> reservationEntityList = this.getCheckInRepository().findAll(reservationEntitySpecification);
+            matchedReservationList = this.engagementServiceHelper.reservationEntity2DetailedVo(reservationEntityList);
+            Collections.sort(matchedReservationList, getCheckInVoTypeComparator());
         }
-        Example<ReservationEntity> reservationEntityExample = Example.of(entity, matcherCriteria);
-        List<ReservationEntity> reservationEntityList = this.getCheckInRepository().findAll(reservationEntityExample);
-        matchedReservationList = this.engagementServiceHelper.reservationEntity2DetailedVo(reservationEntityList);
         log.info("Found {} ReservationVo matching with provided parameters : {}", matchedReservationList.size(), providedFilters);
         log.info("No ReservationVo available matching with provided parameters : {}", matchedReservationList.size(), providedFilters);
         return matchedReservationList;
@@ -226,7 +257,8 @@ public class ReservationServiceImpl implements ReservationService {
     public ReservationVo retrieveDetailsById(String id, Optional<TOABCascadeLevel> optionalCascadeLevel) throws CheckInException {
         log.info("Requesting ReservationEntity by id: {}", id);
         Long idL = this.parsePK(id);
-        Optional<ReservationEntity> optEntity = this.getCheckInRepository().findById(idL);
+        ReservationRepository reservationRepository = this.getCheckInRepository();
+        Optional<ReservationEntity> optEntity = reservationRepository.findById(idL);
         if(optEntity.isEmpty()) {
             log.debug("No ReservationEntity found by id: {}", id);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
@@ -255,7 +287,7 @@ public class ReservationServiceImpl implements ReservationService {
         List<ReservationVo> matchedReservationList = new LinkedList<>();
         Map<String, String> providedFilters = new LinkedHashMap<>();
         ReservationEntity entity = new ReservationEntity();
-        ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll();
+        ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll().withIgnoreNullValues();
         if(StringUtils.hasText(StringUtils.trimWhitespace(accountId))) {
             log.debug("accountId {} is valid", accountId);
             providedFilters.put("accountId", accountId);
@@ -282,6 +314,7 @@ public class ReservationServiceImpl implements ReservationService {
         Example<ReservationEntity> reservationEntityExample = Example.of(entity, matcherCriteria);
         List<ReservationEntity> reservationEntityList = this.getCheckInRepository().findAll(reservationEntityExample);
         matchedReservationList = engagementServiceHelper.reservationEntity2DetailedVo(reservationEntityList);
+        Collections.sort(matchedReservationList, getCheckInVoTypeComparator());
         log.info("Found {} ReservationVo matching with provided parameters : {}", matchedReservationList.size(), providedFilters);
         log.info("No ReservationVo available matching with provided parameters : {}", matchedReservationList.size(), providedFilters);
         return matchedReservationList;
@@ -289,18 +322,10 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public ReservationVo retrieveMatchingDetailsByCriteria(String sequence, String date) throws CheckInException {
-        Long seq = 0l;
         LocalDate dt = LocalDate.now();
         LocalDateTime start = LocalDateTime.now();
         LocalDateTime end = LocalDateTime.now();
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern(reservationTimeFormat);
-
-        try {
-            seq = Long.parseLong(sequence);
-        } catch (NumberFormatException e) {
-            log.debug("Sequence: {} format is invalid", sequence);
-            throw new CheckInException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID, new Object[] { "sequence", sequence });
-        }
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern(reservationDateFormat);
 
         try {
             dt = LocalDate.parse(date, dtf);
@@ -312,13 +337,13 @@ public class ReservationServiceImpl implements ReservationService {
         start = LocalDateTime.of(dt, LocalTime.of(0,0, 0));
         end = LocalDateTime.of(dt, LocalTime.of(23,59, 59));
 
-        log.info("Requesting ReservationEntity by sequence: {} between timestamps: {} and {}", seq, start, end);
-        Optional<ReservationEntity> optEntity = this.getCheckInRepository().findBySequenceAndCreatedOnBetween(seq, start, end);
+        log.info("Requesting ReservationEntity by sequence: {} between timestamps: {} and {}", sequence, start, end);
+        Optional<ReservationEntity> optEntity = this.getCheckInRepository().findBySequenceAndCreatedOnBetween(sequence, start, end);
         if(optEntity.isEmpty()) {
-            log.debug("No ReservationEntity found by sequence: {} between timestamps: {} and {}", seq, start, end);
-            throw new CheckInException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "seq: " + seq, ", date: " + date });
+            log.debug("No ReservationEntity found by sequence: {} between timestamps: {} and {}", sequence, start, end);
+            throw new CheckInException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "sequence: " + sequence, ", date: " + date });
         }
-        log.info("Found ReservationVo by sequence: {} between timestamps: {} and {}", seq, start, end);
+        log.info("Found ReservationVo by sequence: {} between timestamps: {} and {}", sequence, start, end);
         ReservationEntity entity = optEntity.get();
         ReservationVo vo = engagementServiceHelper.reservationEntity2DetailedVo(entity);
         return vo;
@@ -424,7 +449,7 @@ public class ReservationServiceImpl implements ReservationService {
 
         this.checkUniquenessOfCheckIn(form, actualEntity);
 
-        this.getCheckInEntitySelfMapper().compareAndMap(expectedEntity, actualEntity);
+        this.getCheckInEntitySelfMapper().compareAndMapChild(expectedEntity, actualEntity);
         log.debug("Compared and copied attributes from ReservationEntity to ReservationForm");
         actualEntity.setModifiedOn(LocalDateTime.now(ZoneOffset.UTC));
 
@@ -507,16 +532,16 @@ public class ReservationServiceImpl implements ReservationService {
 
 
         log.debug("Patching list items to ReservationDto");
-        ReservationDto patchedReservationForm = new ReservationDto();
+        ReservationDto patchedReservationDto = new ReservationDto();
         try {
             log.debug("Preparing patch list items for CheckIn");
-            JsonNode reservationDtoTree = OBJECT_MAPPER.convertValue(patches, JsonNode.class);
+            JsonNode reservationDtoTree = objectMapper.convertValue(patches, JsonNode.class);
             JsonPatch checkInPatch = JsonPatch.fromJson(reservationDtoTree);
             log.debug("Prepared patch list items for CheckIn");
-            JsonNode blankReservationDtoTree = OBJECT_MAPPER.convertValue(new ReservationDto(), JsonNode.class);
+            JsonNode blankReservationDtoTree = objectMapper.convertValue(new ReservationDto(), JsonNode.class);
             JsonNode patchedReservationFormTree = checkInPatch.apply(blankReservationDtoTree);
             log.debug("Applying patch list items to ReservationDto");
-            patchedReservationForm = OBJECT_MAPPER.treeToValue(patchedReservationFormTree, ReservationDto.class);
+            patchedReservationDto = objectMapper.treeToValue(patchedReservationFormTree, ReservationDto.class);
             log.debug("Applied patch list items to ReservationDto");
         } catch (JsonPatchException e) {
             log.debug("Failed to patch list items to ReservationDto: {}", e);
@@ -535,8 +560,8 @@ public class ReservationServiceImpl implements ReservationService {
         log.debug("Successfully to patch list items to ReservationDto");
 
         log.debug("Validating patched ReservationDto");
-        Errors err = new DirectFieldBindingResult(patchedReservationForm, patchedReservationForm.getClass().getSimpleName());
-        this.getCheckInDtoValidator().validate(patchedReservationForm, err);
+        Errors err = new DirectFieldBindingResult(patchedReservationDto, patchedReservationDto.getClass().getSimpleName());
+        this.getCheckInDtoValidator().validate(patchedReservationDto, err);
         if(err.hasErrors()) {
             log.debug("Patched ReservationDto has {} errors", err.getErrorCount());
             EngagementErrorCode ec = EngagementErrorCode.valueOf(err.getFieldError().getCode());
@@ -545,11 +570,11 @@ public class ReservationServiceImpl implements ReservationService {
         }
         log.debug("All attributes of patched ReservationDto are valid");
 
-        this.checkUniquenessOfCheckIn(patchedReservationForm, actualEntity);
+        this.checkUniquenessOfCheckIn(patchedReservationDto, actualEntity);
 
         log.debug("Comparatively copying patched attributes from ReservationDto to ReservationEntity");
         try {
-            this.getCheckInDto2EntityConverter().compareAndMap(patchedReservationForm, actualEntity);
+            this.getCheckInDto2EntityConverter().compareAndMapChild(patchedReservationDto, actualEntity);
         } catch (TOABBaseException e) {
             throw (CheckInException) e;
         }
@@ -565,56 +590,4 @@ public class ReservationServiceImpl implements ReservationService {
         }
         log.info("Patched ReservationEntity with id:{}", id);
     }
-
-    /*private void checkUniquenessOfCheckIn(ReservationDto patchedReservationForm, ReservationEntity actualEntity) throws CheckInException {
-        List<Boolean> similaritySwitchesCollection = new ArrayList<>(2);
-        if(patchedReservationForm.getAccountId().isPresent()) {
-            similaritySwitchesCollection.add(patchedReservationForm.getAccountId().get().compareTo(actualEntity.getAccountId()) == 0);
-        }
-        if(patchedReservationForm.getSequence().isPresent()) {
-            similaritySwitchesCollection.add(patchedReservationForm.getSequence().get().compareTo(actualEntity.getSequence()) == 0);
-        }
-        if(!similaritySwitchesCollection.isEmpty()) {
-            String accountId = patchedReservationForm.getAccountId().isPresent() ? patchedReservationForm.getAccountId().get() : actualEntity.getAccountId();
-            String sequence = patchedReservationForm.getSequence().isPresent() ? patchedReservationForm.getSequence().get() : actualEntity.getSequence();
-            LocalDate dt = LocalDate.now();
-            LocalDateTime start = LocalDateTime.of(dt, LocalTime.of(0,0, 0));
-            LocalDateTime end = LocalDateTime.of(dt, LocalTime.of(23,59, 59));
-            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence, start, end);
-            boolean sameEntitySw = similaritySwitchesCollection.stream().allMatch(Boolean::valueOf);
-            boolean duplicateEntitySw =  this.getCheckInRepository().existsByAccountIdAndSequenceAndCreatedOnBetween(accountId, sequence, start, end);
-            if(sameEntitySw || duplicateEntitySw) {
-                log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTS_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence, start, end);
-                throw new CheckInException(EngagementErrorCode.ENGAGEMENT_EXISTS, new Object[]{ "accountId: " + accountId, "sequence: " + sequence + ", start: " + start + ", end: " + end });
-            }
-            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_NON_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence, start, end);
-
-        }
-    }
-
-    private void checkUniquenessOfCheckIn(ReservationForm reservationForm, ReservationEntity actualEntity) throws CheckInException {
-        List<Boolean> similaritySwitchesCollection = new ArrayList<>(3);
-        if(StringUtils.hasText(StringUtils.trimWhitespace(reservationForm.getAccountId()))) {
-            similaritySwitchesCollection.add(reservationForm.getAccountId().compareTo(actualEntity.getAccountId()) == 0);
-        }
-        if(!ObjectUtils.isEmpty(reservationForm.getSequence())) {
-            similaritySwitchesCollection.add(reservationForm.getSequence().compareTo(actualEntity.getSequence()) == 0);
-        }
-        if(!similaritySwitchesCollection.isEmpty()) {
-            String accountId = StringUtils.hasText(StringUtils.trimWhitespace(reservationForm.getAccountId())) ? reservationForm.getAccountId() : actualEntity.getAccountId();
-            String sequence = !ObjectUtils.isEmpty(reservationForm.getSequence()) ? reservationForm.getSequence() : actualEntity.getSequence();
-            LocalDate dt = LocalDate.now();
-            LocalDateTime start = LocalDateTime.of(dt, LocalTime.of(0,0, 0));
-            LocalDateTime end = LocalDateTime.of(dt, LocalTime.of(23,59, 59));
-            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence, start, end);
-            boolean sameEntitySw = similaritySwitchesCollection.stream().allMatch(Boolean::valueOf);
-            boolean duplicateEntitySw =  this.getCheckInRepository().existsByAccountIdAndSequenceAndCreatedOnBetween(accountId, sequence, start, end);
-            if(sameEntitySw || duplicateEntitySw) {
-                log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_EXISTS_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence, start, end);
-                throw new CheckInException(EngagementErrorCode.ENGAGEMENT_EXISTS, new Object[]{ "accountId: " + accountId, "sequence: " + sequence + ", start: " + start + ", end: " + end });
-            }
-            log.debug(CheckInMessageTemplate.MSG_TEMPLATE_CHECKIN_NON_EXISTENCE_BY_ACCOUNT_ID_AND_SEQUENCE_AND_CREATED_BETWEEN.getValue(), accountId, sequence, start, end);
-
-        }
-    }*/
 }

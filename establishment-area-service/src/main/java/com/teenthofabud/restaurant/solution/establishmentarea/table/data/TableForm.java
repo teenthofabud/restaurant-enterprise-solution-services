@@ -18,7 +18,7 @@ public class TableForm {
     private String description;
 
     @ToString.Include
-    private String capacity;
+    private Integer capacity;
 
     @ToString.Include
     private String floorId;

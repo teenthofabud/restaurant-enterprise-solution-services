@@ -5,14 +5,15 @@ import com.teenthofabud.restaurant.solution.engagement.integration.establishment
 import com.teenthofabud.restaurant.solution.engagement.integration.establishmentarea.proxy.EstablishmentAreaServiceClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Component("establishmentAreaServiceClientFallback")
 @Slf4j
 public class EstablishmentAreaServiceClientFallbackImpl implements EstablishmentAreaServiceClient {
 
     @Override
-    public TableVo getTableDetailsById(String id) {
-        log.debug("Falling back to default implementation of getting table details by id");
+    public TableVo getTableDetailsById(String id, @RequestParam String cascadeUntilLevel) {
+        log.debug("Falling back to default implementation of getting table details by id and cascadeUntilLevel");
         return new TableVo();
     }
 

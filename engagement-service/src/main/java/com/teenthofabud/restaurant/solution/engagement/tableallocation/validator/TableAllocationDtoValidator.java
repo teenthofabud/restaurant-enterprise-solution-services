@@ -17,12 +17,11 @@ import java.util.Optional;
 
 @Component
 @Slf4j
-public class TableAllocationDtoValidator implements Validator {
+public class TableAllocationDtoValidator extends TableAllocationValidator implements Validator {
 
-    @Autowired
-    @Qualifier("tableIdValidator")
+    //@Autowired
+    //@Qualifier("tableIdValidator")
     private Validator tableIdValidator;
-    private Validator accountIdValidator;
 
     private List<String> fieldsToEscape;
 
@@ -48,7 +47,7 @@ public class TableAllocationDtoValidator implements Validator {
         TableAllocationDto dto = (TableAllocationDto) target;
 
         Optional<String> optNotes = dto.getNotes();
-        if(fieldsToEscape.contains("notes") && optNotes.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optNotes.get()))) {
+        if(!fieldsToEscape.contains("notes") && optNotes.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optNotes.get()))) {
             errors.rejectValue("notes", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             log.debug("TableAllocationDto.notes is invalid");
             return;
@@ -71,11 +70,11 @@ public class TableAllocationDtoValidator implements Validator {
         }*/
 
         Optional<String> optTableId = dto.getTableId();
-        if(fieldsToEscape.contains("tableId") && optTableId.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optTableId.get()))) {
+        if(!fieldsToEscape.contains("tableId") && optTableId.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optTableId.get()))) {
             errors.rejectValue("tableId", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
             log.debug("TableAllocationDto.tableId is invalid");
             return;
-        } else if(fieldsToEscape.contains("tableId") && optTableId.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optTableId.get()))) {
+        } else if(!fieldsToEscape.contains("tableId") && optTableId.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optTableId.get()))) {
             String tableId = optTableId.get();
             Errors err = new DirectFieldBindingResult(tableId, "TableAllocationDto");
             tableIdValidator.validate(tableId, err);
@@ -88,8 +87,21 @@ public class TableAllocationDtoValidator implements Validator {
             }
         }
 
+        Optional<String> optCheckInId = dto.getCheckInId();
+        if(!fieldsToEscape.contains("checkInId") && optCheckInId.isPresent() && StringUtils.isEmpty(StringUtils.trimWhitespace(optCheckInId.get()))) {
+            log.debug("TableAllocationDto.checkInId is empty");
+            errors.rejectValue("checkInId", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
+            return;
+        } else if(!fieldsToEscape.contains("checkInId") && optCheckInId.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optCheckInId.get()))){
+            boolean flag = super.validateCheckInId(optCheckInId.get(), dto.getClass());
+            if(!flag) {
+                errors.rejectValue("checkInId", EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_INVALID.name());
+                return;
+            }
+        }
+
         Optional<String> optActive = dto.getActive();
-        if(fieldsToEscape.contains("active") && optActive.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optActive.get()))) {
+        if(!fieldsToEscape.contains("active") && optActive.isPresent() && StringUtils.hasText(StringUtils.trimWhitespace(optActive.get()))) {
             Boolean trueSW = optActive.get().equalsIgnoreCase(Boolean.TRUE.toString());
             Boolean falseSW = optActive.get().equalsIgnoreCase(Boolean.FALSE.toString());
             if(!trueSW && !falseSW) {

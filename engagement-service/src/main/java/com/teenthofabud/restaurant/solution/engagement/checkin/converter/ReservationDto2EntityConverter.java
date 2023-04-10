@@ -40,10 +40,12 @@ public class ReservationDto2EntityConverter extends CheckInDto2EntityConverter<R
     }
 
     @Override
-    protected void compareAndMapChild(ReservationDto dto, ReservationEntity actualEntity) throws TOABBaseException {
+    public void compareAndMapChild(ReservationDto dto, ReservationEntity actualEntity) throws TOABBaseException {
         boolean[] changeSW = new boolean[NO_OF_COMPARABLE_AND_MAPPABLE_FIELDS]; // size = number of attributes in dto
         Arrays.fill(changeSW, Boolean.FALSE);
         int i = 0;
+
+        super.compareAndMap(dto, actualEntity);
 
         Optional<String> optDate = dto.getDate();
         if(!fieldsToEscape.contains("date") && optDate.isPresent()) {

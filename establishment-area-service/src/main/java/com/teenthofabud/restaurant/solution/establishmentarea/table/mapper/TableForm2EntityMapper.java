@@ -63,8 +63,7 @@ public class TableForm2EntityMapper implements DualChannelMapper<TableEntity, Ta
             log.debug("TableForm.description: is unchanged");
         }
         
-        if(!fieldsToEscape.contains("capacity") && StringUtils.hasText(StringUtils.trimWhitespace(form.getCapacity()))
-                && form.getCapacity().compareTo(actualEntity.getCapacity()) != 0) {
+        if(!fieldsToEscape.contains("capacity") && form.getCapacity() != null && form.getCapacity().compareTo(actualEntity.getCapacity()) != 0) {
             expectedEntity.setCapacity(form.getCapacity());
             changeSW = true;
             log.debug("TableForm.capacity: {} is different as TableEntity.capacity: {}", form.getCapacity(), actualEntity.getCapacity());

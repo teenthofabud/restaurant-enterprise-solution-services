@@ -9,6 +9,14 @@
               "value": "/customer/account/1"
             }
           ],
+          "query": {
+            "cascadeUntilLevel": [
+              {
+                "matcher": "exact",
+                "value": "2"
+              }
+            ]
+          },
           "method": [
             {
               "matcher": "exact",
@@ -46,6 +54,14 @@
               "value": "/customer/account/2"
             }
           ],
+          "query": {
+            "cascadeUntilLevel": [
+              {
+                "matcher": "exact",
+                "value": "2"
+              }
+            ]
+          },
           "method": [
             {
               "matcher": "exact",
@@ -83,6 +99,14 @@
               "value": "/customer/account/4"
             }
           ],
+          "query": {
+            "cascadeUntilLevel": [
+              {
+                "matcher": "exact",
+                "value": "2"
+              }
+            ]
+          },
           "method": [
             {
               "matcher": "exact",
@@ -231,6 +255,14 @@
               "value": "/customer/account/22"
             }
           ],
+          "query": {
+            "cascadeUntilLevel": [
+              {
+                "matcher": "exact",
+                "value": "2"
+              }
+            ]
+          },
           "method": [
             {
               "matcher": "exact",
@@ -305,6 +337,14 @@
               "value": "/establishmentarea/table/1"
             }
           ],
+          "query": {
+            "cascadeUntilLevel": [
+              {
+                "matcher": "exact",
+                "value": "2"
+              }
+            ]
+          },
           "method": [
             {
               "matcher": "exact",
@@ -342,6 +382,14 @@
               "value": "/establishmentarea/table/2"
             }
           ],
+          "query": {
+            "cascadeUntilLevel": [
+              {
+                "matcher": "exact",
+                "value": "2"
+              }
+            ]
+          },
           "method": [
             {
               "matcher": "exact",
@@ -379,6 +427,14 @@
               "value": "/establishmentarea/table/4"
             }
           ],
+          "query": {
+            "cascadeUntilLevel": [
+              {
+                "matcher": "exact",
+                "value": "2"
+              }
+            ]
+          },
           "method": [
             {
               "matcher": "exact",
@@ -416,6 +472,14 @@
               "value": "/establishmentarea/table/22"
             }
           ],
+          "query": {
+            "cascadeUntilLevel": [
+              {
+                "matcher": "exact",
+                "value": "2"
+              }
+            ]
+          },
           "method": [
             {
               "matcher": "exact",
