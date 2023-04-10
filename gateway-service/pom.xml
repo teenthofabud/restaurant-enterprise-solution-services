@@ -14,7 +14,6 @@
         <service.prefix>gateway</service.prefix>
     </properties>
 
-    <groupId>com.teenthofabud.restaurant.solution</groupId>
     <artifactId>restaurant-solution-gateway-service</artifactId>
     <version>2022.2-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -127,7 +126,14 @@
                 </exclusion>
             </exclusions>
         </dependency>
-<!--        <dependency>-->
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-redis-reactive -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
+            <version>2.7.5</version>
+        </dependency>
+
+        <!--        <dependency>-->
 <!--            <groupId>io.github.resilience4j</groupId>-->
 <!--            <artifactId>resilience4j-spring-boot2</artifactId>-->
 <!--            <version>${resilience4j.version}</version>-->
@@ -144,10 +150,6 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-gateway</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
     </dependencies>
 

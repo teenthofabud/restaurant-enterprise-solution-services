@@ -20,12 +20,12 @@ import org.springframework.context.annotation.Scope;
 public class CustomerServiceIntegrationConfiguration {
 
     private CircuitBreakerRegistry circuitBreakerRegistry;
-    private CustomerServiceClientFallbackImpl accountServiceClientFallback;
+    private CustomerServiceClientFallbackImpl customerServiceClientFallback;
 
     @Autowired
     @Qualifier("customerServiceClientFallback")
-    public void setAccountServiceClientFallback(CustomerServiceClientFallbackImpl accountServiceClientFallback) {
-        this.accountServiceClientFallback = accountServiceClientFallback;
+    public void setCustomerServiceClientFallback(CustomerServiceClientFallbackImpl customerServiceClientFallback) {
+        this.customerServiceClientFallback = customerServiceClientFallback;
     }
 
     @Autowired
@@ -35,11 +35,11 @@ public class CustomerServiceIntegrationConfiguration {
 
     @Bean
     @Scope(scopeName = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public Feign.Builder accountServiceClientFeignBuilder() {
+    public Feign.Builder customerServiceClientFeignBuilder() {
         CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker(CustomerServiceClient.SERVICE_CLIENT_NAME);
         FeignDecorators decorators = FeignDecorators.builder()
                 .withCircuitBreaker(circuitBreaker)
-                .withFallback(accountServiceClientFallback, CallNotPermittedException.class)
+                .withFallback(customerServiceClientFallback, CallNotPermittedException.class)
                 .build();
         return Resilience4jFeign.builder(decorators);
     }
