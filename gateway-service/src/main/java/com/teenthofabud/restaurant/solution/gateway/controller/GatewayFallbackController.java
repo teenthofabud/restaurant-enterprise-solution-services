@@ -54,7 +54,7 @@ public class GatewayFallbackController {
         return "encounterService is taking longer than expected, please try again later!!!";
     }
 
-    @GetMapping("/encounterServiceFallBack")
+    @GetMapping("/engagementServiceFallBack")
     public String engagementServiceFallBack(){
         return "engagementService is taking longer than expected, please try again later!!!";
     }
