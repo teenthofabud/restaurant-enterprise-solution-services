@@ -1,0 +1,66 @@
+eureka:
+    client:
+        initial-instance-info-replication-interval-seconds: 120
+        instance-info-replication-interval-seconds: 120
+        serviceUrl:
+            registerWithEureka: true
+    instance:
+        prefer-ip-address: true
+feign:
+    client:
+        config:
+            default:
+                loggerLevel: basic
+            inventory-service:
+                loggerLevel: basic
+            menu-service:
+                loggerLevel: basic
+info:
+    app:
+        description: '@project.description@'
+        encoding: '@project.build.sourceEncoding@'
+        java:
+            version: '@java.version@'
+        name: '@project.name@'
+        version: '@project.version@'
+logging:
+    level:
+        org:
+            hibernate:
+                SQL: INFO
+                type:
+                    descriptor:
+                        sql:
+                            BasicBinder: INFO
+management:
+    endpoint:
+        health:
+            show-details: always
+    endpoints:
+        web:
+            exposure:
+                include: '*'
+spring:
+    cloud:
+        discovery:
+            enabled: true
+        gateway:
+            discovery:
+                locator:
+                    enabled: true
+                    lower-case-service-id: true
+            globalcors:
+                corsConfigurations:
+                    '''[/**]''':
+                        allowedMethods: GET,POST,PUT,PATCH,DELETE
+                        allowedOrigins: '*'
+            metrics:
+                enabled: true
+        loadbalancer:
+            ribbon:
+                enabled: false
+        service-registry:
+            auto-registration:
+                enabled: true
+    main:
+        web-application-type: reactive

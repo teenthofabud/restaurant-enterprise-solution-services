@@ -1171,7 +1171,7 @@ public class PickUpIntegrationTest extends EncounterIntegrationBaseTest {
 
     @Override
     public String getSimulationBaseLocation() {
-        return "simulation/customer-service";
+        return "simulation";
     }
 
     @Override
@@ -1181,6 +1181,6 @@ public class PickUpIntegrationTest extends EncounterIntegrationBaseTest {
 
     @Override
     public String[] getSimulationFilePaths() {
-        return new String[] { String.join("/", getSimulationBaseLocation(), "simulation-v3.json") };
+        return new String[] { String.join("/", getSimulationBaseLocation(), "simulation.json") };
     }
 }

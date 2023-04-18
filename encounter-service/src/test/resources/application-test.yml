@@ -1,0 +1,92 @@
+eureka:
+    client:
+        enabled: false
+        serviceUrl:
+            registerWithEureka: false
+feign:
+    circuitbreaker:
+        enabled: true
+    client:
+        config:
+            customer-service:
+                connectTimeout: 250
+                loggerLevel: basic
+                readTimeout: 500
+            default:
+                loggerLevel: basic
+logging:
+    level:
+        org:
+            hibernate:
+                SQL: INFO
+                type:
+                    descriptor:
+                        sql:
+                            BasicBinder: INFO
+res:
+    encounter:
+        audit:
+            timestamp:
+                format: yyyy-MM-dd'T'HH:mm:ss.SSSSSSS
+        customer:
+            service:
+                url: localhost:${res.encounter.integration.gateway.port}
+        description: '@project.description@'
+        integration:
+            gateway:
+                port: 8199
+        meeting:
+            date:
+                format: dd-MM-yyyy
+            delivery:
+                fields-to-escape: ''
+            fields-to-escape: ''
+            pickUp:
+                fields-to-escape: ''
+            time:
+                format: HH:mm
+            timestamp:
+                format: ${res.encounter.meeting.date.format}'T'${res.encounter.meeting.time.format}
+        version: '@project.version@'
+server:
+    port: 17001
+spring:
+    cloud:
+        discovery:
+            enabled: false
+        loadbalancer:
+            ribbon:
+                enabled: false
+        service-registry:
+            auto-registration:
+                enabled: false
+    datasource:
+        driverClassName: org.h2.Driver
+        initialization-mode: always
+    h2:
+        console:
+            enabled: true
+    jpa:
+        database-platform: org.hibernate.dialect.H2Dialect
+        hibernate:
+            ddl-auto: none
+        properties:
+            hibernate:
+                format_sql: true
+                jdbc:
+                    time_zone: UTC
+                show_sql: true
+                use_sql_comments: true
+        show-sql: true
+    main:
+        allow-bean-definition-overriding: true
+    sleuth:
+        sampler:
+            percentage: 1.0
+        web:
+            skipPattern: (^cleanup.*|.+favicon.*)
+    zipkin:
+        enabled: false
+springdoc:
+    swagger-ui:
+        enabled: false

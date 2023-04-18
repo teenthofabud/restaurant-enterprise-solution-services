@@ -6,7 +6,7 @@
           "path": [
             {
               "matcher": "exact",
-              "value": "/account/1"
+              "value": "/customer/account/1"
             }
           ],
           "method": [
@@ -43,7 +43,7 @@
           "path": [
             {
               "matcher": "exact",
-              "value": "/account/2"
+              "value": "/customer/account/2"
             }
           ],
           "method": [
@@ -80,7 +80,7 @@
           "path": [
             {
               "matcher": "exact",
-              "value": "/account/4"
+              "value": "/customer/account/4"
             }
           ],
           "method": [
@@ -117,7 +117,7 @@
           "path": [
             {
               "matcher": "exact",
-              "value": "/account/(\\s)+"
+              "value": "/customer/account/(\\s)+"
             }
           ],
           "method": [
@@ -154,7 +154,7 @@
           "path": [
             {
               "matcher": "exact",
-              "value": "/account/3"
+              "value": "/customer/account/3"
             }
           ],
           "method": [
@@ -191,7 +191,7 @@
           "path": [
             {
               "matcher": "exact",
-              "value": "/account/r"
+              "value": "/customer/account/r"
             }
           ],
           "method": [
@@ -228,7 +228,7 @@
           "path": [
             {
               "matcher": "exact",
-              "value": "/account/22"
+              "value": "/customer/account/22"
             }
           ],
           "method": [
@@ -265,7 +265,7 @@
           "path": [
             {
               "matcher": "exact",
-              "value": "/account/33"
+              "value": "/customer/account/33"
             }
           ],
           "method": [

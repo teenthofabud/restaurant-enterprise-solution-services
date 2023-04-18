@@ -4,10 +4,11 @@ spring:
   profiles:
     active: native
   cloud:
-    failFast: true
-  loadbalancer:
-    ribbon:
-      enabled: false
+    config:
+      failFast: true
+    loadbalancer:
+      ribbon:
+        enabled: false
   service-registry:
     auto-registration:
       enabled: false

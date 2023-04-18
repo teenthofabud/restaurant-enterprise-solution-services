@@ -1,0 +1,84 @@
+eureka:
+    client:
+        initial-instance-info-replication-interval-seconds: 120
+        instance-info-replication-interval-seconds: 120
+        serviceUrl:
+            registerWithEureka: true
+    instance:
+        prefer-ip-address: true
+feign:
+    client:
+        config:
+            customer-service:
+                connectTimeout: 250
+                readTimeout: 500
+info:
+    app:
+        description: '@project.description@'
+        encoding: '@project.build.sourceEncoding@'
+        java:
+            version: '@java.version@'
+        name: '@project.name@'
+        version: '@project.version@'
+management:
+    endpoint:
+        health:
+            show-details: always
+    endpoints:
+        web:
+            exposure:
+                include: '*'
+    health:
+        mongo:
+            enabled: true
+res:
+    encounter:
+        audit:
+            timestamp:
+                format: yyyy-MM-dd'T'HH:mm:ss.SSSSSS
+        description: '@project.description@'
+        meeting:
+            date:
+                format: dd-MM-yyyy
+            delivery:
+                fields-to-escape: ''
+            fields-to-escape: ''
+            pickUp:
+                fields-to-escape: ''
+            time:
+                format: HH:mm:ss
+            timestamp:
+                format: ${res.encounter.meeting.date.format}'T'${res.encounter.meeting.time.format}
+        version: '@project.version@'
+spring:
+    cloud:
+        discovery:
+            enabled: true
+        loadbalancer:
+            ribbon:
+                enabled: false
+        service-registry:
+            auto-registration:
+                enabled: true
+    datasource:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        password: 3NC0UNT3R
+        username: res_encounter_manager
+    jpa:
+        hibernate:
+            ddl-auto: none
+        open-in-view: false
+        properties:
+            hibernate:
+                format_sql: true
+                jdbc:
+                    time_zone: UTC
+                show_sql: true
+                use_sql_comments: true
+    main:
+        allow-bean-definition-overriding: true
+    sleuth:
+        sampler:
+            percentage: 1.0
+        web:
+            skipPattern: (^cleanup.*|.+favicon.*)
