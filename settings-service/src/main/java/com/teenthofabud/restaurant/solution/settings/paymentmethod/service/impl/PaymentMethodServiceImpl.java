@@ -149,7 +149,7 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
     public PaymentMethodVo retrieveDetailsById(String id, Optional<TOABCascadeLevel> optionalCascadeLevel) throws PaymentMethodException {
         log.info("Requesting PaymentMethodDocument by id: {}", id);
         Optional<PaymentMethodDocument> optDocument = repository.findById(id);
-        if(optDocument.isEmpty()) {
+        if(!optDocument.isPresent()) {
             log.debug("No PaymentMethodDocument found by id: {}", id);
             throw new PaymentMethodException(SettingsErrorCode.SETTINGS_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -166,7 +166,7 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
     @Override
     public List<PaymentMethodVo> retrieveAllMatchingDetailsByCriteria(
             Optional<String> optionalName, Optional<String> optionalDescription) throws PaymentMethodException {
-        if(optionalName.isEmpty() && optionalDescription.isEmpty()) {
+        if(!optionalName.isPresent() && !optionalDescription.isPresent()) {
             log.debug("No search parameters provided");
         }
         String name = optionalName.isPresent() ? optionalName.get() : "";
@@ -254,7 +254,7 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
 
         log.debug(PaymentMethodMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_PAYMENT_METHOD_ENTITY_ID.getValue(), id);
         Optional<PaymentMethodDocument> optActualDocument = repository.findById(id);
-        if(optActualDocument.isEmpty()) {
+        if(!optActualDocument.isPresent()) {
             log.debug(PaymentMethodMessageTemplate.MSG_TEMPLATE_NO_PAYMENT_METHOD_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new PaymentMethodException(SettingsErrorCode.SETTINGS_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -288,7 +288,7 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
         log.debug("All attributes of PaymentMethodForm are valid");
 
         Optional<PaymentMethodDocument> optExpectedDocument = form2DocumentMapper.compareAndMap(actualDocument, form);
-        if(optExpectedDocument.isEmpty()) {
+        if(!optExpectedDocument.isPresent()) {
             log.debug("No new value for attributes of PaymentMethodForm");
             throw new PaymentMethodException(SettingsErrorCode.SETTINGS_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are expected with new values" });
         }
@@ -326,7 +326,7 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
 
         log.debug(PaymentMethodMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_PAYMENT_METHOD_ENTITY_ID.getValue(), id);
         Optional<PaymentMethodDocument> optDocument = repository.findById(id);
-        if(optDocument.isEmpty()) {
+        if(!optDocument.isPresent()) {
             log.debug(PaymentMethodMessageTemplate.MSG_TEMPLATE_NO_PAYMENT_METHOD_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new PaymentMethodException(SettingsErrorCode.SETTINGS_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -359,7 +359,7 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
 
         log.debug(PaymentMethodMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_PAYMENT_METHOD_ENTITY_ID.getValue(), id);
         Optional<PaymentMethodDocument> optActualDocument = repository.findById(id);
-        if(optActualDocument.isEmpty()) {
+        if(!optActualDocument.isPresent()) {
             log.debug(PaymentMethodMessageTemplate.MSG_TEMPLATE_NO_PAYMENT_METHOD_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new PaymentMethodException(SettingsErrorCode.SETTINGS_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }

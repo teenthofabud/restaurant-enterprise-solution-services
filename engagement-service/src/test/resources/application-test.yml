@@ -1,0 +1,99 @@
+eureka:
+    client:
+        enabled: false
+        serviceUrl:
+            registerWithEureka: false
+feign:
+    circuitbreaker:
+        enabled: true
+    client:
+        config:
+            customer-service:
+                loggerLevel: basic
+            default:
+                connectTimeout: 160000000
+                loggerLevel: basic
+                readTimeout: 160000000
+            establishmentarea-service:
+                loggerLevel: basic
+logging:
+    level:
+        org:
+            hibernate:
+                SQL: INFO
+                type: INFO
+                type.descriptor.sql.BasicBinder: INFO
+        root: INFO
+res:
+    engagement:
+        audit:
+            timestamp:
+                format: yyyy-MM-dd'T'HH:mm:ss.SSSSSS
+        checkIn:
+            reservation:
+                date:
+                    format: dd-MM-yyyy
+                fields-to-escape: ''
+                time:
+                    format: HH:mm
+            walkIn:
+                fields-to-escape: ''
+                phoneNumber:
+                    regex: '[0-9]{8,}'
+                timestamp:
+                    format: ${res.engagement.checkIn.reservation.date.format}'T'${res.engagement.checkIn.reservation.time.format}
+        customer:
+            service:
+                url: localhost:${res.engagement.integration.gateway.port}
+        description: '@project.description@'
+        establishmentarea:
+            service:
+                url: localhost:${res.engagement.integration.gateway.port}
+        integration:
+            gateway:
+                port: 8199
+        tableAllocation:
+            fields-to-escape: ''
+        version: '@project.version@'
+server:
+    port: 17001
+spring:
+    cloud:
+        discovery:
+            enabled: false
+        loadbalancer:
+            ribbon:
+                enabled: false
+        service-registry:
+            auto-registration:
+                enabled: false
+    datasource:
+        initialization-mode: always
+        driverClassName: org.h2.Driver
+    h2:
+        console:
+            enabled: true
+    jpa:
+        database-platform: org.hibernate.dialect.H2Dialect
+        hibernate:
+            ddl-auto: none
+        properties:
+            hibernate:
+                format_sql: true
+                jdbc:
+                    time_zone: UTC
+                show_sql: false
+                use_sql_comments: true
+        show-sql: false
+    main:
+        allow-bean-definition-overriding: true
+    sleuth:
+        sampler:
+            percentage: 1.0
+        web:
+            skipPattern: (^cleanup.*|.+favicon.*)
+    zipkin:
+        enabled: false
+springdoc:
+    swagger-ui:
+        enabled: false

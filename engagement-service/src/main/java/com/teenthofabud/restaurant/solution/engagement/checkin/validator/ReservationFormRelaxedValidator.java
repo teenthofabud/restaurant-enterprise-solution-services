@@ -42,7 +42,7 @@ public class ReservationFormRelaxedValidator extends CheckInFormRelaxedValidator
 
     @Override
     public Boolean validateLoosely(Optional<? extends CheckInForm> optionalCheckInForm, Errors errors) {
-        if(optionalCheckInForm.isEmpty()) {
+        if(!optionalCheckInForm.isPresent()) {
             log.debug("No ReservationForm available");
             return false;
         }

@@ -1,0 +1,88 @@
+eureka:
+    client:
+        enabled: false
+        serviceUrl:
+            registerWithEureka: false
+feign:
+    circuitbreaker:
+        enabled: false
+    client:
+        config:
+            country-state-city-api-service:
+                connectTimeout: 2000
+                default-request-headers:
+                    X-CSCAPI-KEY: dkJXMjJzOE9Ec2NJUFdLS1pUTTNJQUpocGFsOWJ4dGxzMU9KNTVmSA==
+                loggerLevel: basic
+                readTimeout: 3000
+            default:
+                loggerLevel: basic
+            metadata-service:
+                connectTimeout: 500
+                readTimeout: 1000
+logging:
+    level:
+        org:
+            hibernate:
+                SQL: INFO
+                type:
+                    descriptor:
+                        sql:
+                            BasicBinder: INFO
+res:
+    customer:
+        account:
+            fields-to-escape: dateOfBirth,emailId
+        address:
+            fields-to-escape: ''
+        dob:
+            format: dd-MM-yyyy
+        country-state-city-api:
+            service:
+                url: https://api.countrystatecity.in/v1/countries
+        integration:
+            gateway:
+                port: 34002
+        metadata:
+            service:
+                url: localhost:${res.customer.integration.gateway.port}
+
+server:
+    port: 11001
+spring:
+    cloud:
+        discovery:
+            enabled: false
+        loadbalancer:
+            ribbon:
+                enabled: false
+        service-registry:
+            auto-registration:
+                enabled: false
+    datasource:
+        initialization-mode: always
+        driverClassName: org.h2.Driver
+    h2:
+        console:
+            enabled: true
+    jpa:
+        database-platform: org.hibernate.dialect.H2Dialect
+        hibernate:
+            ddl-auto: none
+        properties:
+            hibernate:
+                format_sql: true
+                jdbc:
+                    time_zone: UTC
+                show_sql: true
+                use_sql_comments: true
+        show-sql: true
+    sleuth:
+        sampler:
+            percentage: 1.0
+        web:
+            skipPattern: (^cleanup.*|.+favicon.*)
+    zipkin:
+        enabled: false
+springdoc:
+    swagger-ui:
+        enabled: false

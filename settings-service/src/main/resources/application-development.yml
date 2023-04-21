@@ -1,0 +1,30 @@
+eureka:
+    client:
+        enabled: ${SETTINGS_EUREKA_CLIENT_ENABLED}
+        serviceUrl:
+            defaultZone: http://${SETTINGS_EUREKA_HOST}:${SETTINGS_EUREKA_PORT}/eureka
+
+logging:
+    level:
+        org:
+            hibernate:
+                SQL: ${SETTINGS_LOGGING_LEVEL}
+                type:
+                    descriptor:
+                        sql:
+                            BasicBinder: ${SETTINGS_LOGGING_LEVEL}
+
+server:
+    port: ${SETTINGS_SERVER_PORT}
+
+spring:
+    data:
+        mongodb:
+            uri: mongodb://${SETTINGS_DATABASE_HOST}:${SETTINGS_DATABASE_PORT}/settings
+    zipkin:
+        baseUrl: http://${SETTINGS_ZIPKIN_HOST}:${SETTINGS_ZIPKIN_PORT}
+        enabled: ${SETTINGS_ZIPKIN_CLIENT_ENABLED}
+
+springdoc:
+    swagger-ui:
+        enabled: ${DSETTINGS_SWAGGER_ENABLED}

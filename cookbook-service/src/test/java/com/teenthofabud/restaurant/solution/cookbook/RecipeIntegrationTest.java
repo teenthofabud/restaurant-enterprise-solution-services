@@ -58,13 +58,6 @@ public class RecipeIntegrationTest extends CookbookIntegrationBaseTest {
     private RecipeRepository recipeRepository;
     private CuisineRepository cuisineRepository;
 
-    private int integrationServicePort;
-
-    @Value("${res.cookbook.integration.gateway.port}")
-    public void setIntegrationServicePort(int integrationServicePort) {
-        this.integrationServicePort = integrationServicePort;
-    }
-
     @Autowired
     public void setRecipeRepository(RecipeRepository recipeRepository) {
         this.recipeRepository = recipeRepository;
@@ -3061,18 +3054,4 @@ public class RecipeIntegrationTest extends CookbookIntegrationBaseTest {
      * GET all by filter combination - END
      */
 
-    @Override
-    public String getSimulationBaseLocation() {
-        return "simulation/menu-service";
-    }
-
-    @Override
-    public Integer getServicePort() {
-        return this.integrationServicePort;
-    }
-
-    @Override
-    public String[] getSimulationFilePaths() {
-        return new String[] { String.join("/", getSimulationBaseLocation(), "simulation-v3.json") };
-    }
 }

@@ -192,7 +192,7 @@ public class KitchenServiceImpl implements KitchenService {
         log.info("Requesting KitchenEntity by id: {}", id);
         Long kitchenId = parseKitchenId(id);
         Optional<KitchenEntity> optEntity = kitchenRepository.findById(kitchenId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug("No KitchenEntity found by id: {}", id);
             throw new KitchenException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_NOT_FOUND,
                     new Object[] { "id", String.valueOf(id) });
@@ -329,7 +329,7 @@ public class KitchenServiceImpl implements KitchenService {
         log.info("Updating KitchenEntity by id: {}", id);
         Long kitchenId = parseKitchenId(id);
         Optional<KitchenEntity> optEntity = kitchenRepository.findById(kitchenId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug("No KitchenEntity found by id: {}", id);
             throw new KitchenException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_NOT_FOUND,
                     new Object[] { "id", String.valueOf(id) });
@@ -366,7 +366,7 @@ public class KitchenServiceImpl implements KitchenService {
         log.debug("All attributes of KitchenForm are valid");
 
         Optional<KitchenEntity> optExpectedEntity = form2EntityMapper.compareAndMap(actualEntity, form);
-        if(optExpectedEntity.isEmpty()) {
+        if(!optExpectedEntity.isPresent()) {
             log.debug("No new value for attributes of KitchenForm");
             throw new KitchenException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_UNEXPECTED, 
                     new Object[]{ "form", "fields are expected with new values" });
@@ -400,7 +400,7 @@ public class KitchenServiceImpl implements KitchenService {
         log.debug(KitchenMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_KITCHEN_ENTITY_ID.getValue(), id);
         Long floorId = parseKitchenId(id);
         Optional<KitchenEntity> optEntity = kitchenRepository.findById(floorId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug(KitchenMessageTemplate.MSG_TEMPLATE_KITCHEN_ID_INVALID.getValue(), id);
             throw new KitchenException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -435,7 +435,7 @@ public class KitchenServiceImpl implements KitchenService {
         log.debug(KitchenMessageTemplate.MSG_TEMPLATE_FOUND_KITCHEN_ENTITY_ID.getValue(), id);
         Long kitchenId = parseKitchenId(id);
         Optional<KitchenEntity> optActualEntity = kitchenRepository.findById(kitchenId);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(KitchenMessageTemplate.MSG_TEMPLATE_FOUND_KITCHEN_ENTITY_ID.getValue(), id);
             throw new KitchenException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }

@@ -163,7 +163,7 @@ public class RecipeServiceImpl implements RecipeService {
         List<RecipeEntity> recipeEntityList = repository.findAll();
         Set<RecipeVo> naturallyOrderedSet = new TreeSet<RecipeVo>(CMP_BY_NAME_AND_CUISINE_ID_AND_ITEM_ID);
         for(RecipeEntity entity : recipeEntityList) {
-            List<RecipeVo> dtoList = cookbookServiceHelper.recipeEntity2DetailedVo(List.of(entity));
+            List<RecipeVo> dtoList = cookbookServiceHelper.recipeEntity2DetailedVo(Arrays.asList(entity));
             if(dtoList != null && !dtoList.isEmpty()) {
                 RecipeVo dto = dtoList.get(0);
                 log.debug("Converting {} to {}", entity, dto);
@@ -180,7 +180,7 @@ public class RecipeServiceImpl implements RecipeService {
         log.info("Requesting RecipeEntity by id: {}", id);
         Long recipeId = parseRecipeId(id);
         Optional<RecipeEntity> optEntity = repository.findById(recipeId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug("No RecipeEntity found by id: {}", id);
             throw new RecipeException(CookbookErrorCode.COOK_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -235,11 +235,11 @@ public class RecipeServiceImpl implements RecipeService {
                                                                Optional<String> optionalPortionSizeAmount,
                                                                Optional<String> optionalPortionSizeUnitId)
             throws RecipeException {
-        if(optionalName.isEmpty() && optionalDescription.isEmpty() && optionalInstructions.isEmpty()
-                && optionalCookingMethod.isEmpty() && optionalItemId.isEmpty() && optionalNumberOfServings.isEmpty()
-                && optionalPreparationTimeDuration.isEmpty() && optionalPreparationTimeUnitId.isEmpty()
-                && optionalCookingTimeDuration.isEmpty() && optionalCookingTimeUnitId.isEmpty()
-                && optionalPortionSizeAmount.isEmpty() && optionalPortionSizeUnitId.isEmpty()) {
+        if(!optionalName.isPresent() && !optionalDescription.isPresent() && !optionalInstructions.isPresent()
+                && !optionalCookingMethod.isPresent() && !optionalItemId.isPresent() && !optionalNumberOfServings.isPresent()
+                && !optionalPreparationTimeDuration.isPresent() && !optionalPreparationTimeUnitId.isPresent()
+                && !optionalCookingTimeDuration.isPresent() && !optionalCookingTimeUnitId.isPresent()
+                && !optionalPortionSizeAmount.isPresent() && !optionalPortionSizeUnitId.isPresent()) {
             log.debug("No search parameters provided");
         }
         String name = optionalName.isPresent() ? optionalName.get() : "";
@@ -480,7 +480,7 @@ public class RecipeServiceImpl implements RecipeService {
         log.debug(RecipeMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_RECIPE_ENTITY_ID.getValue(), id);
         Long recipeId = parseRecipeId(id);
         Optional<RecipeEntity> optActualEntity = repository.findById(recipeId);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(RecipeMessageTemplate.MSG_TEMPLATE_NO_RECIPE_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new RecipeException(CookbookErrorCode.COOK_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -514,7 +514,7 @@ public class RecipeServiceImpl implements RecipeService {
         log.debug("All attributes of RecipeForm are valid");
 
         Optional<RecipeEntity> optExpectedEntity = form2EntityMapper.compareAndMap(actualEntity, form);
-        if(optExpectedEntity.isEmpty()) {
+        if(!optExpectedEntity.isPresent()) {
             log.debug("No new value for attributes of RecipeForm");
             throw new RecipeException(CookbookErrorCode.COOK_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are expected with new values" });
         }
@@ -547,7 +547,7 @@ public class RecipeServiceImpl implements RecipeService {
         log.debug(RecipeMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_RECIPE_ENTITY_ID.getValue(), id);
         Long recipeId = parseRecipeId(id);
         Optional<RecipeEntity> optEntity = repository.findById(recipeId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug(RecipeMessageTemplate.MSG_TEMPLATE_NO_RECIPE_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new RecipeException(CookbookErrorCode.COOK_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -582,7 +582,7 @@ public class RecipeServiceImpl implements RecipeService {
         log.debug(RecipeMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_RECIPE_ENTITY_ID.getValue(), id);
         Long recipeId = parseRecipeId(id);
         Optional<RecipeEntity> optActualEntity = repository.findById(recipeId);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(RecipeMessageTemplate.MSG_TEMPLATE_NO_RECIPE_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new RecipeException(CookbookErrorCode.COOK_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }

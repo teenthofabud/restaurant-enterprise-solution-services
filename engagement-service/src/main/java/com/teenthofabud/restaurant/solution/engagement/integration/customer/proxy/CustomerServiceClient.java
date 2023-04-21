@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(value = CustomerServiceClient.SERVICE_CLIENT_NAME, url = "${res.engagement.customer.service.url}", configuration = CustomerServiceIntegrationConfiguration.class)
+@FeignClient(value = CustomerServiceClient.SERVICE_CLIENT_NAME, url = "${res.engagement.customer.service.url}", path = "/customer", configuration = CustomerServiceIntegrationConfiguration.class)
 @LoadBalancerClient(value = CustomerServiceClient.SERVICE_CLIENT_NAME)
 public interface CustomerServiceClient {
 

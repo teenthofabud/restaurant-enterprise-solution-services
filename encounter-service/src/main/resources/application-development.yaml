@@ -1,0 +1,51 @@
+# Logging
+logging:
+  level:
+    org.hibernate.SQL: ${ENCOUNTER_LOGGING_LEVEL}
+    org.hibernate.type.descriptor.sql.BasicBinder: ${ENCOUNTER_LOGGING_LEVEL}
+
+  # Servlet
+server:
+  port: ${ENCOUNTER_SERVER_PORT}
+
+# Swagger
+springdoc:
+  swagger-ui:
+    enabled: ${ENCOUNTER_SWAGGER_ENABLED}
+
+
+# JPA
+spring:
+  datasource:
+    url: jdbc:mysql://${ENCOUNTER_DATABASE_HOST}:${ENCOUNTER_DATABASE_PORT}/res_encounter_db?allowPublicKeyRetrieval=true&useSSL=false&logger=Slf4JLogger&explainSlowQueries=true
+  zipkin:
+    enabled: ${ENCOUNTER_ZIPKIN_CLIENT_ENABLED}
+    baseUrl: http://${ENCOUNTER_ZIPKIN_HOST}:${ENCOUNTER_ZIPKIN_PORT}
+
+
+# Eueka
+eureka:
+  client:
+    enabled: ${ENCOUNTER_EUREKA_CLIENT_ENABLED}
+    serviceUrl:
+      defaultZone: http://${ENCOUNTER_EUREKA_HOST}:${ENCOUNTER_EUREKA_PORT}/eureka
+
+# Feign
+feign:
+  circuitbreaker:
+    enabled: ${ENCOUNTER_CIRCUIT_BREAKER_ENABLED}
+  config:
+    default:
+      loggerLevel: ${ENCOUNTER_FEIGN_LOGGING_LEVEL}
+    customer-service:
+      loggerLevel: ${ENCOUNTER_FEIGN_LOGGING_LEVEL}
+
+# Integration
+res:
+  encounter:
+    integration:
+      gateway:
+        port: ${ENCOUNTER_GATEWAY_PORT}
+    customer:
+      service:
+        url: ${ENCOUNTER_GATEWAY_HOST}:${res.encounter.integration.gateway.port}

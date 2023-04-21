@@ -30,7 +30,7 @@ public class DeliveryDtoValidator extends MeetingDtoValidator {
 
     @Override
     protected void validate(Optional<? extends MeetingDto> optionalMeetingDto, Errors errors) {
-        if(optionalMeetingDto.isEmpty()) {
+        if(!optionalMeetingDto.isPresent()) {
             log.debug("No DeliveryDto available");
             return;
         }

@@ -31,7 +31,7 @@ public class PickUpFormValidator extends MeetingFormValidator {
 
     @Override
     protected void validate(Optional<? extends MeetingForm> optionalMeetingForm, Errors errors) {
-        if(optionalMeetingForm.isEmpty()) {
+        if(!optionalMeetingForm.isPresent()) {
             log.debug("No PickUpForm available");
             return;
         }

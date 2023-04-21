@@ -13,6 +13,7 @@ import io.specto.hoverfly.junit.core.config.LocalHoverflyConfig;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.net.URISyntaxException;
@@ -32,6 +33,13 @@ public abstract class EngagementIntegrationBaseTest {
     protected MockMvc mockMvc;
     private Hoverfly hoverfly;
 
+    private Integer integrationGatewayPort;
+
+    @Value("${res.engagement.integration.gateway.port}")
+    public void setIntegrationGatewayPort(Integer integrationGatewayPort) {
+        this.integrationGatewayPort = integrationGatewayPort;
+    }
+
     @Autowired
     public void setObjectMapper(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
@@ -45,48 +53,21 @@ public abstract class EngagementIntegrationBaseTest {
     @BeforeAll
     private void setUp() throws URISyntaxException {
         LocalHoverflyConfig localHoverflyConfig = HoverflyConfig.localConfigs();
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        Path simulationBaseLocationPath = Paths.get(classLoader.getResource("integration").toURI());
 
-        Optional<String> optSimulationBaseLocation = Optional.empty();
-        Optional<Integer> optServicePort = Optional.empty();
-        Optional<String[]> optSimulationFilePaths = Optional.empty();
+        localHoverflyConfig
+                .addCommands("-response-body-files-path", simulationBaseLocationPath.toString())
+                .disableTlsVerification()
+                .asWebServer()
+                .proxyPort(integrationGatewayPort);
 
-        try {
-            optSimulationBaseLocation = Optional.of(getSimulationBaseLocation());
-            optServicePort = Optional.of(getServicePort());
-            optSimulationFilePaths = Optional.of(getSimulationFilePaths());
-        }  catch (UnsupportedOperationException e) {
-
-        }
-
-        if(optSimulationBaseLocation.isPresent() && optServicePort.isPresent() && optSimulationFilePaths.isPresent()) {
-            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            Path simulationBaseLocationPath = Paths.get(classLoader.getResource(optSimulationBaseLocation.get()).toURI());
-
-            localHoverflyConfig
-                    .addCommands("-response-body-files-path", simulationBaseLocationPath.toString())
-                    .disableTlsVerification()
-                    .asWebServer()
-                    .proxyPort(optServicePort.get());
-
-            hoverfly = new Hoverfly(localHoverflyConfig, HoverflyMode.SIMULATE);
-            hoverfly.start();
-            String[] simulationFilePaths = optSimulationFilePaths.get();
-            if (simulationFilePaths != null && simulationFilePaths.length > 0) {
-                List<SimulationSource> simulationSources = Arrays.stream(simulationFilePaths)
-                        .map(sfp -> SimulationSource.classpath(sfp))
-                        .collect(Collectors.toList());
-                hoverfly.simulate(simulationSources.get(0), simulationSources.subList(1,
-                        simulationSources.size()).toArray(new SimulationSource[simulationSources.size() - 1]));
-            }
-        }
-
+        hoverfly = new Hoverfly(localHoverflyConfig, HoverflyMode.SIMULATE);
+        hoverfly.start();
+        Path simulationFilePath = Paths.get(simulationBaseLocationPath.toString(), "simulation.json");
+        SimulationSource simulationSource = SimulationSource.file(simulationFilePath);
+        hoverfly.simulate(simulationSource);
     }
-
-    public abstract String getSimulationBaseLocation() throws UnsupportedOperationException;
-
-    public abstract Integer getServicePort() throws UnsupportedOperationException;
-
-    public abstract String[] getSimulationFilePaths() throws UnsupportedOperationException;
 
     @AfterAll
     private void tearDown() {

@@ -177,7 +177,7 @@ public class WalkInServiceImpl implements WalkInService {
         log.info("Requesting WalkInEntity by id: {}", id);
         Long idL = this.parsePK(id);
         Optional<WalkInEntity> optEntity = this.getCheckInRepository().findById(idL);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug("No WalkInEntity found by id: {}", id);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -193,7 +193,7 @@ public class WalkInServiceImpl implements WalkInService {
 
     @Override
     public List<WalkInVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalAccountId, Optional<String> optionalSequence, Optional<String> optionalNotes) throws CheckInException {
-        if(optionalAccountId.isEmpty() && optionalSequence.isEmpty() && optionalNotes.isEmpty()) {
+        if(!optionalAccountId.isPresent() && !optionalSequence.isPresent() && !optionalNotes.isPresent()) {
             log.debug("No search parameters provided");
         }
         String accountId = optionalAccountId.isPresent() ? optionalAccountId.get() : "";
@@ -256,7 +256,7 @@ public class WalkInServiceImpl implements WalkInService {
 
         log.info("Requesting WalkInEntity by sequence: {} between timestamps: {} and {}", sequence, start, end);
         Optional<WalkInEntity> optEntity = this.getCheckInRepository().findBySequenceAndCreatedOnBetween(sequence, start, end);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug("No WalkInEntity found by sequence: {} between timestamps: {} and {}", sequence, start, end);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "sequence: " + sequence, ", date: " + date });
         }
@@ -324,7 +324,7 @@ public class WalkInServiceImpl implements WalkInService {
         log.debug(CheckInMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_CHECKIN_ENTITY_ID.getValue(), id);
         Long idL = this.parsePK(id);
         Optional<WalkInEntity> optActualEntity = this.getCheckInRepository().findById(idL);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(CheckInMessageTemplate.MSG_TEMPLATE_NO_CHECKIN_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -358,7 +358,7 @@ public class WalkInServiceImpl implements WalkInService {
         log.debug("All attributes of WalkInForm are valid");
 
         Optional<WalkInEntity> optExpectedEntity = this.getCheckInForm2EntityMapper().compareAndMap(actualEntity, form);
-        if(optExpectedEntity.isEmpty()) {
+        if(!optExpectedEntity.isPresent()) {
             log.debug("No new value for attributes of WalkInForm");
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are expected with new values" });
         }
@@ -390,7 +390,7 @@ public class WalkInServiceImpl implements WalkInService {
         log.debug(CheckInMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_CHECKIN_ENTITY_ID.getValue(), id);
         Long idL = this.parsePK(id);
         Optional<WalkInEntity> optEntity = this.getCheckInRepository().findById(idL);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug(CheckInMessageTemplate.MSG_TEMPLATE_NO_CHECKIN_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -425,7 +425,7 @@ public class WalkInServiceImpl implements WalkInService {
         log.debug(CheckInMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_CHECKIN_ENTITY_ID.getValue(), id);
         Long idL = this.parsePK(id);
         Optional<WalkInEntity> optActualEntity = this.getCheckInRepository().findById(idL);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(CheckInMessageTemplate.MSG_TEMPLATE_NO_CHECKIN_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -512,7 +512,7 @@ public class WalkInServiceImpl implements WalkInService {
 
     @Override
     public List<WalkInVo> retrieveAllMatchingWalkInDetailsByCriteria(Optional<String> optionalName, Optional<String> optionalPhoneNumber, Optional<String> optionalEmailId) throws CheckInException {
-        if(optionalName.isEmpty() && optionalPhoneNumber.isEmpty() && optionalEmailId.isEmpty()) {
+        if(!optionalName.isPresent() && !optionalPhoneNumber.isPresent() && !optionalEmailId.isPresent()) {
             log.debug("No search parameters provided");
         }
         String name = optionalName.isPresent() ? optionalName.get() : "";

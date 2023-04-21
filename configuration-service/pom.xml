@@ -5,7 +5,7 @@
     <parent>
         <artifactId>restaurant-enterprise-solution-services</artifactId>
         <groupId>com.teenthofabud.restaurant.solution</groupId>
-        <version>2022.2-SNAPSHOT</version>
+        <version>2023.2-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -19,7 +19,7 @@
 
     <groupId>com.teenthofabud.restaurant.solution</groupId>
     <artifactId>restaurant-solution-configuration-service</artifactId>
-    <version>2022.2-SNAPSHOT</version>
+    <version>2023.2-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>${service.prefix}-service</name>
     <description>manage entity definition attributes for configuration service</description>

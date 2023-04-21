@@ -40,6 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
+@TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class CategoryIntegrationTest extends InventoryIntegrationBaseTest {
 
     private static final String MEDIA_TYPE_APPLICATION_JSON_PATCH = "application/json-patch+json";
@@ -231,13 +232,13 @@ public class CategoryIntegrationTest extends InventoryIntegrationBaseTest {
         productVo5.setDescription(productEntity5.getDescription());
         productVo5.setImageUrl(productEntity5.getImageUrl());
 
-        categoryEntity1.setProducts(new ArrayList<ProductEntity>(List.of(productEntity1)));
+        categoryEntity1.setProducts(new ArrayList<>(Arrays.asList(productEntity1)));
         categoryEntity1 = categoryRepository.save(categoryEntity1);
-        categoryEntity2.setProducts(new ArrayList<ProductEntity>(List.of(productEntity2)));
+        categoryEntity2.setProducts(new ArrayList<>(Arrays.asList(productEntity2)));
         categoryEntity2 = categoryRepository.save(categoryEntity2);
-        categoryEntity3.setProducts(new ArrayList<ProductEntity>(List.of(productEntity3)));
+        categoryEntity3.setProducts(new ArrayList<>(Arrays.asList(productEntity3)));
         categoryEntity3 = categoryRepository.save(categoryEntity3);
-        categoryEntity4.setProducts(new ArrayList<ProductEntity>(List.of(productEntity4, productEntity5)));
+        categoryEntity4.setProducts(new ArrayList<>(Arrays.asList(productEntity4, productEntity5)));
         categoryEntity4 = categoryRepository.save(categoryEntity4);
 
         productVo1.setCategory(categoryVo1);

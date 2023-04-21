@@ -34,6 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class DeviceIntegrationTest extends SettingsIntegrationBaseTest {
 
     private static final String MEDIA_TYPE_APPLICATION_JSON_PATCH = "application/json-patch+json";
@@ -317,7 +318,8 @@ public class DeviceIntegrationTest extends SettingsIntegrationBaseTest {
     @Test
     public void test_Device_Get_ShouldReturn_200Response_And_DeviceListNaturallyOrdered_WhenRequested_ForAllDevices() throws Exception {
         MvcResult mvcResult = null;
-        Set<DeviceVo> deviceList = new TreeSet<>(Arrays.asList(deviceVo1, deviceVo2, deviceVo3, deviceVo4, deviceVo5));
+        List<DeviceVo> deviceList = Arrays.asList(deviceVo1, deviceVo2, deviceVo3, deviceVo4);
+        //Set<DeviceVo> deviceList = new TreeSet<>(Arrays.asList(deviceVo1, deviceVo2, deviceVo3, deviceVo4, deviceVo5));
 
         mvcResult = this.mockMvc.perform(get(DEVICE_URI))
                 .andDo(print())

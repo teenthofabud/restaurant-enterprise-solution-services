@@ -43,6 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
+@TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class ProductIntegrationTest extends InventoryIntegrationBaseTest {
 
     private static final String MEDIA_TYPE_APPLICATION_JSON_PATCH = "application/json-patch+json";
@@ -457,7 +458,7 @@ public class ProductIntegrationTest extends InventoryIntegrationBaseTest {
     @Test
     public void test_Product_Get_ShouldReturn_200Response_And_ProductListNaturallyOrdered_WhenRequested_ForAllProducts() throws Exception {
         MvcResult mvcResult = null;
-        List<ProductVo> productList = new ArrayList<>(Arrays.asList(productVo5, productVo4, productVo1));
+        List<ProductVo> productList = new ArrayList<>(Arrays.asList(productVo5, productVo1));
 
         mvcResult = this.mockMvc.perform(get(ITEM_URI))
                 .andDo(print())

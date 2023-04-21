@@ -1,0 +1,77 @@
+eureka:
+    client:
+        initial-instance-info-replication-interval-seconds: 120
+        instance-info-replication-interval-seconds: 120
+        serviceUrl:
+            registerWithEureka: true
+    instance:
+        prefer-ip-address: true
+feign:
+    client:
+        config:
+            menu-service-item-client:
+                connectTimeout: 250
+                readTimeout: 500
+info:
+    app:
+        description: '@project.description@'
+        encoding: '@project.build.sourceEncoding@'
+        java:
+            version: '@java.version@'
+        name: '@project.name@'
+        version: '@project.version@'
+
+management:
+    endpoint:
+        health:
+            show-details: always
+    endpoints:
+        web:
+            exposure:
+                include: '*'
+    health:
+        mongo:
+            enabled: true
+res:
+    cookbook:
+        cuisine:
+            fields-to-escape: ''
+        description: '@project.description@'
+        ingredient:
+            fields-to-escape: ''
+        recipe:
+            fields-to-escape: ''
+        version: '@project.version@'
+
+server:
+    port: ${COOKBOOK_SERVER_PORT}
+spring:
+    cloud:
+        discovery:
+            enabled: true
+        loadbalancer:
+            ribbon:
+                enabled: false
+        service-registry:
+            auto-registration:
+                enabled: true
+    datasource:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        password: C00k8ooK
+        username: res_cookbook_manager
+    jpa:
+        hibernate:
+            ddl-auto: none
+        open-in-view: false
+        properties:
+            hibernate:
+                format_sql: true
+                jdbc:
+                    time_zone: UTC
+                show_sql: true
+                use_sql_comments: true
+    sleuth:
+        sampler:
+            percentage: 1.0
+        web:
+            skipPattern: (^cleanup.*|.+favicon.*)

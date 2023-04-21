@@ -170,7 +170,7 @@ public class PriceServiceImpl implements PriceService {
         log.info("Requesting PriceEntity by id: {}", id);
         Long priceId = parsePriceId(id);
         Optional<PriceEntity> optEntity = repository.findById(priceId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug("No PriceEntity found by id: {}", id);
             throw new PriceException(MenuErrorCode.MENU_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -214,7 +214,7 @@ public class PriceServiceImpl implements PriceService {
     @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
     public List<PriceVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalItemId, Optional<String> optionalCurrencyId) throws PriceException {
-        if(optionalItemId.isEmpty() && optionalCurrencyId.isEmpty()) {
+        if(!optionalItemId.isPresent() && !optionalCurrencyId.isPresent()) {
             log.debug("No search parameters provided");
         }
         String itemId = optionalItemId.isPresent() ? optionalItemId.get() : "";
@@ -264,7 +264,7 @@ public class PriceServiceImpl implements PriceService {
     @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
     public List<PriceVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalCurrencyId) throws PriceException {
-        if(optionalCurrencyId.isEmpty()) {
+        if(!optionalCurrencyId.isPresent()) {
             log.debug("No search parameters provided");
         }
         String currencyId = optionalCurrencyId.isPresent() ? optionalCurrencyId.get() : "";
@@ -343,7 +343,7 @@ public class PriceServiceImpl implements PriceService {
         log.debug(PriceMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_PRICE_ENTITY_ID.getValue(), id);
         Long priceId = parsePriceId(id);
         Optional<PriceEntity> optActualEntity = repository.findById(priceId);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(PriceMessageTemplate.MSG_TEMPLATE_NO_PRICE_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new PriceException(MenuErrorCode.MENU_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -377,7 +377,7 @@ public class PriceServiceImpl implements PriceService {
         log.debug("All attributes of PriceForm are valid");
 
         Optional<PriceEntity> optExpectedEntity = form2EntityMapper.compareAndMap(actualEntity, form);
-        if(optExpectedEntity.isEmpty()) {
+        if(!optExpectedEntity.isPresent()) {
             log.debug("No new value for attributes of PriceForm");
             throw new PriceException(MenuErrorCode.MENU_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are expected with new values" });
         }
@@ -408,7 +408,7 @@ public class PriceServiceImpl implements PriceService {
         log.debug(PriceMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_PRICE_ENTITY_ID.getValue(), id);
         Long priceId = parsePriceId(id);
         Optional<PriceEntity> optEntity = repository.findById(priceId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug(PriceMessageTemplate.MSG_TEMPLATE_NO_PRICE_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new PriceException(MenuErrorCode.MENU_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -443,7 +443,7 @@ public class PriceServiceImpl implements PriceService {
         log.debug(PriceMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_PRICE_ENTITY_ID.getValue(), id);
         Long priceId = parsePriceId(id);
         Optional<PriceEntity> optActualEntity = repository.findById(priceId);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(PriceMessageTemplate.MSG_TEMPLATE_NO_PRICE_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new PriceException(MenuErrorCode.MENU_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }

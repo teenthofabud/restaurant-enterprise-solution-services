@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.teenthofabud.restaurant.solution</groupId>
 		<artifactId>restaurant-enterprise-solution-services</artifactId>
-		<version>2022.2-SNAPSHOT</version>
+		<version>2023.2-SNAPSHOT</version>
 		<!--<relativePath/>-->
 	</parent>
 
@@ -16,7 +16,7 @@
 
 	<groupId>com.teenthofabud.restaurant.solution</groupId>
 	<artifactId>restaurant-solution-naming-service</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>2023.2-SNAPSHOT</version>
 	<name>naming-service</name>
 	<description>Naming service of restaurant solution</description>
 

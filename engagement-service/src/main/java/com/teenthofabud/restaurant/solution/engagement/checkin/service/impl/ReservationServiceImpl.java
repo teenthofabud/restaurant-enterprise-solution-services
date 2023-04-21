@@ -178,7 +178,7 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public List<ReservationVo> retrieveAllMatchingReservationDetailsByCriteria(Optional<String> optionalDate, Optional<String> optionalTime) throws CheckInException {
-        if(optionalDate.isEmpty() && optionalTime.isEmpty()) {
+        if(!optionalDate.isPresent() && !optionalTime.isPresent()) {
             log.debug("No search parameters provided");
         }
         String date = optionalDate.isPresent() ? optionalDate.get() : "";
@@ -259,7 +259,7 @@ public class ReservationServiceImpl implements ReservationService {
         Long idL = this.parsePK(id);
         ReservationRepository reservationRepository = this.getCheckInRepository();
         Optional<ReservationEntity> optEntity = reservationRepository.findById(idL);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug("No ReservationEntity found by id: {}", id);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -275,7 +275,7 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public List<ReservationVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalAccountId, Optional<String> optionalSequence, Optional<String> optionalNotes) throws CheckInException {
-        if(optionalAccountId.isEmpty() && optionalSequence.isEmpty() && optionalNotes.isEmpty()) {
+        if(!optionalAccountId.isPresent() && !optionalSequence.isPresent() && !optionalNotes.isPresent()) {
             log.debug("No search parameters provided");
         }
         String accountId = optionalAccountId.isPresent() ? optionalAccountId.get() : "";
@@ -339,7 +339,7 @@ public class ReservationServiceImpl implements ReservationService {
 
         log.info("Requesting ReservationEntity by sequence: {} between timestamps: {} and {}", sequence, start, end);
         Optional<ReservationEntity> optEntity = this.getCheckInRepository().findBySequenceAndCreatedOnBetween(sequence, start, end);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug("No ReservationEntity found by sequence: {} between timestamps: {} and {}", sequence, start, end);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "sequence: " + sequence, ", date: " + date });
         }
@@ -405,7 +405,7 @@ public class ReservationServiceImpl implements ReservationService {
         log.debug(CheckInMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_CHECKIN_ENTITY_ID.getValue(), id);
         Long idL = this.parsePK(id);
         Optional<ReservationEntity> optActualEntity = this.getCheckInRepository().findById(idL);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(CheckInMessageTemplate.MSG_TEMPLATE_NO_CHECKIN_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -439,7 +439,7 @@ public class ReservationServiceImpl implements ReservationService {
         log.debug("All attributes of ReservationForm are valid");
 
         Optional<ReservationEntity> optExpectedEntity = this.getCheckInForm2EntityMapper().compareAndMap(actualEntity, form);
-        if(optExpectedEntity.isEmpty()) {
+        if(!optExpectedEntity.isPresent()) {
             log.debug("No new value for attributes of ReservationForm");
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are expected with new values" });
         }
@@ -471,7 +471,7 @@ public class ReservationServiceImpl implements ReservationService {
         log.debug(CheckInMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_CHECKIN_ENTITY_ID.getValue(), id);
         Long idL = this.parsePK(id);
         Optional<ReservationEntity> optEntity = this.getCheckInRepository().findById(idL);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug(CheckInMessageTemplate.MSG_TEMPLATE_NO_CHECKIN_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -506,7 +506,7 @@ public class ReservationServiceImpl implements ReservationService {
         log.debug(CheckInMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_CHECKIN_ENTITY_ID.getValue(), id);
         Long idL = this.parsePK(id);
         Optional<ReservationEntity> optActualEntity = this.getCheckInRepository().findById(idL);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(CheckInMessageTemplate.MSG_TEMPLATE_NO_CHECKIN_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new CheckInException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }

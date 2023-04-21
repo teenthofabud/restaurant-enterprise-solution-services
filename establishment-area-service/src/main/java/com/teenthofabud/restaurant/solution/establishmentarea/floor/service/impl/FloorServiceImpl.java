@@ -191,7 +191,7 @@ public class FloorServiceImpl implements FloorService {
         log.info("Requesting FloorEntity by id: {}", id);
         Long floorId = parseFloorId(id);
         Optional<FloorEntity> optEntity = floorRepository.findById(floorId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug("No FloorEntity found by id: {}", id);
             throw new FloorException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_NOT_FOUND,
                     new Object[] { "id", String.valueOf(id) });
@@ -264,7 +264,7 @@ public class FloorServiceImpl implements FloorService {
         log.info("Updating FloorEntity by id: {}", id);
         Long floorId = parseFloorId(id);
         Optional<FloorEntity> optEntity = floorRepository.findById(floorId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug("No FloorEntity found by id: {}", id);
             throw new FloorException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_NOT_FOUND,
                     new Object[] { "id", String.valueOf(id) });
@@ -301,7 +301,7 @@ public class FloorServiceImpl implements FloorService {
         log.debug("All attributes of FloorForm are valid");
 
         Optional<FloorEntity> optExpectedEntity = form2EntityMapper.compareAndMap(actualEntity, form);
-        if(optExpectedEntity.isEmpty()) {
+        if(!optExpectedEntity.isPresent()) {
             log.debug("No new value for attributes of FloorForm");
             throw new FloorException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_UNEXPECTED, 
                     new Object[]{ "form", "fields are expected with new values" });
@@ -341,7 +341,7 @@ public class FloorServiceImpl implements FloorService {
         log.debug(FloorMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_FLOOR_ENTITY_ID.getValue(), id);
         Long floorId = parseFloorId(id);
         Optional<FloorEntity> optEntity = floorRepository.findById(floorId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug(FloorMessageTemplate.MSG_TEMPLATE_FLOOR_ID_INVALID.getValue(), id);
             throw new FloorException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -376,7 +376,7 @@ public class FloorServiceImpl implements FloorService {
         log.debug(FloorMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_FLOOR_ENTITY_ID.getValue(), id);
         Long floorId = parseFloorId(id);
         Optional<FloorEntity> optActualEntity = floorRepository.findById(floorId);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(FloorMessageTemplate.MSG_TEMPLATE_NO_FLOOR_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new FloorException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }

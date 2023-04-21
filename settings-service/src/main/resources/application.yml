@@ -1,0 +1,65 @@
+eureka:
+    client:
+        initial-instance-info-replication-interval-seconds: 120
+        instance-info-replication-interval-seconds: 120
+        serviceUrl:
+            registerWithEureka: true
+    instance:
+        prefer-ip-address: true
+
+info:
+    app:
+        description: '@project.description@'
+        encoding: '@project.build.sourceEncoding@'
+        java:
+            version: '@java.version@'
+        name: '@project.name@'
+        version: '@project.version@'
+
+management:
+    endpoint:
+        health:
+            show-details: always
+    endpoints:
+        web:
+            exposure:
+                include: '*'
+    health:
+        mongo:
+            enabled: true
+
+res:
+    settings:
+        charge:
+            fields-to-escape: ''
+        deliverypartner:
+            fields-to-escape: ''
+        description: '@project.description@'
+        device:
+            fields-to-escape: ''
+        discount:
+            fields-to-escape: ''
+        paymentmethod:
+            fields-to-escape: ''
+        template:
+            fields-to-escape: ''
+            freemarker:
+                version: '@project.properties.freemarker.version@'
+            path: freemarker-master-template.ftl
+        version: '@project.version@'
+
+spring:
+    cloud:
+        discovery:
+            enabled: true
+        loadbalancer:
+            ribbon:
+                enabled: false
+        service-registry:
+            auto-registration:
+                enabled: true
+    sleuth:
+        sampler:
+            percentage: 1.0
+        web:
+            skipPattern: (^cleanup.*|.+favicon.*)

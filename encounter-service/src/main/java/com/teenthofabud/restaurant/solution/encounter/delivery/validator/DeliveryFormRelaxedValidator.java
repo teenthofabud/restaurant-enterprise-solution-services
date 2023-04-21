@@ -31,7 +31,7 @@ public class DeliveryFormRelaxedValidator extends MeetingFormRelaxedValidator {
 
     @Override
     public Boolean validateLoosely(Optional<? extends MeetingForm> optionalMeetingForm, Errors errors) {
-        if(optionalMeetingForm.isEmpty()) {
+        if(!optionalMeetingForm.isPresent()) {
             log.debug("No DeliveryForm available");
             return false;
         }

@@ -11,6 +11,7 @@ import io.specto.hoverfly.junit.core.config.LocalHoverflyConfig;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.net.URISyntaxException;
@@ -25,6 +26,12 @@ public abstract class CookbookIntegrationBaseTest {
     protected ObjectMapper om;
     protected MockMvc mockMvc;
     private Hoverfly hoverfly;
+    private Integer integrationGatewayPort;
+
+    @Value("${res.cookbook.integration.gateway.port}")
+    public void setIntegrationGatewayPort(Integer integrationGatewayPort) {
+        this.integrationGatewayPort = integrationGatewayPort;
+    }
 
     @Autowired
     public void setOm(ObjectMapper om) {
@@ -44,32 +51,20 @@ public abstract class CookbookIntegrationBaseTest {
         LocalHoverflyConfig localHoverflyConfig = HoverflyConfig.localConfigs();
 
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        Path simulationBaseLocationPath = Paths.get(classLoader.getResource(getSimulationBaseLocation()).toURI());
+        Path simulationBaseLocationPath = Paths.get(classLoader.getResource("integration").toURI());
 
         localHoverflyConfig
                 .addCommands("-response-body-files-path", simulationBaseLocationPath.toString())
                 .disableTlsVerification()
                 .asWebServer()
-                .proxyPort(getServicePort());
+                .proxyPort(integrationGatewayPort);
 
         hoverfly = new Hoverfly(localHoverflyConfig, HoverflyMode.SIMULATE);
         hoverfly.start();
-        String[] simulationFilePaths = getSimulationFilePaths();
-        if(simulationFilePaths != null && simulationFilePaths.length > 0) {
-            List<SimulationSource> simulationSources = Arrays.stream(simulationFilePaths)
-                    .map(sfp -> SimulationSource.classpath(sfp))
-                    .collect(Collectors.toList());
-            hoverfly.simulate(simulationSources.get(0), simulationSources.subList(1,
-                    simulationSources.size()).toArray(new SimulationSource[simulationSources.size() - 1]));
-        }
-
+        Path simulationFilePath = Paths.get(simulationBaseLocationPath.toString(), "simulation.json");
+        SimulationSource simulationSource = SimulationSource.file(simulationFilePath);
+        hoverfly.simulate(simulationSource);
     }
-
-    public abstract String getSimulationBaseLocation();
-
-    public abstract Integer getServicePort();
-
-    public abstract String[] getSimulationFilePaths();
 
     @AfterAll
     private void tearDown() {

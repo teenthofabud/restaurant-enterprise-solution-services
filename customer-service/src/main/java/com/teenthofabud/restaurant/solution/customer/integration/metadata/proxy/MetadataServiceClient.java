@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(value = MetadataServiceClient.SERVICE_CLIENT_NAME, url = "${customer.metadata.service.url}", configuration = MetadataServiceIntegrationConfiguration.class)
+@FeignClient(value = MetadataServiceClient.SERVICE_CLIENT_NAME, url = "${res.customer.metadata.service.url}", path = "/metadata", configuration = MetadataServiceIntegrationConfiguration.class)
 public interface MetadataServiceClient {
 
     public static final String SERVICE_CLIENT_NAME = "metadata-service";

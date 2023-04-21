@@ -33,7 +33,7 @@ public class WalkInDtoValidator extends CheckInDtoValidator {
 
     @Override
     protected void validate(Optional<? extends CheckInDto> optionalCheckInDto, Errors errors) {
-        if(optionalCheckInDto.isEmpty()) {
+        if(!optionalCheckInDto.isPresent()) {
             log.debug("No WalkInDto available");
             return;
         }

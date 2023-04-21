@@ -45,6 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
+@TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class KitchenIntegrationTest extends EstablishmentAreaIntegrationBaseTest {
 
     private static final String MEDIA_TYPE_APPLICATION_JSON_PATCH = "application/json-patch+json";
@@ -196,13 +197,13 @@ public class KitchenIntegrationTest extends EstablishmentAreaIntegrationBaseTest
         kitchenVo4.setDescription(kitchenEntity4.getDescription());
         kitchenVo4.setFloorId(kitchenEntity4.getFloor().getFlrId().toString());
 
-        floorEntity1.setKitchen(new ArrayList<KitchenEntity>(List.of(kitchenEntity1)));
+        floorEntity1.setKitchen(new ArrayList<>(Arrays.asList(kitchenEntity1)));
         floorEntity1 = floorRepository.save(floorEntity1);
-        floorEntity2.setKitchen(new ArrayList<KitchenEntity>(List.of(kitchenEntity2)));
+        floorEntity2.setKitchen(new ArrayList<>(Arrays.asList(kitchenEntity2)));
         floorEntity2 = floorRepository.save(floorEntity2);
-        floorEntity3.setKitchen(new ArrayList<KitchenEntity>(List.of(kitchenEntity3)));
+        floorEntity3.setKitchen(new ArrayList<>(Arrays.asList(kitchenEntity3)));
         floorEntity3 = floorRepository.save(floorEntity3);
-        floorEntity4.setKitchen(new ArrayList<KitchenEntity>(List.of(kitchenEntity4)));
+        floorEntity4.setKitchen(new ArrayList<>(Arrays.asList(kitchenEntity4)));
         floorEntity4 = floorRepository.save(floorEntity4);
 
         kitchenVo1.setFloorVo(floorVo1);

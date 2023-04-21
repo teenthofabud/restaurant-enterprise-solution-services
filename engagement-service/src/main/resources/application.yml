@@ -1,0 +1,91 @@
+eureka:
+    client:
+        initial-instance-info-replication-interval-seconds: 120
+        instance-info-replication-interval-seconds: 120
+        serviceUrl:
+            registerWithEureka: true
+    instance:
+        prefer-ip-address: true
+
+feign:
+    client:
+        config:
+            default:
+                connectTimeout: 160000000
+                readTimeout: 160000000
+
+info:
+    app:
+        description: '@project.description@'
+        encoding: '@project.build.sourceEncoding@'
+        java:
+            version: '@java.version@'
+        name: '@project.name@'
+        version: '@project.version@'
+
+management:
+    endpoint:
+        health:
+            show-details: always
+    endpoints:
+        web:
+            exposure:
+                include: '*'
+    health:
+        mongo:
+            enabled: true
+res:
+    engagement:
+        audit:
+            timestamp:
+                format: yyyy-MM-dd'T'HH:mm:ss.SSSSSS
+        checkIn:
+            reservation:
+                date:
+                    format: dd-MM-yyyy
+                fields-to-escape: ''
+                time:
+                    format: HH:mm
+            walkIn:
+                fields-to-escape: ''
+                phoneNumber:
+                    regex: '[0-9]{10}'
+                timestamp:
+                    format: ${res.engagement.checkIn.reservation.date.format}T${res.engagement.checkIn.reservation.time.format}
+        description: '@project.description@'
+        tableAllocation:
+            fields-to-escape: ''
+        version: '@project.version@'
+
+spring:
+    cloud:
+        discovery:
+            enabled: true
+        loadbalancer:
+            ribbon:
+                enabled: false
+        service-registry:
+            auto-registration:
+                enabled: true
+    datasource:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        password: 3||g/GE|/|e||T
+        username: res_engagement_manager
+    jpa:
+        hibernate:
+            ddl-auto: none
+        open-in-view: false
+        properties:
+            hibernate:
+                format_sql: true
+                jdbc:
+                    time_zone: UTC
+                show_sql: true
+                use_sql_comments: true
+    main:
+        allow-bean-definition-overriding: true
+    sleuth:
+        sampler:
+            percentage: 1.0
+        web:
+            skipPattern: (^cleanup.*|.+favicon.*)

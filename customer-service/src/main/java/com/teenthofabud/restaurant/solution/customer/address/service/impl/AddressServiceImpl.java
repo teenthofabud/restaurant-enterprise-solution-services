@@ -48,14 +48,7 @@ import org.springframework.validation.Validator;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 @Component
 @Slf4j
@@ -184,7 +177,7 @@ public class AddressServiceImpl implements AddressService {
         List<AddressEntity> addressEntityList = repository.findAll();
         Set<AddressVo> naturallyOrderedSet = new TreeSet<AddressVo>(CMP_BY_NAME_AND_ACCOUNT_ID);
         for(AddressEntity entity : addressEntityList) {
-            List<AddressVo> dtoList = customerServiceHelper.addressEntity2DetailedVo(List.of(entity));
+            List<AddressVo> dtoList = customerServiceHelper.addressEntity2DetailedVo(Arrays.asList(entity));
             if(dtoList != null && !dtoList.isEmpty()) {
                 AddressVo dto = dtoList.get(0);
                 log.debug("Converting {} to {}", entity, dto);
@@ -201,7 +194,7 @@ public class AddressServiceImpl implements AddressService {
         log.info("Requesting AddressEntity by id: {}", id);
         Long addressId = parseAddressId(id);
         Optional<AddressEntity> optEntity = repository.findById(addressId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug("No AddressEntity found by id: {}", id);
             throw new AddressException(CustomerErrorCode.CUST_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -270,8 +263,8 @@ public class AddressServiceImpl implements AddressService {
     @Override
     public List<AddressVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalName, Optional<String> optionalPincode,
                                                                 Optional<String> optionalCityId, Optional<String> optionalStateId, Optional<String> optionalCountryId) throws AddressException {
-        if(optionalName.isEmpty() && optionalPincode.isEmpty() && optionalCityId.isEmpty() && optionalStateId.isEmpty()
-                && optionalCountryId.isEmpty()) {
+        if(!optionalName.isPresent() && !optionalPincode.isPresent() && !optionalCityId.isPresent() && !optionalStateId.isPresent()
+                && !optionalCountryId.isPresent()) {
             log.debug("No search parameters provided");
         }
         String name = optionalName.isPresent() ? optionalName.get() : "";
@@ -360,9 +353,9 @@ public class AddressServiceImpl implements AddressService {
                                                                 Optional<String> optionalAddressLine2, Optional<String> optionalPincode,
                                                                 Optional<String> optionalCityId, Optional<String> optionalStateId,
                                                                 Optional<String> optionalCountryId) throws AddressException {
-        if(optionalName.isEmpty() && optionalAddressLine1.isEmpty() && optionalAddressLine2.isEmpty()
-                && optionalPincode.isEmpty() && optionalCityId.isEmpty()
-                && optionalStateId.isEmpty() && optionalCountryId.isEmpty()) {
+        if(!optionalName.isPresent() && !optionalAddressLine1.isPresent() && !optionalAddressLine2.isPresent()
+                && !optionalPincode.isPresent() && !optionalCityId.isPresent()
+                && !optionalStateId.isPresent() && !optionalCountryId.isPresent()) {
             log.debug("No search parameters provided");
         }
         String name = optionalName.isPresent() ? optionalName.get() : "";
@@ -515,7 +508,7 @@ public class AddressServiceImpl implements AddressService {
         log.debug(AddressMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_ADDRESS_ENTITY_ID.getValue(), id);
         Long addressId = parseAddressId(id);
         Optional<AddressEntity> optActualEntity = repository.findById(addressId);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(AddressMessageTemplate.MSG_TEMPLATE_NO_ADDRESS_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new AddressException(CustomerErrorCode.CUST_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -549,7 +542,7 @@ public class AddressServiceImpl implements AddressService {
         log.debug("All attributes of AddressForm are valid");
 
         Optional<AddressEntity> optExpectedEntity = form2EntityMapper.compareAndMap(actualEntity, form);
-        if(optExpectedEntity.isEmpty()) {
+        if(!optExpectedEntity.isPresent()) {
             log.debug("No new value for attributes of AddressForm");
             throw new AddressException(CustomerErrorCode.CUST_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are expected with new values" });
         }
@@ -582,7 +575,7 @@ public class AddressServiceImpl implements AddressService {
         log.debug(AddressMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_ADDRESS_ENTITY_ID.getValue(), id);
         Long addressId = parseAddressId(id);
         Optional<AddressEntity> optEntity = repository.findById(addressId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug(AddressMessageTemplate.MSG_TEMPLATE_NO_ADDRESS_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new AddressException(CustomerErrorCode.CUST_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -617,7 +610,7 @@ public class AddressServiceImpl implements AddressService {
         log.debug(AddressMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_ADDRESS_ENTITY_ID.getValue(), id);
         Long addressId = parseAddressId(id);
         Optional<AddressEntity> optActualEntity = repository.findById(addressId);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(AddressMessageTemplate.MSG_TEMPLATE_NO_ADDRESS_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new AddressException(CustomerErrorCode.CUST_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -704,7 +697,7 @@ public class AddressServiceImpl implements AddressService {
 
     private void checkUniquenessOfAddress(AddressDto patchedAddressForm, AddressEntity actualEntity) throws AddressException {
         // name = true, accountId = false
-        if(patchedAddressForm.getName().isPresent() && patchedAddressForm.getAccountId().isEmpty()) {
+        if(patchedAddressForm.getName().isPresent() && !patchedAddressForm.getAccountId().isPresent()) {
             log.debug(AddressMessageTemplate.MSG_TEMPLATE_ADDRESS_EXISTENCE_BY_NAME_AND_ACCOUNT_ID.getValue(),
                     patchedAddressForm.getName().get(), actualEntity.getAccount().getId());
             boolean sameEntitySw = patchedAddressForm.getName().get().compareTo(actualEntity.getName()) == 0;
@@ -738,7 +731,7 @@ public class AddressServiceImpl implements AddressService {
         }
 
         // name = false, accountId = true
-        if(patchedAddressForm.getName().isEmpty() && patchedAddressForm.getAccountId().isPresent()) {
+        if(!patchedAddressForm.getName().isPresent() && patchedAddressForm.getAccountId().isPresent()) {
             log.debug(AddressMessageTemplate.MSG_TEMPLATE_ADDRESS_EXISTENCE_BY_NAME_AND_ACCOUNT_ID.getValue(),
                     actualEntity.getName(),  patchedAddressForm.getAccountId().get());
             boolean sameEntitySw = patchedAddressForm.getAccountId().get().compareTo(actualEntity.getAccount().getId().toString()) == 0;

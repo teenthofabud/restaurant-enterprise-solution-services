@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(value = InventoryServiceClient.SERVICE_CLIENT_NAME, url = "${res.cookbook.inventory.service.url}", configuration = InventoryServiceIntegrationConfiguration.class)
+@FeignClient(value = InventoryServiceClient.SERVICE_CLIENT_NAME, url = "${res.cookbook.inventory.service.url}", path = "/inventory", configuration = InventoryServiceIntegrationConfiguration.class)
 public interface InventoryServiceClient {
 
     public static final String SERVICE_CLIENT_NAME = "customer-service";

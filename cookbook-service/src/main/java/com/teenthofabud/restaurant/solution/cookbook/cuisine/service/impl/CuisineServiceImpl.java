@@ -154,7 +154,7 @@ public class CuisineServiceImpl implements CuisineService {
         log.info("Requesting CuisineEntity by id: {}", id);
         Long cuisineId = parseCuisineId(id);
         Optional<CuisineEntity> optEntity = repository.findById(cuisineId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug("No CuisineEntity found by id: {}", id);
             throw new CuisineException(CookbookErrorCode.COOK_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -171,7 +171,7 @@ public class CuisineServiceImpl implements CuisineService {
     @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
     public List<CuisineVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalName, Optional<String> optionalDescription) throws CuisineException {
-        if(optionalName.isEmpty() && optionalDescription.isEmpty()) {
+        if(!optionalName.isPresent() && !optionalDescription.isPresent()) {
             log.debug("No search parameters provided");
         }
         String name = optionalName.isPresent() ? optionalName.get() : "";
@@ -261,7 +261,7 @@ public class CuisineServiceImpl implements CuisineService {
         log.debug(CuisineMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_CUISINE_ENTITY_ID.getValue(), id);
         Long cuisineId = parseCuisineId(id);
         Optional<CuisineEntity> optActualEntity = repository.findById(cuisineId);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(CuisineMessageTemplate.MSG_TEMPLATE_NO_CUISINE_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new CuisineException(CookbookErrorCode.COOK_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -295,7 +295,7 @@ public class CuisineServiceImpl implements CuisineService {
         log.debug("All attributes of CuisineForm are valid");
 
         Optional<CuisineEntity> optExpectedEntity = form2EntityMapper.compareAndMap(actualEntity, form);
-        if(optExpectedEntity.isEmpty()) {
+        if(!optExpectedEntity.isPresent()) {
             log.debug("No new value for attributes of CuisineForm");
             throw new CuisineException(CookbookErrorCode.COOK_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are expected with new values" });
         }
@@ -335,7 +335,7 @@ public class CuisineServiceImpl implements CuisineService {
         log.debug(CuisineMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_CUISINE_ENTITY_ID.getValue(), id);
         Long cuisineId = parseCuisineId(id);
         Optional<CuisineEntity> optEntity = repository.findById(cuisineId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug(CuisineMessageTemplate.MSG_TEMPLATE_NO_CUISINE_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new CuisineException(CookbookErrorCode.COOK_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -370,7 +370,7 @@ public class CuisineServiceImpl implements CuisineService {
         log.debug(CuisineMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_CUISINE_ENTITY_ID.getValue(), id);
         Long cuisineId = parseCuisineId(id);
         Optional<CuisineEntity> optActualEntity = repository.findById(cuisineId);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(CuisineMessageTemplate.MSG_TEMPLATE_NO_CUISINE_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new CuisineException(CookbookErrorCode.COOK_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }

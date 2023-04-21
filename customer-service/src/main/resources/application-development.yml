@@ -1,0 +1,59 @@
+res:
+    customer:
+        integration:
+            gateway:
+                port: ${CUSTOMER_GATEWAY_PORT}
+        metadata:
+            service:
+                url: ${CUSTOMER_GATEWAY_HOST}:${res.customer.integration.gateway.port}
+
+eureka:
+    client:
+        enabled: ${CUSTOMER_EUREKA_CLIENT_ENABLED}
+        serviceUrl:
+            defaultZone: http://${CUSTOMER_EUREKA_HOST}:${CUSTOMER_EUREKA_PORT}/eureka
+
+feign:
+    circuitbreaker:
+        enabled: ${CUSTOMER_CIRCUIT_BREAKER_ENABLED}
+    client:
+        config:
+            country-state-city-api-service:
+                loggerLevel: ${CUSTOMER_FEIGN_LOGGING_LEVEL}
+            default:
+                loggerLevel: ${CUSTOMER_FEIGN_LOGGING_LEVEL}
+            metadata-service:
+                loggerLevel: ${CUSTOMER_FEIGN_LOGGING_LEVEL}
+
+info:
+    app:
+        description: '@project.description@'
+        encoding: '@project.build.sourceEncoding@'
+        java:
+            version: '@java.version@'
+        name: '@project.name@'
+        version: '@project.version@'
+
+logging:
+    level:
+        org:
+            hibernate:
+                SQL: ${CUSTOMER_LOGGING_LEVEL}
+                type:
+                    descriptor:
+                        sql:
+                            BasicBinder: ${CUSTOMER_LOGGING_LEVEL}
+
+server:
+    port: ${CUSTOMER_SERVER_PORT}
+
+spring:
+    datasource:
+        url: jdbc:mysql://${CUSTOMER_DATABASE_HOST}:${CUSTOMER_DATABASE_PORT}/res_customer_db
+    zipkin:
+        baseUrl: http://${CUSTOMER_ZIPKIN_HOST}:${CUSTOMER_ZIPKIN_PORT}
+        enabled: ${CUSTOMER_ZIPKIN_CLIENT_ENABLED}
+
+springdoc:
+    swagger-ui:
+        enabled: ${CUSTOMER_SWAGGER_ENABLED}

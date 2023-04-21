@@ -54,8 +54,6 @@ public class PickUpIntegrationTest extends EncounterIntegrationBaseTest {
 
     private PickUpEntity2VoConverter pickUpEntity2VoConverter;
 
-    private Integer integrationPort;
-
     private String pickUpDateFormat;
 
     private String pickUpTimeFormat;
@@ -75,11 +73,6 @@ public class PickUpIntegrationTest extends EncounterIntegrationBaseTest {
     @Value("${res.encounter.meeting.time.format")
     public void setPickUpTimeFormat(String pickUpTimeFormat) {
         this.pickUpTimeFormat = pickUpTimeFormat;
-    }
-
-    @Value("${res.encounter.integration.gateway.port}")
-    public void setIntegrationPort(Integer integrationPort) {
-        this.integrationPort = integrationPort;
     }
 
     @Autowired
@@ -1169,18 +1162,4 @@ public class PickUpIntegrationTest extends EncounterIntegrationBaseTest {
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldDate));
     }
 
-    @Override
-    public String getSimulationBaseLocation() {
-        return "simulation";
-    }
-
-    @Override
-    public Integer getServicePort() throws UnsupportedOperationException {
-        return integrationPort;
-    }
-
-    @Override
-    public String[] getSimulationFilePaths() {
-        return new String[] { String.join("/", getSimulationBaseLocation(), "simulation.json") };
-    }
 }

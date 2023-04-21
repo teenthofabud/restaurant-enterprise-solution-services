@@ -170,7 +170,7 @@ public class QuantityServiceImpl implements QuantityService {
         log.info("Requesting QuantityEntity by id: {}", id);
         Long quantityId = parseQuantityId(id);
         Optional<QuantityEntity> optEntity = repository.findById(quantityId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug("No QuantityEntity found by id: {}", id);
             throw new QuantityException(InventoryErrorCode.INVENTORY_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -214,7 +214,7 @@ public class QuantityServiceImpl implements QuantityService {
     @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
     public List<QuantityVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalProductId, Optional<String> optionalWeightId) throws QuantityException {
-        if(optionalProductId.isEmpty() && optionalWeightId.isEmpty()) {
+        if(!optionalProductId.isPresent() && !optionalWeightId.isPresent()) {
             log.debug("No search parameters provided");
         }
         String productId = optionalProductId.isPresent() ? optionalProductId.get() : "";
@@ -264,7 +264,7 @@ public class QuantityServiceImpl implements QuantityService {
     @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
     public List<QuantityVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalWeightId) throws QuantityException {
-        if(optionalWeightId.isEmpty()) {
+        if(!optionalWeightId.isPresent()) {
             log.debug("No search parameters provided");
         }
         String weightId = optionalWeightId.isPresent() ? optionalWeightId.get() : "";
@@ -343,7 +343,7 @@ public class QuantityServiceImpl implements QuantityService {
         log.debug(QuantityMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_QUANTITY_ENTITY_ID.getValue(), id);
         Long quantityId = parseQuantityId(id);
         Optional<QuantityEntity> optActualEntity = repository.findById(quantityId);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(QuantityMessageTemplate.MSG_TEMPLATE_NO_QUANTITY_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new QuantityException(InventoryErrorCode.INVENTORY_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -377,7 +377,7 @@ public class QuantityServiceImpl implements QuantityService {
         log.debug("All attributes of QuantityForm are valid");
 
         Optional<QuantityEntity> optExpectedEntity = form2EntityMapper.compareAndMap(actualEntity, form);
-        if(optExpectedEntity.isEmpty()) {
+        if(!optExpectedEntity.isPresent()) {
             log.debug("No new value for attributes of QuantityForm");
             throw new QuantityException(InventoryErrorCode.INVENTORY_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are expected with new values" });
         }
@@ -408,7 +408,7 @@ public class QuantityServiceImpl implements QuantityService {
         log.debug(QuantityMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_QUANTITY_ENTITY_ID.getValue(), id);
         Long quantityId = parseQuantityId(id);
         Optional<QuantityEntity> optEntity = repository.findById(quantityId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug(QuantityMessageTemplate.MSG_TEMPLATE_NO_QUANTITY_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new QuantityException(InventoryErrorCode.INVENTORY_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -443,7 +443,7 @@ public class QuantityServiceImpl implements QuantityService {
         log.debug(QuantityMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_QUANTITY_ENTITY_ID.getValue(), id);
         Long quantityId = parseQuantityId(id);
         Optional<QuantityEntity> optActualEntity = repository.findById(quantityId);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(QuantityMessageTemplate.MSG_TEMPLATE_NO_QUANTITY_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new QuantityException(InventoryErrorCode.INVENTORY_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }

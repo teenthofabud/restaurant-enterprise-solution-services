@@ -10,7 +10,13 @@ import com.teenthofabud.restaurant.solution.settings.charge.data.ChargeForm;
 import com.teenthofabud.restaurant.solution.settings.charge.data.ChargeVo;
 import com.teenthofabud.restaurant.solution.settings.charge.repository.ChargeRepository;
 import com.teenthofabud.restaurant.solution.settings.error.SettingsErrorCode;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class ChargeIntegrationTest extends SettingsIntegrationBaseTest {
 
     private static final String MEDIA_TYPE_APPLICATION_JSON_PATCH = "application/json-patch+json";

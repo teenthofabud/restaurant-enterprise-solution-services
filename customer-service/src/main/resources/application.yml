@@ -1,0 +1,86 @@
+eureka:
+    client:
+        initial-instance-info-replication-interval-seconds: 120
+        instance-info-replication-interval-seconds: 120
+        serviceUrl:
+            registerWithEureka: true
+    instance:
+        prefer-ip-address: true
+
+feign:
+    client:
+        config:
+            country-state-city-api-service:
+                connectTimeout: 2000
+                default-request-headers:
+                    X-CSCAPI-KEY: dkJXMjJzOE9Ec2NJUFdLS1pUTTNJQUpocGFsOWJ4dGxzMU9KNTVmSA==
+                readTimeout: 3000
+            default:
+            metadata-service:
+                connectTimeout: 250
+                readTimeout: 500
+
+info:
+    app:
+        description: '@project.description@'
+        encoding: '@project.build.sourceEncoding@'
+        java:
+            version: '@java.version@'
+        name: '@project.name@'
+        version: '@project.version@'
+
+management:
+    endpoint:
+        health:
+            show-details: always
+    endpoints:
+        web:
+            exposure:
+                include: '*'
+    health:
+        mongo:
+            enabled: true
+res:
+    customer:
+        account:
+            fields-to-escape: dateOfBirth,emailId
+        address:
+            fields-to-escape: ''
+        description: '@project.description@'
+        dob:
+            format: dd-MM-yyyy
+        version: '@project.version@'
+        country-state-city-api:
+            service:
+                url: https://api.countrystatecity.in/v1/countries
+
+spring:
+    cloud:
+        discovery:
+            enabled: true
+        loadbalancer:
+            ribbon:
+                enabled: false
+        service-registry:
+            auto-registration:
+                enabled: true
+    datasource:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        password: Cu$t0M3r
+        username: res_customer_manager
+    jpa:
+        hibernate:
+            ddl-auto: none
+        open-in-view: false
+        properties:
+            hibernate:
+                format_sql: true
+                jdbc:
+                    time_zone: UTC
+                show_sql: true
+                use_sql_comments: true
+    sleuth:
+        sampler:
+            percentage: 1.0
+        web:
+            skipPattern: (^cleanup.*|.+favicon.*)

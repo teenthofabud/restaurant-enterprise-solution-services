@@ -1,0 +1,51 @@
+eureka:
+    client:
+        enabled: ${ENGAGEMENT_EUREKA_CLIENT_ENABLED}
+        serviceUrl:
+            defaultZone: http://${ENGAGEMENT_EUREKA_HOST}:${ENGAGEMENT_EUREKA_PORT}/eureka
+
+feign:
+    circuitbreaker:
+        enabled: ${ENGAGEMENT_CIRCUIT_BREAKER_ENABLED}
+    client:
+        config:
+            customer-service:
+                loggerLevel: ${ENGAGEMENT_FEIGN_LOGGING_LEVEL}
+            default:
+                loggerLevel: ${ENGAGEMENT_FEIGN_LOGGING_LEVEL}
+            establishmentarea-service:
+                loggerLevel: ${ENGAGEMENT_FEIGN_LOGGING_LEVEL}
+logging:
+    level:
+        org:
+            hibernate:
+                SQL: ${ENGAGEMENT_LOGGING_LEVEL}
+                type:
+                    descriptor:
+                        sql:
+                            BasicBinder: ${ENGAGEMENT_LOGGING_LEVEL}
+res:
+    engagement:
+        customer:
+            service:
+                url: ${ENGAGEMENT_GATEWAY_HOST}:${res.engagement.integration.gateway.port}
+        establishmentarea:
+            service:
+                url: ${ENGAGEMENT_GATEWAY_HOST}:${res.engagement.integration.gateway.port}
+        integration:
+            gateway:
+                port: ${ENGAGEMENT_GATEWAY_PORT}
+
+server:
+    port: ${ENGAGEMENT_SERVER_PORT}
+
+spring:
+    datasource:
+        url: jdbc:mysql://${ENGAGEMENT_DATABASE_HOST}:${ENGAGEMENT_DATABASE_PORT}/res_engagement_db?allowPublicKeyRetrieval=true&useSSL=false
+    zipkin:
+        baseUrl: http://${ENGAGEMENT_ZIPKIN_HOST}:${ENGAGEMENT_ZIPKIN_PORT}
+        enabled: ${ENGAGEMENT_ZIPKIN_CLIENT_ENABLED}
+
+springdoc:
+    swagger-ui:
+        enabled: ${ENGAGEMENT_SWAGGER_ENABLED}

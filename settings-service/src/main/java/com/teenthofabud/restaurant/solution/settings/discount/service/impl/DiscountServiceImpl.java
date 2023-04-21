@@ -149,7 +149,7 @@ public class DiscountServiceImpl implements DiscountService {
     public DiscountVo retrieveDetailsById(String id, Optional<TOABCascadeLevel> optionalCascadeLevel) throws DiscountException {
         log.info("Requesting DiscountDocument by id: {}", id);
         Optional<DiscountDocument> optDocument = repository.findById(id);
-        if(optDocument.isEmpty()) {
+        if(!optDocument.isPresent()) {
             log.debug("No DiscountDocument found by id: {}", id);
             throw new DiscountException(SettingsErrorCode.SETTINGS_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -166,7 +166,7 @@ public class DiscountServiceImpl implements DiscountService {
     @Override
     public List<DiscountVo> retrieveAllMatchingDetailsByCriteria(
             Optional<String> optionalName, Optional<String> optionalDescription) throws DiscountException {
-        if(optionalName.isEmpty() && optionalDescription.isEmpty()) {
+        if(!optionalName.isPresent() && !optionalDescription.isPresent()) {
             log.debug("No search parameters provided");
         }
         String name = optionalName.isPresent() ? optionalName.get() : "";
@@ -254,7 +254,7 @@ public class DiscountServiceImpl implements DiscountService {
 
         log.debug(DiscountMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_DISCOUNT_ENTITY_ID.getValue(), id);
         Optional<DiscountDocument> optActualDocument = repository.findById(id);
-        if(optActualDocument.isEmpty()) {
+        if(!optActualDocument.isPresent()) {
             log.debug(DiscountMessageTemplate.MSG_TEMPLATE_NO_DISCOUNT_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new DiscountException(SettingsErrorCode.SETTINGS_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -288,7 +288,7 @@ public class DiscountServiceImpl implements DiscountService {
         log.debug("All attributes of DiscountForm are valid");
 
         Optional<DiscountDocument> optExpectedDocument = form2DocumentMapper.compareAndMap(actualDocument, form);
-        if(optExpectedDocument.isEmpty()) {
+        if(!optExpectedDocument.isPresent()) {
             log.debug("No new value for attributes of DiscountForm");
             throw new DiscountException(SettingsErrorCode.SETTINGS_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are expected with new values" });
         }
@@ -326,7 +326,7 @@ public class DiscountServiceImpl implements DiscountService {
 
         log.debug(DiscountMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_DISCOUNT_ENTITY_ID.getValue(), id);
         Optional<DiscountDocument> optDocument = repository.findById(id);
-        if(optDocument.isEmpty()) {
+        if(!optDocument.isPresent()) {
             log.debug(DiscountMessageTemplate.MSG_TEMPLATE_NO_DISCOUNT_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new DiscountException(SettingsErrorCode.SETTINGS_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -359,7 +359,7 @@ public class DiscountServiceImpl implements DiscountService {
 
         log.debug(DiscountMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_DISCOUNT_ENTITY_ID.getValue(), id);
         Optional<DiscountDocument> optActualDocument = repository.findById(id);
-        if(optActualDocument.isEmpty()) {
+        if(!optActualDocument.isPresent()) {
             log.debug(DiscountMessageTemplate.MSG_TEMPLATE_NO_DISCOUNT_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new DiscountException(SettingsErrorCode.SETTINGS_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }

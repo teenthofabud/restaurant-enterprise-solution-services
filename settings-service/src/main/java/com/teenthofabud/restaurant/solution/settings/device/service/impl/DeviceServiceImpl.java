@@ -153,7 +153,7 @@ public class DeviceServiceImpl implements DeviceService {
     public DeviceVo retrieveDetailsById(String id, Optional<TOABCascadeLevel> optionalCascadeLevel) throws DeviceException {
         log.info("Requesting DeviceDocument by id: {}", id);
         Optional<DeviceDocument> optDocument = repository.findById(id);
-        if(optDocument.isEmpty()) {
+        if(!optDocument.isPresent()) {
             log.debug("No DeviceDocument found by id: {}", id);
             throw new DeviceException(SettingsErrorCode.SETTINGS_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -171,7 +171,7 @@ public class DeviceServiceImpl implements DeviceService {
     @Override
     public List<DeviceVo> retrieveAllMatchingDetailsByCriteria(
             Optional<String> optionalName, Optional<String> optionalDescription, Optional<String> optionalDeviceTypeId) throws DeviceException {
-        if(optionalName.isEmpty() && optionalDescription.isEmpty() && optionalDeviceTypeId.isEmpty()) {
+        if(!optionalName.isPresent() && !optionalDescription.isPresent() && !optionalDeviceTypeId.isPresent()) {
             log.debug("No search parameters provided");
         }
         String name = optionalName.isPresent() ? optionalName.get() : "";
@@ -275,7 +275,7 @@ public class DeviceServiceImpl implements DeviceService {
 
         log.debug(DeviceMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_DEVICE_DOCUMENT_ID.getValue(), id);
         Optional<DeviceDocument> optActualDocument = repository.findById(id);
-        if(optActualDocument.isEmpty()) {
+        if(!optActualDocument.isPresent()) {
             log.debug(DeviceMessageTemplate.MSG_TEMPLATE_NO_DEVICE_DOCUMENT_ID_AVAILABLE.getValue(), id);
             throw new DeviceException(SettingsErrorCode.SETTINGS_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -309,7 +309,7 @@ public class DeviceServiceImpl implements DeviceService {
         log.debug("All attributes of DeviceForm are valid");
 
         Optional<DeviceDocument> optExpectedDocument = form2DocumentMapper.compareAndMap(actualDocument, form);
-        if(optExpectedDocument.isEmpty()) {
+        if(!optExpectedDocument.isPresent()) {
             log.debug("No new value for attributes of DeviceForm");
             throw new DeviceException(SettingsErrorCode.SETTINGS_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are expected with new values" });
         }
@@ -341,7 +341,7 @@ public class DeviceServiceImpl implements DeviceService {
 
         log.debug(DeviceMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_DEVICE_DOCUMENT_ID.getValue(), id);
         Optional<DeviceDocument> optDocument = repository.findById(id);
-        if(optDocument.isEmpty()) {
+        if(!optDocument.isPresent()) {
             log.debug(DeviceMessageTemplate.MSG_TEMPLATE_NO_DEVICE_DOCUMENT_ID_AVAILABLE.getValue(), id);
             throw new DeviceException(SettingsErrorCode.SETTINGS_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -375,7 +375,7 @@ public class DeviceServiceImpl implements DeviceService {
 
         log.debug(DeviceMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_DEVICE_DOCUMENT_ID.getValue(), id);
         Optional<DeviceDocument> optActualDocument = repository.findById(id);
-        if(optActualDocument.isEmpty()) {
+        if(!optActualDocument.isPresent()) {
             log.debug(DeviceMessageTemplate.MSG_TEMPLATE_NO_DEVICE_DOCUMENT_ID_AVAILABLE.getValue(), id);
             throw new DeviceException(SettingsErrorCode.SETTINGS_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -462,7 +462,7 @@ public class DeviceServiceImpl implements DeviceService {
 
     private void checkUniquenessOfDevice(DeviceDto patchedDeviceForm, DeviceDocument actualDocument) throws DeviceException {
         // name = true, deviceTypeId = false
-        if(patchedDeviceForm.getName().isPresent() && patchedDeviceForm.getDeviceTypeId().isEmpty()) {
+        if(patchedDeviceForm.getName().isPresent() && !patchedDeviceForm.getDeviceTypeId().isPresent()) {
             log.debug(DeviceMessageTemplate.MSG_TEMPLATE_DEVICE_EXISTENCE_BY_NAME_AND_TEMPLATE_TYPE_ID.getValue(),
                     patchedDeviceForm.getName().get(), actualDocument.getDeviceTypeId());
             boolean sameDocumentSw = patchedDeviceForm.getName().get().compareTo(actualDocument.getName()) == 0;
@@ -496,7 +496,7 @@ public class DeviceServiceImpl implements DeviceService {
         }
 
         // name = false, deviceTypeId = true
-        if(patchedDeviceForm.getName().isEmpty() && patchedDeviceForm.getDeviceTypeId().isPresent()) {
+        if(!patchedDeviceForm.getName().isPresent() && patchedDeviceForm.getDeviceTypeId().isPresent()) {
             log.debug(DeviceMessageTemplate.MSG_TEMPLATE_DEVICE_EXISTENCE_BY_NAME_AND_TEMPLATE_TYPE_ID.getValue(),
                     actualDocument.getName(),  patchedDeviceForm.getDeviceTypeId().get());
             boolean sameDocumentSw = patchedDeviceForm.getDeviceTypeId().get().compareTo(actualDocument.getDeviceTypeId()) == 0;

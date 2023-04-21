@@ -1,0 +1,49 @@
+eureka:
+    client:
+        enabled: ${COOKBOOK_EUREKA_CLIENT_ENABLED}
+        serviceUrl:
+            defaultZone: http://${COOKBOOK_EUREKA_HOST}:${COOKBOOK_EUREKA_PORT}/eureka
+
+feign:
+    circuitbreaker:
+        enabled: ${COOKBOOK_CIRCUIT_BREAKER_ENABLED}
+    client:
+        config:
+            default:
+                loggerLevel: ${COOKBOOK_FEIGN_LOGGING_LEVEL}
+            inventory-service:
+                loggerLevel: ${COOKBOOK_FEIGN_LOGGING_LEVEL}
+            menu-service:
+                loggerLevel: ${COOKBOOK_FEIGN_LOGGING_LEVEL}
+logging:
+    level:
+        org:
+            hibernate:
+                SQL: ${COOKBOOK_LOGGING_LEVEL}
+                type:
+                    descriptor:
+                        sql:
+                            BasicBinder: ${COOKBOOK_LOGGING_LEVEL}
+res:
+    cookbook:
+        integration:
+            gateway:
+                port: ${COOKBOOK_GATEWAY_PORT}
+        inventory:
+            service:
+                url: ${COOKBOOK_GATEWAY_HOST}:${res.cookbook.integration.gateway.port}
+        menu:
+            service:
+                url: ${COOKBOOK_GATEWAY_HOST}:${res.cookbook.integration.gateway.port}
+
+server:
+    port: ${COOKBOOK_SERVER_PORT}
+spring:
+    datasource:
+        url: jdbc:mysql://${COOKBOOK_DATABASE_HOST}:${COOKBOOK_DATABASE_PORT}/res_cookbook_db
+    zipkin:
+        baseUrl: http://${COOKBOOK_ZIPKIN_HOST}:${COOKBOOK_ZIPKIN_PORT}
+        enabled: ${COOKBOOK_ZIPKIN_CLIENT_ENABLED}
+springdoc:
+    swagger-ui:
+        enabled: ${COOKBOOK_SWAGGER_ENABLED}

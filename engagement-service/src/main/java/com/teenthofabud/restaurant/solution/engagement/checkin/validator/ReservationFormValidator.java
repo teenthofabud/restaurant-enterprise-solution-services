@@ -43,7 +43,7 @@ public class ReservationFormValidator extends CheckInFormValidator {
 
     @Override
     protected void validate(Optional<? extends CheckInForm> optionalCheckInForm, Errors errors) {
-        if(optionalCheckInForm.isEmpty()) {
+        if(!optionalCheckInForm.isPresent()) {
             log.debug("No ReservationForm available");
             return;
         }

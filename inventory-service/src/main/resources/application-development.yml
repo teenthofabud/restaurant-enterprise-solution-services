@@ -1,0 +1,29 @@
+eureka:
+    client:
+        enabled: ${INVENTORY_EUREKA_CLIENT_ENABLED}
+        serviceUrl:
+            defaultZone: http://${INVENTORY_EUREKA_HOST}:${INVENTORY_EUREKA_PORT}/eureka
+
+logging:
+    level:
+        org:
+            hibernate:
+                SQL: ${INVENTORY_LOGGING_LEVEL}
+                type:
+                    descriptor:
+                        sql:
+                            BasicBinder: ${INVENTORY_LOGGING_LEVEL}
+
+server:
+    port: ${INVENTORY_SERVER_PORT}
+
+spring:
+    datasource:
+        url: jdbc:mysql://${INVENTORY_DATABASE_HOST}:${INVENTORY_DATABASE_PORT}/res_inventory_db
+    zipkin:
+        baseUrl: http://${INVENTORY_ZIPKIN_HOST}:${INVENTORY_ZIPKIN_PORT}
+        enabled: ${INVENTORY_ZIPKIN_CLIENT_ENABLED}
+
+springdoc:
+    swagger-ui:
+        enabled: ${INVENTORY_SWAGGER_ENABLED}
