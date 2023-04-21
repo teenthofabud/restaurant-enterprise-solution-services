@@ -331,7 +331,7 @@ public class DeliveryPartnerIntegrationTest extends SettingsIntegrationBaseTest 
     @Test
     public void test_DeliveryPartner_Get_ShouldReturn_200Response_And_DeliveryPartnerListNaturallyOrdered_WhenRequested_ForDeliveryPartners_WithNameAndDescription() throws Exception {
         MvcResult mvcResult = null;
-        Set<DeliveryPartnerVo> deliveryPartnerList = new TreeSet<>(Arrays.asList(deliveryPartnerVo1));
+        List<DeliveryPartnerVo> deliveryPartnerList = Arrays.asList(deliveryPartnerVo1);
 
         mvcResult = this.mockMvc.perform(get(DELIVERY_PARTNER_URI_FILTER)
                         .queryParam("name", "DeliveryPartner 1")

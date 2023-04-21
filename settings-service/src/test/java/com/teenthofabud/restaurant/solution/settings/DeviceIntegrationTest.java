@@ -455,7 +455,7 @@ public class DeviceIntegrationTest extends SettingsIntegrationBaseTest {
     @Test
     public void test_Device_Get_ShouldReturn_200Response_And_DeviceListNaturallyOrdered_WhenRequested_ForDevices_WithNameAndDescription() throws Exception {
         MvcResult mvcResult = null;
-        Set<DeviceVo> deviceList = new TreeSet<>(Arrays.asList(deviceVo1));
+        List<DeviceVo> deviceList = Arrays.asList(deviceVo1);
 
         mvcResult = this.mockMvc.perform(get(DEVICE_URI_FILTER)
                         .queryParam("name", "Device 1")
@@ -471,7 +471,7 @@ public class DeviceIntegrationTest extends SettingsIntegrationBaseTest {
     @Test
     public void test_Device_Get_ShouldReturn_200Response_And_DeviceListNaturallyOrdered_WhenRequested_ForDevices_WithNameAndDescriptionAndDeviceTypeId() throws Exception {
         MvcResult mvcResult = null;
-        Set<DeviceVo> deviceList = new TreeSet<>(Arrays.asList(deviceVo1));
+        List<DeviceVo> deviceList = Arrays.asList(deviceVo1);
 
         mvcResult = this.mockMvc.perform(get(DEVICE_URI_FILTER)
                         .queryParam("name", "Device 1")

@@ -313,7 +313,7 @@ public class ChargeIntegrationTest extends SettingsIntegrationBaseTest {
     @Test
     public void test_Charge_Get_ShouldReturn_200Response_And_ChargeListNaturallyOrdered_WhenRequested_ForAllCharges() throws Exception {
         MvcResult mvcResult = null;
-        Set<ChargeVo> chargeList = new TreeSet<>(Arrays.asList(chargeVo1, chargeVo2, chargeVo3, chargeVo4));
+        List<ChargeVo> chargeList = Arrays.asList(chargeVo1, chargeVo2, chargeVo3, chargeVo4);
 
         mvcResult = this.mockMvc.perform(get(CHARGE_URI))
                 .andDo(print())
@@ -417,7 +417,7 @@ public class ChargeIntegrationTest extends SettingsIntegrationBaseTest {
     @Test
     public void test_Charge_Get_ShouldReturn_200Response_And_ChargeListNaturallyOrdered_WhenRequested_ForCharges_WithNameAndDescription() throws Exception {
         MvcResult mvcResult = null;
-        Set<ChargeVo> chargeList = new TreeSet<>(Arrays.asList(chargeVo1));
+        List<ChargeVo> chargeList = Arrays.asList(chargeVo1);
 
         mvcResult = this.mockMvc.perform(get(CHARGE_URI_FILTER)
                         .queryParam("name", "Charge 1")

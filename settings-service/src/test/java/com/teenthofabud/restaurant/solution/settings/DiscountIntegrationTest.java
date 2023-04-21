@@ -307,7 +307,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
     @Test
     public void test_Discount_Get_ShouldReturn_200Response_And_DiscountListNaturallyOrdered_WhenRequested_ForAllDiscounts() throws Exception {
         MvcResult mvcResult = null;
-        Set<DiscountVo> discountList = new TreeSet<>(Arrays.asList(discountVo1, discountVo2, discountVo3, discountVo4));
+        List<DiscountVo> discountList = Arrays.asList(discountVo1, discountVo2, discountVo3, discountVo4);
 
         mvcResult = this.mockMvc.perform(get(DISCOUNT_URI))
                 .andDo(print())
@@ -411,7 +411,7 @@ public class DiscountIntegrationTest extends SettingsIntegrationBaseTest {
     @Test
     public void test_Discount_Get_ShouldReturn_200Response_And_DiscountListNaturallyOrdered_WhenRequested_ForDiscounts_WithNameAndDescription() throws Exception {
         MvcResult mvcResult = null;
-        Set<DiscountVo> discountList = new TreeSet<>(Arrays.asList(discountVo1));
+        List<DiscountVo> discountList = Arrays.asList(discountVo1);
 
         mvcResult = this.mockMvc.perform(get(DISCOUNT_URI_FILTER)
                         .queryParam("name", "Discount 1")
