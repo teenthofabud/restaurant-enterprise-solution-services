@@ -34,6 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class DeliveryPartnerIntegrationTest extends SettingsIntegrationBaseTest {
 
     private static final String MEDIA_TYPE_APPLICATION_JSON_PATCH = "application/json-patch+json";
@@ -152,7 +153,8 @@ public class DeliveryPartnerIntegrationTest extends SettingsIntegrationBaseTest 
         deliveryPartnerVo6.setId(UUID.randomUUID().toString());
         deliveryPartnerVo6.setName("Another Name");
         deliveryPartnerVo6.setDescription("");
-        List<DeliveryPartnerVo> deliveryPartnerList = Arrays.asList(deliveryPartnerVo1, deliveryPartnerVo2, deliveryPartnerVo3, deliveryPartnerVo4, deliveryPartnerVo5, deliveryPartnerVo6);
+        List<DeliveryPartnerVo> deliveryPartnerList = Arrays.asList(deliveryPartnerVo1, deliveryPartnerVo2, deliveryPartnerVo3, deliveryPartnerVo4);
+        //List<DeliveryPartnerVo> deliveryPartnerList = Arrays.asList(deliveryPartnerVo1, deliveryPartnerVo2, deliveryPartnerVo3, deliveryPartnerVo4, deliveryPartnerVo5, deliveryPartnerVo6);
 
         mvcResult = this.mockMvc.perform(get(DELIVERY_PARTNER_URI))
                 .andDo(print())

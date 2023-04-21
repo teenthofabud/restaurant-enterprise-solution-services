@@ -42,6 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
+@TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class TableIntegrationTest extends EstablishmentAreaIntegrationBaseTest {
 
     private static final String MEDIA_TYPE_APPLICATION_JSON_PATCH = "application/json-patch+json";
@@ -203,13 +204,13 @@ public class TableIntegrationTest extends EstablishmentAreaIntegrationBaseTest {
         tableVo4.setCapacity(tableEntity4.getCapacity());
         tableVo4.setFloorId(tableEntity4.getFloor().getFlrId().toString());
 
-        floorEntity1.setTable(new ArrayList<TableEntity>(List.of(tableEntity1)));
+        floorEntity1.setTable(new ArrayList<>(Arrays.asList(tableEntity1)));
         floorEntity1 = floorRepository.save(floorEntity1);
-        floorEntity2.setTable(new ArrayList<TableEntity>(List.of(tableEntity2)));
+        floorEntity2.setTable(new ArrayList<>(Arrays.asList(tableEntity2)));
         floorEntity2 = floorRepository.save(floorEntity2);
-        floorEntity3.setTable(new ArrayList<TableEntity>(List.of(tableEntity3)));
+        floorEntity3.setTable(new ArrayList<>(Arrays.asList(tableEntity3)));
         floorEntity3 = floorRepository.save(floorEntity3);
-        floorEntity4.setTable(new ArrayList<TableEntity>(List.of(tableEntity4)));
+        floorEntity4.setTable(new ArrayList<>(Arrays.asList(tableEntity4)));
         floorEntity4 = floorRepository.save(floorEntity4);
 
         tableVo1.setFloorVo(floorVo1);

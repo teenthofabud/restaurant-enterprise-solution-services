@@ -1,0 +1,61 @@
+de:
+    flapdoodle:
+        os:
+            explain: true
+            override: OS_X|ARM_64
+eureka:
+    client:
+        enabled: false
+        serviceUrl:
+            registerWithEureka: false
+logging:
+    level:
+        org:
+            mongodb: INFO
+res:
+    menu:
+        item:
+            fields-to-escape: ''
+        price:
+            fields-to-escape: ''
+    settings:
+        charge:
+            fields-to-escape: ''
+        deliverypartner:
+            fields-to-escape: ''
+        device:
+            fields-to-escape: ''
+        discount:
+            fields-to-escape: ''
+        paymentmethod:
+            fields-to-escape: ''
+        template:
+            fields-to-escape: ''
+            freemarker:
+                version: '@project.properties.freemarker.version@'
+            path: freemarker-master-template.ftl
+server:
+    port: 13001
+spring:
+    cloud:
+        discovery:
+            enabled: false
+        loadbalancer:
+            ribbon:
+                enabled: false
+        service-registry:
+            auto-registration:
+                enabled: false
+    data:
+        mongodb:
+            uri: mongodb://127.0.0.1:37017/settings
+    sleuth:
+        sampler:
+            percentage: 1.0
+        web:
+            skipPattern: (^cleanup.*|.+favicon.*)
+    zipkin:
+        enabled: false
+springdoc:
+    swagger-ui:
+        enabled: false

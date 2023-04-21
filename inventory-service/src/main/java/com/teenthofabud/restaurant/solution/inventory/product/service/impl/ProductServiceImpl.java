@@ -162,7 +162,7 @@ public class ProductServiceImpl implements ProductService {
         log.info("Requesting ProductEntity by id: {}", id);
         Long productId = parseProductId(id);
         Optional<ProductEntity> optEntity = repository.findById(productId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug("No ProductEntity found by id: {}", id);
             throw new ProductException(InventoryErrorCode.INVENTORY_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -206,7 +206,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
     public List<ProductVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalName, Optional<String> optionalDescription) throws ProductException {
-        if(optionalName.isEmpty() && optionalDescription.isEmpty()) {
+        if(!optionalName.isPresent() && !optionalDescription.isPresent()) {
             log.debug("No search parameters provided");
         }
         String name = optionalName.isPresent() ? optionalName.get() : "";
@@ -298,7 +298,7 @@ public class ProductServiceImpl implements ProductService {
         log.debug(ProductMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_PRODUCT_ENTITY_ID.getValue(), id);
         Long productId = parseProductId(id);
         Optional<ProductEntity> optActualEntity = repository.findById(productId);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(ProductMessageTemplate.MSG_TEMPLATE_NO_PRODUCT_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new ProductException(InventoryErrorCode.INVENTORY_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -332,7 +332,7 @@ public class ProductServiceImpl implements ProductService {
         log.debug("All attributes of ProductForm are valid");
 
         Optional<ProductEntity> optExpectedEntity = form2EntityMapper.compareAndMap(actualEntity, form);
-        if(optExpectedEntity.isEmpty()) {
+        if(!optExpectedEntity.isPresent()) {
             log.debug("No new value for attributes of ProductForm");
             throw new ProductException(InventoryErrorCode.INVENTORY_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are expected with new values" });
         }
@@ -365,7 +365,7 @@ public class ProductServiceImpl implements ProductService {
         log.debug(ProductMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_PRODUCT_ENTITY_ID.getValue(), id);
         Long productId = parseProductId(id);
         Optional<ProductEntity> optEntity = repository.findById(productId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug(ProductMessageTemplate.MSG_TEMPLATE_NO_PRODUCT_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new ProductException(InventoryErrorCode.INVENTORY_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -400,7 +400,7 @@ public class ProductServiceImpl implements ProductService {
         log.debug(ProductMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_PRODUCT_ENTITY_ID.getValue(), id);
         Long productId = parseProductId(id);
         Optional<ProductEntity> optActualEntity = repository.findById(productId);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(ProductMessageTemplate.MSG_TEMPLATE_NO_PRODUCT_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new ProductException(InventoryErrorCode.INVENTORY_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -487,7 +487,7 @@ public class ProductServiceImpl implements ProductService {
 
     private void checkUniquenessOfProduct(ProductDto patchedProductForm, ProductEntity actualEntity) throws ProductException {
         // name = true, categoryId = false
-        if(patchedProductForm.getName().isPresent() && patchedProductForm.getCategoryId().isEmpty()) {
+        if(patchedProductForm.getName().isPresent() && !patchedProductForm.getCategoryId().isPresent()) {
             log.debug(ProductMessageTemplate.MSG_TEMPLATE_PRODUCT_EXISTENCE_BY_NAME_AND_CATEGORY_ID.getValue(),
                     patchedProductForm.getName().get(), actualEntity.getCategory().getId());
             boolean sameEntitySw = patchedProductForm.getName().get().compareTo(actualEntity.getName()) == 0;
@@ -521,7 +521,7 @@ public class ProductServiceImpl implements ProductService {
         }
 
         // name = false, categoryId = true
-        if(patchedProductForm.getName().isEmpty() && patchedProductForm.getCategoryId().isPresent()) {
+        if(!patchedProductForm.getName().isPresent() && patchedProductForm.getCategoryId().isPresent()) {
             log.debug(ProductMessageTemplate.MSG_TEMPLATE_PRODUCT_EXISTENCE_BY_NAME_AND_CATEGORY_ID.getValue(),
                     actualEntity.getName(),  patchedProductForm.getCategoryId().get());
             boolean sameEntitySw = patchedProductForm.getCategoryId().get().compareTo(actualEntity.getCategory().getId().toString()) == 0;

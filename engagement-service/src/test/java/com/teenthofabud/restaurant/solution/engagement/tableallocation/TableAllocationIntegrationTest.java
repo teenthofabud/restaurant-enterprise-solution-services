@@ -68,13 +68,6 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
 
     private WalkInEntity2VoConverter walkInEntity2VoConverter;
 
-    private int integrationServicePort;
-
-    @Value("${res.engagement.integration.gateway.port}")
-    public void setIntegrationServicePort(int integrationServicePort) {
-        this.integrationServicePort = integrationServicePort;
-    }
-
     @Autowired
     public void setTableAllocationRepository(TableAllocationRepository tableAllocationRepository) {
         this.tableAllocationRepository = tableAllocationRepository;
@@ -1838,18 +1831,4 @@ public class TableAllocationIntegrationTest extends EngagementIntegrationBaseTes
      * GET all by filter combination - END
      */
 
-    @Override
-    public String getSimulationBaseLocation() {
-        return "integration";
-    }
-
-    @Override
-    public Integer getServicePort() {
-        return this.integrationServicePort;
-    }
-
-    @Override
-    public String[] getSimulationFilePaths() {
-        return new String[] { String.join("/", getSimulationBaseLocation(), "simulation.json") };
-    }
 }

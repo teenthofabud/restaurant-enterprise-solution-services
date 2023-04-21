@@ -47,7 +47,7 @@ public class ReservationDtoValidator extends CheckInDtoValidator {
 
     @Override
     protected void validate(Optional<? extends CheckInDto> optionalCheckInDtoParameters, Errors errors) {
-        if(optionalCheckInDtoParameters.isEmpty()) {
+        if(!optionalCheckInDtoParameters.isPresent()) {
             log.debug("No ReservationDto available");
             return;
         }

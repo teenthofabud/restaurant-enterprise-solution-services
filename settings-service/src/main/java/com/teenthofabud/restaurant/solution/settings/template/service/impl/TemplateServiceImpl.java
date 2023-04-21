@@ -153,7 +153,7 @@ public class TemplateServiceImpl implements TemplateService {
     public TemplateVo retrieveDetailsById(String id, Optional<TOABCascadeLevel> optionalCascadeLevel) throws TemplateException {
         log.info("Requesting TemplateDocument by id: {}", id);
         Optional<TemplateDocument> optDocument = repository.findById(id);
-        if(optDocument.isEmpty()) {
+        if(!optDocument.isPresent()) {
             log.debug("No TemplateDocument found by id: {}", id);
             throw new TemplateException(SettingsErrorCode.SETTINGS_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -171,7 +171,7 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     public List<TemplateVo> retrieveAllMatchingDetailsByCriteria(
             Optional<String> optionalName, Optional<String> optionalDescription, Optional<String> optionalTemplateTypeId) throws TemplateException {
-        if(optionalName.isEmpty() && optionalDescription.isEmpty() && optionalTemplateTypeId.isEmpty()) {
+        if(!optionalName.isPresent() && !optionalDescription.isPresent() && !optionalTemplateTypeId.isPresent()) {
             log.debug("No search parameters provided");
         }
         String name = optionalName.isPresent() ? optionalName.get() : "";
@@ -275,7 +275,7 @@ public class TemplateServiceImpl implements TemplateService {
 
         log.debug(TemplateMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_TEMPLATE_ENTITY_ID.getValue(), id);
         Optional<TemplateDocument> optActualDocument = repository.findById(id);
-        if(optActualDocument.isEmpty()) {
+        if(!optActualDocument.isPresent()) {
             log.debug(TemplateMessageTemplate.MSG_TEMPLATE_NO_TEMPLATE_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new TemplateException(SettingsErrorCode.SETTINGS_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -309,7 +309,7 @@ public class TemplateServiceImpl implements TemplateService {
         log.debug("All attributes of TemplateForm are valid");
 
         Optional<TemplateDocument> optExpectedDocument = form2DocumentMapper.compareAndMap(actualDocument, form);
-        if(optExpectedDocument.isEmpty()) {
+        if(!optExpectedDocument.isPresent()) {
             log.debug("No new value for attributes of TemplateForm");
             throw new TemplateException(SettingsErrorCode.SETTINGS_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are expected with new values" });
         }
@@ -341,7 +341,7 @@ public class TemplateServiceImpl implements TemplateService {
 
         log.debug(TemplateMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_TEMPLATE_ENTITY_ID.getValue(), id);
         Optional<TemplateDocument> optDocument = repository.findById(id);
-        if(optDocument.isEmpty()) {
+        if(!optDocument.isPresent()) {
             log.debug(TemplateMessageTemplate.MSG_TEMPLATE_NO_TEMPLATE_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new TemplateException(SettingsErrorCode.SETTINGS_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -375,7 +375,7 @@ public class TemplateServiceImpl implements TemplateService {
 
         log.debug(TemplateMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_TEMPLATE_ENTITY_ID.getValue(), id);
         Optional<TemplateDocument> optActualDocument = repository.findById(id);
-        if(optActualDocument.isEmpty()) {
+        if(!optActualDocument.isPresent()) {
             log.debug(TemplateMessageTemplate.MSG_TEMPLATE_NO_TEMPLATE_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new TemplateException(SettingsErrorCode.SETTINGS_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -462,7 +462,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     private void checkUniquenessOfTemplate(TemplateDto patchedTemplateForm, TemplateDocument actualDocument) throws TemplateException {
         // name = true, templateTypeId = false
-        if(patchedTemplateForm.getName().isPresent() && patchedTemplateForm.getTemplateTypeId().isEmpty()) {
+        if(patchedTemplateForm.getName().isPresent() && !patchedTemplateForm.getTemplateTypeId().isPresent()) {
             log.debug(TemplateMessageTemplate.MSG_TEMPLATE_TEMPLATE_EXISTENCE_BY_NAME_AND_TEMPLATE_TYPE_ID.getValue(),
                     patchedTemplateForm.getName().get(), actualDocument.getTemplateTypeId());
             boolean sameDocumentSw = patchedTemplateForm.getName().get().compareTo(actualDocument.getName()) == 0;
@@ -496,7 +496,7 @@ public class TemplateServiceImpl implements TemplateService {
         }
 
         // name = false, templateTypeId = true
-        if(patchedTemplateForm.getName().isEmpty() && patchedTemplateForm.getTemplateTypeId().isPresent()) {
+        if(!patchedTemplateForm.getName().isPresent() && patchedTemplateForm.getTemplateTypeId().isPresent()) {
             log.debug(TemplateMessageTemplate.MSG_TEMPLATE_TEMPLATE_EXISTENCE_BY_NAME_AND_TEMPLATE_TYPE_ID.getValue(),
                     actualDocument.getName(),  patchedTemplateForm.getTemplateTypeId().get());
             boolean sameDocumentSw = patchedTemplateForm.getTemplateTypeId().get().compareTo(actualDocument.getTemplateTypeId()) == 0;

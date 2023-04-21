@@ -150,7 +150,7 @@ public class DeliveryServiceImpl implements DeliveryService{
 
     @Override
     public List<DeliveryVo> retrieveAllMatchingDeliveryDetailsByCriteria(Optional<String> optionalOrderId) throws MeetingException {
-        if (optionalOrderId.isEmpty()) {
+        if (!optionalOrderId.isPresent()) {
             log.debug("No search parameters provided");
         }
         String orderId = optionalOrderId.isPresent() ? optionalOrderId.get() : "";
@@ -200,7 +200,7 @@ public class DeliveryServiceImpl implements DeliveryService{
         log.info("Requesting DeliveryEntity by id: {}", id);
         Long idL = this.parsePK(id);
         Optional<DeliveryEntity> optEntity = this.getMeetingRepository().findById(idL);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug("No DeliveryEntity found by id: {}", id);
             throw new MeetingException(EncounterErrorCode.ENCOUNTER_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -216,7 +216,7 @@ public class DeliveryServiceImpl implements DeliveryService{
 
     @Override
     public List<DeliveryVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalAccountId, Optional<String> optionalSequence) throws MeetingException {
-        if(optionalAccountId.isEmpty() && optionalSequence.isEmpty()) {
+        if(!optionalAccountId.isPresent() && !optionalSequence.isPresent()) {
             log.debug("No search parameters provided");
         }
         String accountId = optionalAccountId.orElse("");
@@ -277,7 +277,7 @@ public class DeliveryServiceImpl implements DeliveryService{
 
         log.info("Requesting DeliveryEntity by sequence: {} between timestamps: {} and {}", sequence, start, end);
         Optional<DeliveryEntity> optEntity = this.getMeetingRepository().findBySequenceAndCreatedOnBetween(sequence, start, end);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug("No DeliveryEntity found by sequence: {} between timestamps: {} and {}", sequence, start, end);
             throw new MeetingException(EncounterErrorCode.ENCOUNTER_NOT_FOUND, new Object[] { "sequence: " + sequence, ", date: " + date });
         }
@@ -336,7 +336,7 @@ public class DeliveryServiceImpl implements DeliveryService{
         log.debug(MeetingMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_MEETING_ENTITY_ID.getValue(), id);
         Long idL = this.parsePK(id);
         Optional<DeliveryEntity> optActualEntity = this.getMeetingRepository().findById(idL);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(MeetingMessageTemplate.MSG_TEMPLATE_NO_MEETING_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new MeetingException(EncounterErrorCode.ENCOUNTER_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -370,7 +370,7 @@ public class DeliveryServiceImpl implements DeliveryService{
         log.debug("All attributes of DeliveryForm are valid");
 
         Optional<DeliveryEntity> optExpectedEntity = this.getMeetingForm2EntityMapper().compareAndMap(actualEntity, form);
-        if(optExpectedEntity.isEmpty()) {
+        if(!optExpectedEntity.isPresent()) {
             log.debug("No new value for attributes of DeliveryForm");
             throw new MeetingException(EncounterErrorCode.ENCOUNTER_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are expected with new values" });
         }
@@ -402,7 +402,7 @@ public class DeliveryServiceImpl implements DeliveryService{
         log.debug(MeetingMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_MEETING_ENTITY_ID.getValue(), id);
         Long idL = this.parsePK(id);
         Optional<DeliveryEntity> optEntity = this.getMeetingRepository().findById(idL);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug(MeetingMessageTemplate.MSG_TEMPLATE_NO_MEETING_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new MeetingException(EncounterErrorCode.ENCOUNTER_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -435,7 +435,7 @@ public class DeliveryServiceImpl implements DeliveryService{
         log.debug(MeetingMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_MEETING_ENTITY_ID.getValue(), id);
         Long idL = this.parsePK(id);
         Optional<DeliveryEntity> optActualEntity = this.getMeetingRepository().findById(idL);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(MeetingMessageTemplate.MSG_TEMPLATE_NO_MEETING_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new MeetingException(EncounterErrorCode.ENCOUNTER_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
-@FeignClient(value = CountryStateCityApiServiceClient.SERVICE_CLIENT_NAME, url = "${customer.country-state-city-api.service.url}", configuration = CountryStateCityApiServiceIntegrationConfiguration.class)
+@FeignClient(value = CountryStateCityApiServiceClient.SERVICE_CLIENT_NAME, url = "${res.customer.country-state-city-api.service.url}", configuration = CountryStateCityApiServiceIntegrationConfiguration.class)
 public interface CountryStateCityApiServiceClient {
 
     public static final String SERVICE_CLIENT_NAME = "country-state-city-api-service";

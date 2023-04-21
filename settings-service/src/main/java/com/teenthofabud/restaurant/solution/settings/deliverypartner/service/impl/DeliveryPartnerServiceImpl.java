@@ -133,7 +133,7 @@ public class DeliveryPartnerServiceImpl implements DeliveryPartnerService {
     public DeliveryPartnerVo retrieveDetailsById(String id, Optional<TOABCascadeLevel> optionalCascadeLevel) throws DeliveryPartnerException {
         log.info("Requesting DeliveryPartnerDocument by id: {}", id);
         Optional<DeliveryPartnerDocument> optDocument = repository.findById(id);
-        if(optDocument.isEmpty()) {
+        if(!optDocument.isPresent()) {
             log.debug("No DeliveryPartnerDocument found by id: {}", id);
             throw new DeliveryPartnerException(SettingsErrorCode.SETTINGS_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -150,7 +150,7 @@ public class DeliveryPartnerServiceImpl implements DeliveryPartnerService {
     @Override
     public List<DeliveryPartnerVo> retrieveAllMatchingDetailsByCriteria(
             Optional<String> optionalName, Optional<String> optionalDescription) throws DeliveryPartnerException {
-        if(optionalName.isEmpty() && optionalDescription.isEmpty()) {
+        if(!optionalName.isPresent() && !optionalDescription.isPresent()) {
             log.debug("No search parameters provided");
         }
         String name = optionalName.isPresent() ? optionalName.get() : "";
@@ -238,7 +238,7 @@ public class DeliveryPartnerServiceImpl implements DeliveryPartnerService {
 
         log.debug(DeliveryPartnerMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_DELIVERY_PARTNER_ENTITY_ID.getValue(), id);
         Optional<DeliveryPartnerDocument> optActualDocument = repository.findById(id);
-        if(optActualDocument.isEmpty()) {
+        if(!optActualDocument.isPresent()) {
             log.debug(DeliveryPartnerMessageTemplate.MSG_TEMPLATE_NO_DELIVERY_PARTNER_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new DeliveryPartnerException(SettingsErrorCode.SETTINGS_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -272,7 +272,7 @@ public class DeliveryPartnerServiceImpl implements DeliveryPartnerService {
         log.debug("All attributes of DeliveryPartnerForm are valid");
 
         Optional<DeliveryPartnerDocument> optExpectedDocument = form2DocumentMapper.compareAndMap(actualDocument, form);
-        if(optExpectedDocument.isEmpty()) {
+        if(!optExpectedDocument.isPresent()) {
             log.debug("No new value for attributes of DeliveryPartnerForm");
             throw new DeliveryPartnerException(SettingsErrorCode.SETTINGS_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are expected with new values" });
         }
@@ -310,7 +310,7 @@ public class DeliveryPartnerServiceImpl implements DeliveryPartnerService {
 
         log.debug(DeliveryPartnerMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_DELIVERY_PARTNER_ENTITY_ID.getValue(), id);
         Optional<DeliveryPartnerDocument> optDocument = repository.findById(id);
-        if(optDocument.isEmpty()) {
+        if(!optDocument.isPresent()) {
             log.debug(DeliveryPartnerMessageTemplate.MSG_TEMPLATE_NO_DELIVERY_PARTNER_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new DeliveryPartnerException(SettingsErrorCode.SETTINGS_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -343,7 +343,7 @@ public class DeliveryPartnerServiceImpl implements DeliveryPartnerService {
 
         log.debug(DeliveryPartnerMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_DELIVERY_PARTNER_ENTITY_ID.getValue(), id);
         Optional<DeliveryPartnerDocument> optActualDocument = repository.findById(id);
-        if(optActualDocument.isEmpty()) {
+        if(!optActualDocument.isPresent()) {
             log.debug(DeliveryPartnerMessageTemplate.MSG_TEMPLATE_NO_DELIVERY_PARTNER_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new DeliveryPartnerException(SettingsErrorCode.SETTINGS_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }

@@ -1,0 +1,75 @@
+eureka:
+    client:
+        enabled: false
+        serviceUrl:
+            registerWithEureka: false
+feign:
+    circuitbreaker:
+        enabled: false
+    client:
+        config:
+            external-service-country-state-city-api-client:
+                connectTimeout: 250
+                default-request-headers:
+                    X-CSCAPI-KEY: dkJXMjJzOE9Ec2NJUFdLS1pUTTNJQUpocGFsOWJ4dGxzMU9KNTVmSA==
+                readTimeout: 500
+            metadata-service-gender-client:
+                connectTimeout: 250
+                readTimeout: 500
+logging:
+    level:
+        org:
+            hibernate:
+                SQL: INFO
+                type:
+                    descriptor:
+                        sql:
+                            BasicBinder: INFO
+res:
+    menu:
+        category:
+            fields-to-escape: ''
+        item:
+            fields-to-escape: ''
+        price:
+            fields-to-escape: ''
+server:
+    port: 11001
+spring:
+    cloud:
+        discovery:
+            enabled: false
+        loadbalancer:
+            ribbon:
+                enabled: false
+        service-registry:
+            auto-registration:
+                enabled: false
+    datasource:
+        initialization-mode: always
+        driverClassName: org.h2.Driver
+    h2:
+        console:
+            enabled: true
+    jpa:
+        database-platform: org.hibernate.dialect.H2Dialect
+        hibernate:
+            ddl-auto: none
+        properties:
+            hibernate:
+                format_sql: true
+                jdbc:
+                    time_zone: UTC
+                show_sql: true
+                use_sql_comments: true
+        show-sql: true
+    sleuth:
+        sampler:
+            percentage: 1.0
+        web:
+            skipPattern: (^cleanup.*|.+favicon.*)
+    zipkin:
+        enabled: false
+springdoc:
+    swagger-ui:
+        enabled: false

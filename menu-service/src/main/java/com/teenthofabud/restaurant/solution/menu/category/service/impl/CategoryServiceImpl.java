@@ -154,7 +154,7 @@ public class CategoryServiceImpl implements CategoryService {
         log.info("Requesting CategoryEntity by id: {}", id);
         Long categoryId = parseCategoryId(id);
         Optional<CategoryEntity> optEntity = repository.findById(categoryId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug("No CategoryEntity found by id: {}", id);
             throw new CategoryException(MenuErrorCode.MENU_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -172,7 +172,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<CategoryVo> retrieveAllMatchingDetailsByCriteria(
             Optional<String> optionalName, Optional<String> optionalDescription) throws CategoryException {
-        if(optionalName.isEmpty() && optionalDescription.isEmpty()) {
+        if(!optionalName.isPresent() && !optionalDescription.isPresent()) {
             log.debug("No search parameters provided");
         }
         String name = optionalName.isPresent() ? optionalName.get() : "";
@@ -263,7 +263,7 @@ public class CategoryServiceImpl implements CategoryService {
         log.debug(CategoryMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_CATEGORY_ENTITY_ID.getValue(), id);
         Long categoryId = parseCategoryId(id);
         Optional<CategoryEntity> optActualEntity = repository.findById(categoryId);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(CategoryMessageTemplate.MSG_TEMPLATE_NO_CATEGORY_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new CategoryException(MenuErrorCode.MENU_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -297,7 +297,7 @@ public class CategoryServiceImpl implements CategoryService {
         log.debug("All attributes of CategoryForm are valid");
 
         Optional<CategoryEntity> optExpectedEntity = form2EntityMapper.compareAndMap(actualEntity, form);
-        if(optExpectedEntity.isEmpty()) {
+        if(!optExpectedEntity.isPresent()) {
             log.debug("No new value for attributes of CategoryForm");
             throw new CategoryException(MenuErrorCode.MENU_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are expected with new values" });
         }
@@ -337,7 +337,7 @@ public class CategoryServiceImpl implements CategoryService {
         log.debug(CategoryMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_CATEGORY_ENTITY_ID.getValue(), id);
         Long categoryId = parseCategoryId(id);
         Optional<CategoryEntity> optEntity = repository.findById(categoryId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug(CategoryMessageTemplate.MSG_TEMPLATE_NO_CATEGORY_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new CategoryException(MenuErrorCode.MENU_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -372,7 +372,7 @@ public class CategoryServiceImpl implements CategoryService {
         log.debug(CategoryMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_CATEGORY_ENTITY_ID.getValue(), id);
         Long categoryId = parseCategoryId(id);
         Optional<CategoryEntity> optActualEntity = repository.findById(categoryId);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(CategoryMessageTemplate.MSG_TEMPLATE_NO_CATEGORY_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new CategoryException(MenuErrorCode.MENU_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }

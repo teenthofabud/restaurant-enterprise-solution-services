@@ -194,7 +194,7 @@ public class TableServiceImpl implements TableService {
         log.info("Requesting TableEntity by id: {}", id);
         Long tableId = parseTableId(id);
         Optional<TableEntity> optEntity = tableRepository.findById(tableId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug("No TableEntity found by id: {}", id);
             throw new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_NOT_FOUND,
                     new Object[] { "id", String.valueOf(id) });
@@ -318,7 +318,7 @@ public class TableServiceImpl implements TableService {
         log.info("Updating TableEntity by id: {}", id);
         Long tableId = parseTableId(id);
         Optional<TableEntity> optEntity = tableRepository.findById(tableId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug("No TableEntity found by id: {}", id);
             throw new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_NOT_FOUND,
                     new Object[] { "id", String.valueOf(id) });
@@ -355,7 +355,7 @@ public class TableServiceImpl implements TableService {
         log.debug("All attributes of TableForm are valid");
 
         Optional<TableEntity> optExpectedEntity = form2EntityMapper.compareAndMap(actualEntity, form);
-        if(optExpectedEntity.isEmpty()) {
+        if(!optExpectedEntity.isPresent()) {
             log.debug("No new value for attributes of TableForm");
             throw new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_ATTRIBUTE_UNEXPECTED, 
                     new Object[]{ "form", "fields are expected with new values" });
@@ -389,7 +389,7 @@ public class TableServiceImpl implements TableService {
         log.debug(TableMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_TABLE_ENTITY_ID.getValue(), id);
         Long tableId = parseTableId(id);
         Optional<TableEntity> optEntity = tableRepository.findById(tableId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug(TableMessageTemplate.MSG_TEMPLATE_TABLE_ID_INVALID.getValue(), id);
             throw new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -424,7 +424,7 @@ public class TableServiceImpl implements TableService {
         log.debug(TableMessageTemplate.MSG_TEMPLATE_FOUND_TABLE_ENTITY_ID.getValue(), id);
         Long tableId = parseTableId(id);
         Optional<TableEntity> optActualEntity = tableRepository.findById(tableId);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(TableMessageTemplate.MSG_TEMPLATE_FOUND_TABLE_ENTITY_ID.getValue(), id);
             throw new TableException(EstablishmentAreaErrorCode.ESTABLISHMENT_AREA_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }

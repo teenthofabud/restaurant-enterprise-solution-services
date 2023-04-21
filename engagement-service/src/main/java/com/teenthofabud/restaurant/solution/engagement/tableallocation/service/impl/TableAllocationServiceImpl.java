@@ -174,7 +174,7 @@ public class TableAllocationServiceImpl implements TableAllocationService {
         log.info("Requesting TableAllocationEntity by id: {}", id);
         Long idL = this.parsePK(id);
         Optional<TableAllocationEntity> optEntity = tableAllocationRepository.findById(idL);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug("No TableAllocationEntity found by id: {}", id);
             throw new TableAllocationException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -192,7 +192,7 @@ public class TableAllocationServiceImpl implements TableAllocationService {
     public List<TableAllocationVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalTableId,
                                                                         Optional<String> optionalActive,
                                                                         Optional<String> optionalNotes) throws TableAllocationException {
-        if(optionalTableId.isEmpty() && optionalActive.isEmpty() && optionalNotes.isEmpty()) {
+        if(!optionalTableId.isPresent() && !optionalActive.isPresent() && !optionalNotes.isPresent()) {
             log.debug("No search parameters provided");
         }
         String tableId = optionalTableId.isPresent() ? optionalTableId.get() : "";
@@ -333,7 +333,7 @@ public class TableAllocationServiceImpl implements TableAllocationService {
         log.debug(TableAllocationMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_TABLE_ALLOCATION_ENTITY_ID.getValue(), id);
         Long idL = this.parsePK(id);
         Optional<TableAllocationEntity> optActualEntity = tableAllocationRepository.findById(idL);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(TableAllocationMessageTemplate.MSG_TEMPLATE_NO_TABLE_ALLOCATION_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new TableAllocationException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -367,7 +367,7 @@ public class TableAllocationServiceImpl implements TableAllocationService {
         log.debug("All attributes of TableAllocationForm are valid");
 
         Optional<TableAllocationEntity> optExpectedEntity = tableAllocationForm2EntityMapper.compareAndMap(actualEntity, form);
-        if(optExpectedEntity.isEmpty()) {
+        if(!optExpectedEntity.isPresent()) {
             log.debug("No new value for attributes of TableAllocationForm");
             throw new TableAllocationException(EngagementErrorCode.ENGAGEMENT_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are expected with new values" });
         }
@@ -399,7 +399,7 @@ public class TableAllocationServiceImpl implements TableAllocationService {
         log.debug(TableAllocationMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_TABLE_ALLOCATION_ENTITY_ID.getValue(), id);
         Long idL = this.parsePK(id);
         Optional<TableAllocationEntity> optEntity = tableAllocationRepository.findById(idL);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug(TableAllocationMessageTemplate.MSG_TEMPLATE_NO_TABLE_ALLOCATION_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new TableAllocationException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -434,7 +434,7 @@ public class TableAllocationServiceImpl implements TableAllocationService {
         log.debug(TableAllocationMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_TABLE_ALLOCATION_ENTITY_ID.getValue(), id);
         Long idL = this.parsePK(id);
         Optional<TableAllocationEntity> optActualEntity = tableAllocationRepository.findById(idL);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(TableAllocationMessageTemplate.MSG_TEMPLATE_NO_TABLE_ALLOCATION_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new TableAllocationException(EngagementErrorCode.ENGAGEMENT_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }

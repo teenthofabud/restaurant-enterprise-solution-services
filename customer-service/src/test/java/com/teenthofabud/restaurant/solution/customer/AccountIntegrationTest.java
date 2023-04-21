@@ -18,7 +18,6 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -57,11 +56,6 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
 
     private int metadataServicePort;
     private AddressRepository addressRepository;
-
-    @Value("${customer.metadata.service.port}")
-    public void setMetadataServicePort(int metadataServicePort) {
-        this.metadataServicePort = metadataServicePort;
-    }
 
     @Autowired
     public void setAccountRepository(AccountRepository accountRepository) {
@@ -290,11 +284,11 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         addressVo4.setPincode(addressForm.getPincode());
         addressVo4.setAccountId(addressForm.getAccountId());
 
-        accountEntity1.setAddresses(new ArrayList<AddressEntity>(List.of(addressEntity1)));
+        accountEntity1.setAddresses(new ArrayList<>(Arrays.asList(addressEntity1)));
         accountEntity1 = accountRepository.save(accountEntity1);
-        accountEntity2.setAddresses(new ArrayList<AddressEntity>(List.of(addressEntity2)));
+        accountEntity2.setAddresses(new ArrayList<>(Arrays.asList(addressEntity2)));
         accountEntity2 = accountRepository.save(accountEntity2);
-        accountEntity3.setAddresses(new ArrayList<AddressEntity>(List.of(addressEntity3)));
+        accountEntity3.setAddresses(new ArrayList<>(Arrays.asList(addressEntity3)));
         accountEntity3 = accountRepository.save(accountEntity3);
 
         addressVo1.setAccount(accountVo1);
@@ -1259,20 +1253,5 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
 
-    }
-
-    @Override
-    public String getSimulationBaseLocation() {
-        return "simulation/metadata-service";
-    }
-
-    @Override
-    public Integer getServicePort() {
-        return this.metadataServicePort;
-    }
-
-    @Override
-    public String[] getSimulationFilePaths() {
-        return new String[] { String.join("/", getSimulationBaseLocation(), "simulation-v3.json") };
     }
 }

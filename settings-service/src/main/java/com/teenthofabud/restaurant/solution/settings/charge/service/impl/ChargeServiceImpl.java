@@ -149,7 +149,7 @@ public class ChargeServiceImpl implements ChargeService {
     public ChargeVo retrieveDetailsById(String id, Optional<TOABCascadeLevel> optionalCascadeLevel) throws ChargeException {
         log.info("Requesting ChargeDocument by id: {}", id);
         Optional<ChargeDocument> optDocument = repository.findById(id);
-        if(optDocument.isEmpty()) {
+        if(!optDocument.isPresent()) {
             log.debug("No ChargeDocument found by id: {}", id);
             throw new ChargeException(SettingsErrorCode.SETTINGS_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -166,7 +166,7 @@ public class ChargeServiceImpl implements ChargeService {
     @Override
     public List<ChargeVo> retrieveAllMatchingDetailsByCriteria(
             Optional<String> optionalName, Optional<String> optionalDescription) throws ChargeException {
-        if(optionalName.isEmpty() && optionalDescription.isEmpty()) {
+        if(!optionalName.isPresent() && !optionalDescription.isPresent()) {
             log.debug("No search parameters provided");
         }
         String name = optionalName.isPresent() ? optionalName.get() : "";
@@ -254,7 +254,7 @@ public class ChargeServiceImpl implements ChargeService {
 
         log.debug(ChargeMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_CHARGE_ENTITY_ID.getValue(), id);
         Optional<ChargeDocument> optActualDocument = repository.findById(id);
-        if(optActualDocument.isEmpty()) {
+        if(!optActualDocument.isPresent()) {
             log.debug(ChargeMessageTemplate.MSG_TEMPLATE_NO_CHARGE_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new ChargeException(SettingsErrorCode.SETTINGS_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -288,7 +288,7 @@ public class ChargeServiceImpl implements ChargeService {
         log.debug("All attributes of ChargeForm are valid");
 
         Optional<ChargeDocument> optExpectedDocument = form2DocumentMapper.compareAndMap(actualDocument, form);
-        if(optExpectedDocument.isEmpty()) {
+        if(!optExpectedDocument.isPresent()) {
             log.debug("No new value for attributes of ChargeForm");
             throw new ChargeException(SettingsErrorCode.SETTINGS_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are expected with new values" });
         }
@@ -326,7 +326,7 @@ public class ChargeServiceImpl implements ChargeService {
 
         log.debug(ChargeMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_CHARGE_ENTITY_ID.getValue(), id);
         Optional<ChargeDocument> optDocument = repository.findById(id);
-        if(optDocument.isEmpty()) {
+        if(!optDocument.isPresent()) {
             log.debug(ChargeMessageTemplate.MSG_TEMPLATE_NO_CHARGE_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new ChargeException(SettingsErrorCode.SETTINGS_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -359,7 +359,7 @@ public class ChargeServiceImpl implements ChargeService {
 
         log.debug(ChargeMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_CHARGE_ENTITY_ID.getValue(), id);
         Optional<ChargeDocument> optActualDocument = repository.findById(id);
-        if(optActualDocument.isEmpty()) {
+        if(!optActualDocument.isPresent()) {
             log.debug(ChargeMessageTemplate.MSG_TEMPLATE_NO_CHARGE_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new ChargeException(SettingsErrorCode.SETTINGS_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }

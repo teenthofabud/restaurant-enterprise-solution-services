@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(value = EstablishmentAreaServiceClient.SERVICE_CLIENT_NAME, url = "${res.engagement.establishmentarea.service.url}", configuration = EstablishmentAreaServiceIntegrationConfiguration.class)
+@FeignClient(value = EstablishmentAreaServiceClient.SERVICE_CLIENT_NAME, url = "${res.engagement.establishmentarea.service.url}", path = "/establishmentarea", configuration = EstablishmentAreaServiceIntegrationConfiguration.class)
 public interface EstablishmentAreaServiceClient {
 
     public static final String SERVICE_CLIENT_NAME = "establishmentarea-service";

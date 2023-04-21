@@ -74,7 +74,6 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
 
     private ReservationEntity2VoConverter reservationEntity2VoConverter;
 
-    private Integer integrationPort;
 
     private String reservationDateFormat;
 
@@ -88,11 +87,6 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
     @Value("${res.engagement.checkIn.reservation.time.format}")
     public void setReservationTimeFormat(String reservationTimeFormat) {
         this.reservationTimeFormat = reservationTimeFormat;
-    }
-
-    @Value("${res.engagement.integration.gateway.port}")
-    public void setIntegrationPort(Integer integrationPort) {
-        this.integrationPort = integrationPort;
     }
 
     @Autowired
@@ -1950,18 +1944,4 @@ public class ReservationIntegrationTest extends EngagementIntegrationBaseTest {
 
     }
 
-    @Override
-    public String getSimulationBaseLocation() {
-        return "integration";
-    }
-
-    @Override
-    public Integer getServicePort() throws UnsupportedOperationException {
-        return integrationPort;
-    }
-
-    @Override
-    public String[] getSimulationFilePaths() {
-        return new String[] { String.join("/", getSimulationBaseLocation(), "simulation.json") };
-    }
 }

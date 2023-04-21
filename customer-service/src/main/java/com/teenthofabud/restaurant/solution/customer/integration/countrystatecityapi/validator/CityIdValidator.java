@@ -46,7 +46,7 @@ public class CityIdValidator implements Validator {
             return;
         }
         Optional<Object> optionalCountryIso = TOABValidationContextHolder.getSupportingValidationParameterContext("countryIso");
-        if(optionalCountryIso.isEmpty()) {
+        if(!optionalCountryIso.isPresent()) {
             throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, "countryIso is required to get state details", new Object[] { "country iso is required" });
         }
         String countryIso =  optionalCountryIso.get().toString();
@@ -62,7 +62,7 @@ public class CityIdValidator implements Validator {
         }
         Long finalCityId = cityId;
         Optional<CityVo> optionalCityVo = cities.stream().filter(c -> c.getId().compareTo(finalCityId) == 0).findAny();
-        if(optionalCityVo.isEmpty()) {
+        if(!optionalCityVo.isPresent()) {
             log.debug(objectName + ".city.id is invalid");
             errors.reject(CustomerErrorCode.CUST_ATTRIBUTE_INVALID.name());
             return;

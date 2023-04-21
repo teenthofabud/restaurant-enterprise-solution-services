@@ -55,8 +55,6 @@ public class DeliveryIntegrationTest extends EncounterIntegrationBaseTest {
 
     private DeliveryEntity2VoConverter deliveryEntity2VoConverter;
 
-    private Integer integrationPort;
-
     private String deliveryDateFormat;
 
     private String deliveryTimeFormat;
@@ -69,11 +67,6 @@ public class DeliveryIntegrationTest extends EncounterIntegrationBaseTest {
     @Value("${res.encounter.meeting.time.format")
     public void setDeliveryTimeFormat(String deliveryTimeFormat) {
         this.deliveryTimeFormat = deliveryTimeFormat;
-    }
-
-    @Value("${res.encounter.integration.gateway.port}")
-    public void setIntegrationPort(Integer integrationPort) {
-        this.integrationPort = integrationPort;
     }
 
     @Autowired
@@ -145,7 +138,7 @@ public class DeliveryIntegrationTest extends EncounterIntegrationBaseTest {
         deliveryForm.setSequence(UUID.randomUUID().toString());
         deliveryForm.setOrderId("11");
 
-        patches = List.of(new PatchOperationForm("replace", "/orderId", "patched orderId"));
+        patches = new ArrayList<>(Arrays.asList(new PatchOperationForm("replace", "/orderId", "patched orderId")));
 
         deliveryEntity1 = this.deliveryEntity(accountVo1.getId(), UUID.randomUUID().toString(), "222222222", true);
         deliveryEntity1 = deliveryRepository.save(deliveryEntity1);
@@ -1096,18 +1089,4 @@ public class DeliveryIntegrationTest extends EncounterIntegrationBaseTest {
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldDate));
     }
 
-    @Override
-    public String getSimulationBaseLocation() {
-        return "simulation";
-    }
-
-    @Override
-    public Integer getServicePort() throws UnsupportedOperationException {
-        return integrationPort;
-    }
-
-    @Override
-    public String[] getSimulationFilePaths() {
-        return new String[] { String.join("/", getSimulationBaseLocation(), "simulation.json") };
-    }
 }

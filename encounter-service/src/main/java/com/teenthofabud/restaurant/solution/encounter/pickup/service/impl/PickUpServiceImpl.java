@@ -165,7 +165,7 @@ public class PickUpServiceImpl implements PickUpService {
         log.info("Requesting PickUpEntity by id: {}", id);
         Long idL = this.parsePK(id);
         Optional<PickUpEntity> optEntity = this.getMeetingRepository().findById(idL);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug("No PickUpEntity found by id: {}", id);
             throw new MeetingException(EncounterErrorCode.ENCOUNTER_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -181,7 +181,7 @@ public class PickUpServiceImpl implements PickUpService {
 
     @Override
     public List<PickUpVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalAccountId, Optional<String> optionalSequence) throws MeetingException {
-        if(optionalAccountId.isEmpty() && optionalSequence.isEmpty()) {
+        if(!optionalAccountId.isPresent() && !optionalSequence.isPresent()) {
             log.debug("No search parameters provided");
         }
         String accountId = optionalAccountId.isPresent() ? optionalAccountId.get() : "";
@@ -241,7 +241,7 @@ public class PickUpServiceImpl implements PickUpService {
 
         log.info("Requesting PickUpEntity by sequence: {} between timestamps: {} and {}", sequence, start, end);
         Optional<PickUpEntity> optEntity = this.getMeetingRepository().findBySequenceAndCreatedOnBetween(sequence, start, end);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug("No PickUpEntity found by sequence: {} between timestamps: {} and {}", sequence, start, end);
             throw new MeetingException(EncounterErrorCode.ENCOUNTER_NOT_FOUND, new Object[] { "sequence: " + sequence, ", date: " + date });
         }
@@ -342,7 +342,7 @@ public class PickUpServiceImpl implements PickUpService {
         log.debug(MeetingMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_MEETING_ENTITY_ID.getValue(), id);
         Long idL = this.parsePK(id);
         Optional<PickUpEntity> optActualEntity = this.getMeetingRepository().findById(idL);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(MeetingMessageTemplate.MSG_TEMPLATE_NO_MEETING_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new MeetingException(EncounterErrorCode.ENCOUNTER_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -376,7 +376,7 @@ public class PickUpServiceImpl implements PickUpService {
         log.debug("All attributes of PickUpForm are valid");
 
         Optional<PickUpEntity> optExpectedEntity = this.getMeetingForm2EntityMapper().compareAndMap(actualEntity, form);
-        if(optExpectedEntity.isEmpty()) {
+        if(!optExpectedEntity.isPresent()) {
             log.debug("No new value for attributes of PickUpForm");
             throw new MeetingException(EncounterErrorCode.ENCOUNTER_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are expected with new values" });
         }
@@ -408,7 +408,7 @@ public class PickUpServiceImpl implements PickUpService {
         log.debug(MeetingMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_MEETING_ENTITY_ID.getValue(), id);
         Long idL = this.parsePK(id);
         Optional<PickUpEntity> optEntity = this.getMeetingRepository().findById(idL);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug(MeetingMessageTemplate.MSG_TEMPLATE_NO_MEETING_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new MeetingException(EncounterErrorCode.ENCOUNTER_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -442,7 +442,7 @@ public class PickUpServiceImpl implements PickUpService {
         log.debug(MeetingMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_MEETING_ENTITY_ID.getValue(), id);
         Long idL = this.parsePK(id);
         Optional<PickUpEntity> optActualEntity = this.getMeetingRepository().findById(idL);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(MeetingMessageTemplate.MSG_TEMPLATE_NO_MEETING_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new MeetingException(EncounterErrorCode.ENCOUNTER_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }

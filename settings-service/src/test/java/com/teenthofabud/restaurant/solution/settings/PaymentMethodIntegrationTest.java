@@ -35,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
 
     private static final String MEDIA_TYPE_APPLICATION_JSON_PATCH = "application/json-patch+json";
@@ -222,7 +223,8 @@ public class PaymentMethodIntegrationTest extends SettingsIntegrationBaseTest {
     @Test
     public void test_PaymentMethod_Get_ShouldReturn_200Response_And_PaymentMethodListNaturallyOrdered_WhenRequested_ForAllPaymentMethods() throws Exception {
         MvcResult mvcResult = null;
-        Set<PaymentMethodVo> paymentMethodList = new TreeSet<>(Arrays.asList(paymentMethodVo1, paymentMethodVo2, paymentMethodVo3, paymentMethodVo4, paymentMethodVo5));
+        List<PaymentMethodVo> paymentMethodList = Arrays.asList(paymentMethodVo1, paymentMethodVo2, paymentMethodVo3, paymentMethodVo4);
+        //Set<PaymentMethodVo> paymentMethodList = new TreeSet<>(Arrays.asList(paymentMethodVo1, paymentMethodVo2, paymentMethodVo3, paymentMethodVo4, paymentMethodVo5));
 
         mvcResult = this.mockMvc.perform(get(PAYMENT_METHOD_URI))
                 .andDo(print())

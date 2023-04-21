@@ -46,15 +46,7 @@ import org.springframework.validation.Errors;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 @Component
 @Slf4j
@@ -172,7 +164,7 @@ public class IngredientServiceImpl implements IngredientService {
         List<IngredientEntity> ingredientEntityList = repository.findAll();
         Set<IngredientVo> naturallyOrderedSet = new TreeSet<IngredientVo>(CMP_BY_NAME_AND_INGREDIENT_ID_AND_PRODUCT_ID);
         for(IngredientEntity entity : ingredientEntityList) {
-            List<IngredientVo> dtoList = cookbookServiceHelper.ingredientEntity2DetailedVo(List.of(entity));
+            List<IngredientVo> dtoList = cookbookServiceHelper.ingredientEntity2DetailedVo(Arrays.asList(entity));
             if(dtoList != null && !dtoList.isEmpty()) {
                 IngredientVo dto = dtoList.get(0);
                 log.debug("Converting {} to {}", entity, dto);
@@ -189,7 +181,7 @@ public class IngredientServiceImpl implements IngredientService {
         log.info("Requesting IngredientEntity by id: {}", id);
         Long ingredientId = parseIngredientId(id);
         Optional<IngredientEntity> optEntity = repository.findById(ingredientId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug("No IngredientEntity found by id: {}", id);
             throw new IngredientException(CookbookErrorCode.COOK_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -235,8 +227,8 @@ public class IngredientServiceImpl implements IngredientService {
                                                                    Optional<String> optionalProductId, Optional<String> optionalQuantityAmount,
                                                                    Optional<String> optionalQuantityUnitId)
             throws IngredientException {
-        if(optionalName.isEmpty() && optionalDescription.isEmpty() && optionalProductId.isEmpty()
-                && optionalProductId.isEmpty() && optionalQuantityAmount.isEmpty() && optionalQuantityUnitId.isEmpty()) {
+        if(!optionalName.isPresent() && !optionalDescription.isPresent() && !optionalProductId.isPresent()
+                && !optionalProductId.isPresent() && !optionalQuantityAmount.isPresent() && !optionalQuantityUnitId.isPresent()) {
             log.debug("No search parameters provided");
         }
         String name = optionalName.isPresent() ? optionalName.get() : "";
@@ -377,7 +369,7 @@ public class IngredientServiceImpl implements IngredientService {
         log.debug(IngredientMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_INGREDIENT_ENTITY_ID.getValue(), id);
         Long ingredientId = parseIngredientId(id);
         Optional<IngredientEntity> optActualEntity = repository.findById(ingredientId);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(IngredientMessageTemplate.MSG_TEMPLATE_NO_INGREDIENT_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new IngredientException(CookbookErrorCode.COOK_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -411,7 +403,7 @@ public class IngredientServiceImpl implements IngredientService {
         log.debug("All attributes of IngredientForm are valid");
 
         Optional<IngredientEntity> optExpectedEntity = form2EntityMapper.compareAndMap(actualEntity, form);
-        if(optExpectedEntity.isEmpty()) {
+        if(!optExpectedEntity.isPresent()) {
             log.debug("No new value for attributes of IngredientForm");
             throw new IngredientException(CookbookErrorCode.COOK_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are expected with new values" });
         }
@@ -444,7 +436,7 @@ public class IngredientServiceImpl implements IngredientService {
         log.debug(IngredientMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_INGREDIENT_ENTITY_ID.getValue(), id);
         Long ingredientId = parseIngredientId(id);
         Optional<IngredientEntity> optEntity = repository.findById(ingredientId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug(IngredientMessageTemplate.MSG_TEMPLATE_NO_INGREDIENT_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new IngredientException(CookbookErrorCode.COOK_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -479,7 +471,7 @@ public class IngredientServiceImpl implements IngredientService {
         log.debug(IngredientMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_INGREDIENT_ENTITY_ID.getValue(), id);
         Long ingredientId = parseIngredientId(id);
         Optional<IngredientEntity> optActualEntity = repository.findById(ingredientId);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(IngredientMessageTemplate.MSG_TEMPLATE_NO_INGREDIENT_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new IngredientException(CookbookErrorCode.COOK_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }

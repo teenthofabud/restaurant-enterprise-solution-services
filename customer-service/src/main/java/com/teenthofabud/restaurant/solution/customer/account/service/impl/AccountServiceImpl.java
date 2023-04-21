@@ -183,7 +183,7 @@ public class AccountServiceImpl implements AccountService {
         log.info("Requesting AccountEntity by id: {}", id);
         Long accountId = parseAccountId(id);
         Optional<AccountEntity> optEntity = repository.findById(accountId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug("No AccountEntity found by id: {}", id);
             throw new AccountException(CustomerErrorCode.CUST_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -199,7 +199,7 @@ public class AccountServiceImpl implements AccountService {
         log.info("Requesting AccountEntity by id: {}", id);
         Long accountId = parseAccountId(id);
         Optional<AccountEntity> optEntity = repository.findById(accountId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug("No AccountEntity found by id: {}", id);
             throw new AccountException(CustomerErrorCode.CUST_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -238,7 +238,7 @@ public class AccountServiceImpl implements AccountService {
     @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
     public List<AccountVo> retrieveAllMatchingDetailsByFirstNameLastNameDateOfBirth(Optional<String> optionalFirstName, Optional<String> optionalLastName, Optional<String> optionalDateOfBirth) throws AccountException {
-        if(optionalFirstName.isEmpty() && optionalLastName.isEmpty() && optionalDateOfBirth.isEmpty()) {
+        if(!optionalFirstName.isPresent() && !optionalLastName.isPresent() && !optionalDateOfBirth.isPresent()) {
             log.debug("All search parameters are empty");
         }
         String firstName = optionalFirstName.isPresent() ? optionalFirstName.get() : "";
@@ -295,7 +295,7 @@ public class AccountServiceImpl implements AccountService {
     public List<AccountVo> retrieveAllMatchingDetailsByCriteria(
             Optional<String> optionalFirstName, Optional<String> optionalLastName, Optional<String> optionalPhoneNumber,
             Optional<String> optionalEmailId, Optional<String> optionalDateOfBirth) throws AccountException {
-        if(optionalFirstName.isEmpty() && optionalLastName.isEmpty() && optionalPhoneNumber.isEmpty() && optionalEmailId.isEmpty() && optionalDateOfBirth.isEmpty()) {
+        if(!optionalFirstName.isPresent() && !optionalLastName.isPresent() && !optionalPhoneNumber.isPresent() && !optionalEmailId.isPresent() && !optionalDateOfBirth.isPresent()) {
             log.debug("No search parameters provided");
         }
         String firstName = optionalFirstName.isPresent() ? optionalFirstName.get() : "";
@@ -416,7 +416,7 @@ public class AccountServiceImpl implements AccountService {
         log.debug(AccountMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_ACCOUNT_ENTITY_ID.getValue(), id);
         Long accountId = parseAccountId(id);
         Optional<AccountEntity> optActualEntity = repository.findById(accountId);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(AccountMessageTemplate.MSG_TEMPLATE_NO_ACCOUNT_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new AccountException(CustomerErrorCode.CUST_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -450,7 +450,7 @@ public class AccountServiceImpl implements AccountService {
         log.debug("All attributes of AccountForm are valid");
 
         Optional<AccountEntity> optExpectedEntity = form2EntityMapper.compareAndMap(actualEntity, form);
-        if(optExpectedEntity.isEmpty()) {
+        if(!optExpectedEntity.isPresent()) {
             log.debug("No new value for attributes of AccountForm");
             throw new AccountException(CustomerErrorCode.CUST_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are expected with new values" });
         }
@@ -490,7 +490,7 @@ public class AccountServiceImpl implements AccountService {
         log.debug(AccountMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_ACCOUNT_ENTITY_ID.getValue(), id);
         Long accountId = parseAccountId(id);
         Optional<AccountEntity> optEntity = repository.findById(accountId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug(AccountMessageTemplate.MSG_TEMPLATE_NO_ACCOUNT_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new AccountException(CustomerErrorCode.CUST_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -525,7 +525,7 @@ public class AccountServiceImpl implements AccountService {
         log.debug(AccountMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_ACCOUNT_ENTITY_ID.getValue(), id);
         Long accountId = parseAccountId(id);
         Optional<AccountEntity> optActualEntity = repository.findById(accountId);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(AccountMessageTemplate.MSG_TEMPLATE_NO_ACCOUNT_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new AccountException(CustomerErrorCode.CUST_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }

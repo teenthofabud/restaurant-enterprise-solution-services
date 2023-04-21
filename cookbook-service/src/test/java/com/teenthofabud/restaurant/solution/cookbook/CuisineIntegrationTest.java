@@ -57,13 +57,7 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
 
     private CuisineRepository cuisineRepository;
 
-    private int integrationServicePort;
     private RecipeRepository recipeRepository;
-
-    @Value("${res.cookbook.integration.gateway.port}")
-    public void setIntegrationServicePort(int integrationServicePort) {
-        this.integrationServicePort = integrationServicePort;
-    }
 
     @Autowired
     public void setCuisineRepository(CuisineRepository cuisineRepository) {
@@ -310,11 +304,11 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
         recipeVo4.setCookingTime(recipeForm.getCookingTimeDuration().toString() + " " + recipeForm.getCookingTimeUnitId());
         recipeVo4.setPortionSize(recipeForm.getPortionSizeAmount().toString() + " " + recipeForm.getPortionSizeUnitId());
 
-        cuisineEntity1.setRecipes(new ArrayList<RecipeEntity>(List.of(recipeEntity1)));
+        cuisineEntity1.setRecipes(new ArrayList<>(Arrays.asList(recipeEntity1)));
         cuisineEntity1 = cuisineRepository.save(cuisineEntity1);
-        cuisineEntity2.setRecipes(new ArrayList<RecipeEntity>(List.of(recipeEntity2)));
+        cuisineEntity2.setRecipes(new ArrayList<>(Arrays.asList(recipeEntity2)));
         cuisineEntity2 = cuisineRepository.save(cuisineEntity2);
-        cuisineEntity3.setRecipes(new ArrayList<RecipeEntity>(List.of(recipeEntity3)));
+        cuisineEntity3.setRecipes(new ArrayList<>(Arrays.asList(recipeEntity3)));
         cuisineEntity3 = cuisineRepository.save(cuisineEntity3);
 
         recipeVo1.setCuisine(cuisineVo1);
@@ -1046,20 +1040,5 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
         Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
 
-    }
-
-    @Override
-    public String getSimulationBaseLocation() {
-        return "simulation/menu-service";
-    }
-
-    @Override
-    public Integer getServicePort() {
-        return this.integrationServicePort;
-    }
-
-    @Override
-    public String[] getSimulationFilePaths() {
-        return new String[] { String.join("/", getSimulationBaseLocation(), "simulation-v3.json") };
     }
 }

@@ -57,18 +57,11 @@ public class WalkInIntegrationTest extends EngagementIntegrationBaseTest {
 
     private WalkInEntity2VoConverter walkInEntity2VoConverter;
 
-    private Integer integrationPort;
-
     private String walkInTimeFormat;
 
     @Value("${res.engagement.checkIn.walkIn.timestamp.format}")
     public void setWalkInTimeFormat(String walkInTimeFormat) {
         this.walkInTimeFormat = walkInTimeFormat;
-    }
-
-    @Value("${res.engagement.integration.gateway.port}")
-    public void setIntegrationPort(Integer integrationPort) {
-        this.integrationPort = integrationPort;
     }
 
     @Autowired
@@ -2085,18 +2078,4 @@ public class WalkInIntegrationTest extends EngagementIntegrationBaseTest {
 
     }
 
-    @Override
-    public String getSimulationBaseLocation() {
-        return "integration";
-    }
-
-    @Override
-    public Integer getServicePort() throws UnsupportedOperationException {
-        return integrationPort;
-    }
-
-    @Override
-    public String[] getSimulationFilePaths() {
-        return new String[] { String.join("/", getSimulationBaseLocation(), "simulation.json") };
-    }
 }

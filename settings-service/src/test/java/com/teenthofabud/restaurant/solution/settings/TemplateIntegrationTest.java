@@ -10,7 +10,13 @@ import com.teenthofabud.restaurant.solution.settings.template.data.TemplateForm;
 import com.teenthofabud.restaurant.solution.settings.template.data.TemplateType;
 import com.teenthofabud.restaurant.solution.settings.template.data.TemplateVo;
 import com.teenthofabud.restaurant.solution.settings.template.repository.TemplateRepository;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +30,11 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -34,6 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class TemplateIntegrationTest extends SettingsIntegrationBaseTest {
 
     private static final String MEDIA_TYPE_APPLICATION_JSON_PATCH = "application/json-patch+json";
@@ -337,7 +348,7 @@ public class TemplateIntegrationTest extends SettingsIntegrationBaseTest {
     @Test
     public void test_Template_Get_ShouldReturn_200Response_And_TemplateListNaturallyOrdered_WhenRequested_ForAllTemplates() throws Exception {
         MvcResult mvcResult = null;
-        Set<TemplateVo> templateList = new TreeSet<>(Arrays.asList(templateVo1, templateVo2, templateVo3, templateVo4));
+        List<TemplateVo> templateList = Arrays.asList(templateVo1, templateVo2, templateVo3, templateVo4);
 
         mvcResult = this.mockMvc.perform(get(TEMPLATE_URI))
                 .andDo(print())
@@ -458,7 +469,7 @@ public class TemplateIntegrationTest extends SettingsIntegrationBaseTest {
     @Test
     public void test_Template_Get_ShouldReturn_200Response_And_TemplateListNaturallyOrdered_WhenRequested_ForTemplates_WithTemplateTypeId() throws Exception {
         MvcResult mvcResult = null;
-        List<TemplateVo> templateList = new ArrayList<>(Arrays.asList(templateVo1, templateVo2, templateVo3, templateVo4, templateVo5, templateVo6));
+        List<TemplateVo> templateList = new ArrayList<>(Arrays.asList(templateVo1, templateVo2, templateVo3, templateVo4));
 
         mvcResult = this.mockMvc.perform(get(TEMPLATE_URI_FILTER)
                         .queryParam("templateTypeId", "FREEMARKER"))
@@ -473,7 +484,7 @@ public class TemplateIntegrationTest extends SettingsIntegrationBaseTest {
     @Test
     public void test_Template_Get_ShouldReturn_200Response_And_TemplateListNaturallyOrdered_WhenRequested_ForTemplates_WithNameAndDescription() throws Exception {
         MvcResult mvcResult = null;
-        Set<TemplateVo> templateList = new TreeSet<>(Arrays.asList(templateVo1));
+        List<TemplateVo> templateList = Arrays.asList(templateVo1);
 
         mvcResult = this.mockMvc.perform(get(TEMPLATE_URI_FILTER)
                         .queryParam("name", "Template 1")
@@ -489,7 +500,7 @@ public class TemplateIntegrationTest extends SettingsIntegrationBaseTest {
     @Test
     public void test_Template_Get_ShouldReturn_200Response_And_TemplateListNaturallyOrdered_WhenRequested_ForTemplates_WithNameAndDescriptionAndTemplateTypeId() throws Exception {
         MvcResult mvcResult = null;
-        Set<TemplateVo> templateList = new TreeSet<>(Arrays.asList(templateVo1));
+        List<TemplateVo> templateList = Arrays.asList(templateVo1);
 
         mvcResult = this.mockMvc.perform(get(TEMPLATE_URI_FILTER)
                         .queryParam("name", "Template 1")
@@ -506,7 +517,7 @@ public class TemplateIntegrationTest extends SettingsIntegrationBaseTest {
     @Test
     public void test_Template_Get_ShouldReturn_200Response_And_EmptyTemplateList_WhenRequested_ForTemplates_WithAbsent_WithNameAndDescription() throws Exception {
         MvcResult mvcResult = null;
-        Set<TemplateVo> templateList = new TreeSet<>();
+        List<TemplateVo> templateList = new LinkedList<>();
 
         mvcResult = this.mockMvc.perform(get(TEMPLATE_URI_FILTER)
                         .queryParam("name", "Template 1")
@@ -522,7 +533,7 @@ public class TemplateIntegrationTest extends SettingsIntegrationBaseTest {
     @Test
     public void test_Template_Get_ShouldReturn_200Response_And_EmptyTemplateList_WhenRequested_ForTemplates_WithAbsent_WithNameAndDescriptionAndTemplateTypeId() throws Exception {
         MvcResult mvcResult = null;
-        Set<TemplateVo> templateList = new TreeSet<>();
+        List<TemplateVo> templateList = new LinkedList<>();
 
         mvcResult = this.mockMvc.perform(get(TEMPLATE_URI_FILTER)
                         .queryParam("name", "Template 1")

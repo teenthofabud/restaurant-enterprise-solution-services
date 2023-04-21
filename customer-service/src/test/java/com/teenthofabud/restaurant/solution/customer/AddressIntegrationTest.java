@@ -56,13 +56,6 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
     private AddressRepository addressRepository;
     private AccountRepository accountRepository;
 
-    private int metadataServicePort;
-
-    @Value("${customer.metadata.service.port}")
-    public void setMetadataServicePort(int metadataServicePort) {
-        this.metadataServicePort = metadataServicePort;
-    }
-
     @Autowired
     public void setAddressRepository(AddressRepository addressRepository) {
         this.addressRepository = addressRepository;
@@ -1882,18 +1875,4 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
 
     }
 
-    @Override
-    public String getSimulationBaseLocation() {
-        return "simulation/metadata-service";
-    }
-
-    @Override
-    public Integer getServicePort() {
-        return this.metadataServicePort;
-    }
-
-    @Override
-    public String[] getSimulationFilePaths() {
-        return new String[] { String.join("/", getSimulationBaseLocation(), "simulation-v3.json") };
-    }
 }

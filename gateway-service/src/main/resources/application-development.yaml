@@ -1,0 +1,14 @@
+server:
+  port: ${GATEWAY_SERVER_PORT}
+springdoc:
+  swagger-ui:
+    enabled: ${GATEWAY_SWAGGER_ENABLED}
+eureka:
+  client:
+    enabled: ${GATEWAY_EUREKA_CLIENT_ENABLED}
+    serviceUrl:
+      defaultZone: http://${GATEWAY_EUREKA_HOST}:${GATEWAY_EUREKA_PORT}/eureka
+spring:
+  zipkin:
+    enabled: ${GATEWAY_ZIPKIN_CLIENT_ENABLED}
+    baseUrl: http://${GATEWAY_ZIPKIN_HOST}:${GATEWAY_ZIPKIN_PORT}

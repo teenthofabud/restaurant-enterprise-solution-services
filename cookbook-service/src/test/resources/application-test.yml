@@ -1,0 +1,86 @@
+eureka:
+    client:
+        enabled: false
+        serviceUrl:
+            registerWithEureka: false
+feign:
+    circuitbreaker:
+        enabled: false
+    client:
+        config:
+            default:
+                loggerLevel: basic
+            inventory-service:
+                connectTimeout: 250
+                loggerLevel: basic
+                readTimeout: 500
+            menu-service:
+                connectTimeout: 500
+                loggerLevel: basic
+                readTimeout: 1000
+logging:
+    level:
+        org:
+            hibernate:
+                SQL: INFO
+                type:
+                    descriptor:
+                        sql:
+                            BasicBinder: INFO
+res:
+    cookbook:
+        cuisine:
+            fields-to-escape: ''
+        ingredient:
+            fields-to-escape: ''
+        integration:
+            gateway:
+                port: 8199
+        inventory:
+            service:
+                url: localhost:${res.cookbook.integration.gateway.port}
+        menu:
+            service:
+                url: localhost:${res.cookbook.integration.gateway.port}
+        recipe:
+            fields-to-escape: ''
+server:
+    port: 16001
+spring:
+    cloud:
+        discovery:
+            enabled: false
+        loadbalancer:
+            ribbon:
+                enabled: false
+        service-registry:
+            auto-registration:
+                enabled: false
+    datasource:
+        initialization-mode: always
+        driverClassName: org.h2.Driver
+    h2:
+        console:
+            enabled: true
+    jpa:
+        database-platform: org.hibernate.dialect.H2Dialect
+        hibernate:
+            ddl-auto: none
+        properties:
+            hibernate:
+                format_sql: true
+                jdbc:
+                    time_zone: UTC
+                show_sql: true
+                use_sql_comments: true
+        show-sql: true
+    sleuth:
+        sampler:
+            percentage: 1.0
+        web:
+            skipPattern: (^cleanup.*|.+favicon.*)
+    zipkin:
+        enabled: false
+springdoc:
+    swagger-ui:
+        enabled: false

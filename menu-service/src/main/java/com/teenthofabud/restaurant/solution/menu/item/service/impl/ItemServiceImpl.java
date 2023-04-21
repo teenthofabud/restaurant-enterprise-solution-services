@@ -162,7 +162,7 @@ public class ItemServiceImpl implements ItemService {
         log.info("Requesting ItemEntity by id: {}", id);
         Long itemId = parseItemId(id);
         Optional<ItemEntity> optEntity = repository.findById(itemId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug("No ItemEntity found by id: {}", id);
             throw new ItemException(MenuErrorCode.MENU_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -206,7 +206,7 @@ public class ItemServiceImpl implements ItemService {
     @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
     public List<ItemVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalName, Optional<String> optionalDescription, Optional<String> optionalIsVegeterian) throws ItemException {
-        if(optionalName.isEmpty() && optionalDescription.isEmpty() && optionalIsVegeterian.isEmpty()) {
+        if(!optionalName.isPresent() && !optionalDescription.isPresent() && !optionalIsVegeterian.isPresent()) {
             log.debug("No search parameters provided");
         }
         String name = optionalName.isPresent() ? optionalName.get() : "";
@@ -314,7 +314,7 @@ public class ItemServiceImpl implements ItemService {
         log.debug(ItemMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_ITEM_ENTITY_ID.getValue(), id);
         Long itemId = parseItemId(id);
         Optional<ItemEntity> optActualEntity = repository.findById(itemId);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(ItemMessageTemplate.MSG_TEMPLATE_NO_ITEM_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new ItemException(MenuErrorCode.MENU_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -348,7 +348,7 @@ public class ItemServiceImpl implements ItemService {
         log.debug("All attributes of ItemForm are valid");
 
         Optional<ItemEntity> optExpectedEntity = form2EntityMapper.compareAndMap(actualEntity, form);
-        if(optExpectedEntity.isEmpty()) {
+        if(!optExpectedEntity.isPresent()) {
             log.debug("No new value for attributes of ItemForm");
             throw new ItemException(MenuErrorCode.MENU_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are expected with new values" });
         }
@@ -381,7 +381,7 @@ public class ItemServiceImpl implements ItemService {
         log.debug(ItemMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_ITEM_ENTITY_ID.getValue(), id);
         Long itemId = parseItemId(id);
         Optional<ItemEntity> optEntity = repository.findById(itemId);
-        if(optEntity.isEmpty()) {
+        if(!optEntity.isPresent()) {
             log.debug(ItemMessageTemplate.MSG_TEMPLATE_NO_ITEM_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new ItemException(MenuErrorCode.MENU_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -416,7 +416,7 @@ public class ItemServiceImpl implements ItemService {
         log.debug(ItemMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_ITEM_ENTITY_ID.getValue(), id);
         Long itemId = parseItemId(id);
         Optional<ItemEntity> optActualEntity = repository.findById(itemId);
-        if(optActualEntity.isEmpty()) {
+        if(!optActualEntity.isPresent()) {
             log.debug(ItemMessageTemplate.MSG_TEMPLATE_NO_ITEM_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new ItemException(MenuErrorCode.MENU_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
@@ -503,7 +503,7 @@ public class ItemServiceImpl implements ItemService {
 
     private void checkUniquenessOfItem(ItemDto patchedItemForm, ItemEntity actualEntity) throws ItemException {
         // name = true, categoryId = false
-        if(patchedItemForm.getName().isPresent() && patchedItemForm.getCategoryId().isEmpty()) {
+        if(patchedItemForm.getName().isPresent() && !patchedItemForm.getCategoryId().isPresent()) {
             log.debug(ItemMessageTemplate.MSG_TEMPLATE_ITEM_EXISTENCE_BY_NAME_AND_CATEGORY_ID.getValue(),
                     patchedItemForm.getName().get(), actualEntity.getCategory().getId());
             boolean sameEntitySw = patchedItemForm.getName().get().compareTo(actualEntity.getName()) == 0;
@@ -537,7 +537,7 @@ public class ItemServiceImpl implements ItemService {
         }
 
         // name = false, categoryId = true
-        if(patchedItemForm.getName().isEmpty() && patchedItemForm.getCategoryId().isPresent()) {
+        if(!patchedItemForm.getName().isPresent() && patchedItemForm.getCategoryId().isPresent()) {
             log.debug(ItemMessageTemplate.MSG_TEMPLATE_ITEM_EXISTENCE_BY_NAME_AND_CATEGORY_ID.getValue(),
                     actualEntity.getName(),  patchedItemForm.getCategoryId().get());
             boolean sameEntitySw = patchedItemForm.getCategoryId().get().compareTo(actualEntity.getCategory().getId().toString()) == 0;
