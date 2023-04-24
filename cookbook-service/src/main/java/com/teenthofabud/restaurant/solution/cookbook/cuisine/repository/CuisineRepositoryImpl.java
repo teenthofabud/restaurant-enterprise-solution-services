@@ -19,8 +19,10 @@ public class CuisineRepositoryImpl implements CuisineRepository{
 
     @Override
     public List<Cuisine> findByName(String name) {
-        List<CuisineEntity> cuisineEntityList =  cuisineJPARepository.findByName(name);
+        /*List<CuisineEntity> cuisineEntityList =  cuisineJPARepository.findByName(name);
         Cuisine cuisine = new Cuisine();
+        return cuisineEntityList;*/
+        throw new UnsupportedOperationException("Not implemented");
     }
 
     @Override
