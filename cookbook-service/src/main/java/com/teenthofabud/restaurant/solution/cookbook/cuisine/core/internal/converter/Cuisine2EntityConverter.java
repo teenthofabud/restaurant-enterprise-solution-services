@@ -1,6 +1,7 @@
 package com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.converter;
 
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineEntity;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.entities.Cuisine;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.dto.CuisineRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,7 +12,7 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class CuisineForm2EntityConverter implements Converter<CuisineRequest, CuisineEntity> {
+public class Cuisine2EntityConverter implements Converter<Cuisine, CuisineEntity> {
 
     private List<String> fieldsToEscape;
 
@@ -21,7 +22,7 @@ public class CuisineForm2EntityConverter implements Converter<CuisineRequest, Cu
     }
 
     @Override
-    public CuisineEntity convert(CuisineRequest form) {
+    public CuisineEntity convert(Cuisine form) {
         CuisineEntity entity = new CuisineEntity();
         if(!fieldsToEscape.contains("name")) {
             entity.setName(form.getName());

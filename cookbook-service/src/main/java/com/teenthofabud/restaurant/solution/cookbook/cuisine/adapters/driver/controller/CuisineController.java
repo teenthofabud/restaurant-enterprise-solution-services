@@ -2,7 +2,6 @@ package com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driver.co
 
 import com.teenthofabud.core.common.constant.TOABBaseMessageTemplate;
 import com.teenthofabud.core.common.constant.TOABCascadeLevel;
-import com.teenthofabud.core.common.data.form.PatchOperationForm;
 import com.teenthofabud.core.common.data.vo.CreatedVo;
 import com.teenthofabud.core.common.data.vo.ErrorVo;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineException;
@@ -13,7 +12,6 @@ import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.s
 import com.teenthofabud.restaurant.solution.cookbook.error.CookbookErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -26,9 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @RestController
 @RequestMapping("cuisine")
@@ -74,7 +70,7 @@ public class CuisineController {
                 new Object[]{ "form", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
     }
 
-    @Operation(summary = "Update Cuisine details by id")
+    /*@Operation(summary = "Update Cuisine details by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Updated details of Cuisine",
                     content = { @Content(schema = @Schema(implementation = Void.class)) }),
@@ -202,7 +198,7 @@ public class CuisineController {
         }
         log.debug("cuisine filters are empty");
         throw new CuisineException(CookbookErrorCode.COOK_ATTRIBUTE_INVALID, new Object[] { "filters" });
-    }
+    }*/
 
     @Operation(summary = "Get Cuisine details by id")
     @ApiResponses(value = {

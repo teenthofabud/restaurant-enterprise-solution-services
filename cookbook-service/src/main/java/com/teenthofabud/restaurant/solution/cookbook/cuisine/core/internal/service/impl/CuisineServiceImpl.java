@@ -1,44 +1,28 @@
 package com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.service.impl;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.fge.jsonpatch.JsonPatch;
-import com.github.fge.jsonpatch.JsonPatchException;
 import com.teenthofabud.core.common.constant.TOABBaseMessageTemplate;
 import com.teenthofabud.core.common.constant.TOABCascadeLevel;
 import com.teenthofabud.core.common.data.dto.TOABRequestContextHolder;
-import com.teenthofabud.core.common.data.form.PatchOperationForm;
-import com.teenthofabud.core.common.error.TOABBaseException;
-import com.teenthofabud.core.common.error.TOABSystemException;
 import com.teenthofabud.core.common.service.TOABBaseService;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.*;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.converter.CuisineDto2EntityConverter;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.converter.CuisineForm2EntityConverter;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.mapper.CuisineEntitySelfMapper;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.mapper.CuisineForm2EntityMapper;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.repository.CuisineJPARepository;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.converter.CuisineDefault2ResponseConverter;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.converter.CuisineRequest2DefaultConverter;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.entities.Cuisine;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driven.CuisineRepository;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.dto.CuisineRequest;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.dto.CuisineResponse;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.service.CuisineService;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.validator.CuisineDtoValidator;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.validator.CuisineFormRelaxedValidator;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.validator.CuisineFormValidator;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.validator.CuisineRequestValidator;
 import com.teenthofabud.restaurant.solution.cookbook.error.CookbookErrorCode;
-import com.teenthofabud.restaurant.solution.cookbook.utils.CookbookServiceHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.*;
 
 @Component
@@ -49,76 +33,25 @@ public class CuisineServiceImpl implements CuisineService {
         return Integer.compare(s1.getName().compareTo(s2.getName()), s1.getDescription().compareTo(s2.getDescription()));
     };
 
-    private CuisineForm2EntityConverter form2EntityConverter;
-    private CuisineDto2EntityConverter dto2EntityConverter;
-    private CuisineForm2EntityMapper form2EntityMapper;
-    private CuisineEntitySelfMapper entitySelfMapper;
-    private CuisineFormValidator formValidator;
-    private CuisineFormRelaxedValidator relaxedFormValidator;
-    private CuisineDtoValidator dtoValidator;
-    private CuisineJPARepository repository;
-    private CookbookServiceHelper cookbookServiceHelper;
-    private TOABBaseService toabBaseService;
-    private ObjectMapper om;
+    private CuisineRequest2DefaultConverter form2EntityConverter;
+    //private CuisineDto2EntityConverter dto2EntityConverter;
+    //private CuisineForm2EntityMapper form2EntityMapper;
+    //private CuisineEntitySelfMapper entitySelfMapper;
+    private CuisineRequestValidator formValidator;
+    //private CuisineFormRelaxedValidator_ relaxedFormValidator;
+    //private CuisineDtoValidator dtoValidator;
+    private CuisineDefault2ResponseConverter cuisineDefault2ResponseConverter;
+    private CuisineRepository repository;
+    //private CookbookServiceHelper cookbookServiceHelper;
+    //private TOABBaseService toabBaseService;
+    //private ObjectMapper om;
 
     @Autowired
-    public void setCookbookServiceHelper(CookbookServiceHelper cookbookServiceHelper) {
-        this.cookbookServiceHelper = cookbookServiceHelper;
-    }
-
-    @Autowired
-    public void setToabBaseService(TOABBaseService toabBaseService) {
-        this.toabBaseService = toabBaseService;
-    }
-
-    @Autowired
-    public void setDto2EntityConverter(CuisineDto2EntityConverter dto2EntityConverter) {
-        this.dto2EntityConverter = dto2EntityConverter;
-    }
-
-    @Autowired
-    public void setForm2EntityMapper(CuisineForm2EntityMapper form2EntityMapper) {
-        this.form2EntityMapper = form2EntityMapper;
-    }
-
-    @Autowired
-    public void setEntitySelfMapper(CuisineEntitySelfMapper entitySelfMapper) {
-        this.entitySelfMapper = entitySelfMapper;
-    }
-
-    @Autowired
-    public void setRelaxedFormValidator(CuisineFormRelaxedValidator relaxedFormValidator) {
-        this.relaxedFormValidator = relaxedFormValidator;
-    }
-
-    @Autowired
-    public void setPatchCuisineValidator(TOABBaseService toabBaseService) {
-        this.toabBaseService = toabBaseService;
-    }
-
-    @Autowired
-    public void setOm(ObjectMapper om) {
-        this.om = om;
-    }
-
-    @Autowired
-    public void setDtoValidator(CuisineDtoValidator dtoValidator) {
-        this.dtoValidator = dtoValidator;
-    }
-
-    @Autowired
-    public void setForm2EntityConverter(CuisineForm2EntityConverter form2EntityConverter) {
+    public CuisineServiceImpl(CuisineRequest2DefaultConverter form2EntityConverter, CuisineRequestValidator formValidator, CuisineDefault2ResponseConverter cuisineDefault2ResponseConverter, CuisineRepository repository) {
         this.form2EntityConverter = form2EntityConverter;
-    }
-
-    @Autowired
-    public void setRepository(CuisineJPARepository repository) {
-        this.repository = repository;
-    }
-
-    @Autowired
-    public void setFormValidator(CuisineFormValidator formValidator) {
         this.formValidator = formValidator;
+        this.cuisineDefault2ResponseConverter = cuisineDefault2ResponseConverter;
+        this.repository = repository;
     }
 
     private Long parseCuisineId(String id) throws CuisineException {
@@ -137,40 +70,40 @@ public class CuisineServiceImpl implements CuisineService {
         return cuisineId;
     }
 
-    @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+    /*@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
     public Set<CuisineResponse> retrieveAllByNaturalOrdering() {
         log.info("Requesting all CuisineEntity by their natural ordering");
-        List<CuisineEntity> cuisineEntityList = repository.findAll();
+        List<Cuisine> cuisineEntityList = repository.findAll();
         List<CuisineResponse> cuisineResponseList = cookbookServiceHelper.cuisineEntity2DetailedVo(cuisineEntityList);
         Collections.sort(cuisineResponseList, CMP_BY_NAME_AND_DESCRIPTION);
         Set<CuisineResponse> naturallyOrderedSet = new LinkedHashSet<>();
         naturallyOrderedSet.addAll(cuisineResponseList);
         log.info("{} CuisineResponse available", naturallyOrderedSet.size());
         return naturallyOrderedSet;
-    }
+    }*/
 
     @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
     public CuisineResponse retrieveDetailsById(String id, Optional<TOABCascadeLevel> optionalCascadeLevel) throws CuisineException {
         log.info("Requesting CuisineEntity by id: {}", id);
         Long cuisineId = parseCuisineId(id);
-        Optional<CuisineEntity> optEntity = repository.findById(cuisineId);
+        Optional<Cuisine> optEntity = repository.findById(cuisineId);
         if(optEntity.isEmpty()) {
             log.debug("No CuisineEntity found by id: {}", id);
             throw new CuisineException(CookbookErrorCode.COOK_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
         log.info("Found CuisineResponse by id: {}", id);
-        CuisineEntity entity = optEntity.get();
+        Cuisine entity = optEntity.get();
         TOABCascadeLevel cascadeLevel = optionalCascadeLevel.isPresent() ? optionalCascadeLevel.get() : TOABCascadeLevel.ZERO;
         TOABRequestContextHolder.setCascadeLevelContext(cascadeLevel);
-        CuisineResponse vo = cookbookServiceHelper.cuisineEntity2DetailedVo(entity);
+        CuisineResponse vo = cuisineDefault2ResponseConverter.convert(entity);
         log.debug("CuisineResponse populated with fields cascaded to level: {}", cascadeLevel);
         TOABRequestContextHolder.clearCascadeLevelContext();
         return vo;
     }
 
-    @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+    /*@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
     public List<CuisineResponse> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalName, Optional<String> optionalDescription) throws CuisineException {
         if(optionalName.isEmpty() && optionalDescription.isEmpty()) {
@@ -207,7 +140,7 @@ public class CuisineServiceImpl implements CuisineService {
         matchedCuisineList = cookbookServiceHelper.cuisineEntity2DetailedVo(cuisineEntityList);
         log.info("Found {} CuisineResponse matching with provided parameters : {}", matchedCuisineList.size(), providedFilters);
         return matchedCuisineList;
-    }
+    }*/
 
     @Transactional
     @Override
@@ -232,7 +165,7 @@ public class CuisineServiceImpl implements CuisineService {
         }
         log.debug("All attributes of CuisineRequest are valid");
 
-        CuisineEntity expectedEntity = form2EntityConverter.convert(form);
+        Cuisine expectedEntity = form2EntityConverter.convert(form);
 
         log.debug(CuisineMessageTemplate.MSG_TEMPLATE_CUISINE_EXISTENCE_BY_NAME.getValue(), form.getName());
         if(repository.existsByName(expectedEntity.getName())) {
@@ -243,7 +176,7 @@ public class CuisineServiceImpl implements CuisineService {
         log.debug(CuisineMessageTemplate.MSG_TEMPLATE_CUISINE_NON_EXISTENCE_BY_NAME.getValue(), expectedEntity.getName());
 
         log.debug("Saving {}", expectedEntity);
-        CuisineEntity actualEntity = repository.save(expectedEntity);
+        Cuisine actualEntity = repository.save(expectedEntity);
         log.debug("Saved {}", actualEntity);
 
         if(actualEntity == null) {
@@ -255,7 +188,7 @@ public class CuisineServiceImpl implements CuisineService {
         return actualEntity.getId().toString();
     }
 
-    @Transactional
+    /*@Transactional
     @Override
     public void updateCuisine(String id, CuisineRequest form) throws CuisineException {
         log.info("Updating CuisineRequest by id: {}", id);
@@ -463,5 +396,5 @@ public class CuisineServiceImpl implements CuisineService {
                     new Object[]{ "patching", "unable to patch currency cuisine details with id:" + id });
         }
         log.info("Patched CuisineEntity with id:{}", id);
-    }
+    }*/
 }

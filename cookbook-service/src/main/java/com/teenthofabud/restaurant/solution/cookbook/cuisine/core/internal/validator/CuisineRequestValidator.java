@@ -13,7 +13,7 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class CuisineFormValidator implements Validator {
+public class CuisineRequestValidator implements Validator {
 
     private List<String> fieldsToEscape;
 

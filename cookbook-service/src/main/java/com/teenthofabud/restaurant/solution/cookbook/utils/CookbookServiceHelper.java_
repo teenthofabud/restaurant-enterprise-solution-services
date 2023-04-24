@@ -1,0 +1,99 @@
+package com.teenthofabud.restaurant.solution.cookbook.utils;
+
+import com.teenthofabud.core.common.error.TOABErrorCode;
+import com.teenthofabud.core.common.error.TOABSystemException;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.converter.CuisineDefault2ResponseConverter;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.entities.Cuisine;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.dto.CuisineResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import tech.units.indriya.unit.BaseUnit;
+import tech.units.indriya.unit.UnitDimension;
+
+import javax.measure.Unit;
+import javax.measure.quantity.Mass;
+import javax.measure.quantity.Time;
+
+@Slf4j
+@Component
+public class CookbookServiceHelper {
+
+    private static final Unit<Time> H = new BaseUnit("h", "Hour", UnitDimension.TIME);
+    private static final Unit<Time> M = new BaseUnit("m", "Minute", UnitDimension.TIME);
+    private static final Unit<Time> S = new BaseUnit("s", "Second", UnitDimension.TIME);
+    private static final Unit<Mass> KG = new BaseUnit("kg", "Kilogram", UnitDimension.MASS);
+    private static final Unit<Mass> G = new BaseUnit("g", "Gram", UnitDimension.MASS);
+
+
+    //private CuisineEntity2VoConverter cuisineEntity2VoConverter;
+    private CuisineDefault2ResponseConverter cuisineDefault2ResponseConverter;
+
+    @Autowired
+    public CookbookServiceHelper(/*CuisineEntity2VoConverter cuisineEntity2VoConverter, */CuisineDefault2ResponseConverter cuisineDefault2ResponseConverter) {
+        //this.cuisineEntity2VoConverter = cuisineEntity2VoConverter;
+        this.cuisineDefault2ResponseConverter = cuisineDefault2ResponseConverter;
+    }
+
+    /*public List<CuisineResponse> cuisineEntity2DetailedVo(List<? extends CuisineEntity> cuisineEntityList) {
+        List<CuisineResponse> cuisineDetailsList = new LinkedList<>();
+        if(cuisineEntityList != null && !cuisineEntityList.isEmpty()) {
+            for(CuisineEntity entity : cuisineEntityList) {
+                CuisineResponse vo = this.cuisineEntity2DetailedVo(entity);
+                cuisineDetailsList.add(vo);
+            }
+        }
+        return cuisineDetailsList;
+    }*/
+
+    public CuisineResponse cuisine2Response(Cuisine cuisineEntity) {
+        if(cuisineEntity != null) {
+            CuisineResponse vo = cuisineDefault2ResponseConverter.convert(cuisineEntity);
+            log.debug("Converting {} to {}", cuisineEntity, vo);
+            return vo;
+        }
+        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "cuisine entity is null" });
+    }
+
+    /*public CuisineResponse cuisineEntity2DetailedVo(CuisineEntity cuisineEntity) {
+        if(cuisineEntity != null) {
+            CuisineResponse vo = cuisineEntity2VoConverter.convert(cuisineEntity);
+            log.debug("Converting {} to {}", cuisineEntity, vo);
+            return vo;
+        }
+        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "cuisine entity is null" });
+    }
+
+    public boolean isTimeIdValid(String timeId) {
+        Optional<Unit<Time>> optionalTimeId = this.parseTimeId(timeId);
+        return optionalTimeId.isPresent();
+    }
+
+    public Optional<Unit<Time>> parseTimeId(String timeId) {
+        if(StringUtils.isEmpty(StringUtils.trimWhitespace(timeId))) {
+            log.debug("timeId is empty");
+            throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object [] { "timeId is empty" });
+        }
+        Optional<Unit<Time>> optionalTimeId = H.getSymbol().compareTo(timeId.toLowerCase()) == 0 ? Optional.of(H)
+                : M.getSymbol().compareTo(timeId.toLowerCase()) == 0 ? Optional.of(M)
+                : S.getSymbol().compareTo(timeId.toLowerCase()) == 0 ? Optional.of(S)
+                : Optional.empty();
+        return optionalTimeId;
+    }
+
+    public boolean isWeightCodeValid(String weightCode) {
+        Optional<Unit<Mass>> optionalWeight = this.parseWeightCode(weightCode);
+        return optionalWeight.isPresent();
+    }
+
+    public Optional<Unit<Mass>> parseWeightCode(String weightCode) {
+        if(StringUtils.isEmpty(StringUtils.trimWhitespace(weightCode))) {
+            log.debug("weight code is empty");
+            throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object [] { "weight code is empty" });
+        }
+        Optional<Unit<Mass>> optionalWeight = KG.getSymbol().compareTo(weightCode.toLowerCase()) == 0 ? Optional.of(KG)
+                : G.getSymbol().compareTo(weightCode.toLowerCase()) == 0 ? Optional.of(G) :Optional.empty();
+        return optionalWeight;
+    }*/
+
+}

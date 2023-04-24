@@ -2,7 +2,6 @@ package com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.teenthofabud.core.common.data.vo.TOABBaseVo;
-import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeVo;
 import lombok.*;
 
 import java.util.List;
@@ -24,9 +23,6 @@ public class CuisineResponse extends TOABBaseVo implements Comparable<CuisineRes
     @EqualsAndHashCode.Include
     @ToString.Include
     private String description;
-    @ToString.Include
-    private List<RecipeVo> recipes;
-
     @Override
     public int compareTo(CuisineResponse o) {
         return Integer.compare(this.getName().compareTo(o.getName()), this.getDescription().compareTo(o.getDescription()));

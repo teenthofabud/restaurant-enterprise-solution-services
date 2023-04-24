@@ -14,9 +14,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @EnableEurekaClient
 @EnableJpaAuditing
-@EnableJpaRepositories(basePackages = { "com.teenthofabud.restaurant.solution.cookbook.cuisine.repository",
-        "com.teenthofabud.restaurant.solution.cookbook.recipe.repository",
-        "com.teenthofabud.restaurant.solution.cookbook.ingredient.repository" })
+@EnableJpaRepositories(basePackages = { "com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.repository" })
 @EnableTransactionManagement
 public class CookbookServiceConfiguration {
 
