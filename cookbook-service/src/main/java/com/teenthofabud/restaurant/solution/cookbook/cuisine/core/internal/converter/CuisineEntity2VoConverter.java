@@ -6,7 +6,7 @@ import com.teenthofabud.core.common.data.dto.TOABRequestContextHolder;
 import com.teenthofabud.core.common.error.TOABErrorCode;
 import com.teenthofabud.core.common.error.TOABSystemException;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineEntity;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineVo;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.dto.CuisineResponse;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeEntity;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeVo;
 import com.teenthofabud.restaurant.solution.cookbook.utils.CookbookServiceHelper;
@@ -26,7 +26,7 @@ import java.util.concurrent.Future;
 
 @Component
 @Slf4j
-public class CuisineEntity2VoConverter extends TOABBaseEntity2VoConverter<CuisineEntity, CuisineVo> implements Converter<CuisineEntity, CuisineVo> {
+public class CuisineEntity2VoConverter extends TOABBaseEntity2VoConverter<CuisineEntity, CuisineResponse> implements Converter<CuisineEntity, CuisineResponse> {
 
     private List<String> fieldsToEscape;
     private CookbookServiceHelper cookbookServiceHelper;
@@ -42,8 +42,8 @@ public class CuisineEntity2VoConverter extends TOABBaseEntity2VoConverter<Cuisin
     }
 
     @Override
-    public CuisineVo convert(CuisineEntity entity) {
-        CuisineVo vo = new CuisineVo();
+    public CuisineResponse convert(CuisineEntity entity) {
+        CuisineResponse vo = new CuisineResponse();
         if(!fieldsToEscape.contains("id")) {
             vo.setId(entity.getId().toString());
         }
@@ -61,7 +61,7 @@ public class CuisineEntity2VoConverter extends TOABBaseEntity2VoConverter<Cuisin
         return vo;
     }
 
-    private void expandSecondLevelFields(CuisineEntity entity, CuisineVo vo, String fieldName) {
+    private void expandSecondLevelFields(CuisineEntity entity, CuisineResponse vo, String fieldName) {
         TOABCascadeLevel cascadeLevel = TOABRequestContextHolder.getCascadeLevelContext();
         switch(cascadeLevel) {
             case TWO:

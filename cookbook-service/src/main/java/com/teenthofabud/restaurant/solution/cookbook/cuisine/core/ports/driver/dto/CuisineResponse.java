@@ -1,4 +1,4 @@
-package com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data;
+package com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.teenthofabud.core.common.data.vo.TOABBaseVo;
@@ -14,7 +14,7 @@ import java.util.List;
 @ToString
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class CuisineVo extends TOABBaseVo implements Comparable<CuisineVo> {
+public class CuisineResponse extends TOABBaseVo implements Comparable<CuisineResponse> {
 
     @ToString.Include
     private String id;
@@ -28,7 +28,7 @@ public class CuisineVo extends TOABBaseVo implements Comparable<CuisineVo> {
     private List<RecipeVo> recipes;
 
     @Override
-    public int compareTo(CuisineVo o) {
+    public int compareTo(CuisineResponse o) {
         return Integer.compare(this.getName().compareTo(o.getName()), this.getDescription().compareTo(o.getDescription()));
     }
 }

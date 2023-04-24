@@ -1,6 +1,6 @@
 package com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.validator;
 
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineForm;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.dto.CuisineRequest;
 import com.teenthofabud.restaurant.solution.cookbook.error.CookbookErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,19 +24,19 @@ public class CuisineFormValidator implements Validator {
 
     @Override
     public boolean supports(Class<?> clazz) {
-        return clazz.isAssignableFrom(CuisineForm.class);
+        return clazz.isAssignableFrom(CuisineRequest.class);
     }
 
     @Override
     public void validate(Object target, Errors errors) {
-        CuisineForm form = (CuisineForm) target;
+        CuisineRequest form = (CuisineRequest) target;
         if(!fieldsToEscape.contains("name") && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getName()))) {
-            log.debug("CuisineForm.name is empty");
+            log.debug("CuisineRequest.name is empty");
             errors.rejectValue("name", CookbookErrorCode.COOK_ATTRIBUTE_INVALID.name());
             return;
         }
         if(!fieldsToEscape.contains("description") && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getDescription()))) {
-            log.debug("CuisineForm.description is empty");
+            log.debug("CuisineRequest.description is empty");
             errors.rejectValue("description", CookbookErrorCode.COOK_ATTRIBUTE_INVALID.name());
             return;
         }

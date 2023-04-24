@@ -1,7 +1,7 @@
 package com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.validator;
 
 import com.teenthofabud.core.common.validator.RelaxedValidator;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineForm;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.dto.CuisineRequest;
 import com.teenthofabud.restaurant.solution.cookbook.error.CookbookErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,7 +13,7 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class CuisineFormRelaxedValidator implements RelaxedValidator<CuisineForm>  {
+public class CuisineFormRelaxedValidator implements RelaxedValidator<CuisineRequest>  {
 
     private List<String> fieldsToEscape;
 
@@ -23,16 +23,16 @@ public class CuisineFormRelaxedValidator implements RelaxedValidator<CuisineForm
     }
 
     @Override
-    public Boolean validateLoosely(CuisineForm form, Errors errors) {
+    public Boolean validateLoosely(CuisineRequest form, Errors errors) {
         if(!fieldsToEscape.contains("name") && form.getName() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getName()))) {
             errors.rejectValue("name", CookbookErrorCode.COOK_ATTRIBUTE_INVALID.name());
-            log.debug("CuisineForm.name is empty");
+            log.debug("CuisineRequest.name is empty");
             return false;
         }
-        log.debug("CuisineForm.name is valid");
+        log.debug("CuisineRequest.name is valid");
         if(!fieldsToEscape.contains("description") && form.getDescription() != null && StringUtils.isEmpty(StringUtils.trimWhitespace(form.getDescription()))) {
             errors.rejectValue("description", CookbookErrorCode.COOK_ATTRIBUTE_INVALID.name());
-            log.debug("CuisineForm.description is empty");
+            log.debug("CuisineRequest.description is empty");
             return false;
         }
         return true;

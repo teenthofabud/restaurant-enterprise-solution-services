@@ -5,7 +5,7 @@ import com.teenthofabud.core.common.data.form.PatchOperationForm;
 import com.teenthofabud.core.common.data.vo.ErrorVo;
 import com.teenthofabud.core.common.error.TOABErrorCode;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineEntity;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineVo;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.dto.CuisineResponse;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.repository.CuisineJPARepository;
 import com.teenthofabud.restaurant.solution.cookbook.error.CookbookErrorCode;
 import com.teenthofabud.restaurant.solution.cookbook.integration.inventory.data.ProductVo;
@@ -102,10 +102,10 @@ public class IngredientIntegrationTest extends CookbookIntegrationBaseTest {
     private ProductVo productVo3;
     private ProductVo productVo4;
 
-    private CuisineVo cuisineVo1;
-    private CuisineVo cuisineVo2;
-    private CuisineVo cuisineVo3;
-    private CuisineVo cuisineVo4;
+    private CuisineResponse cuisineResponse1;
+    private CuisineResponse cuisineResponse2;
+    private CuisineResponse cuisineResponse3;
+    private CuisineResponse cuisineResponse4;
     private CuisineEntity cuisineEntity1;
     private CuisineEntity cuisineEntity2;
     private CuisineEntity cuisineEntity3;
@@ -193,10 +193,10 @@ public class IngredientIntegrationTest extends CookbookIntegrationBaseTest {
 
         cuisineEntity1 = cuisineRepository.save(cuisineEntity1);
 
-        cuisineVo1 = new CuisineVo();
-        cuisineVo1.setId(cuisineEntity1.getId().toString());
-        cuisineVo1.setName(cuisineEntity1.getName());
-        cuisineVo1.setDescription(cuisineEntity1.getDescription());
+        cuisineResponse1 = new CuisineResponse();
+        cuisineResponse1.setId(cuisineEntity1.getId().toString());
+        cuisineResponse1.setName(cuisineEntity1.getName());
+        cuisineResponse1.setDescription(cuisineEntity1.getDescription());
 
         cuisineEntity2 = new CuisineEntity();
         cuisineEntity2.setName("Cuisine 2 Name");
@@ -205,10 +205,10 @@ public class IngredientIntegrationTest extends CookbookIntegrationBaseTest {
 
         cuisineEntity2 = cuisineRepository.save(cuisineEntity2);
 
-        cuisineVo2 = new CuisineVo();
-        cuisineVo2.setId(cuisineEntity2.getId().toString());
-        cuisineVo2.setName(cuisineEntity2.getName());
-        cuisineVo2.setDescription(cuisineEntity2.getDescription());
+        cuisineResponse2 = new CuisineResponse();
+        cuisineResponse2.setId(cuisineEntity2.getId().toString());
+        cuisineResponse2.setName(cuisineEntity2.getName());
+        cuisineResponse2.setDescription(cuisineEntity2.getDescription());
 
         cuisineEntity3 = new CuisineEntity();
         cuisineEntity3.setName("Cuisine 3 Name");
@@ -217,10 +217,10 @@ public class IngredientIntegrationTest extends CookbookIntegrationBaseTest {
 
         cuisineEntity3 = cuisineRepository.save(cuisineEntity3);
 
-        cuisineVo3 = new CuisineVo();
-        cuisineVo3.setId(cuisineEntity3.getId().toString());
-        cuisineVo3.setName(cuisineEntity3.getName());
-        cuisineVo3.setDescription(cuisineEntity3.getDescription());
+        cuisineResponse3 = new CuisineResponse();
+        cuisineResponse3.setId(cuisineEntity3.getId().toString());
+        cuisineResponse3.setName(cuisineEntity3.getName());
+        cuisineResponse3.setDescription(cuisineEntity3.getDescription());
 
         cuisineEntity4 = new CuisineEntity();
         cuisineEntity4.setName("Cuisine 4 Name");
@@ -229,10 +229,10 @@ public class IngredientIntegrationTest extends CookbookIntegrationBaseTest {
 
         cuisineEntity4 = cuisineRepository.save(cuisineEntity4);
 
-        cuisineVo4 = new CuisineVo();
-        cuisineVo4.setId(cuisineEntity4.getId().toString());
-        cuisineVo4.setName(cuisineEntity4.getName());
-        cuisineVo4.setDescription(cuisineEntity4.getDescription());
+        cuisineResponse4 = new CuisineResponse();
+        cuisineResponse4.setId(cuisineEntity4.getId().toString());
+        cuisineResponse4.setName(cuisineEntity4.getName());
+        cuisineResponse4.setDescription(cuisineEntity4.getDescription());
 
         recipeEntity1 = new RecipeEntity();
         recipeEntity1.setName("default");
@@ -264,7 +264,7 @@ public class IngredientIntegrationTest extends CookbookIntegrationBaseTest {
         recipeVo1.setPreparationTime(recipeEntity1.getPreparationTimeDuration().toString() + " " + recipeEntity1.getPreparationTimeUnitId());
         recipeVo1.setCookingTime(recipeEntity1.getCookingTimeDuration().toString() + " " + recipeEntity1.getCookingTimeUnitId());
         recipeVo1.setPortionSize(recipeEntity1.getPortionSizeAmount().toString() + " " + recipeEntity1.getPortionSizeUnitId());
-        //recipeVo1.setCuisine(cuisineVo1);
+        //recipeVo1.setCuisine(cuisineResponse1);
 
         recipeEntity2 = new RecipeEntity();
         recipeEntity2.setName("default");
@@ -296,7 +296,7 @@ public class IngredientIntegrationTest extends CookbookIntegrationBaseTest {
         recipeVo2.setPreparationTime(recipeEntity2.getPreparationTimeDuration().toString() + " " + recipeEntity2.getPreparationTimeUnitId());
         recipeVo2.setCookingTime(recipeEntity2.getCookingTimeDuration().toString() + " " + recipeEntity2.getCookingTimeUnitId());
         recipeVo2.setPortionSize(recipeEntity2.getPortionSizeAmount().toString() + " " + recipeEntity2.getPortionSizeUnitId());
-        //recipeVo2.setCuisine(cuisineVo2);
+        //recipeVo2.setCuisine(cuisineResponse2);
 
         recipeEntity3 = new RecipeEntity();
         recipeEntity3.setName("default");
@@ -328,7 +328,7 @@ public class IngredientIntegrationTest extends CookbookIntegrationBaseTest {
         recipeVo3.setPreparationTime(recipeEntity3.getPreparationTimeDuration().toString() + " " + recipeEntity3.getPreparationTimeUnitId());
         recipeVo3.setCookingTime(recipeEntity3.getCookingTimeDuration().toString() + " " + recipeEntity3.getCookingTimeUnitId());
         recipeVo3.setPortionSize(recipeEntity3.getPortionSizeAmount().toString() + " " + recipeEntity3.getPortionSizeUnitId());
-        //recipeVo3.setCuisine(cuisineVo3);
+        //recipeVo3.setCuisine(cuisineResponse3);
 
         ingredientForm = new IngredientForm();
         ingredientForm.setName("New Something First");
@@ -356,7 +356,7 @@ public class IngredientIntegrationTest extends CookbookIntegrationBaseTest {
         ingredientVo1.setProductId(ingredientEntity1.getProductId());
         ingredientVo1.setRecipeId(ingredientEntity1.getRecipe().getId().toString());
         ingredientVo1.setQuantity(ingredientEntity1.getQuantityAmount().toString() + " " + cookbookServiceHelper.parseWeightCode(ingredientEntity1.getQuantityUnitId()).get().getName());
-        //ingredientVo1.setCuisine(cuisineVo1);
+        //ingredientVo1.setCuisine(cuisineResponse1);
 
         ingredientEntity2 = new IngredientEntity();
         ingredientEntity2.setName("Ingredient 2 Name");
@@ -376,7 +376,7 @@ public class IngredientIntegrationTest extends CookbookIntegrationBaseTest {
         ingredientVo2.setProductId(ingredientEntity2.getProductId());
         ingredientVo2.setRecipeId(ingredientEntity2.getRecipe().getId().toString());
         ingredientVo2.setQuantity(ingredientEntity2.getQuantityAmount().toString() + " " + cookbookServiceHelper.parseWeightCode(ingredientEntity2.getQuantityUnitId()).get().getName());
-        //ingredientVo2.setCuisine(cuisineVo2);
+        //ingredientVo2.setCuisine(cuisineResponse2);
 
         ingredientEntity3 = new IngredientEntity();
         ingredientEntity3.setName("Ingredient 3 Name");
@@ -396,7 +396,7 @@ public class IngredientIntegrationTest extends CookbookIntegrationBaseTest {
         ingredientVo3.setProductId(ingredientEntity3.getProductId());
         ingredientVo3.setRecipeId(ingredientEntity3.getRecipe().getId().toString());
         ingredientVo3.setQuantity(ingredientEntity3.getQuantityAmount().toString() + " " + cookbookServiceHelper.parseWeightCode(ingredientEntity3.getQuantityUnitId()).get().getName());
-        //ingredientVo3.setCuisine(cuisineVo3);
+        //ingredientVo3.setCuisine(cuisineResponse3);
 
         ingredientVo4 = new IngredientVo();
         ingredientVo4.setId(UUID.randomUUID().toString());

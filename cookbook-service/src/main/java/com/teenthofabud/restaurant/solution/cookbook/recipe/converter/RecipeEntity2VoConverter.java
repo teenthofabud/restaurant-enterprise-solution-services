@@ -5,7 +5,7 @@ import com.teenthofabud.core.common.converter.TOABBaseEntity2VoConverter;
 import com.teenthofabud.core.common.data.dto.TOABRequestContextHolder;
 import com.teenthofabud.core.common.error.TOABErrorCode;
 import com.teenthofabud.core.common.error.TOABSystemException;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineVo;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.dto.CuisineResponse;
 import com.teenthofabud.restaurant.solution.cookbook.integration.menu.data.ItemVo;
 import com.teenthofabud.restaurant.solution.cookbook.integration.menu.proxy.MenuServiceClient;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeEntity;
@@ -114,18 +114,18 @@ public class RecipeEntity2VoConverter extends TOABBaseEntity2VoConverter<RecipeE
         switch(cascadeLevel) {
             case TWO:
                 if(!fieldsToEscape.contains("cuisineId") && fieldName.compareTo("cuisineId") == 0) {
-                    Callable<CuisineVo> cuisineEntity2VoConversion = () -> {
+                    Callable<CuisineResponse> cuisineEntity2VoConversion = () -> {
                         TOABRequestContextHolder.setCascadeLevelContext(TOABCascadeLevel.ZERO);
-                        CuisineVo cuisineVo = cookbookServiceHelper.cuisineEntity2DetailedVo(entity.getCuisine());
+                        CuisineResponse cuisineResponse = cookbookServiceHelper.cuisineEntity2DetailedVo(entity.getCuisine());
                         TOABRequestContextHolder.clearCascadeLevelContext();
-                        return cuisineVo;
+                        return cuisineResponse;
                     };
                     ExecutorService executorService = Executors.newFixedThreadPool(1, new CustomizableThreadFactory("cuisineEntity2VoConversion-"));
-                    Future<CuisineVo> cuisineEntity2VoConversionResult = executorService.submit(cuisineEntity2VoConversion);
+                    Future<CuisineResponse> cuisineEntity2VoConversionResult = executorService.submit(cuisineEntity2VoConversion);
                     try {
-                        CuisineVo cuisineVo = cuisineEntity2VoConversionResult.get();
-                        vo.setCuisine(cuisineVo);
-                        log.debug("Retrieved {} for cuisineId: {}", cuisineVo, entity.getCuisine().getId());
+                        CuisineResponse cuisineResponse = cuisineEntity2VoConversionResult.get();
+                        vo.setCuisine(cuisineResponse);
+                        log.debug("Retrieved {} for cuisineId: {}", cuisineResponse, entity.getCuisine().getId());
                     } catch (InterruptedException | ExecutionException e) {
                         log.error("Unable to perform cuisineEntity2VoConversion", e);
                         throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, "Unable to perform cuisineEntity2VoConversion",

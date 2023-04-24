@@ -17,6 +17,8 @@ import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.conve
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.mapper.CuisineEntitySelfMapper;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.mapper.CuisineForm2EntityMapper;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.repository.CuisineJPARepository;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.dto.CuisineRequest;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.dto.CuisineResponse;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.service.CuisineService;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.validator.CuisineDtoValidator;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.validator.CuisineFormRelaxedValidator;
@@ -43,7 +45,7 @@ import java.util.*;
 @Slf4j
 public class CuisineServiceImpl implements CuisineService {
 
-    private static final Comparator<CuisineVo> CMP_BY_NAME_AND_DESCRIPTION = (s1, s2) -> {
+    private static final Comparator<CuisineResponse> CMP_BY_NAME_AND_DESCRIPTION = (s1, s2) -> {
         return Integer.compare(s1.getName().compareTo(s2.getName()), s1.getDescription().compareTo(s2.getDescription()));
     };
 
@@ -137,20 +139,20 @@ public class CuisineServiceImpl implements CuisineService {
 
     @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
-    public Set<CuisineVo> retrieveAllByNaturalOrdering() {
+    public Set<CuisineResponse> retrieveAllByNaturalOrdering() {
         log.info("Requesting all CuisineEntity by their natural ordering");
         List<CuisineEntity> cuisineEntityList = repository.findAll();
-        List<CuisineVo> cuisineVoList = cookbookServiceHelper.cuisineEntity2DetailedVo(cuisineEntityList);
-        Collections.sort(cuisineVoList, CMP_BY_NAME_AND_DESCRIPTION);
-        Set<CuisineVo> naturallyOrderedSet = new LinkedHashSet<>();
-        naturallyOrderedSet.addAll(cuisineVoList);
-        log.info("{} CuisineVo available", naturallyOrderedSet.size());
+        List<CuisineResponse> cuisineResponseList = cookbookServiceHelper.cuisineEntity2DetailedVo(cuisineEntityList);
+        Collections.sort(cuisineResponseList, CMP_BY_NAME_AND_DESCRIPTION);
+        Set<CuisineResponse> naturallyOrderedSet = new LinkedHashSet<>();
+        naturallyOrderedSet.addAll(cuisineResponseList);
+        log.info("{} CuisineResponse available", naturallyOrderedSet.size());
         return naturallyOrderedSet;
     }
 
     @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
-    public CuisineVo retrieveDetailsById(String id, Optional<TOABCascadeLevel> optionalCascadeLevel) throws CuisineException {
+    public CuisineResponse retrieveDetailsById(String id, Optional<TOABCascadeLevel> optionalCascadeLevel) throws CuisineException {
         log.info("Requesting CuisineEntity by id: {}", id);
         Long cuisineId = parseCuisineId(id);
         Optional<CuisineEntity> optEntity = repository.findById(cuisineId);
@@ -158,19 +160,19 @@ public class CuisineServiceImpl implements CuisineService {
             log.debug("No CuisineEntity found by id: {}", id);
             throw new CuisineException(CookbookErrorCode.COOK_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
-        log.info("Found CuisineVo by id: {}", id);
+        log.info("Found CuisineResponse by id: {}", id);
         CuisineEntity entity = optEntity.get();
         TOABCascadeLevel cascadeLevel = optionalCascadeLevel.isPresent() ? optionalCascadeLevel.get() : TOABCascadeLevel.ZERO;
         TOABRequestContextHolder.setCascadeLevelContext(cascadeLevel);
-        CuisineVo vo = cookbookServiceHelper.cuisineEntity2DetailedVo(entity);
-        log.debug("CuisineVo populated with fields cascaded to level: {}", cascadeLevel);
+        CuisineResponse vo = cookbookServiceHelper.cuisineEntity2DetailedVo(entity);
+        log.debug("CuisineResponse populated with fields cascaded to level: {}", cascadeLevel);
         TOABRequestContextHolder.clearCascadeLevelContext();
         return vo;
     }
 
     @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
     @Override
-    public List<CuisineVo> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalName, Optional<String> optionalDescription) throws CuisineException {
+    public List<CuisineResponse> retrieveAllMatchingDetailsByCriteria(Optional<String> optionalName, Optional<String> optionalDescription) throws CuisineException {
         if(optionalName.isEmpty() && optionalDescription.isEmpty()) {
             log.debug("No search parameters provided");
         }
@@ -179,7 +181,7 @@ public class CuisineServiceImpl implements CuisineService {
         if(StringUtils.isEmpty(StringUtils.trimWhitespace(name)) && StringUtils.isEmpty(StringUtils.trimWhitespace(description))) {
             log.debug("All search parameters are empty");
         }
-        List<CuisineVo> matchedCuisineList = new LinkedList<>();
+        List<CuisineResponse> matchedCuisineList = new LinkedList<>();
         Map<String, String> providedFilters = new LinkedHashMap<>();
         CuisineEntity entity = new CuisineEntity();
         ExampleMatcher matcherCriteria = ExampleMatcher.matchingAll();
@@ -203,32 +205,32 @@ public class CuisineServiceImpl implements CuisineService {
         Example<CuisineEntity> cuisineEntityExample = Example.of(entity, matcherCriteria);
         List<CuisineEntity> cuisineEntityList = repository.findAll(cuisineEntityExample);
         matchedCuisineList = cookbookServiceHelper.cuisineEntity2DetailedVo(cuisineEntityList);
-        log.info("Found {} CuisineVo matching with provided parameters : {}", matchedCuisineList.size(), providedFilters);
+        log.info("Found {} CuisineResponse matching with provided parameters : {}", matchedCuisineList.size(), providedFilters);
         return matchedCuisineList;
     }
 
     @Transactional
     @Override
-    public String createCuisine(CuisineForm form) throws CuisineException {
+    public String createCuisine(CuisineRequest form) throws CuisineException {
         log.info("Creating new CuisineEntity");
 
         if(form == null) {
-            log.debug("CuisineForm provided is null");
+            log.debug("CuisineRequest provided is null");
             throw new CuisineException(CookbookErrorCode.COOK_ATTRIBUTE_UNEXPECTED,
                     new Object[]{ "form", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
         }
         log.debug("Form details: {}", form);
 
-        log.debug("Validating provided attributes of CuisineForm");
+        log.debug("Validating provided attributes of CuisineRequest");
         Errors err = new DirectFieldBindingResult(form, form.getClass().getSimpleName());
         formValidator.validate(form, err);
         if(err.hasErrors()) {
-            log.debug("CuisineForm has {} errors", err.getErrorCount());
+            log.debug("CuisineRequest has {} errors", err.getErrorCount());
             CookbookErrorCode ec = CookbookErrorCode.valueOf(err.getFieldError().getCode());
-            log.debug("CuisineForm error detail: {}", ec);
+            log.debug("CuisineRequest error detail: {}", ec);
             throw new CuisineException(ec, new Object[] { err.getFieldError().getField() });
         }
-        log.debug("All attributes of CuisineForm are valid");
+        log.debug("All attributes of CuisineRequest are valid");
 
         CuisineEntity expectedEntity = form2EntityConverter.convert(form);
 
@@ -247,16 +249,16 @@ public class CuisineServiceImpl implements CuisineService {
         if(actualEntity == null) {
             log.debug("Unable to create {}", expectedEntity);
             throw new CuisineException(CookbookErrorCode.COOK_ACTION_FAILURE,
-                    new Object[]{ "creation", "unable to persist CuisineForm details" });
+                    new Object[]{ "creation", "unable to persist CuisineRequest details" });
         }
-        log.info("Created new CuisineForm with id: {}", actualEntity.getId());
+        log.info("Created new CuisineRequest with id: {}", actualEntity.getId());
         return actualEntity.getId().toString();
     }
 
     @Transactional
     @Override
-    public void updateCuisine(String id, CuisineForm form) throws CuisineException {
-        log.info("Updating CuisineForm by id: {}", id);
+    public void updateCuisine(String id, CuisineRequest form) throws CuisineException {
+        log.info("Updating CuisineRequest by id: {}", id);
 
         log.debug(CuisineMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_CUISINE_ENTITY_ID.getValue(), id);
         Long cuisineId = parseCuisineId(id);
@@ -275,31 +277,31 @@ public class CuisineServiceImpl implements CuisineService {
         log.debug("CuisineEntity is active with id: {}", id);
 
         if(form == null) {
-            log.debug("CuisineForm is null");
+            log.debug("CuisineRequest is null");
             throw new CuisineException(CookbookErrorCode.COOK_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
         }
         log.debug("Form details : {}", form);
 
-        log.debug("Validating provided attributes of CuisineForm");
+        log.debug("Validating provided attributes of CuisineRequest");
         Errors err = new DirectFieldBindingResult(form, form.getClass().getSimpleName());
         Boolean allEmpty = relaxedFormValidator.validateLoosely(form, err);
         if(err.hasErrors()) {
-            log.debug("CuisineForm has {} errors", err.getErrorCount());
+            log.debug("CuisineRequest has {} errors", err.getErrorCount());
             CookbookErrorCode ec = CookbookErrorCode.valueOf(err.getFieldError().getCode());
-            log.debug("CuisineForm error detail: {}", ec);
+            log.debug("CuisineRequest error detail: {}", ec);
             throw new CuisineException(ec, new Object[] { err.getFieldError().getField(), err.getFieldError().getCode() });
         } else if (!allEmpty) {
-            log.debug("All attributes of CuisineForm are empty");
+            log.debug("All attributes of CuisineRequest are empty");
             throw new CuisineException(CookbookErrorCode.COOK_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are empty" });
         }
-        log.debug("All attributes of CuisineForm are valid");
+        log.debug("All attributes of CuisineRequest are valid");
 
         Optional<CuisineEntity> optExpectedEntity = form2EntityMapper.compareAndMap(actualEntity, form);
         if(optExpectedEntity.isEmpty()) {
-            log.debug("No new value for attributes of CuisineForm");
+            log.debug("No new value for attributes of CuisineRequest");
             throw new CuisineException(CookbookErrorCode.COOK_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are expected with new values" });
         }
-        log.debug("Successfully compared and copied attributes from CuisineForm to CuisineEntity");
+        log.debug("Successfully compared and copied attributes from CuisineRequest to CuisineEntity");
 
         CuisineEntity expectedEntity = optExpectedEntity.get();
 
@@ -313,7 +315,7 @@ public class CuisineServiceImpl implements CuisineService {
         log.debug(CuisineMessageTemplate.MSG_TEMPLATE_CUISINE_NON_EXISTENCE_BY_NAME.getValue(), expectedEntity.getName());
 
         entitySelfMapper.compareAndMap(expectedEntity, actualEntity);
-        log.debug("Compared and copied attributes from CuisineEntity to CuisineForm");
+        log.debug("Compared and copied attributes from CuisineEntity to CuisineRequest");
         actualEntity.setModifiedOn(LocalDateTime.now(ZoneOffset.UTC));
 
         log.debug("Updating: {}", actualEntity);

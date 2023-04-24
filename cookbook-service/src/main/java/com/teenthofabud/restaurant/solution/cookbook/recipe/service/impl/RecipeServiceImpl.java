@@ -12,7 +12,7 @@ import com.teenthofabud.core.common.error.TOABBaseException;
 import com.teenthofabud.core.common.error.TOABSystemException;
 import com.teenthofabud.core.common.service.TOABBaseService;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineException;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineVo;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.dto.CuisineResponse;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.service.CuisineService;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.converter.RecipeDto2EntityConverter;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.converter.RecipeForm2EntityConverter;
@@ -200,8 +200,8 @@ public class RecipeServiceImpl implements RecipeService {
         log.info("Requesting RecipeEntity that match with cuisineId: {}", cuisineId);
         Errors err = new DirectFieldBindingResult(cuisineId, "RecipeForm");
         try {
-            CuisineVo cuisineVo = cuisineService.retrieveDetailsById(cuisineId, Optional.of(TOABCascadeLevel.ONE));
-            if(!cuisineVo.getActive()) {
+            CuisineResponse cuisineResponse = cuisineService.retrieveDetailsById(cuisineId, Optional.of(TOABCascadeLevel.ONE));
+            if(!cuisineResponse.getActive()) {
                 throw new CuisineException(CookbookErrorCode.COOK_INACTIVE, new Object [] { cuisineId });
             }
         } catch (CuisineException e) {

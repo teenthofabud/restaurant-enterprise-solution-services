@@ -2,7 +2,7 @@ package com.teenthofabud.restaurant.solution.cookbook.recipe.validator;
 
 import com.teenthofabud.core.common.constant.TOABCascadeLevel;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineException;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineVo;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.dto.CuisineResponse;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.service.CuisineService;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeForm;
 import com.teenthofabud.restaurant.solution.cookbook.error.CookbookErrorCode;
@@ -187,8 +187,8 @@ public class RecipeFormValidator implements Validator {
         } else if(!fieldsToEscape.contains("cuisineId") && StringUtils.hasText(StringUtils.trimWhitespace(form.getCuisineId()))){
             String cuisineId = form.getCuisineId();
             try {
-                CuisineVo cuisineVo = cuisineService.retrieveDetailsById(cuisineId, Optional.of(TOABCascadeLevel.ONE));
-                if(!cuisineVo.getActive()) {
+                CuisineResponse cuisineResponse = cuisineService.retrieveDetailsById(cuisineId, Optional.of(TOABCascadeLevel.ONE));
+                if(!cuisineResponse.getActive()) {
                     log.debug("RecipeForm.cuisineId is inactive");
                     errors.rejectValue("cuisineId", CookbookErrorCode.COOK_ATTRIBUTE_INVALID.name());
                     return;

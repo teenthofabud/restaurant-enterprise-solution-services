@@ -2,7 +2,7 @@ package com.teenthofabud.restaurant.solution.cookbook.recipe.data;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.teenthofabud.core.common.data.vo.TOABBaseVo;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineVo;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.dto.CuisineResponse;
 import com.teenthofabud.restaurant.solution.cookbook.integration.menu.data.ItemVo;
 import lombok.*;
 
@@ -41,7 +41,7 @@ public class RecipeVo extends TOABBaseVo implements Comparable<RecipeVo> {
     @ToString.Include
     private String cuisineId;
     @ToString.Include
-    private CuisineVo cuisine;
+    private CuisineResponse cuisine;
 
     @Override
     public int compareTo(RecipeVo o) {

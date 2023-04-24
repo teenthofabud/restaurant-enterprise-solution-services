@@ -5,8 +5,8 @@ import com.teenthofabud.core.common.data.form.PatchOperationForm;
 import com.teenthofabud.core.common.data.vo.ErrorVo;
 import com.teenthofabud.core.common.error.TOABErrorCode;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineEntity;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineForm;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineVo;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.dto.CuisineRequest;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.dto.CuisineResponse;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.repository.CuisineJPARepository;
 import com.teenthofabud.restaurant.solution.cookbook.error.CookbookErrorCode;
 import com.teenthofabud.restaurant.solution.cookbook.integration.menu.data.ItemVo;
@@ -70,7 +70,7 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
         this.cuisineRepository = cuisineRepository;
     }
 
-    private CuisineForm cuisineForm;
+    private CuisineRequest cuisineRequest;
 
     @Autowired
     public void setRecipeRepository(RecipeRepository recipeRepository) {
@@ -82,10 +82,10 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
     private ItemVo itemVo3;
     private ItemVo itemVo4;
 
-    private CuisineVo cuisineVo1;
-    private CuisineVo cuisineVo2;
-    private CuisineVo cuisineVo3;
-    private CuisineVo cuisineVo4;
+    private CuisineResponse cuisineResponse1;
+    private CuisineResponse cuisineResponse2;
+    private CuisineResponse cuisineResponse3;
+    private CuisineResponse cuisineResponse4;
     private CuisineEntity cuisineEntity1;
     private CuisineEntity cuisineEntity2;
     private CuisineEntity cuisineEntity3;
@@ -129,9 +129,9 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
         itemVo4.setId("22");
         itemVo4.setDescription("Item 22 description");
 
-        cuisineForm = new CuisineForm();
-        cuisineForm.setName("New Name");
-        cuisineForm.setDescription("New Description");
+        cuisineRequest = new CuisineRequest();
+        cuisineRequest.setName("New Name");
+        cuisineRequest.setDescription("New Description");
 
         patches = Arrays.asList(
                 new PatchOperationForm("replace", "/name", "patched name"),
@@ -145,10 +145,10 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
 
         cuisineEntity1 = cuisineRepository.save(cuisineEntity1);
 
-        cuisineVo1 = new CuisineVo();
-        cuisineVo1.setId(cuisineEntity1.getId().toString());
-        cuisineVo1.setName(cuisineEntity1.getName());
-        cuisineVo1.setDescription(cuisineEntity1.getDescription());
+        cuisineResponse1 = new CuisineResponse();
+        cuisineResponse1.setId(cuisineEntity1.getId().toString());
+        cuisineResponse1.setName(cuisineEntity1.getName());
+        cuisineResponse1.setDescription(cuisineEntity1.getDescription());
 
         cuisineEntity2 = new CuisineEntity();
         cuisineEntity2.setName("Cuisine 2 Name");
@@ -157,10 +157,10 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
 
         cuisineEntity2 = cuisineRepository.save(cuisineEntity2);
 
-        cuisineVo2 = new CuisineVo();
-        cuisineVo2.setId(cuisineEntity2.getId().toString());
-        cuisineVo2.setName(cuisineEntity2.getName());
-        cuisineVo2.setDescription(cuisineEntity2.getDescription());
+        cuisineResponse2 = new CuisineResponse();
+        cuisineResponse2.setId(cuisineEntity2.getId().toString());
+        cuisineResponse2.setName(cuisineEntity2.getName());
+        cuisineResponse2.setDescription(cuisineEntity2.getDescription());
 
         cuisineEntity3 = new CuisineEntity();
         cuisineEntity3.setName("Cuisine 3 Name");
@@ -169,10 +169,10 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
 
         cuisineEntity3 = cuisineRepository.save(cuisineEntity3);
 
-        cuisineVo3 = new CuisineVo();
-        cuisineVo3.setId(cuisineEntity3.getId().toString());
-        cuisineVo3.setName(cuisineEntity3.getName());
-        cuisineVo3.setDescription(cuisineEntity3.getDescription());
+        cuisineResponse3 = new CuisineResponse();
+        cuisineResponse3.setId(cuisineEntity3.getId().toString());
+        cuisineResponse3.setName(cuisineEntity3.getName());
+        cuisineResponse3.setDescription(cuisineEntity3.getDescription());
 
         cuisineEntity4 = new CuisineEntity();
         cuisineEntity4.setName("Cuisine 4 Name");
@@ -181,10 +181,10 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
 
         cuisineEntity4 = cuisineRepository.save(cuisineEntity4);
 
-        cuisineVo4 = new CuisineVo();
-        cuisineVo4.setId(cuisineEntity4.getId().toString());
-        cuisineVo4.setName(cuisineEntity4.getName());
-        cuisineVo4.setDescription(cuisineEntity4.getDescription());
+        cuisineResponse4 = new CuisineResponse();
+        cuisineResponse4.setId(cuisineEntity4.getId().toString());
+        cuisineResponse4.setName(cuisineEntity4.getName());
+        cuisineResponse4.setDescription(cuisineEntity4.getDescription());
 
         recipeForm = new RecipeForm();
         recipeForm.setName("New Something First");
@@ -231,7 +231,7 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
         recipeVo1.setPreparationTime(recipeEntity1.getPreparationTimeDuration().toString() + " " + recipeEntity1.getPreparationTimeUnitId());
         recipeVo1.setCookingTime(recipeEntity1.getCookingTimeDuration().toString() + " " + recipeEntity1.getCookingTimeUnitId());
         recipeVo1.setPortionSize(recipeEntity1.getPortionSizeAmount().toString() + " " + recipeEntity1.getPortionSizeUnitId());
-        //recipeVo1.setCuisine(cuisineVo1);
+        //recipeVo1.setCuisine(cuisineResponse1);
 
         recipeEntity2 = new RecipeEntity();
         recipeEntity2.setName("default");
@@ -263,7 +263,7 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
         recipeVo2.setPreparationTime(recipeEntity2.getPreparationTimeDuration().toString() + " " + recipeEntity2.getPreparationTimeUnitId());
         recipeVo2.setCookingTime(recipeEntity2.getCookingTimeDuration().toString() + " " + recipeEntity2.getCookingTimeUnitId());
         recipeVo2.setPortionSize(recipeEntity2.getPortionSizeAmount().toString() + " " + recipeEntity2.getPortionSizeUnitId());
-        //recipeVo2.setCuisine(cuisineVo2);
+        //recipeVo2.setCuisine(cuisineResponse2);
 
         recipeEntity3 = new RecipeEntity();
         recipeEntity3.setName("default");
@@ -295,7 +295,7 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
         recipeVo3.setPreparationTime(recipeEntity3.getPreparationTimeDuration().toString() + " " + recipeEntity3.getPreparationTimeUnitId());
         recipeVo3.setCookingTime(recipeEntity3.getCookingTimeDuration().toString() + " " + recipeEntity3.getCookingTimeUnitId());
         recipeVo3.setPortionSize(recipeEntity3.getPortionSizeAmount().toString() + " " + recipeEntity3.getPortionSizeUnitId());
-        //recipeVo3.setCuisine(cuisineVo3);
+        //recipeVo3.setCuisine(cuisineResponse3);
 
         recipeVo4 = new RecipeVo();
         recipeVo4.setId(UUID.randomUUID().toString());
@@ -317,13 +317,13 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
         cuisineEntity3.setRecipes(new ArrayList<RecipeEntity>(List.of(recipeEntity3)));
         cuisineEntity3 = cuisineRepository.save(cuisineEntity3);
 
-        recipeVo1.setCuisine(cuisineVo1);
-        recipeVo2.setCuisine(cuisineVo2);
-        recipeVo3.setCuisine(cuisineVo3);
+        recipeVo1.setCuisine(cuisineResponse1);
+        recipeVo2.setCuisine(cuisineResponse2);
+        recipeVo3.setCuisine(cuisineResponse3);
 
-        cuisineVo1.setRecipes(Arrays.asList(recipeVo1));
-        cuisineVo2.setRecipes(Arrays.asList(recipeVo2));
-        cuisineVo3.setRecipes(Arrays.asList(recipeVo3));
+        cuisineResponse1.setRecipes(Arrays.asList(recipeVo1));
+        cuisineResponse2.setRecipes(Arrays.asList(recipeVo2));
+        cuisineResponse3.setRecipes(Arrays.asList(recipeVo3));
     }
 
     @AfterEach
@@ -354,7 +354,7 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
 
         mvcResult = this.mockMvc.perform(post(ACCOUNT_URI)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(cuisineForm)))
+                .content(om.writeValueAsString(cuisineRequest)))
                 .andDo(print())
                 .andReturn();
 
@@ -368,11 +368,11 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
         MvcResult mvcResult = null;
         String errorCode = CookbookErrorCode.COOK_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "name";
-        cuisineForm.setName("");
+        cuisineRequest.setName("");
 
         mvcResult = mockMvc.perform(post(ACCOUNT_URI)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(cuisineForm)))
+                .content(om.writeValueAsString(cuisineRequest)))
                 .andDo(print())
                 .andReturn();
 
@@ -388,11 +388,11 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
         MvcResult mvcResult = null;
         String errorCode = CookbookErrorCode.COOK_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "description";
-        cuisineForm.setDescription("");
+        cuisineRequest.setDescription("");
 
         mvcResult = mockMvc.perform(post(ACCOUNT_URI)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(cuisineForm)))
+                        .content(om.writeValueAsString(cuisineRequest)))
                 .andDo(print())
                 .andReturn();
 
@@ -427,7 +427,7 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
     @Test
     public void test_Cuisine_Get_ShouldReturn_200Response_And_CuisineListNaturallyOrdered_WhenRequested_ForAllCuisines() throws Exception {
         MvcResult mvcResult = null;
-        List<CuisineVo> cuisineList = new LinkedList<>(Arrays.asList(cuisineVo1, cuisineVo2, cuisineVo3, cuisineVo4));
+        List<CuisineResponse> cuisineList = new LinkedList<>(Arrays.asList(cuisineResponse1, cuisineResponse2, cuisineResponse3, cuisineResponse4));
 
         mvcResult = this.mockMvc.perform(get(ACCOUNT_URI))
                 .andDo(print())
@@ -435,7 +435,7 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
 
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(cuisineList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), CuisineVo[].class).length);
+        Assertions.assertEquals(cuisineList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), CuisineResponse[].class).length);
     }
 
     @ParameterizedTest
@@ -482,7 +482,7 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
 
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(0, om.readValue(mvcResult.getResponse().getContentAsString(), CuisineVo[].class).length);
+        Assertions.assertEquals(0, om.readValue(mvcResult.getResponse().getContentAsString(), CuisineResponse[].class).length);
     }
 
     @Test
@@ -495,13 +495,13 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
 
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(0, om.readValue(mvcResult.getResponse().getContentAsString(), CuisineVo[].class).length);
+        Assertions.assertEquals(0, om.readValue(mvcResult.getResponse().getContentAsString(), CuisineResponse[].class).length);
     }
 
     @Test
     public void test_Cuisine_Get_ShouldReturn_200Response_And_CuisineListNaturallyOrdered_WhenRequested_ForCuisines_WithName() throws Exception {
         MvcResult mvcResult = null;
-        List<CuisineVo> cuisineList = new ArrayList<>(Arrays.asList(cuisineVo1, cuisineVo2, cuisineVo3, cuisineVo4));
+        List<CuisineResponse> cuisineList = new ArrayList<>(Arrays.asList(cuisineResponse1, cuisineResponse2, cuisineResponse3, cuisineResponse4));
 
         mvcResult = this.mockMvc.perform(get(ACCOUNT_URI_FILTER)
                         .queryParam("name", "Cuisine"))
@@ -510,13 +510,13 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
 
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(cuisineList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), CuisineVo[].class).length);
+        Assertions.assertEquals(cuisineList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), CuisineResponse[].class).length);
     }
 
     @Test
     public void test_Cuisine_Get_ShouldReturn_200Response_And_CuisineListNaturallyOrdered_WhenRequested_ForCuisines_WithDescription() throws Exception {
         MvcResult mvcResult = null;
-        List<CuisineVo> cuisineList = new ArrayList<>(Arrays.asList(cuisineVo2));
+        List<CuisineResponse> cuisineList = new ArrayList<>(Arrays.asList(cuisineResponse2));
 
         mvcResult = this.mockMvc.perform(get(ACCOUNT_URI_FILTER)
                         .queryParam("description", "Cuisine 2"))
@@ -525,13 +525,13 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
 
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(cuisineList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), CuisineVo[].class).length);
+        Assertions.assertEquals(cuisineList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), CuisineResponse[].class).length);
     }
 
     @Test
     public void test_Cuisine_Get_ShouldReturn_200Response_And_CuisineListNaturallyOrdered_WhenRequested_ForCuisines_WithNameAndDescription() throws Exception {
         MvcResult mvcResult = null;
-        List<CuisineVo> cuisineList = new LinkedList<>(Arrays.asList(cuisineVo1));
+        List<CuisineResponse> cuisineList = new LinkedList<>(Arrays.asList(cuisineResponse1));
 
         mvcResult = this.mockMvc.perform(get(ACCOUNT_URI_FILTER)
                         .queryParam("name", "Cuisine 1")
@@ -541,13 +541,13 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
 
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(cuisineList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), CuisineVo[].class).length);
+        Assertions.assertEquals(cuisineList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), CuisineResponse[].class).length);
     }
 
     @Test
     public void test_Cuisine_Get_ShouldReturn_200Response_And_CuisineListNaturallyOrdered_WhenRequested_ForCuisines_WithNameAndDescriptionAndPhoneNumber() throws Exception {
         MvcResult mvcResult = null;
-        List<CuisineVo> cuisineList = new LinkedList<>(Arrays.asList(cuisineVo1));
+        List<CuisineResponse> cuisineList = new LinkedList<>(Arrays.asList(cuisineResponse1));
 
         mvcResult = this.mockMvc.perform(get(ACCOUNT_URI_FILTER)
                         .queryParam("name", "Cuisine 1")
@@ -558,13 +558,13 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
 
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(cuisineList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), CuisineVo[].class).length);
+        Assertions.assertEquals(cuisineList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), CuisineResponse[].class).length);
     }
 
     @Test
     public void test_Cuisine_Get_ShouldReturn_200Response_And_EmptyCuisineList_WhenRequested_ForCuisines_WithAbsent_WithNameAndDescription() throws Exception {
         MvcResult mvcResult = null;
-        List<CuisineVo> cuisineList = new LinkedList<>();
+        List<CuisineResponse> cuisineList = new LinkedList<>();
 
         mvcResult = this.mockMvc.perform(get(ACCOUNT_URI_FILTER)
                         .queryParam("name", "Cuisine 1")
@@ -574,7 +574,7 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
 
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(cuisineList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), CuisineVo[].class).length);
+        Assertions.assertEquals(cuisineList.size(), om.readValue(mvcResult.getResponse().getContentAsString(), CuisineResponse[].class).length);
     }
 
     @ParameterizedTest
@@ -636,14 +636,14 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
                 .andReturn();
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(cuisineVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), CuisineVo.class).getId());
-        Assertions.assertEquals(cuisineVo1.getName(), om.readValue(mvcResult.getResponse().getContentAsString(), CuisineVo.class).getName());
-        Assertions.assertEquals(cuisineVo1.getDescription(), om.readValue(mvcResult.getResponse().getContentAsString(), CuisineVo.class).getDescription());
-        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), CuisineVo.class).getCreatedBy()));
-        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), CuisineVo.class).getModifiedBy()));
-        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), CuisineVo.class).getCreatedOn()));
-        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), CuisineVo.class).getModifiedOn()));
-        Assertions.assertFalse(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), CuisineVo.class).getActive()));
+        Assertions.assertEquals(cuisineResponse1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), CuisineResponse.class).getId());
+        Assertions.assertEquals(cuisineResponse1.getName(), om.readValue(mvcResult.getResponse().getContentAsString(), CuisineResponse.class).getName());
+        Assertions.assertEquals(cuisineResponse1.getDescription(), om.readValue(mvcResult.getResponse().getContentAsString(), CuisineResponse.class).getDescription());
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), CuisineResponse.class).getCreatedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), CuisineResponse.class).getModifiedBy()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), CuisineResponse.class).getCreatedOn()));
+        Assertions.assertTrue(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), CuisineResponse.class).getModifiedOn()));
+        Assertions.assertFalse(ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), CuisineResponse.class).getActive()));
     }
 
     @Test
@@ -656,16 +656,16 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
                 .andReturn();
         Assertions.assertNotNull(mvcResult);
         Assertions.assertEquals(HttpStatus.OK.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(cuisineVo1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), CuisineVo.class).getId());
-        Assertions.assertEquals(cuisineVo1.getName(), om.readValue(mvcResult.getResponse().getContentAsString(), CuisineVo.class).getName());
-        Assertions.assertEquals(cuisineVo1.getDescription(), om.readValue(mvcResult.getResponse().getContentAsString(), CuisineVo.class).getDescription());
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), CuisineVo.class).getRecipes() != null);
-        Assertions.assertEquals(cuisineVo1.getRecipes().size(), om.readValue(mvcResult.getResponse().getContentAsString(), CuisineVo.class).getRecipes().size());
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), CuisineVo.class).getCreatedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), CuisineVo.class).getModifiedBy()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), CuisineVo.class).getCreatedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), CuisineVo.class).getModifiedOn()));
-        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), CuisineVo.class).getActive()));
+        Assertions.assertEquals(cuisineResponse1.getId(), om.readValue(mvcResult.getResponse().getContentAsString(), CuisineResponse.class).getId());
+        Assertions.assertEquals(cuisineResponse1.getName(), om.readValue(mvcResult.getResponse().getContentAsString(), CuisineResponse.class).getName());
+        Assertions.assertEquals(cuisineResponse1.getDescription(), om.readValue(mvcResult.getResponse().getContentAsString(), CuisineResponse.class).getDescription());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), CuisineResponse.class).getRecipes() != null);
+        Assertions.assertEquals(cuisineResponse1.getRecipes().size(), om.readValue(mvcResult.getResponse().getContentAsString(), CuisineResponse.class).getRecipes().size());
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), CuisineResponse.class).getCreatedBy()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), CuisineResponse.class).getModifiedBy()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), CuisineResponse.class).getCreatedOn()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), CuisineResponse.class).getModifiedOn()));
+        Assertions.assertTrue(!ObjectUtils.isEmpty(om.readValue(mvcResult.getResponse().getContentAsString(), CuisineResponse.class).getActive()));
     }
 
     @Test
@@ -738,11 +738,11 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
     public void test_Cuisine_Put_ShouldReturn_204Response_And_NoResponseBody_WhenUpdated_ById_AndCuisineDetails() throws Exception {
         String id = cuisineEntity1.getId().toString();
         MvcResult mvcResult = null;
-        cuisineForm.setName("Ferran");
+        cuisineRequest.setName("Ferran");
 
         mvcResult = this.mockMvc.perform(put(ACCOUNT_URI_BY_ID, id)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(cuisineForm)))
+                .content(om.writeValueAsString(cuisineRequest)))
                 .andDo(print())
                 .andReturn();
 
@@ -760,7 +760,7 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
 
         mvcResult = this.mockMvc.perform(put(ACCOUNT_URI_BY_ID, id)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(cuisineForm)))
+                .content(om.writeValueAsString(cuisineRequest)))
                 .andDo(print())
                 .andReturn();
 
@@ -779,7 +779,7 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
 
         mvcResult = this.mockMvc.perform(put(ACCOUNT_URI_BY_ID, id)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(cuisineForm)))
+                .content(om.writeValueAsString(cuisineRequest)))
                 .andDo(print())
                 .andReturn();
 
@@ -798,7 +798,7 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
 
         mvcResult = this.mockMvc.perform(put(ACCOUNT_URI_BY_ID, id)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(cuisineForm)))
+                .content(om.writeValueAsString(cuisineRequest)))
                 .andDo(print())
                 .andReturn();
 
@@ -834,11 +834,11 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
         MvcResult mvcResult = null;
         String errorCode = CookbookErrorCode.COOK_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "name";
-        cuisineForm.setName("");
+        cuisineRequest.setName("");
 
         mvcResult = mockMvc.perform(put(ACCOUNT_URI_BY_ID, id)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(cuisineForm)))
+                .content(om.writeValueAsString(cuisineRequest)))
                 .andDo(print())
                 .andReturn();
 
@@ -854,11 +854,11 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
         MvcResult mvcResult = null;
         String errorCode = CookbookErrorCode.COOK_ATTRIBUTE_INVALID.getErrorCode();
         String fieldName = "description";
-        cuisineForm.setDescription("");
+        cuisineRequest.setDescription("");
 
         mvcResult = mockMvc.perform(put(ACCOUNT_URI_BY_ID, id)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(cuisineForm)))
+                        .content(om.writeValueAsString(cuisineRequest)))
                 .andDo(print())
                 .andReturn();
 
@@ -878,7 +878,7 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
 
         mvcResult = this.mockMvc.perform(put(ACCOUNT_URI_BY_ID, id)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(new CuisineForm())))
+                .content(om.writeValueAsString(new CuisineRequest())))
                 .andDo(print())
                 .andReturn();
 

@@ -1,4 +1,4 @@
-package com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data;
+package com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
@@ -10,7 +10,7 @@ import lombok.*;
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class CuisineForm {
+public class CuisineRequest {
 
     @ToString.Include
     private String name;

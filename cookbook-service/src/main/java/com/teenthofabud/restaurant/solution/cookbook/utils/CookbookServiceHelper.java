@@ -2,9 +2,9 @@ package com.teenthofabud.restaurant.solution.cookbook.utils;
 
 import com.teenthofabud.core.common.error.TOABErrorCode;
 import com.teenthofabud.core.common.error.TOABSystemException;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.dto.CuisineResponse;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.converter.CuisineEntity2VoConverter;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineEntity;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineVo;
 import com.teenthofabud.restaurant.solution.cookbook.ingredient.converter.IngredientEntity2VoConverter;
 import com.teenthofabud.restaurant.solution.cookbook.ingredient.data.IngredientEntity;
 import com.teenthofabud.restaurant.solution.cookbook.ingredient.data.IngredientVo;
@@ -56,20 +56,20 @@ public class CookbookServiceHelper {
         this.ingredientEntity2VoConverter = ingredientEntity2VoConverter;
     }
 
-    public List<CuisineVo> cuisineEntity2DetailedVo(List<? extends CuisineEntity> cuisineEntityList) {
-        List<CuisineVo> cuisineDetailsList = new LinkedList<>();
+    public List<CuisineResponse> cuisineEntity2DetailedVo(List<? extends CuisineEntity> cuisineEntityList) {
+        List<CuisineResponse> cuisineDetailsList = new LinkedList<>();
         if(cuisineEntityList != null && !cuisineEntityList.isEmpty()) {
             for(CuisineEntity entity : cuisineEntityList) {
-                CuisineVo vo = this.cuisineEntity2DetailedVo(entity);
+                CuisineResponse vo = this.cuisineEntity2DetailedVo(entity);
                 cuisineDetailsList.add(vo);
             }
         }
         return cuisineDetailsList;
     }
 
-    public CuisineVo cuisineEntity2DetailedVo(CuisineEntity cuisineEntity) {
+    public CuisineResponse cuisineEntity2DetailedVo(CuisineEntity cuisineEntity) {
         if(cuisineEntity != null) {
-            CuisineVo vo = cuisineEntity2VoConverter.convert(cuisineEntity);
+            CuisineResponse vo = cuisineEntity2VoConverter.convert(cuisineEntity);
             log.debug("Converting {} to {}", cuisineEntity, vo);
             return vo;
         }

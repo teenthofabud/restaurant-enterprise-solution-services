@@ -6,9 +6,9 @@ import com.teenthofabud.core.common.data.form.PatchOperationForm;
 import com.teenthofabud.core.common.data.vo.CreatedVo;
 import com.teenthofabud.core.common.data.vo.ErrorVo;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineException;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineForm;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.dto.CuisineRequest;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineMessageTemplate;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineVo;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.dto.CuisineResponse;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.service.CuisineService;
 import com.teenthofabud.restaurant.solution.cookbook.error.CookbookErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
@@ -60,7 +60,7 @@ public class CuisineController {
     })
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public CreatedVo postNewCuisine(@RequestBody(required = false) CuisineForm form) throws CuisineException {
+    public CreatedVo postNewCuisine(@RequestBody(required = false) CuisineRequest form) throws CuisineException {
         log.debug("Requesting to create new cuisine");
         if(form != null) {
             String id = service.createCuisine(form);
@@ -69,7 +69,7 @@ public class CuisineController {
             createdVo.setId(id);
             return createdVo;
         }
-        log.debug("CuisineForm is null");
+        log.debug("CuisineRequest is null");
         throw new CuisineException(CookbookErrorCode.COOK_ATTRIBUTE_UNEXPECTED,
                 new Object[]{ "form", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
     }
@@ -89,7 +89,7 @@ public class CuisineController {
     })
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping(path = "{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void putExistingCuisine(@PathVariable String id, @RequestBody(required = false) CuisineForm form) throws CuisineException {
+    public void putExistingCuisine(@PathVariable String id, @RequestBody(required = false) CuisineRequest form) throws CuisineException {
         log.debug("Requesting to update all attributes of existing cuisine");
         if(StringUtils.hasText(StringUtils.trimWhitespace(id))) {
             if(form != null) {
@@ -97,7 +97,7 @@ public class CuisineController {
                 log.debug("Responding with successful updation of attributes for existing cuisine");
                 return;
             }
-            log.debug("CuisineForm is null");
+            log.debug("CuisineRequest is null");
             throw new CuisineException(CookbookErrorCode.COOK_ATTRIBUTE_UNEXPECTED,
                     new Object[]{ "form", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
         }
@@ -166,13 +166,13 @@ public class CuisineController {
     @Operation(summary = "Get all Cuisine details")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Retrieve all available Cuisines and their details ordered by first name, last name",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = CuisineVo.class))) })
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = CuisineResponse.class))) })
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public Set<CuisineVo> getAllCuisineNaturallyOrdered() {
+    public Set<CuisineResponse> getAllCuisineNaturallyOrdered() {
         log.debug("Requesting all available cuisines by their natural orders");
-        Set<CuisineVo> naturallyOrderedCuisines = service.retrieveAllByNaturalOrdering();
+        Set<CuisineResponse> naturallyOrderedCuisines = service.retrieveAllByNaturalOrdering();
         log.debug("Responding with all available cuisines by their natural orders");
         return naturallyOrderedCuisines;
     }
@@ -180,7 +180,7 @@ public class CuisineController {
     @Operation(summary = "Get all Cuisine details by name, description")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Retrieve all available Cuisines and their details that match the provided name, description",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = CuisineVo.class))) }),
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = CuisineResponse.class))) }),
             @ApiResponse(responseCode = "400", description = "Cuisine search filters are invalid",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) }),
             @ApiResponse(responseCode = "404", description = "No Cuisines available by the given filters",
@@ -188,7 +188,7 @@ public class CuisineController {
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("filter")
-    public List<CuisineVo> getAllCuisinesByFilters(@RequestParam(required = false) String name, @RequestParam(required = false) String description)
+    public List<CuisineResponse> getAllCuisinesByFilters(@RequestParam(required = false) String name, @RequestParam(required = false) String description)
             throws CuisineException {
         log.debug("Requesting all available cuisines with given filters");
         boolean emptyName = !StringUtils.hasText(StringUtils.trimWhitespace(name));
@@ -196,7 +196,7 @@ public class CuisineController {
         if(!emptyName || !emptyDescription) {
             Optional<String> optCuisineName = emptyName ? Optional.empty() : Optional.of(name);
             Optional<String> optDescription = emptyDescription ? Optional.empty() : Optional.of(description);
-            List<CuisineVo> matchedByFilter = service.retrieveAllMatchingDetailsByCriteria(optCuisineName, optDescription);
+            List<CuisineResponse> matchedByFilter = service.retrieveAllMatchingDetailsByCriteria(optCuisineName, optDescription);
             log.debug("Responding with all available cuisines with given filters");
             return matchedByFilter;
         }
@@ -207,7 +207,7 @@ public class CuisineController {
     @Operation(summary = "Get Cuisine details by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Retrieve the details of Cuisine that matches the given id",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CuisineVo.class)) }),
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CuisineResponse.class)) }),
             @ApiResponse(responseCode = "400", description = "Cuisine id is invalid",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) }),
             @ApiResponse(responseCode = "404", description = "No Cuisine found with the given id",
@@ -215,10 +215,10 @@ public class CuisineController {
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("{id}")
-    public CuisineVo getCuisineDetailsById(@PathVariable String id, @RequestParam(required = false)
+    public CuisineResponse getCuisineDetailsById(@PathVariable String id, @RequestParam(required = false)
     @io.swagger.v3.oas.annotations.Parameter(in = ParameterIn.QUERY, description = "levels of nested fields to be unfolded within the response body")
             String cascadeUntilLevel) throws CuisineException {
-        CuisineVo cuisineDetails = null;
+        CuisineResponse cuisineDetails = null;
         log.debug("Requesting all details of cuisine by its id");
         if(StringUtils.hasText(StringUtils.trimWhitespace(id)) && StringUtils.isEmpty(StringUtils.trimWhitespace(cascadeUntilLevel))) {
             cuisineDetails = service.retrieveDetailsById(id, Optional.empty());
