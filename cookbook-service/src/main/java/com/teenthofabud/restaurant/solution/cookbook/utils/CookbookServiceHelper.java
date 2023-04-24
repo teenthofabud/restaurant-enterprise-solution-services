@@ -2,9 +2,9 @@ package com.teenthofabud.restaurant.solution.cookbook.utils;
 
 import com.teenthofabud.core.common.error.TOABErrorCode;
 import com.teenthofabud.core.common.error.TOABSystemException;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.converter.CuisineEntity2VoConverter;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.data.CuisineEntity;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.data.CuisineVo;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.converter.CuisineEntity2VoConverter;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineEntity;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineVo;
 import com.teenthofabud.restaurant.solution.cookbook.ingredient.converter.IngredientEntity2VoConverter;
 import com.teenthofabud.restaurant.solution.cookbook.ingredient.data.IngredientEntity;
 import com.teenthofabud.restaurant.solution.cookbook.ingredient.data.IngredientVo;

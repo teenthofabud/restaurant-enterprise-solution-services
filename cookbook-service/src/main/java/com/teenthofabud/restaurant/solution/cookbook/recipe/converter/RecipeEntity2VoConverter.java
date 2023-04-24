@@ -5,7 +5,7 @@ import com.teenthofabud.core.common.converter.TOABBaseEntity2VoConverter;
 import com.teenthofabud.core.common.data.dto.TOABRequestContextHolder;
 import com.teenthofabud.core.common.error.TOABErrorCode;
 import com.teenthofabud.core.common.error.TOABSystemException;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.data.CuisineVo;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineVo;
 import com.teenthofabud.restaurant.solution.cookbook.integration.menu.data.ItemVo;
 import com.teenthofabud.restaurant.solution.cookbook.integration.menu.proxy.MenuServiceClient;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeEntity;

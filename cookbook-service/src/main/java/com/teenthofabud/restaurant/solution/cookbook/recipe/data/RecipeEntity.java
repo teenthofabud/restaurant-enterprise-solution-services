@@ -1,7 +1,7 @@
 package com.teenthofabud.restaurant.solution.cookbook.recipe.data;
 
 import com.teenthofabud.core.common.data.entity.TOABBaseEntity;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.data.CuisineEntity;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineEntity;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 

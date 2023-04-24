@@ -1,8 +1,8 @@
 package com.teenthofabud.restaurant.solution.cookbook.recipe.mapper;
 
 import com.teenthofabud.core.common.mapper.DualChannelMapper;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.data.CuisineEntity;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.repository.CuisineJPARepository;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineEntity;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.repository.CuisineJPARepository;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeEntity;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeForm;
 import lombok.extern.slf4j.Slf4j;

@@ -2,8 +2,8 @@ package com.teenthofabud.restaurant.solution.cookbook.recipe.converter;
 
 import com.teenthofabud.core.common.converter.ComparativePatchConverter;
 import com.teenthofabud.core.common.error.TOABBaseException;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.data.CuisineEntity;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.repository.CuisineJPARepository;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineEntity;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.repository.CuisineJPARepository;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeDto;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeEntity;
 import com.teenthofabud.restaurant.solution.cookbook.utils.CookbookServiceHelper;

@@ -2,7 +2,7 @@ package com.teenthofabud.restaurant.solution.cookbook.recipe.data;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.teenthofabud.core.common.data.vo.TOABBaseVo;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.data.CuisineVo;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineVo;
 import com.teenthofabud.restaurant.solution.cookbook.integration.menu.data.ItemVo;
 import lombok.*;
 

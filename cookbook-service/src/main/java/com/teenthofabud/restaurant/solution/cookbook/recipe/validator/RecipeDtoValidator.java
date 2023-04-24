@@ -1,10 +1,9 @@
 package com.teenthofabud.restaurant.solution.cookbook.recipe.validator;
 
 import com.teenthofabud.core.common.constant.TOABCascadeLevel;
-import com.teenthofabud.core.common.data.dto.TOABValidationContextHolder;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.data.CuisineException;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.data.CuisineVo;
-import com.teenthofabud.restaurant.solution.cookbook.cuisine.service.CuisineService;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineException;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineVo;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.service.CuisineService;
 import com.teenthofabud.restaurant.solution.cookbook.recipe.data.RecipeDto;
 import com.teenthofabud.restaurant.solution.cookbook.error.CookbookErrorCode;
 import com.teenthofabud.restaurant.solution.cookbook.utils.CookbookServiceHelper;
