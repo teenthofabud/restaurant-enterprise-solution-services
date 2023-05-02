@@ -113,6 +113,8 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         accountEntity1.setLastName("Account 1 Last Name");
         accountEntity1.setCountryCode("91");
         accountEntity1.setPhoneNumber("1122334455");
+        accountEntity1.setGenderId(1l);
+        accountEntity1.setEmailId("account1@example.com");
         accountEntity1.setActive(Boolean.TRUE);
 
         accountEntity1 = accountRepository.save(accountEntity1);
@@ -129,6 +131,8 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         accountEntity2.setLastName("Account 2 Last Name");
         accountEntity2.setCountryCode("91");
         accountEntity2.setPhoneNumber("0987654321");
+        accountEntity2.setGenderId(2l);
+        accountEntity2.setEmailId("account2@example.com");
         accountEntity2.setActive(Boolean.TRUE);
 
         accountEntity2 = accountRepository.save(accountEntity2);
@@ -145,6 +149,8 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         accountEntity3.setLastName("Account 3 Last Name");
         accountEntity3.setCountryCode("91");
         accountEntity3.setPhoneNumber("7766441236");
+        accountEntity3.setGenderId(1l);
+        accountEntity3.setEmailId("account3@example.com");
         accountEntity3.setActive(Boolean.FALSE);
 
         accountEntity3 = accountRepository.save(accountEntity3);
@@ -161,6 +167,8 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         accountEntity4.setLastName("Account 4 Last Name");
         accountEntity4.setCountryCode("91");
         accountEntity4.setPhoneNumber("6299711209");
+        accountEntity4.setGenderId(2l);
+        accountEntity4.setEmailId("account4@example.com");
         accountEntity4.setActive(Boolean.TRUE);//here
 
         accountEntity4 = accountRepository.save(accountEntity4);

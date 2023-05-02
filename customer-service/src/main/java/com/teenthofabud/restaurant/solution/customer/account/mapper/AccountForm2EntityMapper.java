@@ -90,7 +90,7 @@ public class AccountForm2EntityMapper implements DualChannelMapper<AccountEntity
         }
         if(!fieldsToEscape.contains("genderId") && StringUtils.hasText(StringUtils.trimWhitespace(form.getGenderId()))
                 && form.getGenderId().compareTo(actualEntity.getGenderId().toString()) != 0) {
-            expectedEntity.setGenderId(form.getGenderId());
+            expectedEntity.setGenderId(Long.parseLong(form.getGenderId()));
             changeSW = true;
             log.debug("AccountForm.genderId: {} is different as AccountEntity.genderId: {}", form.getGenderId(), actualEntity.getGenderId());
         } else {
