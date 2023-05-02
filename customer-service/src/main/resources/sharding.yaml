@@ -47,12 +47,18 @@ rules:
           standard:
             shardingColumn: gender_id
             shardingAlgorithmName: inline
+        keyGenerateStrategy:
+          column: id
+          keyGeneratorName: snowflake_generator
     shardingAlgorithms:
       inline:
         type: INLINE
         props:
           algorithm-expression: account_$->{gender_id % 2}
           allow-range-query-with-inline-sharding: true
+    keyGenerators:
+      snowflake_generator:
+        type: SNOWFLAKE
 
   - !READWRITE_SPLITTING
     dataSources:
