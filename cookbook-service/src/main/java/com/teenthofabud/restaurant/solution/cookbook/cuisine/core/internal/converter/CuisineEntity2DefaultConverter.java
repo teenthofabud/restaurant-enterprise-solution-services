@@ -38,6 +38,11 @@ public class CuisineEntity2DefaultConverter implements Converter<CuisineEntity, 
         if(!fieldsToEscape.contains("description")) {
             vo.setDescription(entity.getDescription());
         }
+        vo.setCreatedOn(entity.getCreatedOn());
+        vo.setCreatedBy(entity.getCreatedBy());
+        vo.setModifiedOn(entity.getModifiedOn());
+        vo.setModifiedBy(entity.getModifiedBy());
+        vo.setActive(entity.getActive());
         log.debug("Converted {} to {} ", entity, vo);
         return vo;
     }

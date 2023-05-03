@@ -258,6 +258,162 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
 
     }
 
+    @Test
+    public void test_Cuisine_Put_ShouldReturn_204Response_And_NoResponseBody_WhenUpdated_ById_AndCuisineDetails() throws Exception {
+        String id = cuisineEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        cuisineRequest.setName("Ferran");
+
+        mvcResult = this.mockMvc.perform(put(ACCOUNT_URI_BY_ID, id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(cuisineRequest)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.NO_CONTENT.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals("", mvcResult.getResponse().getContentAsString());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { " ", "r" })
+    public void test_Cuisine_Put_ShouldReturn_400Response_And_ErrorCode_RES_COOK_001_WhenUpdatedBy_EmptyInvalidId_AndCuisineDetails(String id) throws Exception {
+        MvcResult mvcResult = null;
+        String errorCode = CookbookErrorCode.COOK_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "id";
+
+        mvcResult = this.mockMvc.perform(put(ACCOUNT_URI_BY_ID, id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(cuisineRequest)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+    }
+
+    @Test
+    public void test_Cuisine_Put_ShouldReturn_404Response_And_ErrorCode_RES_COOK_002_WhenUpdated_ByAbsentId_AndCuisineDetails() throws Exception {
+        String id = "5";
+        MvcResult mvcResult = null;
+        String errorCode = CookbookErrorCode.COOK_NOT_FOUND.getErrorCode();
+        String fieldName = "id";
+
+        mvcResult = this.mockMvc.perform(put(ACCOUNT_URI_BY_ID, id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(cuisineRequest)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(id.toString()));
+    }
+
+    @Test
+    public void test_Cuisine_Put_ShouldReturn_400Response_And_ErrorCode_RES_COOK_005_WhenUpdated_ByInactiveId_AndCuisineDetails() throws Exception {
+        String id = cuisineEntity4.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = CookbookErrorCode.COOK_INACTIVE.getErrorCode();
+
+        mvcResult = this.mockMvc.perform(put(ACCOUNT_URI_BY_ID, id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(cuisineRequest)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(id.toString()));
+    }
+
+    @Test
+    public void test_Cuisine_Put_ShouldReturn_422Response_And_ErrorCode_RES_COOK_003_WhenUpdated_ById_AndNoCuisineDetails() throws Exception {
+        String id = cuisineEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = CookbookErrorCode.COOK_ATTRIBUTE_UNEXPECTED.getErrorCode();
+        String fieldName = "form";
+        String message = "not provided";
+
+        mvcResult = this.mockMvc.perform(put(ACCOUNT_URI_BY_ID, id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.UNPROCESSABLE_ENTITY.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
+    }
+
+    @Test
+    public void test_Cuisine_Put_ShouldReturn_400Response_And_ErrorCode_RES_COOK_001_WhenRequested_ById_AndInvalidName() throws Exception {
+        String id = cuisineEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = CookbookErrorCode.COOK_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "name";
+        cuisineRequest.setName("");
+
+        mvcResult = mockMvc.perform(put(ACCOUNT_URI_BY_ID, id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(cuisineRequest)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+    }
+
+    @Test
+    public void test_Cuisine_Put_ShouldReturn_400Response_And_ErrorCode_RES_COOK_001_WhenRequested_ById_AndInvalidDescription() throws Exception {
+        String id = cuisineEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = CookbookErrorCode.COOK_ATTRIBUTE_INVALID.getErrorCode();
+        String fieldName = "description";
+        cuisineRequest.setDescription("");
+
+        mvcResult = mockMvc.perform(put(ACCOUNT_URI_BY_ID, id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(cuisineRequest)))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+    }
+
+    @Test
+    public void test_Cuisine_Put_ShouldReturn_422Response_And_ErrorCode_RES_COOK_003_WhenUpdated_ById_AndEmptyCuisineDetails() throws Exception {
+        String id = cuisineEntity1.getId().toString();
+        MvcResult mvcResult = null;
+        String errorCode = CookbookErrorCode.COOK_ATTRIBUTE_UNEXPECTED.getErrorCode();
+        String fieldName = "form";
+        String message = "fields are expected with new values";
+
+        mvcResult = this.mockMvc.perform(put(ACCOUNT_URI_BY_ID, id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(new CuisineRequest())))
+                .andDo(print())
+                .andReturn();
+
+        Assertions.assertNotNull(mvcResult);
+        Assertions.assertEquals(HttpStatus.UNPROCESSABLE_ENTITY.value(), mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
+        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
+    }
+
+
    /* @Test
     public void test_Cuisine_Get_ShouldReturn_200Response_And_CuisineListNaturallyOrdered_WhenRequested_ForAllCuisines() throws Exception {
         MvcResult mvcResult = null;
@@ -568,160 +724,6 @@ public class CuisineIntegrationTest extends CookbookIntegrationBaseTest {
         Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
     }
 
-    @Test
-    public void test_Cuisine_Put_ShouldReturn_204Response_And_NoResponseBody_WhenUpdated_ById_AndCuisineDetails() throws Exception {
-        String id = cuisineEntity1.getId().toString();
-        MvcResult mvcResult = null;
-        cuisineRequest.setName("Ferran");
-
-        mvcResult = this.mockMvc.perform(put(ACCOUNT_URI_BY_ID, id)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(cuisineRequest)))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.NO_CONTENT.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals("", mvcResult.getResponse().getContentAsString());
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = { " ", "r" })
-    public void test_Cuisine_Put_ShouldReturn_400Response_And_ErrorCode_RES_COOK_001_WhenUpdatedBy_EmptyInvalidId_AndCuisineDetails(String id) throws Exception {
-        MvcResult mvcResult = null;
-        String errorCode = CookbookErrorCode.COOK_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "id";
-
-        mvcResult = this.mockMvc.perform(put(ACCOUNT_URI_BY_ID, id)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(cuisineRequest)))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-    }
-
-    @Test
-    public void test_Cuisine_Put_ShouldReturn_404Response_And_ErrorCode_RES_COOK_002_WhenUpdated_ByAbsentId_AndCuisineDetails() throws Exception {
-        String id = "5";
-        MvcResult mvcResult = null;
-        String errorCode = CookbookErrorCode.COOK_NOT_FOUND.getErrorCode();
-        String fieldName = "id";
-
-        mvcResult = this.mockMvc.perform(put(ACCOUNT_URI_BY_ID, id)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(cuisineRequest)))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(id.toString()));
-    }
-
-    @Test
-    public void test_Cuisine_Put_ShouldReturn_400Response_And_ErrorCode_RES_COOK_005_WhenUpdated_ByInactiveId_AndCuisineDetails() throws Exception {
-        String id = cuisineEntity4.getId().toString();
-        MvcResult mvcResult = null;
-        String errorCode = CookbookErrorCode.COOK_INACTIVE.getErrorCode();
-
-        mvcResult = this.mockMvc.perform(put(ACCOUNT_URI_BY_ID, id)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(cuisineRequest)))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(id.toString()));
-    }
-
-    @Test
-    public void test_Cuisine_Put_ShouldReturn_422Response_And_ErrorCode_RES_COOK_003_WhenUpdated_ById_AndNoCuisineDetails() throws Exception {
-        String id = cuisineEntity1.getId().toString();
-        MvcResult mvcResult = null;
-        String errorCode = CookbookErrorCode.COOK_ATTRIBUTE_UNEXPECTED.getErrorCode();
-        String fieldName = "form";
-        String message = "not provided";
-
-        mvcResult = this.mockMvc.perform(put(ACCOUNT_URI_BY_ID, id)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.UNPROCESSABLE_ENTITY.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
-    }
-
-    @Test
-    public void test_Cuisine_Put_ShouldReturn_400Response_And_ErrorCode_RES_COOK_001_WhenRequested_ById_AndInvalidName() throws Exception {
-        String id = cuisineEntity1.getId().toString();
-        MvcResult mvcResult = null;
-        String errorCode = CookbookErrorCode.COOK_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "name";
-        cuisineRequest.setName("");
-
-        mvcResult = mockMvc.perform(put(ACCOUNT_URI_BY_ID, id)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(cuisineRequest)))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-    }
-
-    @Test
-    public void test_Cuisine_Put_ShouldReturn_400Response_And_ErrorCode_RES_COOK_001_WhenRequested_ById_AndInvalidDescription() throws Exception {
-        String id = cuisineEntity1.getId().toString();
-        MvcResult mvcResult = null;
-        String errorCode = CookbookErrorCode.COOK_ATTRIBUTE_INVALID.getErrorCode();
-        String fieldName = "description";
-        cuisineRequest.setDescription("");
-
-        mvcResult = mockMvc.perform(put(ACCOUNT_URI_BY_ID, id)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(cuisineRequest)))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-    }
-
-    @Test
-    public void test_Cuisine_Put_ShouldReturn_422Response_And_ErrorCode_RES_COOK_003_WhenUpdated_ById_AndEmptyCuisineDetails() throws Exception {
-        String id = cuisineEntity1.getId().toString();
-        MvcResult mvcResult = null;
-        String errorCode = CookbookErrorCode.COOK_ATTRIBUTE_UNEXPECTED.getErrorCode();
-        String fieldName = "form";
-        String message = "fields are expected with new values";
-
-        mvcResult = this.mockMvc.perform(put(ACCOUNT_URI_BY_ID, id)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(new CuisineRequest())))
-                .andDo(print())
-                .andReturn();
-
-        Assertions.assertNotNull(mvcResult);
-        Assertions.assertEquals(HttpStatus.UNPROCESSABLE_ENTITY.value(), mvcResult.getResponse().getStatus());
-        Assertions.assertEquals(errorCode, om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getCode());
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(fieldName));
-        Assertions.assertTrue(om.readValue(mvcResult.getResponse().getContentAsString(), ErrorVo.class).getMessage().contains(message));
-    }
 
     @Test
     public void test_Cuisine_Patch_ShouldReturn_204Response_And_NoResponseBody_WhenUpdated_ById_AndCuisineDetails() throws Exception {

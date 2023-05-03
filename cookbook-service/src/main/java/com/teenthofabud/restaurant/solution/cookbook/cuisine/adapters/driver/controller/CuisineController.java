@@ -70,7 +70,7 @@ public class CuisineController {
                 new Object[]{ "form", TOABBaseMessageTemplate.MSG_TEMPLATE_NOT_PROVIDED });
     }
 
-    /*@Operation(summary = "Update Cuisine details by id")
+    @Operation(summary = "Update Cuisine details by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Updated details of Cuisine",
                     content = { @Content(schema = @Schema(implementation = Void.class)) }),
@@ -101,7 +101,7 @@ public class CuisineController {
         throw new CuisineException(CookbookErrorCode.COOK_ATTRIBUTE_INVALID, new Object[] { "id", id });
     }
 
-    @Operation(summary = "Soft delete Cuisine by id and all associated Type Models")
+    /*@Operation(summary = "Soft delete Cuisine by id and all associated Type Models")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Soft deleted Cuisine",
                     content = { @Content(schema = @Schema(implementation = Void.class)) }),

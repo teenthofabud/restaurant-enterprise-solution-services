@@ -1,14 +1,15 @@
 package com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teenthofabud.core.common.constant.TOABBaseMessageTemplate;
 import com.teenthofabud.core.common.constant.TOABCascadeLevel;
 import com.teenthofabud.core.common.data.dto.TOABRequestContextHolder;
-import com.teenthofabud.core.common.service.TOABBaseService;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.*;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.converter.CuisineDefault2ResponseConverter;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.converter.CuisineRequest2DefaultConverter;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.entities.Cuisine;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.mapper.CuisineDefaultSelfMapper;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.mapper.CuisineRequest2DefaultMapper;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.validator.CuisineRequestRelaxedValidator;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driven.CuisineRepository;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.dto.CuisineRequest;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.dto.CuisineResponse;
@@ -23,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.Errors;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 
 @Component
@@ -35,10 +38,10 @@ public class CuisineServiceImpl implements CuisineService {
 
     private CuisineRequest2DefaultConverter form2EntityConverter;
     //private CuisineDto2EntityConverter dto2EntityConverter;
-    //private CuisineForm2EntityMapper form2EntityMapper;
-    //private CuisineEntitySelfMapper entitySelfMapper;
+    private CuisineRequest2DefaultMapper form2EntityMapper;
+    private CuisineDefaultSelfMapper entitySelfMapper;
     private CuisineRequestValidator formValidator;
-    //private CuisineFormRelaxedValidator_ relaxedFormValidator;
+    private CuisineRequestRelaxedValidator relaxedFormValidator;
     //private CuisineDtoValidator dtoValidator;
     private CuisineDefault2ResponseConverter cuisineDefault2ResponseConverter;
     private CuisineRepository repository;
@@ -46,10 +49,14 @@ public class CuisineServiceImpl implements CuisineService {
     //private TOABBaseService toabBaseService;
     //private ObjectMapper om;
 
+
     @Autowired
-    public CuisineServiceImpl(CuisineRequest2DefaultConverter form2EntityConverter, CuisineRequestValidator formValidator, CuisineDefault2ResponseConverter cuisineDefault2ResponseConverter, CuisineRepository repository) {
+    public CuisineServiceImpl(CuisineRequest2DefaultConverter form2EntityConverter, CuisineRequest2DefaultMapper form2EntityMapper, CuisineDefaultSelfMapper entitySelfMapper, CuisineRequestValidator formValidator, CuisineRequestRelaxedValidator relaxedFormValidator, CuisineDefault2ResponseConverter cuisineDefault2ResponseConverter, CuisineRepository repository) {
         this.form2EntityConverter = form2EntityConverter;
+        this.form2EntityMapper = form2EntityMapper;
+        this.entitySelfMapper = entitySelfMapper;
         this.formValidator = formValidator;
+        this.relaxedFormValidator = relaxedFormValidator;
         this.cuisineDefault2ResponseConverter = cuisineDefault2ResponseConverter;
         this.repository = repository;
     }
@@ -188,21 +195,21 @@ public class CuisineServiceImpl implements CuisineService {
         return actualEntity.getId().toString();
     }
 
-    /*@Transactional
+    @Transactional
     @Override
     public void updateCuisine(String id, CuisineRequest form) throws CuisineException {
         log.info("Updating CuisineRequest by id: {}", id);
 
         log.debug(CuisineMessageTemplate.MSG_TEMPLATE_SEARCHING_FOR_CUISINE_ENTITY_ID.getValue(), id);
         Long cuisineId = parseCuisineId(id);
-        Optional<CuisineEntity> optActualEntity = repository.findById(cuisineId);
+        Optional<Cuisine> optActualEntity = repository.findById(cuisineId);
         if(optActualEntity.isEmpty()) {
             log.debug(CuisineMessageTemplate.MSG_TEMPLATE_NO_CUISINE_ENTITY_ID_AVAILABLE.getValue(), id);
             throw new CuisineException(CookbookErrorCode.COOK_NOT_FOUND, new Object[] { "id", String.valueOf(id) });
         }
         log.debug(CuisineMessageTemplate.MSG_TEMPLATE_FOUND_CUISINE_ENTITY_ID.getValue(), id);
 
-        CuisineEntity actualEntity = optActualEntity.get();
+        Cuisine actualEntity = optActualEntity.get();
         if(!actualEntity.getActive()) {
             log.debug("CuisineEntity is inactive with id: {}", id);
             throw new CuisineException(CookbookErrorCode.COOK_INACTIVE, new Object[] { String.valueOf(id) });
@@ -229,14 +236,14 @@ public class CuisineServiceImpl implements CuisineService {
         }
         log.debug("All attributes of CuisineRequest are valid");
 
-        Optional<CuisineEntity> optExpectedEntity = form2EntityMapper.compareAndMap(actualEntity, form);
+        Optional<Cuisine> optExpectedEntity = form2EntityMapper.compareAndMap(actualEntity, form);
         if(optExpectedEntity.isEmpty()) {
             log.debug("No new value for attributes of CuisineRequest");
             throw new CuisineException(CookbookErrorCode.COOK_ATTRIBUTE_UNEXPECTED, new Object[]{ "form", "fields are expected with new values" });
         }
         log.debug("Successfully compared and copied attributes from CuisineRequest to CuisineEntity");
 
-        CuisineEntity expectedEntity = optExpectedEntity.get();
+        Cuisine expectedEntity = optExpectedEntity.get();
 
         log.debug(CuisineMessageTemplate.MSG_TEMPLATE_CUISINE_EXISTENCE_BY_NAME.getValue(), form.getName());
         if(actualEntity.getName().compareTo(expectedEntity.getName()) == 0
@@ -262,7 +269,7 @@ public class CuisineServiceImpl implements CuisineService {
         log.info("Updated existing CuisineEntity with id: {}", actualEntity.getId());
     }
 
-    @Transactional
+    /*@Transactional
     @Override
     public void deleteCuisine(String id) throws CuisineException {
         log.info("Soft deleting CuisineEntity by id: {}", id);

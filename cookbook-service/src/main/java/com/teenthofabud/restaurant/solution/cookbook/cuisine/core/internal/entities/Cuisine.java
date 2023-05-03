@@ -1,9 +1,14 @@
 package com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+
+import javax.persistence.Access;
+import javax.persistence.AccessType;
+import javax.persistence.Column;
+import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,5 +20,9 @@ public class Cuisine {
     private String name;
     private String description;
     private Boolean active;
+    private LocalDateTime createdOn;
+    private LocalDateTime modifiedOn;
+    private Long createdBy;
+    private Long modifiedBy;
 
 }

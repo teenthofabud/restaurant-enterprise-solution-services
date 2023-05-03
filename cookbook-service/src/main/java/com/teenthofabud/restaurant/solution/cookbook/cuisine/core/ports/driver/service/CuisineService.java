@@ -20,9 +20,9 @@ public interface CuisineService {
 
     public String createCuisine(CuisineRequest form) throws CuisineException;
 
-    /*public void updateCuisine(String id, CuisineRequest form) throws CuisineException;
+    public void updateCuisine(String id, CuisineRequest form) throws CuisineException;
 
-    public void deleteCuisine(String id) throws CuisineException;
+    /*public void deleteCuisine(String id) throws CuisineException;
 
     public void applyPatchOnCuisine(String id, List<PatchOperationForm> patches) throws CuisineException;*/
 

@@ -2,6 +2,7 @@ package com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.mapp
 
 import com.teenthofabud.core.common.mapper.DualChannelMapper;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineEntity;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.entities.Cuisine;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.ports.driver.dto.CuisineRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,7 +14,7 @@ import java.util.Optional;
 
 @Component
 @Slf4j
-public class CuisineForm2EntityMapper implements DualChannelMapper<CuisineEntity, CuisineRequest> {
+public class CuisineRequest2DefaultMapper implements DualChannelMapper<Cuisine, CuisineRequest> {
 
     private List<String> fieldsToEscape;
 
@@ -23,8 +24,8 @@ public class CuisineForm2EntityMapper implements DualChannelMapper<CuisineEntity
     }
 
     @Override
-    public Optional<CuisineEntity> compareAndMap(CuisineEntity actualEntity, CuisineRequest form) {
-        CuisineEntity expectedEntity = new CuisineEntity();
+    public Optional<Cuisine> compareAndMap(Cuisine actualEntity, CuisineRequest form) {
+        Cuisine expectedEntity = new Cuisine();
         boolean changeSW = false;
         // direct copy
         expectedEntity.setId(actualEntity.getId());

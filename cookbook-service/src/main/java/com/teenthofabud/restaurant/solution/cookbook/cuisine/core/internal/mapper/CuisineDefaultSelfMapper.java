@@ -2,6 +2,7 @@ package com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.mapp
 
 import com.teenthofabud.core.common.mapper.SingleChannelMapper;
 import com.teenthofabud.restaurant.solution.cookbook.cuisine.adapters.driven.data.CuisineEntity;
+import com.teenthofabud.restaurant.solution.cookbook.cuisine.core.internal.entities.Cuisine;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -10,10 +11,10 @@ import java.util.Optional;
 
 @Component
 @Slf4j
-public class CuisineEntitySelfMapper implements SingleChannelMapper<CuisineEntity> {
+public class CuisineDefaultSelfMapper implements SingleChannelMapper<Cuisine> {
 
     @Override
-    public Optional<CuisineEntity> compareAndMap(CuisineEntity source, CuisineEntity target) {
+    public Optional<Cuisine> compareAndMap(Cuisine source, Cuisine target) {
         boolean changeSW = false;
         if(source.getId() != null && source.getId().compareTo(target.getId()) != 0) {
             target.setId(source.getId());
