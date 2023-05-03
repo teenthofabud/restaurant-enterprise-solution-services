@@ -19,19 +19,16 @@ feign:
             metadata-service:
                 connectTimeout: 500
                 readTimeout: 1000
+
 logging:
     level:
-        org:
-            hibernate:
-                SQL: INFO
-                type:
-                    descriptor:
-                        sql:
-                            BasicBinder: INFO
+        org.hibernate.SQL: INFO
+        org.hibernate.type.descriptor.sql.BasicBinder: INFO
+
 res:
     customer:
         account:
-            fields-to-escape: dateOfBirth,emailId
+            fields-to-escape: dateOfBirth
         address:
             fields-to-escape: ''
         dob:
@@ -65,11 +62,12 @@ spring:
         console:
             enabled: true
     jpa:
-        database-platform: org.hibernate.dialect.H2Dialect
+        #database-platform: org.hibernate.dialect.H2Dialect
         hibernate:
             ddl-auto: none
         properties:
             hibernate:
+                dialect: org.hibernate.dialect.H2Dialect
                 format_sql: true
                 jdbc:
                     time_zone: UTC

@@ -43,7 +43,7 @@ management:
 res:
     customer:
         account:
-            fields-to-escape: dateOfBirth,emailId
+            fields-to-escape: dateOfBirth
         address:
             fields-to-escape: ''
         description: '@project.description@'
@@ -65,23 +65,22 @@ spring:
             auto-registration:
                 enabled: true
     datasource:
-        driver-class-name: com.mysql.cj.jdbc.Driver
-        password: Cu$t0M3r
-        username: res_customer_manager
+        driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
+        url: jdbc:shardingsphere:classpath:sharding.yaml
     jpa:
         hibernate:
             ddl-auto: none
-            dialect: org.hibernate.dialect.MySQL5Dialect
         open-in-view: false
         properties:
             hibernate:
+                dialect: org.hibernate.dialect.MySQL8Dialect
                 format_sql: true
                 jdbc:
                     time_zone: UTC
                 show_sql: true
                 use_sql_comments: true
     main:
-        lazy-initialization: true
+        lazy-initialization: false
     sleuth:
         sampler:
             percentage: 1.0

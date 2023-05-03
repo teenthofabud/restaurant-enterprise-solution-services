@@ -38,11 +38,6 @@ server:
     port: ${CUSTOMER_SERVER_PORT}
 
 spring:
-    datasource:
-        driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
-        url: jdbc:shardingsphere:classpath:config.yaml
-        #url: jdbc:mysql://${CUSTOMER_DATABASE_HOST}:${CUSTOMER_DATABASE_PORT}/res_customer_db
-
     zipkin:
         baseUrl: http://${CUSTOMER_ZIPKIN_HOST}:${CUSTOMER_ZIPKIN_PORT}
         enabled: ${CUSTOMER_ZIPKIN_CLIENT_ENABLED}

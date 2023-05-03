@@ -105,6 +105,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         accountForm.setCountryCode("91");
         accountForm.setPhoneNumber("1234567890");
         accountForm.setGenderId(genderVo.getId());
+        accountForm.setEmailId("new@email.com");
 
         patches = Arrays.asList(
                 new PatchOperationForm("replace", "/firstName", "patched first name"),
@@ -119,6 +120,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         accountEntity1.setPhoneNumber("1122334455");
         accountEntity1.setGenderId(Long.parseLong(genderVo.getId()));
         accountEntity1.setActive(Boolean.TRUE);
+        accountEntity1.setEmailId("account1@email.com");
 
         accountEntity1 = accountRepository.save(accountEntity1);
 
@@ -130,6 +132,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         accountVo1.setPhoneNumber(accountEntity1.getPhoneNumber());
         accountVo1.setGender(genderVo);
         accountVo1.setGenderId(accountEntity1.getGenderId().toString());
+        accountVo1.setEmailId(accountEntity1.getEmailId());
 
         accountEntity2 = new AccountEntity();
         accountEntity2.setFirstName("Account 2 First Name");
@@ -138,6 +141,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         accountEntity2.setPhoneNumber("0987654321");
         accountEntity2.setGenderId(Long.parseLong(genderVo.getId()));
         accountEntity2.setActive(Boolean.TRUE);
+        accountEntity2.setEmailId("account2@email.com");
 
         accountEntity2 = accountRepository.save(accountEntity2);
 
@@ -149,6 +153,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         accountVo2.setPhoneNumber(accountEntity2.getPhoneNumber());
         accountVo2.setGender(genderVo);
         accountVo2.setGenderId(accountEntity1.getGenderId().toString());
+        accountVo2.setEmailId(accountEntity2.getEmailId());
 
         accountEntity3 = new AccountEntity();
         accountEntity3.setFirstName("Account 3 First Name");
@@ -157,6 +162,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         accountEntity3.setPhoneNumber("7766441236");
         accountEntity3.setGenderId(Long.parseLong(genderVo.getId()));
         accountEntity3.setActive(Boolean.FALSE);
+        accountEntity3.setEmailId("account3@email.com");
 
         accountEntity3 = accountRepository.save(accountEntity3);
 
@@ -168,6 +174,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         accountVo3.setPhoneNumber(accountEntity3.getPhoneNumber());
         accountVo3.setGender(genderVo);
         accountVo3.setGenderId(accountEntity1.getGenderId().toString());
+        accountVo3.setEmailId(accountEntity3.getEmailId());
 
         accountEntity4 = new AccountEntity();
         accountEntity4.setFirstName("Account 4 First Name");
@@ -177,6 +184,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         accountEntity4.setGenderId(Long.parseLong(genderVo.getId()));
         accountEntity4.setActive(Boolean.FALSE);
         //accountEntity4.setActive(Boolean.TRUE);//here
+        accountEntity4.setEmailId("account4@email.com");
 
         accountEntity4 = accountRepository.save(accountEntity4);
 
@@ -188,6 +196,7 @@ public class AccountIntegrationTest extends CustomerIntegrationBaseTest {
         accountVo4.setPhoneNumber(accountEntity4.getPhoneNumber());
         accountVo4.setGender(genderVo);
         accountVo4.setGenderId(accountEntity1.getGenderId().toString());
+        accountVo4.setEmailId(accountEntity4.getEmailId());
 
         addressForm = new AddressForm();
         addressForm.setAddressLine1("New Something First");

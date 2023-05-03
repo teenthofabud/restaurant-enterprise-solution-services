@@ -93,10 +93,6 @@ spring:
     datasource:
         driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
         url: jdbc:shardingsphere:classpath:sharding.yaml
-    #    password: Cu$t0M3r
-    #    username: res_customer_manager
-    #    driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
-    #    url: jdbc:shardingsphere:classpath:config.yaml
     jpa:
         hibernate:
             ddl-auto: none
