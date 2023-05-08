@@ -174,8 +174,8 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         accountEntity4.setCountryCode("91");
         accountEntity4.setPhoneNumber("6299711209");
         accountEntity4.setGenderId(2l);
-        accountEntity4.setActive(Boolean.FALSE);
-        //accountEntity4.setActive(Boolean.TRUE);//here
+        //accountEntity4.setActive(Boolean.FALSE);
+        accountEntity4.setActive(Boolean.TRUE);//here
         accountEntity4.setEmailId("account4@email.com");
 
         accountEntity4 = accountRepository.save(accountEntity4);
@@ -186,7 +186,7 @@ public class AddressIntegrationTest extends CustomerIntegrationBaseTest {
         accountVo4.setLastName(accountEntity4.getLastName());
         accountVo4.setCountryCode(accountEntity4.getCountryCode());
         accountVo4.setPhoneNumber(accountEntity4.getPhoneNumber());
-        accountVo4.setGenderId(accountEntity1.getGenderId().toString());
+        accountVo4.setGenderId(accountEntity4.getGenderId().toString());
         accountVo4.setEmailId(accountEntity4.getEmailId());
 
         addressForm = new AddressForm();
