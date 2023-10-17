@@ -4,20 +4,27 @@ eureka:
         instance-info-replication-interval-seconds: 120
         serviceUrl:
             registerWithEureka: true
+            defaultZone: http://${CUSTOMER_EUREKA_HOST}:${CUSTOMER_EUREKA_PORT}/eureka
+        enabled: ${CUSTOMER_EUREKA_CLIENT_ENABLED}
     instance:
         prefer-ip-address: true
 
 feign:
+    circuitbreaker:
+        enabled: ${CUSTOMER_CIRCUIT_BREAKER_ENABLED}
     client:
         config:
             country-state-city-api-service:
                 connectTimeout: 2000
                 default-request-headers:
                     X-CSCAPI-KEY: dkJXMjJzOE9Ec2NJUFdLS1pUTTNJQUpocGFsOWJ4dGxzMU9KNTVmSA==
+                loggerLevel: ${CUSTOMER_FEIGN_LOGGING_LEVEL}
                 readTimeout: 3000
             default:
+                loggerLevel: ${CUSTOMER_FEIGN_LOGGING_LEVEL}
             metadata-service:
                 connectTimeout: 250
+                loggerLevel: ${CUSTOMER_FEIGN_LOGGING_LEVEL}
                 readTimeout: 500
 
 info:
@@ -28,6 +35,11 @@ info:
             version: '@java.version@'
         name: '@project.name@'
         version: '@project.version@'
+
+logging:
+    level:
+        org.hibernate.SQL: ${CUSTOMER_LOGGING_LEVEL}
+        org.hibernate.type.descriptor.sql.BasicBinder: ${CUSTOMER_SQL_VALUES_LOGGING_LEVEL}
 
 management:
     endpoint:
@@ -40,19 +52,33 @@ management:
     health:
         mongo:
             enabled: true
+
 res:
     customer:
+        dataSource:
+            server: ${CUSTOMER_DATABASE_HOST}:${CUSTOMER_DATABASE_PORT}
+        etcd:
+            server: ${CUSTOMER_ETCD_HOST}:${CUSTOMER_ETCD_PORT}
         account:
-            fields-to-escape: dateOfBirth,emailId
+            fields-to-escape: dateOfBirth
         address:
             fields-to-escape: ''
         description: '@project.description@'
         dob:
             format: dd-MM-yyyy
+        integration:
+            gateway:
+                port: ${CUSTOMER_GATEWAY_PORT}
+        metadata:
+            service:
+                url: ${CUSTOMER_GATEWAY_HOST}:${res.customer.integration.gateway.port}
         version: '@project.version@'
         country-state-city-api:
             service:
                 url: https://api.countrystatecity.in/v1/countries
+
+server:
+    port: ${CUSTOMER_SERVER_PORT}
 
 spring:
     cloud:
@@ -65,22 +91,31 @@ spring:
             auto-registration:
                 enabled: true
     datasource:
-        driver-class-name: com.mysql.cj.jdbc.Driver
-        password: Cu$t0M3r
-        username: res_customer_manager
+        driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
+        url: jdbc:shardingsphere:classpath:sharding.yaml
     jpa:
         hibernate:
             ddl-auto: none
         open-in-view: false
         properties:
             hibernate:
+                dialect: org.hibernate.dialect.MySQL8Dialect
                 format_sql: true
                 jdbc:
                     time_zone: UTC
                 show_sql: true
                 use_sql_comments: true
+    main:
+        lazy-initialization: false
     sleuth:
         sampler:
             percentage: 1.0
         web:
             skipPattern: (^cleanup.*|.+favicon.*)
+    zipkin:
+        baseUrl: http://${CUSTOMER_ZIPKIN_HOST}:${CUSTOMER_ZIPKIN_PORT}
+        enabled: ${CUSTOMER_ZIPKIN_CLIENT_ENABLED}
+
+springdoc:
+    swagger-ui:
+        enabled: ${CUSTOMER_SWAGGER_ENABLED}

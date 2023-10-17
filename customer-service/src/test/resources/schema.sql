@@ -2,7 +2,7 @@ create table if not exists account (
     id identity not null,
     first_name varchar(50) not null,
     last_name varchar(50) not null,
-    gender_id varchar(100),
+    gender_id int,
     date_of_birth date,
     country_code varchar(10) not null,
     phone_number varchar(50) not null,

@@ -1,5 +1,9 @@
 res:
     customer:
+        dataSource:
+            server: ${CUSTOMER_DATABASE_HOST}:${CUSTOMER_DATABASE_PORT}
+        etcd:
+            server: ${CUSTOMER_ETCD_HOST}:${CUSTOMER_ETCD_PORT}
         integration:
             gateway:
                 port: ${CUSTOMER_GATEWAY_PORT}
@@ -25,31 +29,15 @@ feign:
             metadata-service:
                 loggerLevel: ${CUSTOMER_FEIGN_LOGGING_LEVEL}
 
-info:
-    app:
-        description: '@project.description@'
-        encoding: '@project.build.sourceEncoding@'
-        java:
-            version: '@java.version@'
-        name: '@project.name@'
-        version: '@project.version@'
-
 logging:
     level:
-        org:
-            hibernate:
-                SQL: ${CUSTOMER_LOGGING_LEVEL}
-                type:
-                    descriptor:
-                        sql:
-                            BasicBinder: ${CUSTOMER_LOGGING_LEVEL}
+        org.hibernate.SQL: ${CUSTOMER_LOGGING_LEVEL}
+        org.hibernate.type.descriptor.sql.BasicBinder: ${CUSTOMER_LOGGING_LEVEL}
 
 server:
     port: ${CUSTOMER_SERVER_PORT}
 
 spring:
-    datasource:
-        url: jdbc:mysql://${CUSTOMER_DATABASE_HOST}:${CUSTOMER_DATABASE_PORT}/res_customer_db
     zipkin:
         baseUrl: http://${CUSTOMER_ZIPKIN_HOST}:${CUSTOMER_ZIPKIN_PORT}
         enabled: ${CUSTOMER_ZIPKIN_CLIENT_ENABLED}

@@ -12,7 +12,7 @@ import java.util.List;
 public interface AccountRepository extends TOABSimpleEntityBaseRepository<AccountEntity> {
 
     @Lock(LockModeType.PESSIMISTIC_READ)
-    List<AccountEntity> findByGenderId(String genderId);
+    List<AccountEntity> findByGenderId(Long genderId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     public AccountEntity save(AccountEntity entity);

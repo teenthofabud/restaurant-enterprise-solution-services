@@ -31,7 +31,7 @@ public class AccountEntity extends TOABBaseEntity implements Comparable<AccountE
     @Column(name = "last_name")
     private String lastName;
     @Column(name = "gender_id")
-    private String genderId;
+    private Long genderId;
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
     @Column(name = "phone_number")

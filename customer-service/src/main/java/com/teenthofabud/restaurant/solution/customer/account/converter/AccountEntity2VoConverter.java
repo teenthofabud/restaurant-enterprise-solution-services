@@ -93,7 +93,7 @@ public class AccountEntity2VoConverter extends TOABBaseEntity2VoConverter<Accoun
         switch(cascadeLevel) {
             case TWO:
                 if(!fieldsToEscape.contains("genderId")) {
-                    GenderVo genderVo = metadataServiceClient.getGenderDetailsById(entity.getGenderId());
+                    GenderVo genderVo = metadataServiceClient.getGenderDetailsById(entity.getGenderId().toString());
                     vo.setGender(genderVo);
                     log.debug("Retrieved {} for genderId: {}", vo, entity.getGenderId());
                 }
@@ -105,7 +105,7 @@ public class AccountEntity2VoConverter extends TOABBaseEntity2VoConverter<Accoun
                 }
                 break;
             default:
-                vo.setGenderId(entity.getGenderId());
+                vo.setGenderId(entity.getGenderId().toString());
                 log.debug("only first level cascaded for genderId");
                 break;
         }
@@ -116,7 +116,7 @@ public class AccountEntity2VoConverter extends TOABBaseEntity2VoConverter<Accoun
         switch(cascadeLevel) {
             case TWO:
                 if(!fieldsToEscape.contains("genderId") && fieldName.compareTo("genderId") == 0) {
-                    GenderVo genderVo = metadataServiceClient.getGenderDetailsById(entity.getGenderId());
+                    GenderVo genderVo = metadataServiceClient.getGenderDetailsById(entity.getGenderId().toString());
                     vo.setGender(genderVo);
                     log.debug("Retrieved {} for genderId: {}", vo, entity.getGenderId());
                 }
@@ -142,7 +142,7 @@ public class AccountEntity2VoConverter extends TOABBaseEntity2VoConverter<Accoun
                 }
                 break;
             default:
-                vo.setGenderId(entity.getGenderId());
+                vo.setGenderId(entity.getGenderId().toString());
                 log.debug("only first level cascaded for genderId");
                 break;
         }

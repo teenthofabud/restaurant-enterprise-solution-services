@@ -225,7 +225,7 @@ public class AccountServiceImpl implements AccountService {
             log.error("genderId is invalid: {}", ec);
             throw new AccountException(ec, new Object [] { "genderId: " + genderId });
         }
-        List<AccountEntity> accountEntityList = repository.findByGenderId(genderId);
+        List<AccountEntity> accountEntityList = repository.findByGenderId(Long.parseLong(genderId));
         List<AccountVo> matchedAccountList = customerServiceHelper.accountEntity2DetailedVo(accountEntityList);
         log.info("Found {} AccountVo matching with genderId: {}", matchedAccountList.size(),genderId);
         if(matchedAccountList != null && !matchedAccountList.isEmpty()) {

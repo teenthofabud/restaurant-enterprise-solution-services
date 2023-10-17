@@ -1,86 +1,88 @@
 eureka:
     client:
-        enabled: false
+        initial-instance-info-replication-interval-seconds: 120
+        instance-info-replication-interval-seconds: 120
         serviceUrl:
-            registerWithEureka: false
+            registerWithEureka: true
+    instance:
+        prefer-ip-address: true
+
 feign:
-    circuitbreaker:
-        enabled: false
     client:
         config:
             country-state-city-api-service:
                 connectTimeout: 2000
                 default-request-headers:
                     X-CSCAPI-KEY: dkJXMjJzOE9Ec2NJUFdLS1pUTTNJQUpocGFsOWJ4dGxzMU9KNTVmSA==
-                loggerLevel: basic
                 readTimeout: 3000
             default:
-                loggerLevel: basic
             metadata-service:
-                connectTimeout: 500
-                readTimeout: 1000
+                connectTimeout: 250
+                readTimeout: 500
 
-logging:
-    level:
-        org.hibernate.SQL: INFO
-        org.hibernate.type.descriptor.sql.BasicBinder: INFO
+info:
+    app:
+        description: '@project.description@'
+        encoding: '@project.build.sourceEncoding@'
+        java:
+            version: '@java.version@'
+        name: '@project.name@'
+        version: '@project.version@'
 
+management:
+    endpoint:
+        health:
+            show-details: always
+    endpoints:
+        web:
+            exposure:
+                include: '*'
+    health:
+        mongo:
+            enabled: true
 res:
     customer:
         account:
             fields-to-escape: dateOfBirth
         address:
             fields-to-escape: ''
+        description: '@project.description@'
         dob:
             format: dd-MM-yyyy
+        version: '@project.version@'
         country-state-city-api:
             service:
                 url: https://api.countrystatecity.in/v1/countries
-        integration:
-            gateway:
-                port: 34002
-        metadata:
-            service:
-                url: localhost:${res.customer.integration.gateway.port}
 
-server:
-    port: 11001
 spring:
     cloud:
         discovery:
-            enabled: false
+            enabled: true
         loadbalancer:
             ribbon:
                 enabled: false
         service-registry:
             auto-registration:
-                enabled: false
+                enabled: true
     datasource:
-        initialization-mode: always
-        driverClassName: org.h2.Driver
-    h2:
-        console:
-            enabled: true
+        driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
+        url: jdbc:shardingsphere:classpath:sharding.yaml
     jpa:
-        #database-platform: org.hibernate.dialect.H2Dialect
         hibernate:
             ddl-auto: none
+        open-in-view: false
         properties:
             hibernate:
-                dialect: org.hibernate.dialect.H2Dialect
+                dialect: org.hibernate.dialect.MySQL8Dialect
                 format_sql: true
                 jdbc:
                     time_zone: UTC
                 show_sql: true
                 use_sql_comments: true
-        show-sql: true
+    main:
+        lazy-initialization: false
     sleuth:
         sampler:
             percentage: 1.0
         web:
             skipPattern: (^cleanup.*|.+favicon.*)
-    zipkin:
-        enabled: false
-springdoc:
-    swagger-ui:
-        enabled: false
