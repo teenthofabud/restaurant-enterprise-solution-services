@@ -14,6 +14,9 @@ import com.teenthofabud.restaurant.solution.settings.device.data.DeviceVo;
 import com.teenthofabud.restaurant.solution.settings.discount.converter.DiscountDocument2VoConverter;
 import com.teenthofabud.restaurant.solution.settings.discount.data.DiscountDocument;
 import com.teenthofabud.restaurant.solution.settings.discount.data.DiscountVo;
+import com.teenthofabud.restaurant.solution.settings.internationalization.converter.LanguageDocument2VoConverter;
+import com.teenthofabud.restaurant.solution.settings.internationalization.data.LanguageDocument;
+import com.teenthofabud.restaurant.solution.settings.internationalization.data.LanguageVo;
 import com.teenthofabud.restaurant.solution.settings.paymentmethod.converter.PaymentMethodDocument2VoConverter;
 import com.teenthofabud.restaurant.solution.settings.paymentmethod.data.PaymentMethodDocument;
 import com.teenthofabud.restaurant.solution.settings.paymentmethod.data.PaymentMethodVo;
@@ -36,6 +39,7 @@ public class SettingsServiceHelper {
     private DeliveryPartnerDocument2VoConverter deliveryPartnerDocument2VoConverter;
     private TemplateDocument2VoConverter templateDocument2VoConverter;
     private DeviceDocument2VoConverter deviceDocument2VoConverter;
+    private LanguageDocument2VoConverter languageDocument2VoConverter;
 
     @Autowired
     public void setDeviceDocument2VoConverter(DeviceDocument2VoConverter deviceDocument2VoConverter) {
@@ -65,6 +69,11 @@ public class SettingsServiceHelper {
     @Autowired
     public void setChargeDocument2VoConverter(ChargeDocument2VoConverter chargeDocument2VoConverter) {
         this.chargeDocument2VoConverter = chargeDocument2VoConverter;
+    }
+
+    @Autowired
+    public void setLanguageDocument2VoConverter(LanguageDocument2VoConverter languageDocument2VoConverter){
+        this.languageDocument2VoConverter = languageDocument2VoConverter;
     }
 
     public List<DeliveryPartnerVo> deliveryPartnerDocument2DetailedVo(List<? extends DeliveryPartnerDocument> deliveryPartnerDocumentList) throws TOABSystemException {
@@ -186,4 +195,25 @@ public class SettingsServiceHelper {
         }
         throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "device document is null" });
     }
+
+    public List<LanguageVo> languageDocument2DetailedVo(List<? extends LanguageDocument> languageDocumentList){
+        List<LanguageVo> languageDetailsList = new LinkedList<>();
+        if(languageDocumentList != null && !languageDocumentList.isEmpty()){
+            for(LanguageDocument document : languageDocumentList){
+                LanguageVo vo = this.languageDocument2DetailedVo(document);
+                languageDetailsList.add(vo);
+            }
+        }
+        return languageDetailsList;
+    }
+
+    public LanguageVo languageDocument2DetailedVo(LanguageDocument languageDocument) {
+        if(languageDocument != null){
+            LanguageVo vo = languageDocument2VoConverter.convert(languageDocument);
+            log.debug("Converting {} to {}", languageDocument, vo);
+            return vo;
+        }
+        throw new TOABSystemException(TOABErrorCode.SYSTEM_INTERNAL_ERROR, new Object[] { "language document is null" });
+    }
+
 }

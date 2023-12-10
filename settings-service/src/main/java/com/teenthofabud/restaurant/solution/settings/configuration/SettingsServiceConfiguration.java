@@ -28,7 +28,8 @@ import java.time.format.DateTimeFormatter;
         "com.teenthofabud.restaurant.solution.settings.discount.repository",
         "com.teenthofabud.restaurant.solution.settings.deliverypartner.repository",
         "com.teenthofabud.restaurant.solution.settings.template.repository",
-        "com.teenthofabud.restaurant.solution.settings.device.repository" },
+        "com.teenthofabud.restaurant.solution.settings.device.repository",
+        "com.teenthofabud.restaurant.solution.settings.internationalization.repository"},
         repositoryBaseClass = TOABBaseMongoRepositoryImpl.class)
 public class SettingsServiceConfiguration {
 
